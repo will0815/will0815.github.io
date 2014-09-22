@@ -313,10 +313,9 @@
 }
 #willgo{
     margin-top:0px;
-	text-align:left;
-	float:left;
 }
 #willgo-li{
+	padding-left:0px;
 	margin-top:35px;
 }
 #willgo-header{
