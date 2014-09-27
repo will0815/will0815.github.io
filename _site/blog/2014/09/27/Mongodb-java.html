@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta name="description" content="Will go, Just do it.">
   <meta name="author" content="Will.Quan">
-  <meta name="keywords" content="Java class loader, willgo, Will.Quan">
-  <title>Java class loader - willgo</title>
-  <link rel="canonical" href="index.html/blog/2014/09/27/Java-class-loader.html">
+  <meta name="keywords" content="Mongodb java简单操作, willgo, Will.Quan">
+  <title>Mongodb java简单操作 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/09/27/Mongodb-java.html">
   <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="/res/css/public.css">
@@ -58,45 +58,93 @@
 </div>
     <div class="main">
     <header class="post-header">
-  <h1 class="post-title"><a href="/blog/2014/09/27/Java-class-loader.html">Java class loader</a></h2>
+  <h1 class="post-title"><a href="/blog/2014/09/27/Mongodb-java.html">Mongodb java简单操作</a></h2>
   <p class="post-meta">
     <i class="fa fa-calendar"></i>
     2014年09月27日
     <i class="space"></i>
     <i class="fa fa-tags"></i>
-    <a class="post-category" href="/page/category.html#java">java</a>	
+    <a class="post-category" href="/page/category.html#nosql">nosql</a>	
   </p>
 </header>
 <div class="post-main">
-<p><strong>java classloader 结构：</strong></p>
+<pre><code>import java.net.UnknownHostException;
+import java.util.Set;
 
-<ol>
-  <li>Bootstrap classloader(启动类加载器)
-主要负责jdk_home/lib目录下的核心API或-Xbootclasspath选项指定的jar包的装入工作</li>
-  <li>Extension Classloader(扩展类加载器)
-负责jdk_home/lib/ext目录下的jar包或者-Djava.ext.dirs指定目录下的jar包装入工作
-3.System classloader(系统类加载器)
-负责Java -classpath/-Djava.class.path所指定的类与jar包的装入</li>
-  <li>User Custom classloader（用户自定义类加载器（java.lang.ClassLoader的子类））
-以上每一个classloader都会维护一份自己的名称空间，同一个名称空间不能出现两个同名的类。
-为了实现Java安全沙箱模型顶层的类加载器安全机制，Java默认采用 双亲委派的加载链 结构</li>
-</ol>
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
-<p>在jvm启动时就会构建bootstrap classloader 负责Java平台核心库</p>
+public class Mongodb {
 
-<p><strong>每个ClassLoader加载Class的过程是：</strong></p>
-
-<ol>
-  <li>检测此Class是否载入过（即在cache中是否有此Class），如果有到8,如果没有到2</li>
-  <li>如果parent classloader不存在（没有parent，那parent一定是bootstrap classloader了），到4</li>
-  <li>请求parent classloader载入，如果成功到8，不成功到5</li>
-  <li>请求jvm从bootstrap classloader中载入，如果成功到8</li>
-  <li>寻找Class文件（从与此classloader相关的类路径中寻找）。如果找不到则到7.</li>
-  <li>从文件中载入Class，到8.</li>
-  <li>抛出ClassNotFoundException.</li>
-  <li>返回Class.</li>
-</ol>
-
+/**
+* @author gaogao
+* @param args
+* @throws MongoException
+* @throws UnknownHostException
+*/
+public static void main(String[] args) throws UnknownHostException,
+MongoException {
+// 连接本地数据库
+Mongo m = new Mongo();
+// 创建名为new_test_db的数据库
+DB db = m.getDB("new_test_db");
+// 获取new_test_db中的集合（类似于获取关系数据库中的表）
+Set&lt;String&gt; cols = db.getCollectionNames();
+// 打印出new_test_db中的集合，这里应当为null
+for (String s : cols) {
+System.out.println(s);
+}
+// 创建一个叫做"new_test_col"的集合
+DBCollection collection = db.getCollection("new_test_col");
+// 初始化一个基本DB对象，最终插入数据库的就是这个DB对象
+BasicDBObject obj = new BasicDBObject();
+// 放入几个键值对
+obj.put("from", "搞搞");
+obj.put("to", "宝宝");
+obj.put("subject", "狗子爱宝子");
+// 插入对象
+collection.insert(obj);
+// 查看一条记录，findOne()=find().limit(1);
+DBObject dbobj = collection.findOne();
+// 打印出刚才插入的数据
+System.out.println(dbobj);
+System.out.println("==================================================");
+// 现在我们来插入9条{ranking:i}的数据
+for (int i = 0; i &lt; 9; i++) {
+collection.insert(new BasicDBObject().append("ranking", i));
+}
+// 打印集合中的数据总数，这里应当输出10
+System.out.println(collection.getCount());
+// 下面我们来遍历集合，find()方法返回的是一个游标(cursor)，这里的概念和关系数据库很相似
+DBCursor cursor = collection.find();
+// 然后我们使用这个游标来遍历集合
+while (cursor.hasNext()) {
+System.out.println(cursor.next());
+}
+// 下面来看一些略复杂一点的查询技巧，第一个，简单的条件查询，查询ranking为1的记录
+BasicDBObject query = new BasicDBObject();
+query.put("ranking", 1);
+cursor = collection.find(query);
+while (cursor.hasNext()) {
+System.out.println(cursor.next());
+}
+// 下面是更复杂的条件查询，查询ranking大于5小于9的记录
+query = new BasicDBObject();
+query.put("ranking", new BasicDBObject("$gt", 5).append("$lt", 9));
+cursor = collection.find(query);
+while (cursor.hasNext()) {
+System.out.println(cursor.next());
+}
+// 最后删除我们的测试数据库
+m.dropDatabase("new_test_db");
+}
+}
+</code></pre>
 
 </div>
 <div class="share">
@@ -109,14 +157,14 @@
 </div>
 <div class="pagination">
 
-<a class="pagination-item newer" href="/blog/2014/09/27/Java-Serialization.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Java Serialization</a>
+<a class="pagination-item newer" href="/blog/2014/09/27/Module.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Module</a>
 
 
-<a class="pagination-item older" href="/blog/2014/09/27/Linux-SSH-.html">Linux SSH 登录&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+<a class="pagination-item older" href="/blog/2014/09/27/Mysql-outputformat.html">Mysql outputformat简单实现&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
 
 </div>
 <div class="comments">
-  <div class="ds-thread" data-title="Java class loader" data-thread-key="/blog/2014/09/27/Java-class-loader" data-url="index.html/blog/2014/09/27/Java-class-loader.html"></div>
+  <div class="ds-thread" data-title="Mongodb java简单操作" data-thread-key="/blog/2014/09/27/Mongodb-java" data-url="index.html/blog/2014/09/27/Mongodb-java.html"></div>
   <script type="text/javascript">var duoshuoQuery = {short_name:"5312914"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
 </div>
     <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>

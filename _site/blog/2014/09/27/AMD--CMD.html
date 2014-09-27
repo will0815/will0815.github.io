@@ -1,0 +1,247 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="AMD & CMD, willgo, Will.Quan">
+  <title>AMD & CMD - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/09/27/AMD--CMD.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?will_go8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;时间轴</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;阅读</a></li>
+    
+      <li><a href="/life/index.html"target="_blank"><i class="fa fa-eyedropper"></i>&nbsp;记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/will0815.github.io" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+    <div class="main">
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2014/09/27/AMD--CMD.html">AMD & CMD</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2014年09月27日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#不懂">不懂</a>	
+  </p>
+</header>
+<div class="post-main">
+<p>http://blog.csdn.net/dojotoolkit/article/details/7820321</p>
+
+<p><strong>AMD</strong></p>
+
+<p>随着web应用不断发展和对JavaScript依赖的进一步加深，
+出现了使用模块（Modules）来组织代码和依赖性。模块使得我们创建明确清晰的组件和接口，
+这些组件和接口能够很容易的加载并连接到其依赖组件。 AMD模块系统提供了使用JavaScript模块来构建Web应用的完美方式，
+并且这种方式具有形式简单，异步加载和广泛采用的特点。</p>
+
+<p>异步模块定义（AMD）格式是一套API，它用于定义可重用的并能在多种框架使用的模块。
+开发AMD是为了提供一种定义模块的方式，这种方式可以使用原生的浏览器脚本元素机制来实现模块的异步加载。
+AMD API由2009年Dojo 社区的讨论中产生，然后移动到讨论CommonJS如何更好的为浏览器适应CommonJS模块格式（被NodeJS使用）。
+CommonJS已经发展成为单独的一个标准并有其专门的社区。AMD已经广泛普及，形成了众多模块加载实现并被广泛使用。在SitePen公司，
+我们广泛的使用Dojo的AMD机制工作，为其提供支持，并积极的建设这一机制。</p>
+
+<p>CMD Common Module Definition</p>
+
+<p>在CMD规范里面，一个模块就是一个Javascript文件</p>
+
+<pre><code>define(factory); define是全局函数，来定义模块 仅接收一个factory参数，可以是函数，对象，字符串等类型
+</code></pre>
+
+<ol>
+  <li>
+    <p>factory为对象、字符串等非函数类型时候，表示模块的接口是该对象、字符串等值
+Js代码</p>
+
+    <pre><code> define({
+ "foo":"bar"
+ }); 通过字符串定义模版模块 Js代码
+
+ define('I am a template.My name is .');
+</code></pre>
+  </li>
+  <li>
+    <p>factory为函数时候，表示模块的构造方法。
+执行该方法，可以得到模块向外提供的接口。默认3个参数：require 、 exports 、 module
+Js代码</p>
+
+    <pre><code> define(function(require,exports,module){
+ //...
+ });
+ require --------- 是一个方法，用来获取其他模块提供的接口。 Js代码
+</code></pre>
+
+    <p>define(function(require){
+ var a = require(‘./a’);
+ a.doSomething;
+ });
+require接受模块标识作为唯一参数，模块标识书写需要遵循一些规范。</p>
+
+    <p>require.async
+———- 可以用来异步加载模块，并在加载完成后执行指定的回调。
+Js代码</p>
+
+    <pre><code> define(function(require,exports,module){
+ //异步加载b
+ require.async('./b',function(b){
+ b.doSomething;
+ });
+ //异步加载多个模块
+ require.async(['./c','./d'],function(c,d){
+ //
+ ........
+ })
+ });
+ require.resolve --------- 使用模块系统内部的路径解析机制来返回模块的路径。该函数不会加载模块，只返回解析后的绝对路径。 Js代码
+</code></pre>
+
+    <p>define(function(require,exports){
+ console.log(require.resolve(‘./b’));
+ //../b.js
+ });
+ require.cache
+———- 可以查看模块系统加载过的所有模块。
+某些情况下，需要重新加载某个模块，可以得到该模块的url，然后通过delete require.cache[url] 来将其信息删除。
+exports
+——– 是一个对象，用来向外提供模块接口。
+Js代码</p>
+
+    <pre><code> define(function(require,exports){
+ exports.foo = "bar";
+ exports.doSomething = function(){
+ ...............
+ }
+ }); 除了给exports对象增加成员，还可以以return的方式直接向外提供接口。 Js代码
+
+ define(function(require,exports,module){
+ return {
+ fool: "bar",
+ doSomething:function(){
+ .............
+ }
+ };
+ }); 当然如果只是返回一个对象，可以直接： Js代码
+
+ define({
+ foo: "bar",
+ doSomething:function(){}
+ });
+</code></pre>
+  </li>
+</ol>
+
+<p>注释：在factory里面给exports重新赋值是没有意义的，因为exports仅仅是module.exports的一个引用，直接给exports重新赋值并不会修改module.exports的值。
+错误的例子：</p>
+
+<p>Js代码</p>
+
+<pre><code>	define(function(require,exports,module){
+	exports = {
+	foo: "bar",
+	doSomething:function(){}
+	}
+	}); 正确的应该是：
+</code></pre>
+
+<p>Js代码</p>
+
+<pre><code>	define(function(require,exports,module){
+	module.exports = {
+	foo: "bar",
+	doSomething:function(){}
+	}
+	}); module module 是一个对象，存储了与当前模块关联的一些属性和方法。 module.id ---------- 模块标识 Js代码
+
+	define(function(require,exports,module){
+	console.log(require(module.id) === exports); // true
+	});
+	module.uri
+	------------ 根据模块系统的路径解析规则得到的模块绝对路径
+	module.dependencies
+	------------ 是一个数组，标识当前模块的依赖列表
+	module.parent
+	------------ 指向初始化调用当前模块的模块。可以得到模块初始化的callstack
+	module.factory
+	------------ 指向define(factory)中的factory参数
+	module.status
+	------------ 当前模块的状态，是一个数值
+	module.exports ------------ 当前模块对外提供的接口 传给factory构造方法的exports参数是module.exports对象的一个引用。 比如当模块的接口是某一个类的实例时候，需要通过module.exports来实现 Js代码
+
+	define(function(require,exports,module){
+	console.log(module.exports === exports); // true
+	module.exports = new SomeClass();
+	console.log(module.exports === exports); //false
+	});
+	module.require 在module环境中运行require，一般用于插件开发
+</code></pre>
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<span class="pagination-item newer">上一篇&nbsp;<i class="fa fa-chain-broken"></i></span>
+
+
+<a class="pagination-item older" href="/blog/2014/09/27/DB-Index.html">DB Index&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="AMD & CMD" data-thread-key="/blog/2014/09/27/AMD--CMD" data-url="index.html/blog/2014/09/27/AMD--CMD.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"5312914"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

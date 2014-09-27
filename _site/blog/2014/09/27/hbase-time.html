@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta name="description" content="Will go, Just do it.">
   <meta name="author" content="Will.Quan">
-  <meta name="keywords" content="Java class loader, willgo, Will.Quan">
-  <title>Java class loader - willgo</title>
-  <link rel="canonical" href="index.html/blog/2014/09/27/Java-class-loader.html">
+  <meta name="keywords" content="hbase time集群时间不一致无法启动, willgo, Will.Quan">
+  <title>hbase time集群时间不一致无法启动 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/09/27/hbase-time.html">
   <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="/res/css/public.css">
@@ -58,45 +58,56 @@
 </div>
     <div class="main">
     <header class="post-header">
-  <h1 class="post-title"><a href="/blog/2014/09/27/Java-class-loader.html">Java class loader</a></h2>
+  <h1 class="post-title"><a href="/blog/2014/09/27/hbase-time.html">hbase time集群时间不一致无法启动</a></h2>
   <p class="post-meta">
     <i class="fa fa-calendar"></i>
     2014年09月27日
     <i class="space"></i>
     <i class="fa fa-tags"></i>
-    <a class="post-category" href="/page/category.html#java">java</a>	
+    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
   </p>
 </header>
 <div class="post-main">
-<p><strong>java classloader 结构：</strong></p>
+<p>hbase 分布式时可能因为各个机器的时间不一致导致无法启动
+两种解决方案：</p>
 
 <ol>
-  <li>Bootstrap classloader(启动类加载器)
-主要负责jdk_home/lib目录下的核心API或-Xbootclasspath选项指定的jar包的装入工作</li>
-  <li>Extension Classloader(扩展类加载器)
-负责jdk_home/lib/ext目录下的jar包或者-Djava.ext.dirs指定目录下的jar包装入工作
-3.System classloader(系统类加载器)
-负责Java -classpath/-Djava.class.path所指定的类与jar包的装入</li>
-  <li>User Custom classloader（用户自定义类加载器（java.lang.ClassLoader的子类））
-以上每一个classloader都会维护一份自己的名称空间，同一个名称空间不能出现两个同名的类。
-为了实现Java安全沙箱模型顶层的类加载器安全机制，Java默认采用 双亲委派的加载链 结构</li>
+  <li>
+    <p>联网更新时间：</p>
+
+    <pre><code> sudo tzconfig， 如果命令不存在请使用 dpkg-reconfigure tzdata 然后按照提示选择 Asia对应的序号，选完后会显示一堆新的提示—输入城市名， 如Shanghai或Chongqing，最后再用 sudo date -s “” 来修改本地时间。 按照提示进行选择时区，然后： www.2cto.com sudo cp /usr/share/zoneinfo/Asia/ShangHai /etc/localtime 上面的命令是防止系统重启后时区改变。
+</code></pre>
+  </li>
 </ol>
 
-<p>在jvm启动时就会构建bootstrap classloader 负责Java平台核心库</p>
-
-<p><strong>每个ClassLoader加载Class的过程是：</strong></p>
+<p>网上同步时间</p>
 
 <ol>
-  <li>检测此Class是否载入过（即在cache中是否有此Class），如果有到8,如果没有到2</li>
-  <li>如果parent classloader不存在（没有parent，那parent一定是bootstrap classloader了），到4</li>
-  <li>请求parent classloader载入，如果成功到8，不成功到5</li>
-  <li>请求jvm从bootstrap classloader中载入，如果成功到8</li>
-  <li>寻找Class文件（从与此classloader相关的类路径中寻找）。如果找不到则到7.</li>
-  <li>从文件中载入Class，到8.</li>
-  <li>抛出ClassNotFoundException.</li>
-  <li>返回Class.</li>
-</ol>
+  <li>
+    <p>安装ntpdate工具</p>
 
+    <pre><code> # sudo apt-get install ntpdate
+</code></pre>
+  </li>
+  <li>
+    <p>设置系统时间与网络时间同步</p>
+
+    <pre><code> # ntpdate cn.pool.ntp.org
+</code></pre>
+  </li>
+  <li>
+    <p>将系统时间写入硬件时间</p>
+
+    <p># hwclock –systohc</p>
+  </li>
+  <li>
+    <p>修改hbase的时间检查， 其默认的时间为30000ms</p>
+
+    <pre><code> hbase.master.maxclockskew
+ 180000
+</code></pre>
+  </li>
+</ol>
 
 </div>
 <div class="share">
@@ -109,14 +120,14 @@
 </div>
 <div class="pagination">
 
-<a class="pagination-item newer" href="/blog/2014/09/27/Java-Serialization.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Java Serialization</a>
+<a class="pagination-item newer" href="/blog/2014/09/27/hbase-import-export.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;hbase import export</a>
 
 
-<a class="pagination-item older" href="/blog/2014/09/27/Linux-SSH-.html">Linux SSH 登录&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+<a class="pagination-item older" href="/blog/2014/09/27/hbaseenable.html">hbase表无法enable&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
 
 </div>
 <div class="comments">
-  <div class="ds-thread" data-title="Java class loader" data-thread-key="/blog/2014/09/27/Java-class-loader" data-url="index.html/blog/2014/09/27/Java-class-loader.html"></div>
+  <div class="ds-thread" data-title="hbase time集群时间不一致无法启动" data-thread-key="/blog/2014/09/27/hbase-time" data-url="index.html/blog/2014/09/27/hbase-time.html"></div>
   <script type="text/javascript">var duoshuoQuery = {short_name:"5312914"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
 </div>
     <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>

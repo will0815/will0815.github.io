@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta name="description" content="Will go, Just do it.">
   <meta name="author" content="Will.Quan">
-  <meta name="keywords" content="Java class loader, willgo, Will.Quan">
-  <title>Java class loader - willgo</title>
-  <link rel="canonical" href="index.html/blog/2014/09/27/Java-class-loader.html">
+  <meta name="keywords" content="初始Nginx, willgo, Will.Quan">
+  <title>初始Nginx - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/09/27/Nginx.html">
   <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="/res/css/public.css">
@@ -58,45 +58,99 @@
 </div>
     <div class="main">
     <header class="post-header">
-  <h1 class="post-title"><a href="/blog/2014/09/27/Java-class-loader.html">Java class loader</a></h2>
+  <h1 class="post-title"><a href="/blog/2014/09/27/Nginx.html">初始Nginx</a></h2>
   <p class="post-meta">
     <i class="fa fa-calendar"></i>
     2014年09月27日
     <i class="space"></i>
     <i class="fa fa-tags"></i>
-    <a class="post-category" href="/page/category.html#java">java</a>	
+    <a class="post-category" href="/page/category.html#ws">ws</a>	
   </p>
 </header>
 <div class="post-main">
-<p><strong>java classloader 结构：</strong></p>
+<p>Nginx 是一个轻量级，以占用系统资源少，运行效率而成为web服务器的后起之秀，国内现在很多大型网站都以使用nginx。
+直接php+mysql这是Linux web服务器的黄金组合。今天我们一来学如何在ubuntu 12.04 中架设lnmp。</p>
+
+<pre><code>1. 使用官方PPA安装 Nginx 最新版本，使用以下命令：
+sudo add-apt-repository ppa:nginx/stable
+sudo apt-get update
+sudo apt-get install nginx
+</code></pre>
+
+<p>Nginx相关控制命令：
+启动 Nginx：</p>
+
+<pre><code>sudo /etc/init.d/nginx start
+</code></pre>
+
+<p>浏览器浏览运行情况输入：http://localhost ;如果现实”Welcome to nginx!”，表明你的 Nginx 服务器安装成功！</p>
+
+<pre><code>关闭 Nginx：sudo /etc/init.d/nginx stop;
+重启 nginx：sudo /etc/init.d/nginx restart;
+</code></pre>
 
 <ol>
-  <li>Bootstrap classloader(启动类加载器)
-主要负责jdk_home/lib目录下的核心API或-Xbootclasspath选项指定的jar包的装入工作</li>
-  <li>Extension Classloader(扩展类加载器)
-负责jdk_home/lib/ext目录下的jar包或者-Djava.ext.dirs指定目录下的jar包装入工作
-3.System classloader(系统类加载器)
-负责Java -classpath/-Djava.class.path所指定的类与jar包的装入</li>
-  <li>User Custom classloader（用户自定义类加载器（java.lang.ClassLoader的子类））
-以上每一个classloader都会维护一份自己的名称空间，同一个名称空间不能出现两个同名的类。
-为了实现Java安全沙箱模型顶层的类加载器安全机制，Java默认采用 双亲委派的加载链 结构</li>
+  <li>
+    <p>安装 PHP，输入以下命令：</p>
+
+    <pre><code> sudo apt-get install php5-cli php5-cgi php5-fpm php5-mcrypt php5-mysql
+</code></pre>
+  </li>
 </ol>
 
-<p>在jvm启动时就会构建bootstrap classloader 负责Java平台核心库</p>
+<p>以用户rob在本机localhost的9100端口下运行一个PHP FastCGI进程，输入以下命令</p>
 
-<p><strong>每个ClassLoader加载Class的过程是：</strong></p>
+<pre><code>/usr/bin/spawn-fcgi -a 127.0.0.1 -p 9100 -u rob -g rob -f /usr/bin/php5-cgi -P /var/run/fastcgi-php.pid 加入开机运行，以免每次开机运行此命令。
 
-<ol>
-  <li>检测此Class是否载入过（即在cache中是否有此Class），如果有到8,如果没有到2</li>
-  <li>如果parent classloader不存在（没有parent，那parent一定是bootstrap classloader了），到4</li>
-  <li>请求parent classloader载入，如果成功到8，不成功到5</li>
-  <li>请求jvm从bootstrap classloader中载入，如果成功到8</li>
-  <li>寻找Class文件（从与此classloader相关的类路径中寻找）。如果找不到则到7.</li>
-  <li>从文件中载入Class，到8.</li>
-  <li>抛出ClassNotFoundException.</li>
-  <li>返回Class.</li>
-</ol>
+vi /etc/rc.local 在最后一行加入下面语句（在exit前面）。
 
+[...]
+/usr/bin/spawn-fcgi -a 127.0.0.1 -p 9100 -u rob -g rob -f /usr/bin/php5-cgi -P /var/run/fastcgi-php.pid
+[...]
+</code></pre>
+
+<p>配置Nginx站点，设置：</p>
+
+<pre><code>sudo vi /etc/nginx/sites-available/default
+</code></pre>
+
+<p>修改 “index” 为：“index index.html index.htm index.php;”
+删除以下内容：</p>
+
+<pre><code>location ~ \.php$ {
+fastcgi_pass 127.0.0.1:9000;
+fastcgi_index index.php;
+include fastcgi_params;
+} 测试，创建网站目录
+
+sudo mkdir /var/www/
+</code></pre>
+
+<p>建立一个虚拟站点：</p>
+
+<pre><code>sudo vi /etc/nginx/sites-available/default
+</code></pre>
+
+<p>修改root目录: “root /var/www;”
+建立一个测试页面：</p>
+
+<pre><code>sudo vi /var/www/test.php
+</code></pre>
+
+<p>在测试页面test.php中加入以下代码:</p>
+
+<pre><code>&lt;?php phpinfo();?&gt; 重启nginx
+
+sudo /etc/init.d/nginx restart
+</code></pre>
+
+<p>浏览器输入以下地址，看看有没有安装成功！</p>
+
+<p>http://localhost/test.php
+3.安装 MySQL 数据库：</p>
+
+<pre><code>sudo apt-get install mysql-server
+</code></pre>
 
 </div>
 <div class="share">
@@ -109,14 +163,14 @@
 </div>
 <div class="pagination">
 
-<a class="pagination-item newer" href="/blog/2014/09/27/Java-Serialization.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Java Serialization</a>
+<a class="pagination-item newer" href="/blog/2014/09/27/Mysql-outputformat.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Mysql outputformat简单实现</a>
 
 
-<a class="pagination-item older" href="/blog/2014/09/27/Linux-SSH-.html">Linux SSH 登录&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+<a class="pagination-item older" href="/blog/2014/09/27/Page-Block.html">Page Block&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
 
 </div>
 <div class="comments">
-  <div class="ds-thread" data-title="Java class loader" data-thread-key="/blog/2014/09/27/Java-class-loader" data-url="index.html/blog/2014/09/27/Java-class-loader.html"></div>
+  <div class="ds-thread" data-title="初始Nginx" data-thread-key="/blog/2014/09/27/Nginx" data-url="index.html/blog/2014/09/27/Nginx.html"></div>
   <script type="text/javascript">var duoshuoQuery = {short_name:"5312914"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
 </div>
     <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>

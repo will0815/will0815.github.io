@@ -1,0 +1,845 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="Will go, Just do it., willgo, 最好的从未错过, Will.Quan">
+  <title>Will go, Just do it.</title>
+  <link rel="canonical" href="index.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?will_go8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;时间轴</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;阅读</a></li>
+    
+      <li><a href="/life/index.html"target="_blank"><i class="fa fa-eyedropper"></i>&nbsp;记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/will0815.github.io" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+    <div class="main">
+    
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Java-File.html">Java File</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>/**
+ * @author Toby 通用工具类
+ */
+public class Utils {</p>
+
+<pre><code>/**
+ * @param args
+ * @throws Exception
+ * @throws IOException
+ */
+public static void main(String[] args) throws IOException, Exception {
+    // TODO Auto-generated method stub
+    // File file = new File("D:/user/mms.xml");
+    // System.out.println(file.renameTo(new File("D:/user/mms5.xml")));
+
+    // 1
+    // compress("D:/user/test", "D:/user/test.zip");
+
+    /*
+     * String fileName = "D:/user/88.zip"; try {
+     * System.out.println(encryptBASE64(readFileToBytes(fileName))); } catch
+     * (Exception e) { // TODO Auto-generated catch block
+     * e.printStackTrace(); }
+     */
+
+    /*
+     * String mi
+     * ="UEsDBBQACAA";
+     * RandomAccessFile inOut = new RandomAccessFile(
+     * "D:/user/sample.","rw"); inOut.write(decryptBASE64(mi));
+     * inOut.close();
+     */
+
+    // System.out.println(new String(decryptBASE64("5rWL6K+V"),"utf-8"));
+    // 2
+    // String xml =
+    // createXML("1828","qww","123456","10658103619033","15918542546",encryptBASE64("两款茶饮润肺护肤防过敏".getBytes()),encryptBASE64(readFileToBytes("D:/user/test.zip")));
+    // System.out.println(xml);
+    /*
+     * String xml = "&lt;?xml version=\"1.0\" encoding=\"UTF-8\"
+     * standalone=\"yes\"?&gt;&lt;TaskDataTransfer4ERsp
+     * xmlns=\"http://www.aspirehld.com/iecp/TaskDataTransfer4ERsp\"&gt;&lt;ResultCode&gt;2000&lt;/ResultCode&gt;&lt;TaskId&gt;&lt;/TaskId&gt;&lt;ResultMSG&gt;没有获得IP鉴权!&lt;/ResultMSG&gt;&lt;/TaskDataTransfer4ERsp&gt;";
+     * 
+     * Document doc = DocumentHelper.parseText(xml); // 将字符串转为XML Element
+     * rootElt = doc.getRootElement(); // 获取根节点
+     * 
+     * String resultCode = rootElt.element("ResultCode").getTextTrim();
+     * String TaskId = rootElt.element("TaskId").getTextTrim(); String
+     * ResultMSG = rootElt.element("ResultMSG").getTextTrim();
+     * System.out.println(" "+resultCode+" "+TaskId+" "+ResultMSG);
+     */
+
+}
+
+/**
+ * BASE64解密
+ * 
+ * @param key
+ * @return
+ * @throws Exception
+ */
+public static byte[] decryptBASE64(String key) throws Exception {
+    return (new BASE64Decoder()).decodeBuffer(key);
+}
+
+/**
+ * BASE64加密
+ * 
+ * @param key
+ * @return
+ * @throws Exception
+ */
+public static String encryptBASE64(byte[] key) throws Exception {
+    return (new BASE64Encoder()).encodeBuffer(key);
+}
+
+/**
+ * 获取路径下所有文件名
+ * 
+ * @param path
+ * @return
+ */
+public static String[] getFile(String path) {
+    File file = new File(path);
+    String[] name = file.list();
+    return name;
+}
+
+/**
+ * 
+ * @param sourceDirPath
+ * @param targetDirPath
+ * @throws IOException
+ */
+public static void copyDir(String sourceDirPath, String targetDirPath) throws IOException {
+    // 创建目标文件夹
+    (new File(targetDirPath)).mkdirs();
+    // 获取源文件夹当前下的文件或目录
+    File[] file = (new File(sourceDirPath)).listFiles();
+    for (int i = 0; i &lt; file.length; i++) {
+        if (file[i].isFile()) {
+            // 复制文件
+            String type = file[i].getName().substring(file[i].getName().lastIndexOf(".") + 1);
+
+            if (type.equalsIgnoreCase("txt"))
+                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()), MTOServerConstants.CODE_UTF_8,
+                        MTOServerConstants.CODE_GBK);
+            else
+                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()));
+        }
+        if (file[i].isDirectory()) {
+            // 复制目录
+            String sourceDir = sourceDirPath + File.separator + file[i].getName();
+            String targetDir = targetDirPath + File.separator + file[i].getName();
+            FileUtil.copyDirectiory(sourceDir, targetDir);
+        }
+    }
+}
+
+/**
+ * 读取文件中内容
+ * 
+ * @param path
+ * @return
+ * @throws IOException
+ */
+public static String readFileToString(String path) throws IOException {
+    String resultStr = null;
+    FileInputStream fis = null;
+    try {
+        fis = new FileInputStream(path);
+        byte[] inBuf = new byte[2000];
+        int len = inBuf.length;
+        int off = 0;
+        int ret = 0;
+        while ((ret = fis.read(inBuf, off, len)) &gt; 0) {
+            off += ret;
+            len -= ret;
+        }
+        resultStr = new String(new String(inBuf, 0, off, MTOServerConstants.CODE_GBK).getBytes());
+    } finally {
+        if (fis != null)
+            fis.close();
+    }
+    return resultStr;
+}
+
+/**
+ * 文件转成字节数组
+ * 
+ * @param path
+ * @return
+ * @throws IOException
+ */
+public static byte[] readFileToBytes(String path) throws IOException {
+    byte[] b = null;
+    InputStream is = null;
+    File f = new File(path);
+    try {
+        is = new FileInputStream(f);
+        b = new byte[(int) f.length()];
+        is.read(b);
+    } finally {
+        if (is != null)
+            is.close();
+    }
+    return b;
+}
+
+/**
+ * 将byte写入文件中
+ * 
+ * @param fileByte
+ * @param filePath
+ * @throws IOException
+ */
+public static void byteToFile(byte[] fileByte, String filePath) throws IOException {
+    OutputStream os = null;
+    try {
+        os = new FileOutputStream(new File(filePath));
+        os.write(fileByte);
+        os.flush();
+    } finally {
+        if (os != null)
+            os.close();
+    }
+}
+
+/**
+ * 将目录文件打包成zip
+ * 
+ * @param srcPathName
+ * @param zipFilePath
+ * @return 成功打包true 失败false
+ */
+public static boolean compress(String srcPathName, String zipFilePath) {
+    if (strIsNull(srcPathName) || strIsNull(zipFilePath))
+        return false;
+
+    File zipFile = new File(zipFilePath);
+    File srcdir = new File(srcPathName);
+    if (!srcdir.exists())
+        return false;
+    Project prj = new Project();
+    Zip zip = new Zip();
+    zip.setProject(prj);
+    zip.setDestFile(zipFile);
+    FileSet fileSet = new FileSet();
+    fileSet.setProject(prj);
+    fileSet.setDir(srcdir);
+    zip.addFileset(fileSet);
+    zip.execute();
+    return zipFile.exists();
+}
+
+/**
+ * 判空字串
+ * 
+ * @param str
+ * @return 为空true
+ */
+public static boolean strIsNull(String str) {
+    return str == null || str.equals("");
+}
+
+/**
+ * 折分数组
+ * 
+ * @param ary
+ * @param subSize
+ * @return
+ */
+public static List&lt;List&lt;Object&gt;&gt; splitAry(Object[] ary, int subSize) {
+    int count = ary.length % subSize == 0 ? ary.length / subSize : ary.length / subSize + 1;
+
+    List&lt;List&lt;Object&gt;&gt; subAryList = new ArrayList&lt;List&lt;Object&gt;&gt;();
+
+    for (int i = 0; i &lt; count; i++) {
+        int index = i * subSize;
+
+        List&lt;Object&gt; list = new ArrayList&lt;Object&gt;();
+        int j = 0;
+        while (j &lt; subSize &amp;&amp; index &lt; ary.length) {
+            list.add(ary[index++]);
+            j++;
+        }
+
+        subAryList.add(list);
+    }
+
+    return subAryList;
+}
+
+/**
+ * @param mobile
+ * @return
+ */
+public static String ArrayToString(Object[] mobile) {
+    String destId = "";
+    for (Object phone : mobile) {
+        destId += " " + (String) phone;
+    }
+    return destId.trim();
+} }
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/Java-File.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/InputFormat.html">InputFormat实现流程</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>自定义InputFormat类步骤：</p>
+
+<ol>
+  <li>
+    <p>继承InputFormat抽象类，InputFormat&lt;K, V&gt;</p>
+  </li>
+  <li>
+    <p>根据具体需求逻辑，实现自定义key,value.
+自定义key,value类，需要实现WritableComparable接口，
+实现其中的readFields, write, compareTo 方法
+readFields，write 分别实现对读写的序列化和反序列化
+注：对于实现类的属性，在实现readFields和write方法是必须保持顺序一致。
+compareTo方法，根据具体逻辑实现对实现对象的比较，用于map/reduce过程中的排序。</p>
+  </li>
+  <li>
+    <p>在继承InputFormat抽象类后，需要实现其中的两个抽象方法。</p>
+
+    <pre><code> List&lt;InputSplit&gt; getSplits(JobContext context)
+ RecordReader&lt;K,V&gt; createRecordReader(InputSplit split, TaskAttemptContext context )  3.1
+</code></pre>
+
+    <p>List<inputsplit> getSplits(JobContext context)：
+ 在该方法中我们需要实现对待处理文件按需求进行分割，方法返回值List的大小即为map的个数。
+ 若需要我们自定义我们的分割方法我们需要需要继承InputSplit抽象类，该抽象类中拥有</inputsplit></p>
+
+    <pre><code> long getLength()        返回split的大小
+ String[] getLocations() 返回获取数据的位置。
+ 注：在继承InputSplit类时，必须实现Writable接口，否则此split无法在hadoop中传递。
+ 实现Writable接口： 需要实现其中的 readFields，write 分别实现对读写的序列化和反序列化
+</code></pre>
+
+    <p>3.2</p>
+
+    <p>RecordReader&lt;K,V&gt; createRecordReader(InputSplit split, TaskAttemptContext context )
+ 在该方法中我们需要实现根据split对数据的读取，返回值RecordReader&lt;K, V&gt; 即map的输入键值。
+ 由此我们需要继承RecodReader&lt;K, V&gt;抽象类，来实现我们的读取逻辑。
+ 该抽象类的中方法：</p>
+
+    <pre><code> abstract void initialize(InputSplit split, TaskAttemptContext context ) ：初始化方法，一般在此读取数据
+ abstract boolean nextKeyValue()     ：返回是否还有下一个键值对，并对其赋值。
+ abstract KEYIN getCurrentKey()      ：Get the current key
+ abstract  VALUEIN getCurrentValue() ：Get the current value.
+ abstract float getProgress()        ：获取处理进度
+ abstract void close()               ：结束方法， 销毁资源之类的操作
+</code></pre>
+  </li>
+</ol>
+
+      <div class="readall"><a href="/blog/2014/09/27/InputFormat.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/HashMap-equalshashCode.html">HashMap equals&hashCode</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>HashMap源码中获取value的实现方法如下：</p>
+
+<pre><code>public V get(Object key) {
+if (key == null)
+return getForNullKey();
+int hash = hash(key.hashCode());
+for (Entry&lt;K,V&gt; e = table[indexFor(hash, table.length)];
+e != null;
+e = e.next) {
+Object k;
+if (e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k)))
+return e.value;
+}
+return null;
+}
+</code></pre>
+
+<p>遍历HashMap的内部维护的Entry数组，找到匹配的目标Entry并返回其value即可。 匹配的标准是：
+Entry的hash值是否与参数key的hash值相等。 (这要求我们必须正确实现作为key的对象的hashCode()方法)
+Entry的key是否与参数key为同一对象，或者Entry的key”等于”参数key。 (注意是否”等于”， 是通过调用参数key的equals()方法来完成的， 这要求我们必须正确实现作为key的对象的equals()方法)</p>
+
+<p>So, 我们在自定义map的key的时候，需要实现equals和hashCode两个方法，hashCode可偷懒直接返回一个数字。。。</p>
+
+<p>关于HashCode的官方文档定义：
+hashcode方法返回该对象的哈希码值。支持该方法是为哈希表提供一些优点，例如，java.util.Hashtable 提供的哈希表。</p>
+
+<p>hashCode 的常规协定是：</p>
+
+<p>在 Java 应用程序执行期间，在同一对象上多次调用 hashCode 方法时，必须一致地返回相同的整数，前提是对象上 equals 比较中所用的信息没有被修改。从某一应用程序的一次执行到同一应用程序的另一次执行，该整数无需保持一致。</p>
+
+<p>如果根据 equals(Object) 方法，两个对象是相等的，那么在两个对象中的每个对象上调用 hashCode 方法都必须生成相同的整数结果。
+以下情况不 是必需的：如果根据 equals(java.lang.Object) 方法，两个对象不相等，那么在两个对象中的任一对象上调用 hashCode 方法必定会生成不同的整数结果。但是，程序员应该知道，为不相等的对象生成不同整数结果可以提高哈希表的性能。</p>
+
+<p>实际上，由 Object 类定义的 hashCode 方法确实会针对不同的对象返回不同的整数。（这一般是通过将该对象的内部地址转换成一个整数来实现的，但是 JavaTM 编程语言不需要这种实现技巧。）
+当equals方法被重写时，通常有必要重写 hashCode 方法，以维护 hashCode 方法的常规协定，该协定声明相等对象必须具有相等的哈希码。</p>
+
+<p>综上：</p>
+
+<ol>
+  <li>hashCode的存在主要是用于查找的快捷性，如Hashtable，HashMap等，hashCode是用来在散列存储结构中确定对象的存储地址的；</li>
+  <li>如果两个对象相同，就是适用于equals(java.lang.Object) 方法，那么这两个对象的hashCode一定要相同；</li>
+  <li>如果对象的equals方法被重写，那么对象的hashCode也尽量重写，并且产生hashCode使用的对象，一定要和equals方法中使用的一致，否则就会违反上面提到的第2点；</li>
+  <li>两个对象的hashCode相同，并不一定表示两个对象就相同，也就是不一定适用于equals(java.lang.Object) 方法，只能够说明这两个对象在散列存储结构中，如Hashtable，他们“存放在同一个篮子里”。</li>
+</ol>
+
+<p>hashCode用于查找使用的，equals是用于比较两个对象的是否相等的。</p>
+
+<ol>
+  <li>
+    <p>hashcode是用来查找的，
+例如内存中有这样的位置
+0 1 2 3 4 5 6 7
+一个类，这个类有个字段叫ID,我要把这个类存放在以上8个位置之一，如果不用hashcode而任意存放，那么当查找时就需要到这八个位置里挨个去找，或者用二分法一类的算法。
+但如果用hashcode那就会使效率提高很多。
+我们这个类中有个字段叫ID,那么我们就定义我们的hashcode为ID％8，然后把我们的类存放在取得得余数那个位置。比如我们的ID为9，9除8的余数为1，那么我们就把该类存在1这个位置，如果ID是13，求得的余数是5，那么我们就把该类放在5这个位置。这样，以后在查找该类时就可以通过ID除 8求余数直接找到存放的位置了。</p>
+  </li>
+  <li>
+    <p>但是如果两个类有相同的hashcode怎么办那（我们假设上面的类的ID不是唯一的），例如9除以8和17除以8的余数都是1，那么这是不是合法的，回答是：可以这样。那么如何判断呢？在这个时候就需要定义 equals了。
+也就是说，我们先通过 hashcode来判断两个类是否存放某个桶里，但这个桶里可能有很多类，那么我们就需要再通过 equals 来在这个桶里找到我们要的类。
+那么。重写了equals()，为什么还要重写hashCode()呢？
+在一个桶里找东西，先要找到这个桶，通过重写hashcode()来找到桶，equals()比较</p>
+  </li>
+</ol>
+
+      <div class="readall"><a href="/blog/2014/09/27/HashMap-equalshashCode.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Hadoop.html">单节点伪分布式Hadoop搭建</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#"></a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>单节点伪分布式Hadoop配置</p>
+
+<p>第一步： 安装JDK</p>
+
+<p>因为 Hadoop 运行必须安装 JDK 环境，因此在安装好 Linux 后进入系统的第一步 便是安装 JDK ，安装过程和在 Windows 环境中的安装步骤很类似，首先去 Oracle 官网 去下载安装包，然后直接进行解压。我自己解压在路径 /usr/jvm 下面，假如你的安装包现在已经下载在 jvm 文件夹下面，然后 按 Ctrl+Alt+t 进去命令行，然后输入</p>
+
+<pre><code>cd  /usr/jvm
+</code></pre>
+
+<p>进入到jvm文件夹下面，然后再输入如下命令进行解压：</p>
+
+<pre><code>sudo tar  -zxvf  jdk-7u40-linux-i586.tar.gz
+</code></pre>
+
+<p>第二步： 配置环境变量</p>
+
+<p>解压结束以后，像在 Windows 系统中一样，需要配置环境变量，在 Ubuntu 中设置 环境变量的过程为打开文件 /etc/profile ，因为权限的问题，因此在命令行需要输入 的是</p>
+
+<pre><code>sudo gedit /etc/profile
+</code></pre>
+
+<p>然后在根据提示输入用户密码即可，然后在文件最下面添加如下：</p>
+
+<pre><code>export JAVA_HOME=/usr/jvm/jdk1.7.0_40
+
+export CLASSPATH=".:$JAVA_HOME/lib:$JAVA_HOME/jre/lib$CLASSPATH"
+
+export PATH="$JAVA_HOME/bin:$JAVA_HOME/jre/bin:/usr/hadoop/hadoop-1.2.1/bin:$PATH"
+</code></pre>
+
+<p>上面这三个以单词 export 开始的三个语句就类似于我们在 Windows 中的环境变量中设置一样，而且在这个里面和 Windows 中不同的是，在 Windows 中使用 “；” 号来表示分隔，但是在 Ubuntu 中是以 “：” 号来表示分隔。还需要注意的是，上面的路径都是我自己配置的时候的路径，因为我的 JDK 解压在 /usr/jvm 中，所以我的 JAVA_HOME 设置的是那个路径，而且如果安装的 JDK 版本不同那么后面的也不一样。同理在 CLASSPATH 路径中也是因为我自己的安装路径进行设置的，因此在配置过程中需要读者注意。在 PATH 路径中最后面还将 Hadoop 的路径也添加了进去，因此在读者安装了 Hadoop 后也将这个路径添加进环境变量 PATH 中去。</p>
+
+<p>在配置完环境变量后，我们来将我们安装的 JDK 设置为 Ubuntu 系统默认的 JDK ，因为之前系统里面自带 openjdk ，在命令行里面输入如下：</p>
+
+<pre><code>sudo update-alternatives  --install  /usr/bin/java  java  /usr/jvm/jdk1.7.0_40/bin/java 300
+
+sudo update-alternatives  --install  /usr/bin/javac  javac  /usr/jvm/jdk1.7.0_40/bin/javac 300
+
+sudo update-alternatives  --config  java
+</code></pre>
+
+<p>然后我们就可以在命令行输入 java -version 来进行察看 JDK 是否已经配置好了。</p>
+
+<p>第三步： 安装Hadoop  </p>
+
+<p>我们可以去 Hadoop 官网上去下载安装包，我自己下载使用的是 hadoop-1.2.1.tar.gz ，然后当安装包下载结束后，将安装包解压到指定位置，我将安装包解压到了 /usr/hadoop 目录下面。</p>
+
+<p>具体步骤是，像解压 JDK 一样，首先加入下载的 Hadoop 安装包在 /usr/hadoop 文件夹下面。然后在命令行下进入 /usr/hadoop 文件，类似于上面的。然后输入解压命令如下</p>
+
+<pre><code>sudo  tar  -zxvf  hadoop-1.2.1.tar.gz  
+</code></pre>
+
+<p>后面的 Hadoop 安装包名称具体看你下载的版本，我下载的是1.2.1版本的。 为了以后操作 /usr/hadoop 文件夹里面的文件方便，我们设置一下文件夹的权限，在命令行输入如下</p>
+
+<pre><code>sudo  chown  -hR  long  /usr/hadoop
+</code></pre>
+
+<p>注意：在上面的命令中，long是我自己此时登陆的用户名，因此你需要将那个改成你自己的用户名。</p>
+
+<p>第四步： 配置Hadoop环境变量</p>
+
+<p>在上面解压完 Hadoop 以后，现在我们来设置环境变量，其实在上面刚才我们配置 JDK 环境变量的时候，已经在 PATH 路径后面添加了 Hadoop 安装目录的 bin 目录的路径，所以那个就代表环境变量已经设置好了，但是读者一定要注意，不要 Copy ，要明确自己的 Hadoop 安装路径来进行配置。</p>
+
+<p>第五步： 设置SSH（安全外壳协议）</p>
+
+<p>推荐安装 OpenSSH ， Hadoop 需要通过 SSH 来启动 Slave 列表中各台主机的守护进程，因此 SSH 是必需安装的。虽然我们现在搭建的是一个伪分布式的平台，但是 Hadoop 没有区分开集群式和伪分布式，对于伪分布式， Hadoop 会采用与集群相同的处理方式，即按次序启动文件 conf/slaves 中记载的主机进程，只不过在伪分布式中 Salve 为 localhost 而已，所以对于伪分布式， SSH 是必须的。</p>
+
+<p>配置过程（首先确保连接上网络）：</p>
+
+<p>① 安装SSH，在命令行输入如下</p>
+
+<pre><code>sudo  apt-get install openssh-server
+</code></pre>
+
+<p>② 配置可以免密码登陆本机</p>
+
+<p>在命令行输入（注意其中的ssh前面还有一个 “ . ” 不要遗漏）</p>
+
+<pre><code>ssh-keygen  -t  dsa -P '' -f  ~/.ssh/id_dsa 
+</code></pre>
+
+<p>（解释一下上面这条命令， ssh-keygen  代表生成密钥； -t  表示指定生成的密钥 类型； dsa  是 dsa 密钥认证的意思； -P  用于提供密语（接着后面是两个单引号， 不要打错）； -f  表示指定生成密钥文件）</p>
+
+<p>这条命令完成后，会在当前文件夹下面的 .ssh 文件夹下创建 id_dsa 和 id_dsa.pub 两个文件，这是 SSH 的一对私钥和公钥，把 id_dsa.pub （公钥）追加到授权的 key 中去，输入如下命令：</p>
+
+<pre><code>cat  ~/.ssh/id_dsa.pub  &gt;&gt;  ~/.ssh/authorized_keys
+</code></pre>
+
+<p>至此，免密码登陆本机已经配置完毕。</p>
+
+<p>说明：一般来说，安装SSH时会自动在当前用户下创建.ssh这个隐藏文件夹，一般不会直接看到，除非安装好了以后，在命令行使用命令ls才会看到。</p>
+
+<p>③ 输入 ssh  localhost ，显示登陆成功信息。</p>
+
+<p>第六步： 配置Hadoop伪分布式模式</p>
+
+<p>现在进入到安装 Hadoop 的文件夹，找到里面的 conf 文件夹，点击进去。</p>
+
+<p>配置 hadoop 环境文件 hadoop-env.sh</p>
+
+<p>打开文件，找到某行有 ”# export JAVA_HOME = …”  字样的地方，去掉 “#” ，然后在等号后面填写你自己的 JDK 路径，比如像我自己的 JDK 路径，那就改为了 如下所示</p>
+
+<pre><code>“export  JAVA_HOME=/usr/jvm/jdk1.7.0_40”
+</code></pre>
+
+<p>配置 Hadoop 的核心文件 core-site.xml</p>
+
+<p>打开文件，会发现标签 <configuration></configuration> 中是空的，在空的地方添加如下配置</p>
+
+<pre><code>&lt;property&gt;
+
+            &lt;name&gt;fs.default.name&lt;/name&gt;
+
+            &lt;value&gt;hdfs://localhost:9000&lt;/value&gt;
+
+     &lt;/property&gt;
+
+
+
+     &lt;property&gt;
+
+             &lt;name&gt;dfs.replication&lt;/name&gt;
+
+             &lt;value&gt;1&lt;/value&gt;
+
+     &lt;/property&gt;
+
+
+
+     &lt;property&gt;
+
+              &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
+
+              &lt;value&gt;/home/long/tmp&lt;/value&gt;
+
+     &lt;/property&gt;
+</code></pre>
+
+<p>（注意：在最后一个value值中，上面是long，是因为那是我的用户名，所以你需要将那个修改为你自己的用户名）</p>
+
+<p>配置 Hadoop 中 MapReduce 的配置文件 mapred-site.xml</p>
+
+<p>打开文件，会发现标签 <configuration></configuration> 中是空的，在空的地方添加如下配置</p>
+
+<pre><code>&lt;property&gt;
+
+     &lt;name&gt;mapred.job.tracker&lt;/name&gt;
+
+     &lt;value&gt;localhost:9001&lt;/value&gt;
+
+&lt;/property&gt;
+</code></pre>
+
+<p>第七步： 格式化Hadoop文件系统HDFS并启动Hadoop</p>
+
+<p>首次运行 hadoop 必须进行格式化 Hadoop 文件系统，以后运行即可跳过。打开命令行，进入安装了 Hadoop 的文件路径下，然后在命令行输入</p>
+
+<pre><code>bin/hadoop  namenode -format
+</code></pre>
+
+<p>格式化文件系统，然后启动 Hadoop ，在命令行里面输入
+	bin/start-all.sh</p>
+
+<p>验证是否正常启动，在命令行里面输入 jps ，然后回车，如果在命令行里面出现如下类似画面（因为前面的数字可以不同）</p>
+
+<pre><code>3235 NameNode
+
+4113 Jps
+
+3819 JobTracker
+
+4059 TaskTracker
+
+3721 SecondaryNameNode
+
+3487 DataNode
+</code></pre>
+
+<p>则说明已经正常启动。如果以后需要关闭 Hadoop 的话，在 Hadoop 安装的文件夹路径下面在命令行输入</p>
+
+<pre><code>bin/stop-all.sh
+</code></pre>
+
+<p>来关闭 Hadoop 。</p>
+
+<p>第八步： 跑一个Hadoop中自带的WordCount程序，来体验一把</p>
+
+<p>步骤如下（我在自己平台上的，读者可仿照实验）：</p>
+
+<p>1)  准备一个文本文件</p>
+
+<p>首先我在桌面，新建了一个空白文档 test ，在里面输入一段话，或是几一些什么 单 词什么的，保存。</p>
+
+<p>2)  将文本文件上传到 dfs 文件系统中的 input 目录下，打开命令行，进入到安装 hadoop 的文件夹下，然后输入如下</p>
+
+<pre><code>bin/hadoop  dfs  -copyFromLocal  /home/long/桌面/test  input
+</code></pre>
+
+<p>（注：如果 dfs 中不包含 input 目录的话就会自动创建一个）</p>
+
+<p>3)  然后在命令行中输入如下命令，执行 WordCount 程序</p>
+
+ 	 bin/hadoop  jar  hadoop-examples-1.2.1.jar  wordcount  input  output
+
+<p>（注：因为这个程序是 Hadoop 安装包里面自带的，就在 hadoop-examples-1.2.1.jar 中，后面的数字因为版本号的不同而不同，后面的 input 代表输入文件夹， output 代表输出文件夹 ， 系统输出时会自动创建）</p>
+
+<p>读者如果这个执行成功了，就会发现有很多输出信息，从屏幕上显示，当程序运行结束后。</p>
+
+<p>4)  察看结果 在命令行里面输入</p>
+
+<pre><code>bin/hadoop  dfs  -cat  output/part-r-00000
+</code></pre>
+
+<p>现在你就可以看见自己刚才输入文本里面的单词计数了。</p>
+
+<p>至此，伪分布式搭建结束!</p>
+
+      <div class="readall"><a href="/blog/2014/09/27/Hadoop.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/HDFS.html">HDFS超租约异常</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>HDFS超租约异常总结（org.apache.hadoop.hdfs.server.namenode.LeaseExpiredException）
+http://www.cnblogs.com/wangxiaowei/p/3317479.html</p>
+
+<p>hbase.regionserver.lease.period 客户端租期超时阀值；scan量大时可以考虑增大；否则”Lease Exception: lease -70000000000000001 does not exist”</p>
+
+<p>这个log通常出现在regionserver挂掉之前。通常regionserver因为某种原因从zookeeper上掉线，需要flush以及删除region对应的WAL，而如果接管的regionserver在此之前已经读取完成WAL并且删除的话，那么就会出现如上文件已经不存在的错误</p>
+
+<p><strong>解决办法，调整xcievers参数</strong></p>
+
+<pre><code>默认是4096，改为8192，hdfs-site.xml
+&lt;property&gt;
+&lt;name&gt;dfs.datanode.max.xcievers&amp;lt;/name&gt;
+&lt;value&gt;8192&amp;lt;/value&gt;
+&lt;/property&gt;
+dfs.datanode.max.xcievers 参数说明 一个 Hadoop HDFS Datanode 有一个同时处理文件的上限. 这个参数叫 xcievers (Hadoop的作者把这个单词拼错了). 在你加载之前，先确认下你有没有配置这个文件conf/hdfs-site.xml里面的xceivers参数，至少要有4096:
+
+&lt;property&gt;
+&lt;name&gt;dfs.datanode.max.xcievers&amp;lt;/name&gt;
+&lt;value&gt;4096&lt;/value&gt;
+&lt;/property&gt;
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/HDFS.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/HBasesession.html">HBase第一次session记录</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <ol>
+  <li>数据本地化(Data Localization)
+数据存在当前JVM 或是当前磁盘</li>
+  <li>HBase的架构 实现数据与操作的分离，没有本地数据。
+其数据存放于hadoop上，所以集群能具有很强的健壮性：
+hase写过程：先写Hlog</li>
+  <li>HBase的没有指定master，在哪台机器上启动HBase集群，该台机就是master。</li>
+  <li>rowkey是数据的一部分，其必须人工指定。
+column family 在定义表时需指明。</li>
+  <li>HBase没有database的概念。</li>
+  <li>
+    <p>HBase表结构：</p>
+
+    <pre><code> table
+ |-column family
+ |-column
+ |-cell
+ |-timestamp
+ |-value
+</code></pre>
+  </li>
+  <li>HBase最佳实践：column family 不应超过两个，因为一个column family 对应一个store，flush和compaction的触发的基本单位都是Region级别，所以当一个column family有大量的数据的时候会触发整个region里面的其他column family的memstore（其实这些memstore可能仅有少量的数据，还不需要flush的）也发生flush动作；另外compaction触发的条件是当store file的个数（不是总的store file的大小）达到一定数量的时候会发生，而flush产生的大量store file通常会导致compaction，flush/compaction会发生很多IO相关的负载，这对Hbase的整体性能有很大影响。</li>
+  <li>一个table对应一个或多个region，在map/reduce 中对应一个map
+一个column family 对应一个store。 store 中含一个menstore 和多个fileStore
+当menstore 存储到达一定阀值就生成一个filestore， fileStore存放在hdfs上，
+当fileStore 数量到达一定阀值就将其合并成一个大的file。</li>
+  <li>qualifier对应column</li>
+  <li>在插入rowkey时，不考虑region的大小及状态，只是根据它的access 编码排序，找到对应的startkey，endkey,确定插入的位置。</li>
+  <li>HBase两张管理表：+
+.META.:管理用户region，它可以有多个region。
+ROOT: 管理.META.的region，它只有一个region。
+所以读写数据的流程为：
+client–&gt;ROOT–&gt;META–&gt;regionserver
+在数据的读写过程中client不会与master产生关系
+master只是负责管理表结构。</li>
+  <li>利用backup-master机制，解决master单点的问题。</li>
+  <li>region在存储的数据到达一定阀值后将split，split的同时更形.META.和ROOT表的相关数据。
+split region的过程不需要master的参与，master只负责将split后新的region分配到对应的regionserver。</li>
+  <li>HBase的数据安全机制之一：在插入数据时先写Hlog然后在写到内存。
+一个regionserver中只有一个Hlog， Hlog中只记录内存中存放的数据。
+当机器挂掉后，master会根据Hlog中region将其分割，然后分配到不同的机器加载，做数据恢复。</li>
+</ol>
+
+      <div class="readall"><a href="/blog/2014/09/27/HBasesession.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="pagination">
+  
+  
+  <a class="pagination-item newer" href="/page/5"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;上一页</a>
+  
+    
+  
+  <a class="pagination-item older" href="/page/7">下一页&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+  
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

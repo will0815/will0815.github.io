@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta name="description" content="Will go, Just do it.">
   <meta name="author" content="Will.Quan">
-  <meta name="keywords" content="Java class loader, willgo, Will.Quan">
-  <title>Java class loader - willgo</title>
-  <link rel="canonical" href="index.html/blog/2014/09/27/Java-class-loader.html">
+  <meta name="keywords" content="Map/Reduce第一次开发记录, willgo, Will.Quan">
+  <title>Map/Reduce第一次开发记录 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/09/27/MapReduce.html">
   <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="/res/css/public.css">
@@ -58,45 +58,77 @@
 </div>
     <div class="main">
     <header class="post-header">
-  <h1 class="post-title"><a href="/blog/2014/09/27/Java-class-loader.html">Java class loader</a></h2>
+  <h1 class="post-title"><a href="/blog/2014/09/27/MapReduce.html">Map/Reduce第一次开发记录</a></h2>
   <p class="post-meta">
     <i class="fa fa-calendar"></i>
     2014年09月27日
     <i class="space"></i>
     <i class="fa fa-tags"></i>
-    <a class="post-category" href="/page/category.html#java">java</a>	
+    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
   </p>
 </header>
 <div class="post-main">
-<p><strong>java classloader 结构：</strong></p>
+<p>1.main()
+作用：配置job, 提交job
+main()运行于JobTracker</p>
 
 <ol>
-  <li>Bootstrap classloader(启动类加载器)
-主要负责jdk_home/lib目录下的核心API或-Xbootclasspath选项指定的jar包的装入工作</li>
-  <li>Extension Classloader(扩展类加载器)
-负责jdk_home/lib/ext目录下的jar包或者-Djava.ext.dirs指定目录下的jar包装入工作
-3.System classloader(系统类加载器)
-负责Java -classpath/-Djava.class.path所指定的类与jar包的装入</li>
-  <li>User Custom classloader（用户自定义类加载器（java.lang.ClassLoader的子类））
-以上每一个classloader都会维护一份自己的名称空间，同一个名称空间不能出现两个同名的类。
-为了实现Java安全沙箱模型顶层的类加载器安全机制，Java默认采用 双亲委派的加载链 结构</li>
+  <li>
+    <p>map/reduce运行流程：</p>
+
+    <pre><code> map(k1, v1)--&gt;(k2, v2)--&gt;combiner(k2, v2)--&gt;(k3, v3)--&gt;reduce(k3, v3)--&gt;(k4, v4)
+ InputFormat  程序逻辑          map的输出               combiner的输出  最终输出
+</code></pre>
+  </li>
+  <li>
+    <p>不要在map类中自己实现combiner或reduce的功能。可能导致内存不足。
+context.write();方法在当写入量超过一定值后，会写入文件。</p>
+  </li>
+  <li>
+    <p>setNumReduce() 设置reduce的个数，默认为1. 另外当map/reduce运行在本地时此方法的设置无效。
+对于reduce的个数一般由metadata来决定。</p>
+  </li>
+  <li>
+    <p>map/reduce 程序的运行方式：</p>
+
+    <p>a: 将写好的程序，打成jar包，将其和其依赖的jar包放置于 hadoop安装环境上 然后在hadoop上以 hadoop -jar /path/***.jar
+ b：在eclipse中run
+ c: 编写servlet, 在servlet 中调用a方法中的命令 运行程序。</p>
+  </li>
+  <li>
+    <p>Combiner</p>
+
+    <p>在map端实现对key的聚合，然后再有reduce从聚合以后的数据中获取，从而减少map于reduce之间的数据传输，提高程序效率。
+ 另外使用Combiner,应考虑使用combiner对数据的聚合程度。如果聚合量太少，是没有必要的。</p>
+  </li>
+  <li>
+    <p>Partitioner  (shuffle)
+ Partitioner 实现将map或是combiner的输出发送到对应的reduce的功能.
+ 可以自定义实现。默认为HashPartitioner</p>
+  </li>
+  <li>
+    <p>configuration：作用：实现对job的配置
+ 可以作为jobtracker,map,reduce之间的参数传递，configuration对象在设置后，在程序的任何地方都能获取。</p>
+  </li>
+  <li>
+    <p>在本地run map/redcue 程序时 需要修改源码中FileUtil类如下：</p>
+
+    <pre><code> private static void checkReturnValue(boolean rv, File p,
+ FsPermission permission
+ ) throws IOException {
+ // if (!rv) {
+ // throw new IOException("Failed to set permissions of path: " + p +
+ // " to " +
+ // String.format("%04o", permission.toShort()));
+ // }
+ }
+</code></pre>
+  </li>
 </ol>
 
-<p>在jvm启动时就会构建bootstrap classloader 负责Java平台核心库</p>
-
-<p><strong>每个ClassLoader加载Class的过程是：</strong></p>
-
-<ol>
-  <li>检测此Class是否载入过（即在cache中是否有此Class），如果有到8,如果没有到2</li>
-  <li>如果parent classloader不存在（没有parent，那parent一定是bootstrap classloader了），到4</li>
-  <li>请求parent classloader载入，如果成功到8，不成功到5</li>
-  <li>请求jvm从bootstrap classloader中载入，如果成功到8</li>
-  <li>寻找Class文件（从与此classloader相关的类路径中寻找）。如果找不到则到7.</li>
-  <li>从文件中载入Class，到8.</li>
-  <li>抛出ClassNotFoundException.</li>
-  <li>返回Class.</li>
-</ol>
-
+<p>可以把这个类copy到你eclipse工程中的源程序中，包名和类名都不变。
+在eclipse中运行时将优先使用你copy过来修改的那个类。
+没有必要重新编译整个hadoop的类。</p>
 
 </div>
 <div class="share">
@@ -109,14 +141,14 @@
 </div>
 <div class="pagination">
 
-<a class="pagination-item newer" href="/blog/2014/09/27/Java-Serialization.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Java Serialization</a>
+<a class="pagination-item newer" href="/blog/2014/09/27/MVC.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;MVC框架简单实现</a>
 
 
-<a class="pagination-item older" href="/blog/2014/09/27/Linux-SSH-.html">Linux SSH 登录&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+<a class="pagination-item older" href="/blog/2014/09/27/Module.html">Module&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
 
 </div>
 <div class="comments">
-  <div class="ds-thread" data-title="Java class loader" data-thread-key="/blog/2014/09/27/Java-class-loader" data-url="index.html/blog/2014/09/27/Java-class-loader.html"></div>
+  <div class="ds-thread" data-title="Map/Reduce第一次开发记录" data-thread-key="/blog/2014/09/27/MapReduce" data-url="index.html/blog/2014/09/27/MapReduce.html"></div>
   <script type="text/javascript">var duoshuoQuery = {short_name:"5312914"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
 </div>
     <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>

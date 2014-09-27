@@ -1,0 +1,180 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="log4j配置解释, willgo, Will.Quan">
+  <title>log4j配置解释 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/09/27/log4j.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?will_go8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;时间轴</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;阅读</a></li>
+    
+      <li><a href="/life/index.html"target="_blank"><i class="fa fa-eyedropper"></i>&nbsp;记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/will0815.github.io" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+    <div class="main">
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2014/09/27/log4j.html">log4j配置解释</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2014年09月27日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#java">java</a>	
+  </p>
+</header>
+<div class="post-main">
+<p>Log4j说明</p>
+
+<ol>
+  <li>
+    <p>log4j.rootCategory=INFO, stdout , R</p>
+
+    <p>此句为将等级为INFO的日志信息输出到stdout和R这两个目的地，
+stdout和R的定义在下面的代码，可以任意起名。
+等级可分为OFF、 FATAL、ERROR、WARN、INFO、DEBUG、ALL，
+如果配置OFF则不打出任何信息，如果配置为INFO这样只显示INFO, WARN, ERROR的log信息，
+而DEBUG信息不会被显示。</p>
+  </li>
+  <li>log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+ 此句为定义名为stdout的输出端是哪种类型，可以是
+ org.apache.log4j.ConsoleAppender（控制台），
+ org.apache.log4j.FileAppender（文件），
+ org.apache.log4j.DailyRollingFileAppender（每天产生一个日志文件），
+ org.apache.log4j.RollingFileAppender（文件大小到达指定尺寸的时候产生一个新的文件）
+ org.apache.log4j.WriterAppender（将日志信息以流格式发送到任意指定的地方）</li>
+  <li>log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+ 此句为定义名为stdout的输出端的layout是哪种类型，可以是
+ org.apache.log4j.HTMLLayout（以HTML表格形式布局），
+ org.apache.log4j.PatternLayout（可以灵活地指定布局模式），
+ org.apache.log4j.SimpleLayout（包含日志信息的级别和信息字符串），
+ org.apache.log4j.TTCCLayout（包含日志产生的时间、线程、类别等等信息）</li>
+  <li>
+    <p>log4j.appender.stdout.layout.ConversionPattern= [QC] %p [%t] %C.%M(%L) | %m%n
+ 如果使用pattern布局就要指定的打印信息的具体格式ConversionPattern，
+ 打印参数如下：
+ %m 输出代码中指定的消息
+ %p 输出优先级，即DEBUG，INFO，WARN，ERROR，FATAL
+ %r 输出自应用启动到输出该log信息耗费的毫秒数
+ %c 输出所属的类目，通常就是所在类的全名
+ %t 输出产生该日志事件的线程名
+ %n 输出一个回车换行符，Windows平台为“rn”，Unix平台为“n”
+ %d 输出日志时间点的日期或时间，默认格式为ISO8601，也可以在其后指定格式，
+ 比如：%d{yyyy MMM dd HH:mm:ss,SSS}，输出类似：2002年10月18日 22：10：28，921
+ %l 输出日志事件的发生位置，包括类目名、发生的线程，以及在代码中的行数。</p>
+
+    <p>[QC]是log信息的开头，可以为任意字符，一般为项目简称。
+ 输出的信息
+ [TS] DEBUG [main] AbstractBeanFactory.getBean(189) | Returning cached instance of singleton bean ‘MyAutoProxy’</p>
+  </li>
+  <li>
+    <p>log4j.appender.R=org.apache.log4j.DailyRollingFileAppender
+ 此句与第3行一样。定义名为R的输出端的类型为每天产生一个日志文件。</p>
+  </li>
+  <li>
+    <p>log4j.appender.R.File=D:\Tomcat 5.5\logs\qc.log</p>
+
+    <p>此句为定义名为R的输出端的文件名为D:\Tomcat 5.5\logs\qc.log</p>
+  </li>
+  <li>log4j.appender.R.layout=org.apache.log4j.PatternLayout
+ 与第4行相同。</li>
+</ol>
+
+<p>10 log4j.appender.R.layout.ConversionPattern=%d-[TS] %p %t %c - %m%n
+与第5行相同。</p>
+
+<p>12 log4j.logger.com. neusoft =DEBUG
+指定com.neusoft包下的所有类的等级为DEBUG。
+可以把com.neusoft改为自己项目所用的包名。</p>
+
+<p>13 log4j.logger.com.opensymphony.oscache=ERROR
+14 log4j.logger.net.sf.navigator=ERROR
+这两句是把这两个包下出现的错误的等级设为ERROR，如果项目中没有配置EHCache，则不需要这两句。</p>
+
+<p>15 log4j.logger.org.apache.commons=ERROR
+16 log4j.logger.org.apache.struts=WARN
+这两句是struts的包。</p>
+
+<p>17 log4j.logger.org.displaytag=ERROR
+这句是displaytag的包。（QC问题列表页面所用）</p>
+
+<p>18 log4j.logger.org.springframework=DEBUG
+此句为Spring的包。</p>
+
+<p>24 log4j.logger.org.hibernate.ps.PreparedStatementCache=WARN
+25 log4j.logger.org.hibernate=DEBUG
+此两句是hibernate的包。</p>
+
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2014/09/27/linux-command.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;linux command下解压命令大全</a>
+
+
+<a class="pagination-item older" href="/blog/2014/09/27/mashup.html">mashup&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="log4j配置解释" data-thread-key="/blog/2014/09/27/log4j" data-url="index.html/blog/2014/09/27/log4j.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"5312914"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="hbase import export, willgo, Will.Quan">
+  <title>hbase import export - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/09/27/hbase-import-export.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?will_go8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;时间轴</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;阅读</a></li>
+    
+      <li><a href="/life/index.html"target="_blank"><i class="fa fa-eyedropper"></i>&nbsp;记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/will0815.github.io" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+    <div class="main">
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2014/09/27/hbase-import-export.html">hbase import export</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2014年09月27日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
+  </p>
+</header>
+<div class="post-main">
+<ol>
+  <li>
+    <p>导出HFlie
+使用org.apache.hadoop.hbase.mapreduce.Export类
+参数: MR配置参数 需导出的表 导出路径 时间戳版本（默认为1）时间戳起始结束时间 可加正则的RowFilter或PrefixFilter</p>
+
+    <pre><code> Export [-D &lt;property=value&gt;]* &lt;tablename&gt; &lt;outputdir&gt; [&lt;versions&gt; [&lt;starttime&gt; [&lt;endtime&gt;]] [^[regex pattern] or [Prefix] to filter]]
+ Note: -D properties will be applied to the conf used.
+ For example:
+ -D mapred.output.compress=true
+ -D mapred.output.compression.codec=org.apache.hadoop.io.compress.GzipCodec
+ -D mapred.output.compression.type=BLOCK
+ Additionally, the following SCAN properties can be specified
+ to control/limit what is exported..
+ -D hbase.mapreduce.scan.column.family=&lt;familyName&gt;
+ -D hbase.mapreduce.include.deleted.rows=true
+ For performance consider the following properties:
+ -Dhbase.client.scanner.caching=100
+ -Dmapred.map.tasks.speculative.execution=false
+ -Dmapred.reduce.tasks.speculative.execution=false
+ 可直接运行也可以利用Driver如：
+ hbase org.apache.hadoop.hbase.mapreduce.Driver export &lt;hbase 表&gt; &lt;导出路径&gt;
+ hbase org.apache.hadoop.hbase.mapreduce.Driver export my_table /tmp/my_file
+</code></pre>
+  </li>
+  <li>
+    <p>导入HFlie</p>
+
+    <pre><code> 使用org.apache.hadoop.hbase.mapreduce.Import类
+ 参数: Import [options] &lt;tablename&gt; &lt;inputdir&gt;
+ By default Import will load data directly into HBase. To instead generate
+ HFiles of data to prepare for a bulk data load, pass the option:
+ -Dimport.bulk.output=/path/for/output
+ For performance consider the following options:
+ -Dmapred.map.tasks.speculative.execution=false
+ -Dmapred.reduce.tasks.speculative.execution=false
+ 可直接运行也可以用Driver如：
+ hbase org.apache.hadoop.hbase.mapreduce.Driver import &lt;hbase 表&gt; &lt;导入路径&gt;
+ hbase org.apache.hadoop.hbase.mapreduce.Driver import my_table /tmp/my_file
+</code></pre>
+  </li>
+  <li>
+    <p>批量导入HFlie（导入到已存在的表）</p>
+
+    <pre><code> org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles
+ 参数: completebulkload &lt;/path/to/hfileoutputformat-output&gt; &lt;tablename&gt;
+ 可直接运行也可以用Driver如：
+ hbase org.apache.hadoop.hbase.mapreduce.Driver completebulkload &lt;导入路径&gt; &lt;hbase 表&gt;
+ hbase org.apache.hadoop.hbase.mapreduce.Driver completebulkload /tmp/my_file my_table
+</code></pre>
+
+    <p>后面几个工具MR没有测试：</p>
+  </li>
+  <li>
+    <p>导入TSV文件</p>
+
+    <pre><code> org.apache.hadoop.hbase.mapreduce.ImportTsv类
+ 参数: importtsv -Dimporttsv.columns=a,b,c &lt;tablename&gt; &lt;inputdir&gt;
+ 必须用-Dimporttsv.columns指定导入的TSV文件的列，列与列之间用逗号隔开
+ 一个列对应hbase的columnfamily，
+
+ By default importtsv will load data directly into HBase. To instead generate
+ HFiles of data to prepare for a bulk data load, pass the option:
+ -Dimporttsv.bulk.output=/path/for/output
+ Note: if you do not use this option, then the target table must already exist in HBase
+ Other options that may be specified with -D include:
+ -Dimporttsv.skip.bad.lines=false - fail if encountering an invalid line
+ '-Dimporttsv.separator=|' - eg separate on pipes instead of tabs
+ -Dimporttsv.timestamp=currentTimeAsLong - use the specified timestamp for the import
+ -Dimporttsv.mapper.class=my.Mapper - A user-defined Mapper to use instead of org.apache.hadoop.hbase.mapreduce.TsvImporterMapper
+ For performance consider the following options:
+ -Dmapred.map.tasks.speculative.execution=false
+ -Dmapred.reduce.tasks.speculative.execution=false
+ 可直接运行也可以用Driver如：
+ hbase org.apache.hadoop.hbase.mapreduce.Driver importtsv Dimporttsv.columns=name,age &lt;hbase 表&gt; &lt;导入路径&gt;
+ hbase org.apache.hadoop.hbase.mapreduce.Driver importtsv Dimporttsv.columns=name,age my_table /tmp/my_tsvFile
+</code></pre>
+  </li>
+  <li>
+    <p>表复制</p>
+
+    <p>org.apache.hadoop.hbase.mapreduce.CopyTable类</p>
+
+    <p>Usage: CopyTable [general options] [–starttime=X] [–endtime=Y] [–new.name=NEW] [–peer.adr=ADR] <tablename>
+ Options:
+ rs.class hbase.regionserver.class of the peer cluster
+ specify if different from current cluster
+ rs.impl hbase.regionserver.impl of the peer cluster
+ starttime beginning of the time range (unixtime in millis)
+ without endtime means from starttime to forever
+ endtime end of the time range. Ignored if no starttime specified.
+ versions number of cell versions to copy
+ new.name new table's name
+ peer.adr Address of the peer cluster given in the format
+ hbase.zookeeer.quorum:hbase.zookeeper.client.port:zookeeper.znode.parent
+ families comma-separated list of families to copy
+ To copy from cf1 to cf2, give sourceCfName:destCfName.
+ To keep the same name, just give "cfName"
+ all.cells also copy delete markers and deleted cells
+ Args:
+ tablename Name of the table to copy
+ Examples:
+ To copy 'TestTable' to a cluster that uses replication for a 1 hour window:
+ $ bin/hbase org.apache.hadoop.hbase.mapreduce.CopyTable
+ --starttime=1265875194289
+ --endtime=1265878794289
+ --peer.adr=server1,server2,server3:2181:/hbase
+ --families=myOldCf:myNewCf,cf2,cf3 TestTable
+ For performance consider the following general options:
+ -Dhbase.client.scanner.caching=100
+ -Dmapred.map.tasks.speculative.execution=false</tablename></p>
+  </li>
+  <li>
+    <p>Compares the data</p>
+
+    <p>org.apache.hadoop.hbase.mapreduce.replication.VerifyReplication类
+ Usage: verifyrep [–starttime=X] [–stoptime=Y] [–families=A] <peerid> <tablename>
+ Options:
+ starttime beginning of the time range
+ without endtime means from starttime to forever
+ stoptime end of the time range
+ families comma-separated list of families to copy
+ Args:
+ peerid Id of the peer used for verification, must match the one given for replication
+ tablename Name of the table to verify
+ Examples:
+ To verify the data replicated from TestTable for a 1 hour window with peer #5
+ $ bin/hbase org.apache.hadoop.hbase.mapreduce.replication.VerifyReplication --starttime=1265875194289 --stoptime=1265878794289 5 TestTable</tablename></peerid></p>
+  </li>
+</ol>
+
+<p>实例记录：</p>
+
+<ol>
+  <li>Export Production HBase table as following:
+hbase org.apache.hadoop.hbase.mapreduce.Export ‘mytable’ /hbase_bak/mytable</li>
+  <li>
+    <p>Copy HDFS files to local:
+hadoop fs -copyToLocal /hbase_bak/mytable /home/user/hbase_bak/mytable</p>
+  </li>
+  <li>
+    <p>Copy the local files from production to production extension server</p>
+  </li>
+  <li>Copy local file to HDFS:
+hadoop fs -copyFromLocal /home/user/hbase_bak/mytable /hbase_bak/mytable</li>
+  <li>Create table in production extension
+create ‘mytable’, {NAME=&gt;’log’, VERSION=&gt; 1}</li>
+  <li>Import the HDFS files into HBase:
+hbase org.apache.hadoop.hbase.mapreduce.Import ‘mytable’ /hbase_bak/mytable</li>
+  <li>Verify the result:
+hbase shell
+count mytable</li>
+</ol>
+
+<p>Find both the row count are same in production and production extension.</p>
+
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2014/09/27/eclipse-hadoop-job.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;eclipse hadoop job</a>
+
+
+<a class="pagination-item older" href="/blog/2014/09/27/hbase-time.html">hbase time集群时间不一致无法启动&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="hbase import export" data-thread-key="/blog/2014/09/27/hbase-import-export" data-url="index.html/blog/2014/09/27/hbase-import-export.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"5312914"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

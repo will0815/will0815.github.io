@@ -1,0 +1,962 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="Will go, Just do it., willgo, 最好的从未错过, Will.Quan">
+  <title>Will go, Just do it.</title>
+  <link rel="canonical" href="index.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?will_go8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;时间轴</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;阅读</a></li>
+    
+      <li><a href="/life/index.html"target="_blank"><i class="fa fa-eyedropper"></i>&nbsp;记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/will0815.github.io" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+    <div class="main">
+    
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/HBASE.html">HBASE性能优化方法总结</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>From :http://www.blogjava.net/paulwong/archive/2012/11/29/392232.html</p>
+
+<ol>
+  <li>
+    <p>表的设计</p>
+
+    <p>1.1 Pre-Creating Regions</p>
+
+    <p>默认情况下，在创建HBase表的时候会自动创建一个region分区，当导入数据的时候，所有的HBase客户端都向这一个region写数据，直到这个region足够大了才进行切分。一种可以加快批量写入速度的方法是通过预先创建一些空的regions，这样当数据写入HBase时，会按照region分区情况，在集群内做数据的负载均衡。</p>
+
+    <p>有关预分区，详情参见：Table Creation: Pre-Creating Regions，下面是一个例子：
+     publicstaticbooleancreateTable(HBaseAdmin admin, HTableDescriptor table,byte[][] splits)
+     throwsIOException {
+       try{
+         admin.createTable(table, splits);
+         returntrue;
+       }catch(TableExistsException e) {
+         logger.info(“table “+ table.getNameAsString() +” already exists”);
+         // the table already exists
+         returnfalse;
+       }
+     }</p>
+
+    <pre><code> publicstaticbyte[][] getHexSplits(String startKey, String endKey,intnumRegions) {
+   byte[][] splits =newbyte[numRegions-1][];
+   BigInteger lowestKey =newBigInteger(startKey,16);
+   BigInteger highestKey =newBigInteger(endKey,16);
+   BigInteger range = highestKey.subtract(lowestKey);
+   BigInteger regionIncrement = range.divide(BigInteger.valueOf(numRegions));
+   lowestKey = lowestKey.add(regionIncrement);
+   for(inti=0; i &lt; numRegions-1;i++) {
+     BigInteger key = lowestKey.add(regionIncrement.multiply(BigInteger.valueOf(i)));
+     byte[] b = String.format("%016x", key).getBytes();
+     splits[i] = b;
+   }
+   returnsplits;
+ }
+</code></pre>
+
+    <p>1.2 Row Key</p>
+
+    <p>HBase中row key用来检索表中的记录，支持以下三种方式：</p>
+
+    <p>通过单个row key访问：即按照某个row key键值进行get操作；
+ 通过row key的range进行scan：即通过设置startRowKey和endRowKey，在这个范围内进行扫描；
+ 全表扫描：即直接扫描整张表中所有行记录。
+ 在HBase中，row key可以是任意字符串，最大长度64KB，实际应用中一般为10~100bytes，存为byte[]字节数组，一般设计成定长的。</p>
+
+    <p>row key是按照字典序存储，因此，设计row key时，要充分利用这个排序特点，将经常一起读取的数据存储到一块，将最近可能会被访问的数据放在一块。</p>
+
+    <p>举个例子：如果最近写入HBase表中的数据是最可能被访问的，可以考虑将时间戳作为row key的一部分，由于是字典序排序，所以可以使用Long.MAX_VALUE – timestamp作为row key，这样能保证新写入的数据在读取时可以被快速命中。</p>
+
+    <p>1.3 Column Family</p>
+
+    <p>不要在一张表里定义太多的column family。目前Hbase并不能很好的处理超过2~3个column family的表。因为某个column family在flush的时候，它邻近的column family也会因关联效应被触发flush，最终导致系统产生更多的I/O。感兴趣的同学可以对自己的HBase集群进行实际测试，从得到的测试结果数据验证一下。</p>
+
+    <p>1.4 In Memory</p>
+
+    <p>创建表的时候，可以通过HColumnDescriptor.setInMemory(true)将表放到RegionServer的缓存中，保证在读取的时候被cache命中。</p>
+
+    <p>1.5 Max Version</p>
+
+    <p>创建表的时候，可以通过HColumnDescriptor.setMaxVersions(int maxVersions)设置表中数据的最大版本，如果只需要保存最新版本的数据，那么可以设置setMaxVersions(1)。</p>
+
+    <p>1.6 Time To Live</p>
+
+    <p>创建表的时候，可以通过HColumnDescriptor.setTimeToLive(int timeToLive)设置表中数据的存储生命期，过期数据将自动被删除，例如如果只需要存储最近两天的数据，那么可以设置setTimeToLive(2 * 24 * 60 * 60)。</p>
+
+    <p>1.7 Compact &amp; Split</p>
+
+    <p>在HBase中，数据在更新时首先写入WAL 日志(HLog)和内存(MemStore)中，MemStore中的数据是排序的，当MemStore累计到一定阈值时，就会创建一个新的MemStore，并且将老的MemStore添加到flush队列，由单独的线程flush到磁盘上，成为一个StoreFile。于此同时， 系统会在zookeeper中记录一个redo point，表示这个时刻之前的变更已经持久化了(minor compact)。</p>
+
+    <p>StoreFile是只读的，一旦创建后就不可以再修改。因此Hbase的更新其实是不断追加的操作。当一个Store中的StoreFile达到一定的阈值后，就会进行一次合并(major compact)，将对同一个key的修改合并到一起，形成一个大的StoreFile，当StoreFile的大小达到一定阈值后，又会对 StoreFile进行分割(split)，等分为两个StoreFile。</p>
+
+    <p>由于对表的更新是不断追加的，处理读请求时，需要访问Store中全部的StoreFile和MemStore，将它们按照row key进行合并，由于StoreFile和MemStore都是经过排序的，并且StoreFile带有内存中索引，通常合并过程还是比较快的。</p>
+
+    <p>实际应用中，可以考虑必要时手动进行major compact，将同一个row key的修改进行合并形成一个大的StoreFile。同时，可以将StoreFile设置大些，减少split的发生。</p>
+  </li>
+  <li>
+    <p>写表操作</p>
+
+    <p>2.1 多HTable并发写
+ 创建多个HTable客户端用于写操作，提高写数据的吞吐量，一个例子：</p>
+
+    <pre><code> staticfinalConfiguration conf = HBaseConfiguration.create();
+ staticfinalString table_log_name = “user_log”;
+ wTableLog =newHTable[tableN];
+ for(inti =0; i &lt; tableN; i++) {
+ wTableLog[i] =newHTable(conf, table_log_name);
+ wTableLog[i].setWriteBufferSize(5*1024*1024);//5MB
+ wTableLog[i].setAutoFlush(false);
+ }  2.2 HTable参数设置
+</code></pre>
+
+    <p>2.2.1 Auto Flush</p>
+
+    <p>通过调用HTable.setAutoFlush(false)方法可以将HTable写客户端的自动flush关闭，这样可以批量写入数据到HBase，而不是有一条put就执行一次更新，只有当put填满客户端写缓存时，才实际向HBase服务端发起写请求。默认情况下auto flush是开启的。</p>
+
+    <p>2.2.2 Write Buffer</p>
+
+    <p>通过调用HTable.setWriteBufferSize(writeBufferSize)方法可以设置HTable客户端的写buffer大小，如果新设置的buffer小于当前写buffer中的数据时，buffer将会被flush到服务端。其中，writeBufferSize的单位是byte字节数，可以根据实际写入数据量的多少来设置该值。</p>
+
+    <p>.2.3 WAL Flag</p>
+
+    <p>在HBae中，客户端向集群中的RegionServer提交数据时（Put/Delete操作），首先会先写WAL（Write Ahead Log）日志（即HLog，一个RegionServer上的所有Region共享一个HLog），只有当WAL日志写成功后，再接着写MemStore，然后客户端被通知提交数据成功；如果写WAL日志失败，客户端则被通知提交失败。这样做的好处是可以做到RegionServer宕机后的数据恢复。</p>
+
+    <p>因此，对于相对不太重要的数据，可以在Put/Delete操作时，通过调用Put.setWriteToWAL(false)或Delete.setWriteToWAL(false)函数，放弃写WAL日志，从而提高数据写入的性能。</p>
+
+    <p>值得注意的是：谨慎选择关闭WAL日志，因为这样的话，一旦RegionServer宕机，Put/Delete的数据将会无法根据WAL日志进行恢复。</p>
+
+    <p>2.3 批量写</p>
+
+    <p>通过调用HTable.put(Put)方法可以将一个指定的row key记录写入HBase，同样HBase提供了另一个方法：通过调用HTable.put(List<put>)方法可以将指定的row key列表，批量写入多行记录，这样做的好处是批量执行，只需要一次网络I/O开销，这对于对数据实时性要求高，网络传输RTT高的情景下可能带来明显的性能提升。</put></p>
+
+    <p>2.4 多线程并发写</p>
+
+    <p>在客户端开启多个HTable写线程，每个写线程负责一个HTable对象的flush操作，这样结合定时flush和写buffer（writeBufferSize），可以既保证在数据量小的时候，数据可以在较短时间内被flush（如1秒内），同时又保证在数据量大的时候，写buffer一满就及时进行flush。下面给个具体的例子：</p>
+
+    <pre><code> for(inti =0; i &lt; threadN; i++) {
+ Thread th =newThread() {
+ publicvoidrun() {
+ while(true) {
+ try{
+ sleep(1000);//1 second
+ }catch(InterruptedException e) {
+ e.printStackTrace();
+ }
+ synchronized(wTableLog[i]) {
+ try{
+ wTableLog[i].flushCommits();
+ }catch(IOException e) {
+ e.printStackTrace();
+ }
+ }
+ }
+ }
+ };
+ th.setDaemon(true);
+ th.start();
+ }
+</code></pre>
+  </li>
+  <li>
+    <p>读表操作</p>
+
+    <p>3.1 多HTable并发读
+ 创建多个HTable客户端用于读操作，提高读数据的吞吐量，一个例子：</p>
+
+    <p>staticfinalConfiguration conf = HBaseConfiguration.create();
+ staticfinalString table_log_name = “user_log”;
+ rTableLog =newHTable[tableN];
+ for(inti =0; i &lt; tableN; i++) {
+ rTableLog[i] =newHTable(conf, table_log_name);
+ rTableLog[i].setScannerCaching(50);
+ }</p>
+
+    <p>3.2 HTable参数设置
+ 3.2.1 Scanner Caching
+ 通过调用HTable.setScannerCaching(int scannerCaching)可以设置HBase scanner一次从服务端抓取的数据条数，默认情况下一次一条。通过将此值设置成一个合理的值，可以减少scan过程中next()的时间开销，代价是scanner需要通过客户端的内存来维持这些被cache的行记录。</p>
+
+    <p>3.2.2 Scan Attribute Selection
+ scan时指定需要的Column Family，可以减少网络传输数据量，否则默认scan操作会返回整行所有Column Family的数据。</p>
+
+    <p>3.2.3 Close ResultScanner
+ 通过scan取完数据后，记得要关闭ResultScanner，否则RegionServer可能会出现问题（对应的Server资源无法释放）。</p>
+
+    <p>3.3 批量读
+ 通过调用HTable.get(Get)方法可以根据一个指定的row key获取一行记录，同样HBase提供了另一个方法：通过调用HTable.get(List)方法可以根据一个指定的row key列表，批量获取多行记录，这样做的好处是批量执行，只需要一次网络I/O开销，这对于对数据实时性要求高而且网络传输RTT高的情景下可能带来明显的性能提升。</p>
+
+    <p>3.4 多线程并发读
+ 在客户端开启多个HTable读线程，每个读线程负责通过HTable对象进行get操作。下面是一个多线程并发读取HBase，获取店铺一天内各分钟PV值的例子：</p>
+
+    <pre><code> publicclassDataReaderServer {
+ //获取店铺一天内各分钟PV值的入口函数
+ publicstaticConcurrentHashMap getUnitMinutePV(longuid,longstartStamp,longendStamp){
+ longmin = startStamp;
+ intcount = (int)((endStamp - startStamp) / (60*1000));
+ List lst =newArrayList();
+ for(inti =0; i &lt;= count; i++) {
+ min = startStamp + i *60*1000;
+ lst.add(uid +"_"+ min);
+ }
+ returnparallelBatchMinutePV(lst);
+ }
+ //多线程并发查询，获取分钟PV值
+ privatestaticConcurrentHashMap parallelBatchMinutePV(List lstKeys){
+ ConcurrentHashMap hashRet =newConcurrentHashMap();
+ intparallel =3;
+ List&lt;List&lt;String&gt;&gt; lstBatchKeys =null;
+ if(lstKeys.size() &lt; parallel ){
+ lstBatchKeys =newArrayList&lt;List&lt;String&gt;&gt;(1);
+ lstBatchKeys.add(lstKeys);
+ }
+ else{
+ lstBatchKeys =newArrayList&lt;List&lt;String&gt;&gt;(parallel);
+ for(inti =0; i &lt; parallel; i++ ){
+ List lst =newArrayList();
+ lstBatchKeys.add(lst);
+ }
+	
+ for(inti =0; i &lt; lstKeys.size() ; i ++ ){
+ lstBatchKeys.get(i%parallel).add(lstKeys.get(i));
+ }
+ }
+	
+ List &gt;&gt; futures =newArrayList &gt;&gt;(5);
+	
+ ThreadFactoryBuilder builder =newThreadFactoryBuilder();
+ builder.setNameFormat("ParallelBatchQuery");
+ ThreadFactory factory = builder.build();
+ ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(lstBatchKeys.size(), factory);
+	
+ for(List keys : lstBatchKeys){
+ Callable&lt; ConcurrentHashMap &gt; callable =newBatchMinutePVCallable(keys);
+ FutureTask&lt; ConcurrentHashMap &gt; future = (FutureTask&lt; ConcurrentHashMap &gt;) executor.submit(callable);
+ futures.add(future);
+ }
+ executor.shutdown();
+	
+ // Wait for all the tasks to finish
+ try{
+ booleanstillRunning = !executor.awaitTermination(
+ 5000000, TimeUnit.MILLISECONDS);
+ if(stillRunning) {
+ try{
+ executor.shutdownNow();
+ }catch(Exception e) {
+ // TODO Auto-generated catch block
+ e.printStackTrace();
+ }
+ }
+ }catch(InterruptedException e) {
+ try{
+ Thread.currentThread().interrupt();
+ }catch(Exception e1) {
+ // TODO Auto-generated catch block
+ e1.printStackTrace();
+ }
+ }
+	
+ // Look for any exception
+ for(Future f : futures) {
+ try{
+ if(f.get() !=null)
+ {
+ hashRet.putAll((ConcurrentHashMap)f.get());
+ }
+ }catch(InterruptedException e) {
+ try{
+ Thread.currentThread().interrupt();
+ }catch(Exception e1) {
+ // TODO Auto-generated catch block
+ e1.printStackTrace();
+ }
+ }catch(ExecutionException e) {
+ e.printStackTrace();
+ }
+ }
+	
+ returnhashRet;
+ }
+ //一个线程批量查询，获取分钟PV值
+ protectedstaticConcurrentHashMap getBatchMinutePV(List lstKeys){
+ ConcurrentHashMap hashRet =null;
+ List lstGet =newArrayList();
+ String[] splitValue =null;
+ for(String s : lstKeys) {
+ splitValue = s.split("_");
+ longuid = Long.parseLong(splitValue[0]);
+ longmin = Long.parseLong(splitValue[1]);
+ byte[] key =newbyte[16];
+ Bytes.putLong(key,0, uid);
+ Bytes.putLong(key,8, min);
+ Get g =newGet(key);
+ g.addFamily(fp);
+ lstGet.add(g);
+ }
+ Result[] res =null;
+ try{
+ res = tableMinutePV[rand.nextInt(tableN)].get(lstGet);
+ }catch(IOException e1) {
+ logger.error("tableMinutePV exception, e="+ e1.getStackTrace());
+ }
+	
+ if(res !=null&amp;&amp; res.length &gt;0) {
+ hashRet =newConcurrentHashMap(res.length);
+ for(Result re : res) {
+ if(re !=null&amp;&amp; !re.isEmpty()) {
+ try{
+ byte[] key = re.getRow();
+ byte[] value = re.getValue(fp, cp);
+ if(key !=null&amp;&amp; value !=null) {
+ hashRet.put(String.valueOf(Bytes.toLong(key,
+ Bytes.SIZEOF_LONG)), String.valueOf(Bytes
+ .toLong(value)));
+ }
+ }catch(Exception e2) {
+ logger.error(e2.getStackTrace());
+ }
+ }
+ }
+ }
+	
+ returnhashRet;
+ }
+ }
+ //调用接口类，实现Callable接口
+ classBatchMinutePVCallableimplementsCallable&gt;{
+ privateList keys;
+	
+ publicBatchMinutePVCallable(List lstKeys ) {
+ this.keys = lstKeys;
+ }
+	
+ publicConcurrentHashMap call()throwsException {
+ returnDataReadServer.getBatchMinutePV(keys);
+ }
+ }
+</code></pre>
+
+    <p>3.5 缓存查询结果
+ 对于频繁查询HBase的应用场景，可以考虑在应用程序中做缓存，当有新的查询请求时，首先在缓存中查找，如果存在则直接返回，不再查询HBase；否则对HBase发起读请求查询，然后在应用程序中将查询结果缓存起来。至于缓存的替换策略，可以考虑LRU等常用的策略。</p>
+
+    <p>3.6 Blockcache
+ HBase上Regionserver的内存分为两个部分，一部分作为Memstore，主要用来写；另外一部分作为BlockCache，主要用于读。</p>
+
+    <p>写请求会先写入Memstore，Regionserver会给每个region提供一个Memstore，当Memstore满64MB以后，会启动 flush刷新到磁盘。当Memstore的总大小超过限制时（heapsize * hbase.regionserver.global.memstore.upperLimit * 0.9），会强行启动flush进程，从最大的Memstore开始flush直到低于限制。</p>
+
+    <p>读请求先到Memstore中查数据，查不到就到BlockCache中查，再查不到就会到磁盘上读，并把读的结果放入BlockCache。由于BlockCache采用的是LRU策略，因此BlockCache达到上限(heapsize * hfile.block.cache.size * 0.85)后，会启动淘汰机制，淘汰掉最老的一批数据。</p>
+
+    <p>一个Regionserver上有一个BlockCache和N个Memstore，它们的大小之和不能大于等于heapsize * 0.8，否则HBase不能启动。默认BlockCache为0.2，而Memstore为0.4。对于注重读响应时间的系统，可以将 BlockCache设大些，比如设置BlockCache=0.4，Memstore=0.39，以加大缓存的命中率。</p>
+
+    <p>有关BlockCache机制，请参考这里：HBase的Block cache，HBase的blockcache机制，hbase中的缓存的计算与使用。</p>
+  </li>
+</ol>
+
+<p>4.数据计算</p>
+
+<pre><code>4.1 服务端计算
+Coprocessor运行于HBase RegionServer服务端，各个Regions保持对与其相关的coprocessor实现类的引用，coprocessor类可以通过RegionServer上classpath中的本地jar或HDFS的classloader进行加载。
+
+目前，已提供有几种coprocessor：
+
+Coprocessor：提供对于region管理的钩子，例如region的open/close/split/flush/compact等；
+RegionObserver：提供用于从客户端监控表相关操作的钩子，例如表的get/put/scan/delete等；
+Endpoint：提供可以在region上执行任意函数的命令触发器。一个使用例子是RegionServer端的列聚合，这里有代码示例。
+以上只是有关coprocessor的一些基本介绍，本人没有对其实际使用的经验，对它的可用性和性能数据不得而知。感兴趣的同学可以尝试一下，欢迎讨论。
+
+4.2 写端计算
+
+4.2.1 计数
+
+HBase本身可以看作是一个可以水平扩展的Key-Value存储系统，但是其本身的计算能力有限（Coprocessor可以提供一定的服务端计算），因此，使用HBase时，往往需要从写端或者读端进行计算，然后将最终的计算结果返回给调用者。举两个简单的例子：
+
+PV计算：通过在HBase写端内存中，累加计数，维护PV值的更新，同时为了做到持久化，定期（如1秒）将PV计算结果同步到HBase中，这样查询端最多会有1秒钟的延迟，能看到秒级延迟的PV结果。
+分钟PV计算：与上面提到的PV计算方法相结合，每分钟将当前的累计PV值，按照rowkey + minute作为新的rowkey写入HBase中，然后在查询端通过scan得到当天各个分钟以前的累计PV值，然后顺次将前后两分钟的累计PV值相减，就得到了当前一分钟内的PV值，从而最终也就得到当天各个分钟内的PV值。
+
+4.2.2 去重
+
+对于UV的计算，就是个去重计算的例子。分两种情况：
+
+如果内存可以容纳，那么可以在Hash表中维护所有已经存在的UV标识，每当新来一个标识时，通过快速查找Hash确定是否是一个新的UV，若是则UV值加1，否则UV值不变。另外，为了做到持久化或提供给查询接口使用，可以定期（如1秒）将UV计算结果同步到HBase中。
+如果内存不能容纳，可以考虑采用Bloom Filter来实现，从而尽可能的减少内存的占用情况。除了UV的计算外，判断URL是否存在也是个典型的应用场景。
+
+4.3 读端计算
+
+如果对于响应时间要求比较苛刻的情况（如单次http请求要在毫秒级时间内返回），个人觉得读端不宜做过多复杂的计算逻辑，尽量做到读端功能单一化：即从HBase RegionServer读到数据（scan或get方式）后，按照数据格式进行简单的拼接，直接返回给前端使用。当然，如果对于响应时间要求一般，或者业务特点需要，也可以在读端进行一些计算逻辑。
+</code></pre>
+
+<p>5.总结</p>
+
+<p>作为一个Key-Value存储系统，HBase并不是万能的，它有自己独特的地方。因此，基于它来做应用时，我们往往需要从多方面进行优化改进（表设计、读表操作、写表操作、数据计算等），有时甚至还需要从系统级对HBase进行配置调优，更甚至可以对HBase本身进行优化。这属于不同的层次范畴。</p>
+
+<p>总之，概括来讲，对系统进行优化时，首先定位到影响你的程序运行性能的瓶颈之处，然后有的放矢进行针对行的优化。如果优化后满足你的期望，那么就可以停止优化；否则继续寻找新的瓶颈之处，开始新的优化，直到满足性能要求。</p>
+
+      <div class="readall"><a href="/blog/2014/09/27/HBASE.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/EJob.html">EJob</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <pre><code>import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
+
+public class EJob {
+
+// To declare global field
+private static List&lt;URL&gt; classPath = new ArrayList&lt;URL&gt;();
+
+// To declare method
+public static File createTempJar(String root) throws IOException {
+if (!new File(root).exists()) {
+return null;
+}
+Manifest manifest = new Manifest();
+manifest.getMainAttributes().putValue("Manifest-Version", "1.0");
+final File jarFile = File.createTempFile("EJob-", ".jar", new File(
+System.getProperty("java.io.tmpdir")));
+
+Runtime.getRuntime().addShutdownHook(new Thread() {
+public void run() {
+jarFile.delete();
+}
+});
+
+JarOutputStream out = new JarOutputStream(
+new FileOutputStream(jarFile), manifest);
+createTempJarInner(out, new File(root), "");
+out.flush();
+out.close();
+return jarFile;
+}
+
+private static void createTempJarInner(JarOutputStream out, File f,
+String base) throws IOException {
+if (f.isDirectory()) {
+File[] fl = f.listFiles();
+if (base.length() &gt; 0) {
+base = base + "/";
+}
+for (int i = 0; i &lt; fl.length; i++) {
+createTempJarInner(out, fl[i], base + fl[i].getName());
+}
+} else {
+out.putNextEntry(new JarEntry(base));
+FileInputStream in = new FileInputStream(f);
+byte[] buffer = new byte[1024];
+int n = in.read(buffer);
+while (n != -1) {
+out.write(buffer, 0, n);
+n = in.read(buffer);
+}
+in.close();
+}
+}
+
+public static ClassLoader getClassLoader() {
+ClassLoader parent = Thread.currentThread().getContextClassLoader();
+if (parent == null) {
+parent = EJob.class.getClassLoader();
+}
+if (parent == null) {
+parent = ClassLoader.getSystemClassLoader();
+}
+return new URLClassLoader(classPath.toArray(new URL[0]), parent);
+}
+
+public static void addClasspath(String component) {
+
+if ((component != null) &amp;&amp; (component.length() &gt; 0)) {
+try {
+File f = new File(component);
+
+if (f.exists()) {
+URL key = f.getCanonicalFile().toURL();
+if (!classPath.contains(key)) {
+classPath.add(key);
+}
+}
+} catch (IOException e) {
+}
+}
+}
+}
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/EJob.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Dflinux.html">Df命令linux系统以磁盘</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>Df命令是linux系统以磁盘分区为单位查看文件系统，可以加上参数查看磁盘剩余空间信息，命令格式：</p>
+
+<p>df -hl</p>
+
+<p>显示格式为：</p>
+
+<p>文件系统              容量 已用 可用 已用% 挂载点　</p>
+
+<p>Filesystem            Size Used Avail Use% Mounted on</p>
+
+<p>/dev/hda2              45G   19G   24G 44% /</p>
+
+<p>/dev/hda1             494M   19M 450M   4% /boot</p>
+
+<p>/dev/hda6             4.9G 2.2G 2.5G 47% /home</p>
+
+<p>/dev/hda5             9.7G 2.9G 6.4G 31% /opt</p>
+
+<p>none                 1009M     0 1009M   0% /dev/shm</p>
+
+<p>/dev/hda3             9.7G 7.2G 2.1G 78% /usr/local</p>
+
+<p>/dev/hdb2              75G   75G     0 100% /</p>
+
+<p>/dev/hdb2              75G   75G     0 100% /</p>
+
+<p>以上面的输出为例，表示的意思为：</p>
+
+<p>HD硬盘接口的第二个硬盘（b），第二个分区（2），容量是75G，用了75G，可用是0，因此利用率是100%， 被挂载到根分区目录上（/）。</p>
+
+<p>下面是相关命令的解释：</p>
+
+<p>df -hl 查看磁盘剩余空间</p>
+
+<p>df -h 查看每个根路径的分区大小</p>
+
+<p>du -sh [目录名] 返回该目录的大小</p>
+
+<p>du -sm [文件夹] 返回该文件夹总M数</p>
+
+<p>更多功能可以输入一下命令查看：</p>
+
+<p>df –help</p>
+
+<p>du –help</p>
+
+<p>查看硬盘的分区 #sudo fdisk -l</p>
+
+<p>查看IDE硬盘信息 #sudo hdparm -i /dev/hda</p>
+
+<p>查看STAT硬盘信息 #sudo hdparm -I /dev/sda 或 #sudo apt-get install blktool #sudo blktool /dev/sda id</p>
+
+<p>查看硬盘剩余空间 #df -h #df -H</p>
+
+<p>查看目录占用空间 #du -hs 目录名</p>
+
+<p>优盘没法卸载 #sync fuser -km /media/usbdisk</p>
+
+<p>http://blog.163.com/yes___ican/blog/static/18506244920124394617622/</p>
+
+      <div class="readall"><a href="/blog/2014/09/27/Dflinux.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/DB-Index.html">DB Index</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#db">db</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>理解索引结构     </p>
+
+<p>实际上，可以把索引理解为一种特殊的目录。微软的SQL SERVER提供了两种索引：聚集索引（clustered index，也称聚类索引、簇集索引）和非聚集索引（nonclustered index，也称非聚类索引、非簇集索引）。下面，我们举例来说明一下聚集索引和非聚集索引的区别： </p>
+
+<p>其实，我们的汉语字典的正文本身就是一个聚集索引。比如，我们要查”安”字，就会很自然地翻开字典的前几页，因为”安”的拼音是”an”，而按照拼音排序汉字的字典是以英文字母”a”开头并以”z”结尾的，那么”安”字就自然地排在字典的前部。如果您翻完了所有以”a”开头的部分仍然找不到这个字，那么就说明您的字典中没有这个字；同样的，如果查”张”字，那您也会将您的字典翻到最后部分，因为”张”的拼音是”zhang”。也就是说，字典的正文部分本身就是一个目录，您不需要再去查其他目录来找到您需要找的内容。  </p>
+
+<p>我们把这种正文内容本身就是一种按照一定规则排列的目录称为”聚集索引”。      </p>
+
+<p>如果您认识某个字，您可以快速地从自动中查到这个字。但您也可能会遇到您不认识的字，不知道它的发音，这时候，您就不能按照刚才的方法找到您要查的字，而需要去根据”偏旁部首”查到您要找的字，然后根据这个字后的页码直接翻到某页来找到您要找的字。但您结合”部首目录”和”检字表”而查到的字的排序并不是真正的正文的排序方法，比如您查”张”字，我们可以看到在查部首之后的检字表中”张”的页码是672页，检字表中”张”的上面是”驰”字，但页码却是63页，”张”的下面是”弩”字，页面是390页。很显然，这些字并不是真正的分别位于”张”字的上下方，现在您看到的连续的”驰、张、弩”三字实际上就是他们在非聚集索引中的排序，是字典正文中的字在非聚集索引中的映射。我们可以通过这种方式来找到您所需要的字，但它需要两个过程，先找到目录中的结果，然后再翻到您所需要的页码。 </p>
+
+<p>我们把这种目录纯粹是目录，正文纯粹是正文的排序方式称为”非聚集索引”。 </p>
+
+<p>何时使用聚集索引或非聚集索引    <br />
+下面的表总结了何时使用聚集索引或非聚集索引（很重要）。   </p>
+
+<pre><code>	动作描述        使用聚集索引 使用非聚集索引     
+	列经常被分组排序      应        应     
+	返回某范围内的数据          应      不应        
+	一个或极少不同值           不应     不应     
+	小数目的不同值                应     不应     
+	大数目的不同值              不应    应     
+	频繁更新的列                 不应   应     
+	外键列                  应 应     
+	主键列               应   应     
+	频繁修改索引列       不应      应        
+</code></pre>
+
+<p>几种常见的MySQL索引类型。</p>
+
+<ol>
+  <li>
+    <p>普通型索引
+ 这是最基本的索引类型，而且它没有唯一性之类的限制。普通索引可以通过以下几种方式创建： </p>
+  </li>
+  <li>创建索引，例如CREATE INDEX 索引的名字 ON tablename (列名1，列名2,…); </li>
+  <li>修改表，例如ALTER TABLE tablename ADD INDEX 索引的名字 (列名1，列名2,…); </li>
+  <li>创建表的时候指定索引，例如CREATE TABLE tablename ( […], INDEX 索引的名字 (列名1，列名
+2,…) );</li>
+  <li>
+    <p>唯一索引
+   这种索引和前面的“普通索引”基本相同，但有一个区别：索引列的所有值都只能出现一次，即必须唯一。唯一性索引可以用以下几种方式创建： </p>
+  </li>
+  <li>创建索引，例如CREATE UNIQUE INDEX 索引的名字 ON tablename (列的列表); </li>
+  <li>修改表，例如ALTER TABLE tablename ADD UNIQUE 索引的名字 (列的列表); </li>
+  <li>
+    <p>创建表的时候指定索引，例如CREATE TABLE tablename ( […], UNIQUE 索引的名字 (列的列
+     表) );</p>
+  </li>
+  <li>
+    <p>主键</p>
+
+    <p>主键是一种唯一性索引，但它必须指定为“PRIMARY KEY”。如果你曾经用过AUTO_INCREMENT类型的列，你可能已经熟悉主键之类的概念了。主键一般在创建表的时候指定，例如“CREATE TABLE tablename ( […], PRIMARY KEY (列的列表) ); ”。但是，我们也可以通过修改表的方式加入主键，例如“ALTER TABLE tablename ADD PRIMARY KEY (列的列表); ”。每个表只能有一个主键。 （主键相当于聚合索引，是查找最快的索引）</p>
+  </li>
+  <li>
+    <p>单列索引和多列索引</p>
+
+    <p>索引可以是单列索引，也可以是多列索引。
+ 1. 单列索引就是常用的一个列字段的索引，常见的索引。
+ 2. 多列索引就是含有多个列字段的索引</p>
+
+    <pre><code> 	 alter table student add index sy(name,age，score);
+ 	 索引sy就为多列索引，多列索引在以下几中情况下才能有效：
+ 	 select * from student where name='jia' and age&gt;='12' //where条件中含有索引的首列字段和
+		   第二个字段
+ 	 select * from student where name='jia' //where条件中只含有首列字段
+ 	 select * from student where name='jia' and score&lt;60//where条件中含有首列字段和第三个字
+		  段
+		 总结：多列索引只有在where条件中含有索引中的首列字段时才有效
+</code></pre>
+  </li>
+  <li>
+    <p>选择索引列</p>
+
+    <p>应该怎样选择索引列，首先要看查询条件，一般将查询条件中的列作为索引</p>
+  </li>
+</ol>
+
+<p><strong>联合索引使用结论:</strong></p>
+
+<ol>
+  <li>查询条件中出现联合索引第一列,或者全部,则能利用联合索引.</li>
+  <li>条件列中只要条件相连在一起,以本文例子来说就是:
+last_name=’1′ and first_name=’1′与first_name=’1′ and last_name=’1′
+,无论前后,都会利用上联合索引.</li>
+  <li>查询条件中没有出现联合索引的第一列,而出现联合索引的第二列,或者第三列,都不会利用联合索引查询.</li>
+</ol>
+
+<p><strong>单一列索引的应用结论:</strong></p>
+
+<p>只要条件列中出现索引列,无论在什么位置,都能利用索引查询.</p>
+
+<p><strong>两者的共同点:</strong></p>
+
+<ol>
+  <li>要想利用索引,都要符合SARG标准.</li>
+  <li>都是为了提高查询速度.</li>
+  <li>都需要额外的系统开销,磁盘空间.</li>
+</ol>
+
+<p>补充说明: stmtText信息来产生,在查询语句前面加上:SET STATISTICS PROFILE on.可以通过运行它,来观察你的查询是否合理,这样才能真正做到优化.</p>
+
+<p><strong>主旨:讨论什么情况下能利用上索引.</strong></p>
+
+<p>索引:创建索引可以根据查询业务的不同分为两种:单一列的索引,联合索引. 顾名思义,单一列索引就是指在表的某一列上创建索引,联合索引是在多个列上联合创建索引.</p>
+
+<p>优缺点比较:</p>
+
+<ol>
+  <li>索引所占用空间:单一列索引相对要小.</li>
+  <li>索引创建时间:单一列索引相对短.</li>
+  <li>索引对insert,update,delete的影响程序:单一列索引要相对低.</li>
+  <li>在多条件查询时,联合索引效率要高.</li>
+</ol>
+
+<p>索引的使用范围:单一列索引可以出现在where 条件中的任何位置,而联合索引需要按一定的顺序来写. </p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/DB-Index.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/AMD--CMD.html">AMD & CMD</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#不懂">不懂</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>http://blog.csdn.net/dojotoolkit/article/details/7820321</p>
+
+<p><strong>AMD</strong></p>
+
+<p>随着web应用不断发展和对JavaScript依赖的进一步加深，
+出现了使用模块（Modules）来组织代码和依赖性。模块使得我们创建明确清晰的组件和接口，
+这些组件和接口能够很容易的加载并连接到其依赖组件。 AMD模块系统提供了使用JavaScript模块来构建Web应用的完美方式，
+并且这种方式具有形式简单，异步加载和广泛采用的特点。</p>
+
+<p>异步模块定义（AMD）格式是一套API，它用于定义可重用的并能在多种框架使用的模块。
+开发AMD是为了提供一种定义模块的方式，这种方式可以使用原生的浏览器脚本元素机制来实现模块的异步加载。
+AMD API由2009年Dojo 社区的讨论中产生，然后移动到讨论CommonJS如何更好的为浏览器适应CommonJS模块格式（被NodeJS使用）。
+CommonJS已经发展成为单独的一个标准并有其专门的社区。AMD已经广泛普及，形成了众多模块加载实现并被广泛使用。在SitePen公司，
+我们广泛的使用Dojo的AMD机制工作，为其提供支持，并积极的建设这一机制。</p>
+
+<p>CMD Common Module Definition</p>
+
+<p>在CMD规范里面，一个模块就是一个Javascript文件</p>
+
+<pre><code>define(factory); define是全局函数，来定义模块 仅接收一个factory参数，可以是函数，对象，字符串等类型
+</code></pre>
+
+<ol>
+  <li>
+    <p>factory为对象、字符串等非函数类型时候，表示模块的接口是该对象、字符串等值
+Js代码</p>
+
+    <pre><code> define({
+ "foo":"bar"
+ }); 通过字符串定义模版模块 Js代码
+
+ define('I am a template.My name is .');
+</code></pre>
+  </li>
+  <li>
+    <p>factory为函数时候，表示模块的构造方法。
+执行该方法，可以得到模块向外提供的接口。默认3个参数：require 、 exports 、 module
+Js代码</p>
+
+    <pre><code> define(function(require,exports,module){
+ //...
+ });
+ require --------- 是一个方法，用来获取其他模块提供的接口。 Js代码
+</code></pre>
+
+    <p>define(function(require){
+ var a = require(‘./a’);
+ a.doSomething;
+ });
+require接受模块标识作为唯一参数，模块标识书写需要遵循一些规范。</p>
+
+    <p>require.async
+———- 可以用来异步加载模块，并在加载完成后执行指定的回调。
+Js代码</p>
+
+    <pre><code> define(function(require,exports,module){
+ //异步加载b
+ require.async('./b',function(b){
+ b.doSomething;
+ });
+ //异步加载多个模块
+ require.async(['./c','./d'],function(c,d){
+ //
+ ........
+ })
+ });
+ require.resolve --------- 使用模块系统内部的路径解析机制来返回模块的路径。该函数不会加载模块，只返回解析后的绝对路径。 Js代码
+</code></pre>
+
+    <p>define(function(require,exports){
+ console.log(require.resolve(‘./b’));
+ //../b.js
+ });
+ require.cache
+———- 可以查看模块系统加载过的所有模块。
+某些情况下，需要重新加载某个模块，可以得到该模块的url，然后通过delete require.cache[url] 来将其信息删除。
+exports
+——– 是一个对象，用来向外提供模块接口。
+Js代码</p>
+
+    <pre><code> define(function(require,exports){
+ exports.foo = "bar";
+ exports.doSomething = function(){
+ ...............
+ }
+ }); 除了给exports对象增加成员，还可以以return的方式直接向外提供接口。 Js代码
+
+ define(function(require,exports,module){
+ return {
+ fool: "bar",
+ doSomething:function(){
+ .............
+ }
+ };
+ }); 当然如果只是返回一个对象，可以直接： Js代码
+
+ define({
+ foo: "bar",
+ doSomething:function(){}
+ });
+</code></pre>
+  </li>
+</ol>
+
+<p>注释：在factory里面给exports重新赋值是没有意义的，因为exports仅仅是module.exports的一个引用，直接给exports重新赋值并不会修改module.exports的值。
+错误的例子：</p>
+
+<p>Js代码</p>
+
+<pre><code>	define(function(require,exports,module){
+	exports = {
+	foo: "bar",
+	doSomething:function(){}
+	}
+	}); 正确的应该是：
+</code></pre>
+
+<p>Js代码</p>
+
+<pre><code>	define(function(require,exports,module){
+	module.exports = {
+	foo: "bar",
+	doSomething:function(){}
+	}
+	}); module module 是一个对象，存储了与当前模块关联的一些属性和方法。 module.id ---------- 模块标识 Js代码
+
+	define(function(require,exports,module){
+	console.log(require(module.id) === exports); // true
+	});
+	module.uri
+	------------ 根据模块系统的路径解析规则得到的模块绝对路径
+	module.dependencies
+	------------ 是一个数组，标识当前模块的依赖列表
+	module.parent
+	------------ 指向初始化调用当前模块的模块。可以得到模块初始化的callstack
+	module.factory
+	------------ 指向define(factory)中的factory参数
+	module.status
+	------------ 当前模块的状态，是一个数值
+	module.exports ------------ 当前模块对外提供的接口 传给factory构造方法的exports参数是module.exports对象的一个引用。 比如当模块的接口是某一个类的实例时候，需要通过module.exports来实现 Js代码
+
+	define(function(require,exports,module){
+	console.log(module.exports === exports); // true
+	module.exports = new SomeClass();
+	console.log(module.exports === exports); //false
+	});
+	module.require 在module环境中运行require，一般用于插件开发
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/AMD--CMD.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="pagination">
+  
+  
+  <a class="pagination-item newer" href="/page/6"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;上一页</a>
+  
+    
+  
+  <span class="pagination-item older">下一页&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></span>
+  
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

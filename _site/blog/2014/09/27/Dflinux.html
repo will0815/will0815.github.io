@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta name="description" content="Will go, Just do it.">
   <meta name="author" content="Will.Quan">
-  <meta name="keywords" content="Java class loader, willgo, Will.Quan">
-  <title>Java class loader - willgo</title>
-  <link rel="canonical" href="index.html/blog/2014/09/27/Java-class-loader.html">
+  <meta name="keywords" content="Df命令linux系统以磁盘, willgo, Will.Quan">
+  <title>Df命令linux系统以磁盘 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/09/27/Dflinux.html">
   <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="/res/css/public.css">
@@ -58,45 +58,75 @@
 </div>
     <div class="main">
     <header class="post-header">
-  <h1 class="post-title"><a href="/blog/2014/09/27/Java-class-loader.html">Java class loader</a></h2>
+  <h1 class="post-title"><a href="/blog/2014/09/27/Dflinux.html">Df命令linux系统以磁盘</a></h2>
   <p class="post-meta">
     <i class="fa fa-calendar"></i>
     2014年09月27日
     <i class="space"></i>
     <i class="fa fa-tags"></i>
-    <a class="post-category" href="/page/category.html#java">java</a>	
+    <a class="post-category" href="/page/category.html#linux">linux</a>	
   </p>
 </header>
 <div class="post-main">
-<p><strong>java classloader 结构：</strong></p>
+<p>Df命令是linux系统以磁盘分区为单位查看文件系统，可以加上参数查看磁盘剩余空间信息，命令格式：</p>
 
-<ol>
-  <li>Bootstrap classloader(启动类加载器)
-主要负责jdk_home/lib目录下的核心API或-Xbootclasspath选项指定的jar包的装入工作</li>
-  <li>Extension Classloader(扩展类加载器)
-负责jdk_home/lib/ext目录下的jar包或者-Djava.ext.dirs指定目录下的jar包装入工作
-3.System classloader(系统类加载器)
-负责Java -classpath/-Djava.class.path所指定的类与jar包的装入</li>
-  <li>User Custom classloader（用户自定义类加载器（java.lang.ClassLoader的子类））
-以上每一个classloader都会维护一份自己的名称空间，同一个名称空间不能出现两个同名的类。
-为了实现Java安全沙箱模型顶层的类加载器安全机制，Java默认采用 双亲委派的加载链 结构</li>
-</ol>
+<p>df -hl</p>
 
-<p>在jvm启动时就会构建bootstrap classloader 负责Java平台核心库</p>
+<p>显示格式为：</p>
 
-<p><strong>每个ClassLoader加载Class的过程是：</strong></p>
+<p>文件系统              容量 已用 可用 已用% 挂载点　</p>
 
-<ol>
-  <li>检测此Class是否载入过（即在cache中是否有此Class），如果有到8,如果没有到2</li>
-  <li>如果parent classloader不存在（没有parent，那parent一定是bootstrap classloader了），到4</li>
-  <li>请求parent classloader载入，如果成功到8，不成功到5</li>
-  <li>请求jvm从bootstrap classloader中载入，如果成功到8</li>
-  <li>寻找Class文件（从与此classloader相关的类路径中寻找）。如果找不到则到7.</li>
-  <li>从文件中载入Class，到8.</li>
-  <li>抛出ClassNotFoundException.</li>
-  <li>返回Class.</li>
-</ol>
+<p>Filesystem            Size Used Avail Use% Mounted on</p>
 
+<p>/dev/hda2              45G   19G   24G 44% /</p>
+
+<p>/dev/hda1             494M   19M 450M   4% /boot</p>
+
+<p>/dev/hda6             4.9G 2.2G 2.5G 47% /home</p>
+
+<p>/dev/hda5             9.7G 2.9G 6.4G 31% /opt</p>
+
+<p>none                 1009M     0 1009M   0% /dev/shm</p>
+
+<p>/dev/hda3             9.7G 7.2G 2.1G 78% /usr/local</p>
+
+<p>/dev/hdb2              75G   75G     0 100% /</p>
+
+<p>/dev/hdb2              75G   75G     0 100% /</p>
+
+<p>以上面的输出为例，表示的意思为：</p>
+
+<p>HD硬盘接口的第二个硬盘（b），第二个分区（2），容量是75G，用了75G，可用是0，因此利用率是100%， 被挂载到根分区目录上（/）。</p>
+
+<p>下面是相关命令的解释：</p>
+
+<p>df -hl 查看磁盘剩余空间</p>
+
+<p>df -h 查看每个根路径的分区大小</p>
+
+<p>du -sh [目录名] 返回该目录的大小</p>
+
+<p>du -sm [文件夹] 返回该文件夹总M数</p>
+
+<p>更多功能可以输入一下命令查看：</p>
+
+<p>df –help</p>
+
+<p>du –help</p>
+
+<p>查看硬盘的分区 #sudo fdisk -l</p>
+
+<p>查看IDE硬盘信息 #sudo hdparm -i /dev/hda</p>
+
+<p>查看STAT硬盘信息 #sudo hdparm -I /dev/sda 或 #sudo apt-get install blktool #sudo blktool /dev/sda id</p>
+
+<p>查看硬盘剩余空间 #df -h #df -H</p>
+
+<p>查看目录占用空间 #du -hs 目录名</p>
+
+<p>优盘没法卸载 #sync fuser -km /media/usbdisk</p>
+
+<p>http://blog.163.com/yes___ican/blog/static/18506244920124394617622/</p>
 
 </div>
 <div class="share">
@@ -109,14 +139,14 @@
 </div>
 <div class="pagination">
 
-<a class="pagination-item newer" href="/blog/2014/09/27/Java-Serialization.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Java Serialization</a>
+<a class="pagination-item newer" href="/blog/2014/09/27/DB-Index.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;DB Index</a>
 
 
-<a class="pagination-item older" href="/blog/2014/09/27/Linux-SSH-.html">Linux SSH 登录&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+<a class="pagination-item older" href="/blog/2014/09/27/EJob.html">EJob&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
 
 </div>
 <div class="comments">
-  <div class="ds-thread" data-title="Java class loader" data-thread-key="/blog/2014/09/27/Java-class-loader" data-url="index.html/blog/2014/09/27/Java-class-loader.html"></div>
+  <div class="ds-thread" data-title="Df命令linux系统以磁盘" data-thread-key="/blog/2014/09/27/Dflinux" data-url="index.html/blog/2014/09/27/Dflinux.html"></div>
   <script type="text/javascript">var duoshuoQuery = {short_name:"5312914"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
 </div>
     <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>

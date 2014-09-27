@@ -1,0 +1,317 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="Mysql outputformat简单实现, willgo, Will.Quan">
+  <title>Mysql outputformat简单实现 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/09/27/Mysql-outputformat.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?will_go8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;时间轴</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;阅读</a></li>
+    
+      <li><a href="/life/index.html"target="_blank"><i class="fa fa-eyedropper"></i>&nbsp;记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/will0815.github.io" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+    <div class="main">
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2014/09/27/Mysql-outputformat.html">Mysql outputformat简单实现</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2014年09月27日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
+  </p>
+</header>
+<div class="post-main">
+<p>================================OutputFormat=========</p>
+
+<pre><code>import java.io.IOException;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.List;
+
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.OutputCommitter;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+import com.augmentum.rob.input.Person;
+
+public class MySqlOutputFormat extends OutputFormat&lt;NullWritable, Person&gt; {
+
+@Override
+public RecordWriter&lt;NullWritable, Person&gt; getRecordWriter(
+TaskAttemptContext context) throws IOException,
+InterruptedException {
+MysqlRecordWriter mysqlRecordWriter = null;
+try {
+String connString = "jdbc:mysql://172.20.29.29:3306/MapReduceInputTest";
+Class.forName("com.mysql.jdbc.Driver");
+Connection connection = java.sql.DriverManager.getConnection(
+connString + "?useUnicode=true&amp;characterEncoding=utf8",
+"admin", "admin");
+Statement statement = connection.createStatement();
+mysqlRecordWriter = new MysqlRecordWriter(connection, statement);
+
+} catch (Exception ex) {
+throw new IOException(ex.getMessage());
+}
+
+return mysqlRecordWriter;
+}
+
+@Override
+public void checkOutputSpecs(JobContext context) throws IOException,
+InterruptedException {
+// TODO Auto-generated method stub
+// 判断输出表是否设置
+
+// 判断输出表是否存在
+
+}
+
+@Override
+public OutputCommitter getOutputCommitter(TaskAttemptContext context)
+throws IOException, InterruptedException {
+return new FileOutputCommitter(
+FileOutputFormat.getOutputPath(context),
+context);
+}
+
+}
+</code></pre>
+
+<p>==========================RecordWriter=====================</p>
+
+<pre><code>import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.util.StringUtils;
+
+import com.augmentum.rob.input.Person;
+public class MysqlRecordWriter extends RecordWriter&lt;NullWritable, Person&gt;{
+
+private Connection connection;
+private Statement statement;
+private static final Log LOG = LogFactory.getLog(MysqlRecordWriter.class);
+
+public MysqlRecordWriter() throws SQLException {}
+
+public MysqlRecordWriter(Connection connection, Statement statement) throws SQLException {
+this.connection = connection;
+this.statement = statement;
+this.connection.setAutoCommit(false);
+}
+
+public Connection getConnection() {
+return connection;
+}
+
+public Statement getStatement() {
+return statement;
+}
+
+@Override
+public void write(NullWritable key, Person person) throws IOException, InterruptedException {
+String sql = "INSERT person2(name, age) VALUES('"+person.getName()+"', "+person.getAge()+")";
+//可以根据key和value情况写多条INSERT SQL
+// List&lt;String&gt; sqlList = buildInsertSql();
+try {
+// if (sqlList != null &amp;&amp; sqlList.size() &gt; 0) {
+// for (String sql : sqlList) {
+// statement.addBatch(sql);
+// }
+// }
+statement.addBatch(sql);
+} catch (SQLException e) {
+e.printStackTrace();
+}
+}
+
+// //更具逻辑具体实现插入sql。
+// public abstract List&lt;String&gt; buildInsertSql();
+
+@Override
+public void close(TaskAttemptContext context) throws IOException, InterruptedException {
+try {
+statement.executeBatch();
+connection.commit();
+} catch (SQLException e) {
+try {
+connection.rollback();
+}
+catch (SQLException ex) {
+LOG.warn(StringUtils.stringifyException(ex));
+}
+throw new IOException(e.getMessage());
+} finally {
+try {
+statement.close();
+connection.close();
+}
+catch (SQLException ex) {
+throw new IOException(ex.getMessage());
+}
+}
+
+}
+
+}
+</code></pre>
+
+<p>======================================================================================================</p>
+
+<pre><code>import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
+import org.apache.hadoop.mapreduce.lib.db.DBOutputFormat;
+import org.apache.hadoop.mapreduce.lib.db.DBWritable;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class RobOut&lt;K extends DBWritable, V&gt; extends DBOutputFormat&lt;K, V&gt;{
+
+/** {@inheritDoc} */
+public RecordWriter&lt;K, V&gt; getRecordWriter(TaskAttemptContext context)
+throws IOException {
+DBConfiguration dbConf = new DBConfiguration(context.getConfiguration());
+
+String tableName = dbConf.getOutputTableName();
+String[] fieldNames = dbConf.getOutputFieldNames();
+
+if(fieldNames == null) {
+fieldNames = new String[dbConf.getOutputFieldCount()];
+}
+
+try {
+Connection connection = dbConf.getConnection();
+PreparedStatement statement = null;
+
+statement = connection.prepareStatement(
+constructQuery(tableName, fieldNames));
+return new DBRecordWriter(connection, statement);
+} catch (Exception ex) {
+throw new IOException(ex.getMessage());
+}
+}
+
+/**
+* Set the {@link Path} of the output directory for the map-reduce job.
+*
+* @param job The job to modify
+* @param outputDir the {@link Path} of the output directory for
+* the map-reduce job.
+*/
+public static void setOutputTable(Job job, String tableName) {
+job.getConfiguration().set("output.mysql.table" + tableName, tableName);
+}
+
+/**
+* Get the {@link Path} to the output directory for the map-reduce job.
+*
+* @return the {@link Path} to the output directory for the map-reduce job.
+* @see FileOutputFormat#getWorkOutputPath(TaskInputOutputContext)
+*/
+public static Path getOutputTable(JobContext job) {
+String name = job.getConfiguration().get("mapred.output.table");
+return name == null ? null: new Path(name);
+}
+
+}
+</code></pre>
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2014/09/27/Mongodb-java.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Mongodb java简单操作</a>
+
+
+<a class="pagination-item older" href="/blog/2014/09/27/Nginx.html">初始Nginx&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="Mysql outputformat简单实现" data-thread-key="/blog/2014/09/27/Mysql-outputformat" data-url="index.html/blog/2014/09/27/Mysql-outputformat.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"5312914"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

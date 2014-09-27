@@ -5,655 +5,1080 @@
     <description>willgo - 最好的从未错过</description>
     <link>index.html</link>
     <atom:link href="index.html/page/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sat, 27 Sep 2014 16:09:07 +0800</pubDate>
-    <lastBuildDate>Sat, 27 Sep 2014 16:09:07 +0800</lastBuildDate>
+    <pubDate>Sat, 27 Sep 2014 18:21:06 +0800</pubDate>
+    <lastBuildDate>Sat, 27 Sep 2014 18:21:06 +0800</lastBuildDate>
     <generator>Will.Quan</generator>
     
       <item>
-        <title>arraylist&amp;arraylink</title>
-        <description>&lt;p&gt;&lt;strong&gt;区别&lt;/strong&gt;：&lt;/p&gt;
+        <title>ubuntu下eclipse菜单栏无法展开</title>
+        <description>&lt;p&gt;因为ubuntu13下菜单栏被代理到状态栏下，下载安装eclipse3.8，打开后菜单栏点击无法打开，网上认为可能是unity的bug&lt;/p&gt;
 
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;array 在定义的时候必须实例化(至少申明大小)，arraylist则可以只是申明&lt;/p&gt;
+&lt;p&gt;解决办法去掉eclipse的菜单代理：&lt;/p&gt;
 
-    &lt;ul&gt;
-      &lt;li&gt;int[] array = new array[3]&lt;/li&gt;
-      &lt;li&gt;int[] array = {1,2,3}&lt;/li&gt;
-      &lt;li&gt;ArrayList arrayList;&lt;/li&gt;
-      &lt;li&gt;int[] array;则不合法&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Array只能存储同构对象，ArrayList则可以存储异构对象，当然object[]和使用泛型的arraylist不适用此条。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;在CRL的托管方式不一样
- Array是连续存储，Arraylist则不一定是连续存储&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Array的大小是定义的时候指定的，Arraylist则可以动态扩容&lt;/li&gt;
-  &lt;li&gt;Array不能随意添加或删除其中的项，ArrayList则可以随意添加删除&lt;/li&gt;
-&lt;/ol&gt;
+&lt;p&gt;1.在终端中进入快捷方式的目录，然后运行&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;相似&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;sudo gedit eclipse.desktop&lt;/p&gt;
 
-&lt;ol&gt;
-  &lt;li&gt;都具有索引，即可以通过索引来直接添加和修改任意项&lt;/li&gt;
-  &lt;li&gt;所创建的对象都托管在堆中&lt;/li&gt;
-  &lt;li&gt;都能够对自身进行枚举（因为实现了IEnumerable接口）&lt;/li&gt;
-&lt;/ol&gt;
+&lt;p&gt;2.修改Exec的值，将原有的Exec=eclipse修改为：&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;ArrayList 源码摘要：&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Exec=env UBUNTU_MENUPROXY=0  eclipse&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;1. public class ArrayList&amp;lt;E&amp;gt; extends AbstractList&amp;lt;E&amp;gt;  
-2.         implements List&amp;lt;E&amp;gt;, RandomAccess, Cloneable, java.io.Serializable  
-3. {  
-4.     ......  
-5.   
-6.     /** 
-7.      * The array buffer into which the elements of the ArrayList are stored. 
-8.      * The capacity of the ArrayList is the length of this array buffer. 
-9.      */  
-10.     private transient E[] elementData;  
-11.   
-12.   
-13.     /** 
-14.      * The size of the ArrayList (the number of elements it contains). 
-15.      * 
-16.      * @serial 
-17.      */  
-18.     private int size;  
-19.    ......  
-20. }  
-21. 
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;——问题解决&lt;/p&gt;
 
-&lt;p&gt;底层两个属性一个object[] 一个size&lt;/p&gt;
+&lt;p&gt;顺带学习ubuntu 程序快捷方式&lt;/p&gt;
 
-&lt;ol&gt;
-  &lt;li&gt;ArrayList底层通过object[] 复制的方式（System.arraycopy()）来处理数组的增长&lt;/li&gt;
-  &lt;li&gt;当ArrayList 的容量不足时，其扩充容量的方式：先将容量扩充至当前容量的1.5倍，若还不够，则将容量扩充至当前需要的数量。&lt;/li&gt;
-&lt;/ol&gt;
+&lt;p&gt;进入 /usr/share/applications 目录下，这里有所有程序的图形化的快捷方式，
+你可以直接复制到桌面，即可&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;ArrayList与Vector的区别&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;搜索ls &lt;em&gt;程序名&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;1） vector 是线程同步 的，所以它也是线程安全 的，而arraylist 是线程异步 的，是不安全的 。如果不考虑到线程的安全因素，一般用 arraylist效率比较高。&lt;/p&gt;
+&lt;p&gt;方法一：进入 /usr/share/applications 目录下，这里有所有程序的图形化的快捷方式，你可以直接复制到桌面，即可&lt;/p&gt;
 
-&lt;p&gt;2） 如果集合中的元素的数目大于目前集合数组的长度时，vector 增长率为目前数组长度的100%, 而arraylist 增长率为目前数组长度的50% .如果在集合中使用数据量比较大的数据，用vector有一定的优势。&lt;/p&gt;
-
-&lt;p&gt;3） 如果查找一个指定位置的数据 ，vector和arraylist使用的时间是相同 的，都是O(1) ,这个时候使用vector和arraylist都可以。&lt;/p&gt;
-
-&lt;p&gt;而如果移动一个指定位置的数据花费的时间为O(n-i)n为总长度 ，这个时候就应该考虑到使用linklist ,因为它移动一个指定位置的数据所花费的时间为0(1),而查询一个指定位置的数据时花费的时间为0(i)。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;ArrayList和LinkedList的大致区别：&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;ArrayList是实现了基于动态数组的数据结构，LinkedList基于链表的数据结构。&lt;/li&gt;
-  &lt;li&gt;对于随机访问get和set，ArrayList觉得优于LinkedList，因为LinkedList要移动指针。&lt;/li&gt;
-  &lt;li&gt;对于新增和删除操作add和remove，LinedList比较占优势，因为ArrayList要移动数据。 &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;&lt;strong&gt;ArrayList和LinkedList在性能上各有优缺点，都有各自所适用的地方，总的说来可以描述如下：&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;对ArrayList和LinkedList而言，在列表末尾增加一个元素所花的开销都是固定的。对ArrayList而言，主要是在内部数组中增加一项，指向所添加的元素，偶尔可能会导致对数组重新进行分配；而对LinkedList而言，这个开销是统一的，分配一个内部Entry对象。&lt;/li&gt;
-  &lt;li&gt;在ArrayList的中间插入或删除一个元素意味着这个列表中剩余的元素都会被移动；而在LinkedList的中间插入或删除一个元素的开销是固定的。&lt;/li&gt;
-  &lt;li&gt;LinkedList不支持高效的随机元素访问。&lt;/li&gt;
-  &lt;li&gt;ArrayList的空间浪费主要体现在在list列表的结尾预留一定的容量空间，而LinkedList的空间花费则体现在它的每一个元素都需要消耗相当的空间&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;可以这样说：当操作是在一列数据的后面添加数据而不是在前面或中间,并且需要随机地访问其中的元素时,使用ArrayList会提供比较好的性能；当你的操作是在一列数据的前面或中间添加或删除数据,并且按照顺序访问其中的元素时,就应该使用LinkedList了。&lt;/p&gt;
+&lt;p&gt;方法二：使用命令的方式： gnome-desktop-item-edit&lt;/p&gt;
 
 </description>
         <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2014/09/27/arraylistarraylink.html</link>
-        <guid isPermaLink="true">index.html/blog/2014/09/27/arraylistarraylink.html</guid>
+        <link>index.html/blog/2014/09/27/ubuntueclipse.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/ubuntueclipse.html</guid>
         
-        <category>java</category>
+        <category>linux</category>
         
       </item>
     
       <item>
-        <title>Java class loader</title>
-        <description>&lt;p&gt;&lt;strong&gt;java classloader 结构：&lt;/strong&gt;&lt;/p&gt;
+        <title>sqoop安装</title>
+        <description>&lt;p&gt;1、下载sqoop压缩包，并解压&lt;/p&gt;
+
+&lt;p&gt;压缩包分别是：sqoop-1.2.0-CDH3B4.tar.gz，hadoop-0.20.2-CDH3B4.tar.gz， Mysql JDBC驱动包mysql-connector-java-5.1.10-bin.jar&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[root@node1 ~]# ll
+drwxr-xr-x 15 root  root      4096 Feb 22  2011 hadoop-0.20.2-CDH3B4
+-rw-r--r--  1 root  root    724225 Sep 15 06:46 mysql-connector-java-5.1.10-bin.jar
+drwxr-xr-x 11 root  root      4096 Feb 22  2011 sqoop-1.2.0-CDH3B4
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;2、将sqoop-1.2.0-CDH3B4拷贝到/home/hadoop目录下，并将Mysql JDBC驱动包和hadoop-0.20.2-CDH3B4下的hadoop-core-0.20.2-CDH3B4.jar至sqoop-1.2.0-CDH3B4/lib下，最后修改一下属主。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[root@node1 ~]# cp mysql-connector-java-5.1.10-bin.jar sqoop-1.2.0-CDH3B4/lib
+[root@node1 ~]# cp hadoop-0.20.2-CDH3B4/hadoop-core-0.20.2-CDH3B4.jar sqoop-1.2.0-CDH3B4/lib
+[root@node1 ~]# chown -R hadoop:hadoop sqoop-1.2.0-CDH3B4
+[root@node1 ~]# mv sqoop-1.2.0-CDH3B4 /home/hadoop
+[root@node1 ~]# ll /home/hadoop
+total 35748
+-rw-rw-r--  1 hadoop hadoop      343 Sep 15 05:13 derby.log
+drwxr-xr-x 13 hadoop hadoop     4096 Sep 14 16:16 hadoop-0.20.2
+drwxr-xr-x  9 hadoop hadoop     4096 Sep 14 20:21 hive-0.10.0
+-rw-r--r--  1 hadoop hadoop 36524032 Sep 14 20:20 hive-0.10.0.tar.gz
+drwxr-xr-x  8 hadoop hadoop     4096 Sep 25  2012 jdk1.7
+drwxr-xr-x 12 hadoop hadoop     4096 Sep 15 00:25 mahout-distribution-0.7
+drwxrwxr-x  5 hadoop hadoop     4096 Sep 15 05:13 metastore_db
+-rw-rw-r--  1 hadoop hadoop      406 Sep 14 16:02 scp.sh
+drwxr-xr-x 11 hadoop hadoop     4096 Feb 22  2011 sqoop-1.2.0-CDH3B4
+drwxrwxr-x  3 hadoop hadoop     4096 Sep 14 16:17 temp
+drwxrwxr-x  3 hadoop hadoop     4096 Sep 14 15:59 user
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;3、配置configure-sqoop，注释掉对于HBase和ZooKeeper的检查&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[root@node1 bin]# pwd
+/home/hadoop/sqoop-1.2.0-CDH3B4/bin
+[root@node1 bin]# vi configure-sqoop 
+
+#!/bin/bash
+#
+# Licensed to Cloudera, Inc. under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+.
+.
+.
+# Check: If we can&#39;t find our dependencies, give up here.
+if [ ! -d &quot;${HADOOP_HOME}&quot; ]; then
+  	echo &quot;Error: $HADOOP_HOME does not exist!&quot;
+  	echo &#39;Please set $HADOOP_HOME to the root of your Hadoop installation.&#39;
+  	exit 1
+fi
+#if [ ! -d &quot;${HBASE_HOME}&quot; ]; then
+#  echo &quot;Error: $HBASE_HOME does not exist!&quot;
+#  echo &#39;Please set $HBASE_HOME to the root of your HBase installation.&#39;
+#  exit 1
+#fi
+#if [ ! -d &quot;${ZOOKEEPER_HOME}&quot; ]; then
+#  echo &quot;Error: $ZOOKEEPER_HOME does not exist!&quot;
+#  echo &#39;Please set $ZOOKEEPER_HOME to the root of your ZooKeeper installation.&#39;
+#  exit 1
+#fi
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;4、修改/etc/profile和.bash_profile文件，添加Hadoop_Home,调整PATH
+	[hadoop@node1 ~]$ vi .bash_profile &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+
+# User specific environment and startup programs
+
+HADOOP_HOME=/home/hadoop/hadoop-0.20.2
+PATH=$HADOOP_HOME/bin:$PATH:$HOME/bin
+export HIVE_HOME=/home/hadoop/hive-0.10.0
+export MAHOUT_HOME=/home/hadoop/mahout-distribution-0.7
+export PATH HADOOP_HOME
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;三、测试Sqoop&lt;/p&gt;
 
 &lt;ol&gt;
-  &lt;li&gt;Bootstrap classloader(启动类加载器)
-主要负责jdk_home/lib目录下的核心API或-Xbootclasspath选项指定的jar包的装入工作&lt;/li&gt;
-  &lt;li&gt;Extension Classloader(扩展类加载器)
-负责jdk_home/lib/ext目录下的jar包或者-Djava.ext.dirs指定目录下的jar包装入工作
-3.System classloader(系统类加载器)
-负责Java -classpath/-Djava.class.path所指定的类与jar包的装入&lt;/li&gt;
-  &lt;li&gt;User Custom classloader（用户自定义类加载器（java.lang.ClassLoader的子类））
-以上每一个classloader都会维护一份自己的名称空间，同一个名称空间不能出现两个同名的类。
-为了实现Java安全沙箱模型顶层的类加载器安全机制，Java默认采用 双亲委派的加载链 结构&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;查看mysql中的数据库：&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; [hadoop@node1 bin]$ ./sqoop list-databases --connect jdbc:mysql://192.168.1.152:3306/ --username sqoop --password sqoop
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;将mysql的表导入到hive中：&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; [hadoop@node1 bin]$ ./sqoop import --connect jdbc:mysql://192.168.1.152:3306/sqoop --username sqoop --password sqoop --table test --hive-import -m 1
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
 &lt;/ol&gt;
-
-&lt;p&gt;在jvm启动时就会构建bootstrap classloader 负责Java平台核心库&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;每个ClassLoader加载Class的过程是：&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;检测此Class是否载入过（即在cache中是否有此Class），如果有到8,如果没有到2&lt;/li&gt;
-  &lt;li&gt;如果parent classloader不存在（没有parent，那parent一定是bootstrap classloader了），到4&lt;/li&gt;
-  &lt;li&gt;请求parent classloader载入，如果成功到8，不成功到5&lt;/li&gt;
-  &lt;li&gt;请求jvm从bootstrap classloader中载入，如果成功到8&lt;/li&gt;
-  &lt;li&gt;寻找Class文件（从与此classloader相关的类路径中寻找）。如果找不到则到7.&lt;/li&gt;
-  &lt;li&gt;从文件中载入Class，到8.&lt;/li&gt;
-  &lt;li&gt;抛出ClassNotFoundException.&lt;/li&gt;
-  &lt;li&gt;返回Class.&lt;/li&gt;
-&lt;/ol&gt;
-
 </description>
         <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2014/09/27/Java-class-loader.html</link>
-        <guid isPermaLink="true">index.html/blog/2014/09/27/Java-class-loader.html</guid>
+        <link>index.html/blog/2014/09/27/sqoop.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/sqoop.html</guid>
         
-        <category>java</category>
+        <category>hadoop</category>
         
       </item>
     
       <item>
-        <title>Java Serialization</title>
-        <description>&lt;p&gt;目的：&lt;/p&gt;
+        <title>sql frist day</title>
+        <description>&lt;p&gt;计算周月的第一天， 以星期天为一周的开始&lt;/p&gt;
 
-&lt;p&gt;保存对象的状态，并且可以把保存的对象状态再读取出来进行恢复。&lt;/p&gt;
-
-&lt;p&gt;场景：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;需要把内存中对象状态保存到一个文件中或者数据库中时&lt;/li&gt;
-  &lt;li&gt;需要用套接字在网络上传送对象时&lt;/li&gt;
-  &lt;li&gt;需要通过RMI传输对象时
-特点：&lt;/li&gt;
-  &lt;li&gt;序列化时 只对对象的状态进行保存 而不管对象的方法&lt;/li&gt;
-  &lt;li&gt;当一个父类实现序列化，子类自动实现序列化 无须显式实现Serializable借口&lt;/li&gt;
-  &lt;li&gt;当一个对象的实例变量引用其他对象，序列化该对象时也会把引用对象进行序列化&lt;/li&gt;
-  &lt;li&gt;并非所有对象都可以序列化：
-socket/thread&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Serialization 是一种将对象以一连串的字节描述的过程，deserialization 将这些字节重构成一个对象的过程。Java序列化API提供一种处理对象序列化的标准机制。&lt;/p&gt;
-
-&lt;h2 id=&quot;section&quot;&gt;进阶问题：&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;序列化ID的问题&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;serialVersionID即 序列化的版本号，是为了保证不同版本之间的兼容性。向前兼容以及向后兼容。
-两种生成方式：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;使用默认的1L&lt;/li&gt;
-  &lt;li&gt;根据类名 接口名 成员方法以及属性来生成&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;如果一个类实现了序列化 但没有显示的申明序列化版本号  在程序编译的时候会自动生成一个版本号。存储在文件中，如果类有改动版本号也会随之改变。 在反序列化的时候JVM会将文件中的ID与本地相应实体类的ID比较  两者一致才能够序列化成功。否则会抛InvalidClassException异常。&lt;/p&gt;
-
-&lt;p&gt;静态化变量的序列化&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;                    //初始时staticVar为5
-                    ObjectOutputStream out = new ObjectOutputStream(
-                                    new FileOutputStream(&quot;result.obj&quot;));
-                    out.writeObject(new Test());
-                    out.close();
-
-                    //序列化后修改为10
-                    Test.staticVar = 10;
-
-                    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
-                                    &quot;result.obj&quot;));
-                    Test t = (Test) oin.readObject();
-                    oin.close();
-                    //再读取，通过t.staticVar打印新的值
-                    System.out.println(t.staticVar); 以上代码的输出结果为10.。。因为序列化并不保存静态化变量。
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;父类的序列化&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;一个子类实现了Serializable接口  它的父类没有实现Serializable接口   序列化该子类对象然后反序列化输出父类定义的某变量的数值  该数值与序列化时的数值不同&lt;/p&gt;
-
-&lt;p&gt;在父类没有实现Serializable接口时  JVM将不会序列化父类对象  而一个Java对象的构造必须有父类对象 所以在反序列化时 只能调用父类的无参构造器作为默认的父对象  所以这是可以在父类的无参构造器中对变量进行初始化 否则父类变量都是默认的值&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Transient关键字&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Transient关键字的作用是控制变量的序列化，在变量申明前加上次关键字可以阻止该变量被序列化&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;序列化存储规则&lt;/strong&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt; ObjectOutputStream out = new ObjectOutputStream(
-                                    new FileOutputStream(&quot;result.obj&quot;));
-    Test test = new Test();
-    //试图将对象两次写入文件
-    out.writeObject(test);
-    out.flush();
-    System.out.println(new File(&quot;result.obj&quot;).length());
-    out.writeObject(test);
-    out.close();
-    System.out.println(new File(&quot;result.obj&quot;).length());
-
-    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
-                    &quot;result.obj&quot;));
-    //从文件依次读出两个文件
-    Test t1 = (Test) oin.readObject();
-    Test t2 = (Test) oin.readObject();
-    oin.close();
-    //判断两个引用是否指向同一个对象
-    System.out.println(t1 == t2);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;同一对象两次写入文件，打印出写入一次对象后的存储大小和写入两次后的存储大小，然后从文件中反序列化出两个对象，比较这两个对象是否为同一对象。一般的思维是，两次写入对象，文件大小会变为两倍的大小，反序列化时，由于从文件读取，生成了两个对象，判断相等时应该是输入 false 才对，最后却为TRUE。&lt;/p&gt;
-
-&lt;p&gt;因为：Java 序列化机制为了节省磁盘空间，具有特定的存储规则，当写入文件的为同一对象时，并不会再将对象的内容进行存储，而只是再次存储一份引用，上面增加的 5 字节的存储空间就是新增引用和一些控制信息的空间。反序列化时，恢复引用关系，使得清单 3 中的 t1 和 t2 指向唯一的对象，二者相等，输出 true。该存储规则极大的节省了存储空间。&lt;/p&gt;
-
-</description>
-        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2014/09/27/Java-Serialization.html</link>
-        <guid isPermaLink="true">index.html/blog/2014/09/27/Java-Serialization.html</guid>
-        
-        <category>java</category>
-        
-      </item>
-    
-      <item>
-        <title>Java File</title>
-        <description>&lt;p&gt;/**
- * @author Toby 通用工具类
- */
-public class Utils {&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;/**
- * @param args
- * @throws Exception
- * @throws IOException
- */
-public static void main(String[] args) throws IOException, Exception {
-    // TODO Auto-generated method stub
-    // File file = new File(&quot;D:/user/mms.xml&quot;);
-    // System.out.println(file.renameTo(new File(&quot;D:/user/mms5.xml&quot;)));
-
-    // 1
-    // compress(&quot;D:/user/test&quot;, &quot;D:/user/test.zip&quot;);
-
-    /*
-     * String fileName = &quot;D:/user/88.zip&quot;; try {
-     * System.out.println(encryptBASE64(readFileToBytes(fileName))); } catch
-     * (Exception e) { // TODO Auto-generated catch block
-     * e.printStackTrace(); }
-     */
-
-    /*
-     * String mi
-     * =&quot;UEsDBBQACAA&quot;;
-     * RandomAccessFile inOut = new RandomAccessFile(
-     * &quot;D:/user/sample.&quot;,&quot;rw&quot;); inOut.write(decryptBASE64(mi));
-     * inOut.close();
-     */
-
-    // System.out.println(new String(decryptBASE64(&quot;5rWL6K+V&quot;),&quot;utf-8&quot;));
-    // 2
-    // String xml =
-    // createXML(&quot;1828&quot;,&quot;qww&quot;,&quot;123456&quot;,&quot;10658103619033&quot;,&quot;15918542546&quot;,encryptBASE64(&quot;两款茶饮润肺护肤防过敏&quot;.getBytes()),encryptBASE64(readFileToBytes(&quot;D:/user/test.zip&quot;)));
-    // System.out.println(xml);
-    /*
-     * String xml = &quot;&amp;lt;?xml version=\&quot;1.0\&quot; encoding=\&quot;UTF-8\&quot;
-     * standalone=\&quot;yes\&quot;?&amp;gt;&amp;lt;TaskDataTransfer4ERsp
-     * xmlns=\&quot;http://www.aspirehld.com/iecp/TaskDataTransfer4ERsp\&quot;&amp;gt;&amp;lt;ResultCode&amp;gt;2000&amp;lt;/ResultCode&amp;gt;&amp;lt;TaskId&amp;gt;&amp;lt;/TaskId&amp;gt;&amp;lt;ResultMSG&amp;gt;没有获得IP鉴权!&amp;lt;/ResultMSG&amp;gt;&amp;lt;/TaskDataTransfer4ERsp&amp;gt;&quot;;
-     * 
-     * Document doc = DocumentHelper.parseText(xml); // 将字符串转为XML Element
-     * rootElt = doc.getRootElement(); // 获取根节点
-     * 
-     * String resultCode = rootElt.element(&quot;ResultCode&quot;).getTextTrim();
-     * String TaskId = rootElt.element(&quot;TaskId&quot;).getTextTrim(); String
-     * ResultMSG = rootElt.element(&quot;ResultMSG&quot;).getTextTrim();
-     * System.out.println(&quot; &quot;+resultCode+&quot; &quot;+TaskId+&quot; &quot;+ResultMSG);
-     */
-
-}
-
-/**
- * BASE64解密
- * 
- * @param key
- * @return
- * @throws Exception
- */
-public static byte[] decryptBASE64(String key) throws Exception {
-    return (new BASE64Decoder()).decodeBuffer(key);
-}
-
-/**
- * BASE64加密
- * 
- * @param key
- * @return
- * @throws Exception
- */
-public static String encryptBASE64(byte[] key) throws Exception {
-    return (new BASE64Encoder()).encodeBuffer(key);
-}
-
-/**
- * 获取路径下所有文件名
- * 
- * @param path
- * @return
- */
-public static String[] getFile(String path) {
-    File file = new File(path);
-    String[] name = file.list();
-    return name;
-}
-
-/**
- * 
- * @param sourceDirPath
- * @param targetDirPath
- * @throws IOException
- */
-public static void copyDir(String sourceDirPath, String targetDirPath) throws IOException {
-    // 创建目标文件夹
-    (new File(targetDirPath)).mkdirs();
-    // 获取源文件夹当前下的文件或目录
-    File[] file = (new File(sourceDirPath)).listFiles();
-    for (int i = 0; i &amp;lt; file.length; i++) {
-        if (file[i].isFile()) {
-            // 复制文件
-            String type = file[i].getName().substring(file[i].getName().lastIndexOf(&quot;.&quot;) + 1);
-
-            if (type.equalsIgnoreCase(&quot;txt&quot;))
-                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()), MTOServerConstants.CODE_UTF_8,
-                        MTOServerConstants.CODE_GBK);
-            else
-                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()));
-        }
-        if (file[i].isDirectory()) {
-            // 复制目录
-            String sourceDir = sourceDirPath + File.separator + file[i].getName();
-            String targetDir = targetDirPath + File.separator + file[i].getName();
-            FileUtil.copyDirectiory(sourceDir, targetDir);
-        }
-    }
-}
-
-/**
- * 读取文件中内容
- * 
- * @param path
- * @return
- * @throws IOException
- */
-public static String readFileToString(String path) throws IOException {
-    String resultStr = null;
-    FileInputStream fis = null;
-    try {
-        fis = new FileInputStream(path);
-        byte[] inBuf = new byte[2000];
-        int len = inBuf.length;
-        int off = 0;
-        int ret = 0;
-        while ((ret = fis.read(inBuf, off, len)) &amp;gt; 0) {
-            off += ret;
-            len -= ret;
-        }
-        resultStr = new String(new String(inBuf, 0, off, MTOServerConstants.CODE_GBK).getBytes());
-    } finally {
-        if (fis != null)
-            fis.close();
-    }
-    return resultStr;
-}
-
-/**
- * 文件转成字节数组
- * 
- * @param path
- * @return
- * @throws IOException
- */
-public static byte[] readFileToBytes(String path) throws IOException {
-    byte[] b = null;
-    InputStream is = null;
-    File f = new File(path);
-    try {
-        is = new FileInputStream(f);
-        b = new byte[(int) f.length()];
-        is.read(b);
-    } finally {
-        if (is != null)
-            is.close();
-    }
-    return b;
-}
-
-/**
- * 将byte写入文件中
- * 
- * @param fileByte
- * @param filePath
- * @throws IOException
- */
-public static void byteToFile(byte[] fileByte, String filePath) throws IOException {
-    OutputStream os = null;
-    try {
-        os = new FileOutputStream(new File(filePath));
-        os.write(fileByte);
-        os.flush();
-    } finally {
-        if (os != null)
-            os.close();
-    }
-}
-
-/**
- * 将目录文件打包成zip
- * 
- * @param srcPathName
- * @param zipFilePath
- * @return 成功打包true 失败false
- */
-public static boolean compress(String srcPathName, String zipFilePath) {
-    if (strIsNull(srcPathName) || strIsNull(zipFilePath))
-        return false;
-
-    File zipFile = new File(zipFilePath);
-    File srcdir = new File(srcPathName);
-    if (!srcdir.exists())
-        return false;
-    Project prj = new Project();
-    Zip zip = new Zip();
-    zip.setProject(prj);
-    zip.setDestFile(zipFile);
-    FileSet fileSet = new FileSet();
-    fileSet.setProject(prj);
-    fileSet.setDir(srcdir);
-    zip.addFileset(fileSet);
-    zip.execute();
-    return zipFile.exists();
-}
-
-/**
- * 判空字串
- * 
- * @param str
- * @return 为空true
- */
-public static boolean strIsNull(String str) {
-    return str == null || str.equals(&quot;&quot;);
-}
-
-/**
- * 折分数组
- * 
- * @param ary
- * @param subSize
- * @return
- */
-public static List&amp;lt;List&amp;lt;Object&amp;gt;&amp;gt; splitAry(Object[] ary, int subSize) {
-    int count = ary.length % subSize == 0 ? ary.length / subSize : ary.length / subSize + 1;
-
-    List&amp;lt;List&amp;lt;Object&amp;gt;&amp;gt; subAryList = new ArrayList&amp;lt;List&amp;lt;Object&amp;gt;&amp;gt;();
-
-    for (int i = 0; i &amp;lt; count; i++) {
-        int index = i * subSize;
-
-        List&amp;lt;Object&amp;gt; list = new ArrayList&amp;lt;Object&amp;gt;();
-        int j = 0;
-        while (j &amp;lt; subSize &amp;amp;&amp;amp; index &amp;lt; ary.length) {
-            list.add(ary[index++]);
-            j++;
-        }
-
-        subAryList.add(list);
-    }
-
-    return subAryList;
-}
-
-/**
- * @param mobile
- * @return
- */
-public static String ArrayToString(Object[] mobile) {
-    String destId = &quot;&quot;;
-    for (Object phone : mobile) {
-        destId += &quot; &quot; + (String) phone;
-    }
-    return destId.trim();
-} }
+&lt;pre&gt;&lt;code&gt;	SELECT LAST_DAY(&#39;2013-2-1&#39;);
+	SELECT concat(date_format(LAST_DAY(&#39;2013-02-01&#39;),&#39;%Y-%m-&#39;),&#39;01&#39;);
+	select DATE_SUB(&#39;2014-03-08&#39;,INTERVAL (WEEKDAY(&#39;2014-03-08&#39;)+1)%7 DAY);
+	select DATE_SUB(&#39;2014-03-08&#39;,INTERVAL ((WEEKDAY(&#39;2014-03-08&#39;)+1)%7)-6 DAY);
 &lt;/code&gt;&lt;/pre&gt;
 </description>
         <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2014/09/27/Java-File.html</link>
-        <guid isPermaLink="true">index.html/blog/2014/09/27/Java-File.html</guid>
-        
-        <category>java</category>
-        
-      </item>
-    
-      <item>
-        <title>DB Index</title>
-        <description>&lt;p&gt;理解索引结构     &lt;/p&gt;
-
-&lt;p&gt;实际上，可以把索引理解为一种特殊的目录。微软的SQL SERVER提供了两种索引：聚集索引（clustered index，也称聚类索引、簇集索引）和非聚集索引（nonclustered index，也称非聚类索引、非簇集索引）。下面，我们举例来说明一下聚集索引和非聚集索引的区别： &lt;/p&gt;
-
-&lt;p&gt;其实，我们的汉语字典的正文本身就是一个聚集索引。比如，我们要查”安”字，就会很自然地翻开字典的前几页，因为”安”的拼音是”an”，而按照拼音排序汉字的字典是以英文字母”a”开头并以”z”结尾的，那么”安”字就自然地排在字典的前部。如果您翻完了所有以”a”开头的部分仍然找不到这个字，那么就说明您的字典中没有这个字；同样的，如果查”张”字，那您也会将您的字典翻到最后部分，因为”张”的拼音是”zhang”。也就是说，字典的正文部分本身就是一个目录，您不需要再去查其他目录来找到您需要找的内容。  &lt;/p&gt;
-
-&lt;p&gt;我们把这种正文内容本身就是一种按照一定规则排列的目录称为”聚集索引”。      &lt;/p&gt;
-
-&lt;p&gt;如果您认识某个字，您可以快速地从自动中查到这个字。但您也可能会遇到您不认识的字，不知道它的发音，这时候，您就不能按照刚才的方法找到您要查的字，而需要去根据”偏旁部首”查到您要找的字，然后根据这个字后的页码直接翻到某页来找到您要找的字。但您结合”部首目录”和”检字表”而查到的字的排序并不是真正的正文的排序方法，比如您查”张”字，我们可以看到在查部首之后的检字表中”张”的页码是672页，检字表中”张”的上面是”驰”字，但页码却是63页，”张”的下面是”弩”字，页面是390页。很显然，这些字并不是真正的分别位于”张”字的上下方，现在您看到的连续的”驰、张、弩”三字实际上就是他们在非聚集索引中的排序，是字典正文中的字在非聚集索引中的映射。我们可以通过这种方式来找到您所需要的字，但它需要两个过程，先找到目录中的结果，然后再翻到您所需要的页码。 &lt;/p&gt;
-
-&lt;p&gt;我们把这种目录纯粹是目录，正文纯粹是正文的排序方式称为”非聚集索引”。 &lt;/p&gt;
-
-&lt;p&gt;何时使用聚集索引或非聚集索引    &lt;br /&gt;
-下面的表总结了何时使用聚集索引或非聚集索引（很重要）。   &lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;	动作描述        使用聚集索引 使用非聚集索引     
-	列经常被分组排序      应        应     
-	返回某范围内的数据          应      不应        
-	一个或极少不同值           不应     不应     
-	小数目的不同值                应     不应     
-	大数目的不同值              不应    应     
-	频繁更新的列                 不应   应     
-	外键列                  应 应     
-	主键列               应   应     
-	频繁修改索引列       不应      应        
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;几种常见的MySQL索引类型。&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;普通型索引
- 这是最基本的索引类型，而且它没有唯一性之类的限制。普通索引可以通过以下几种方式创建： &lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;创建索引，例如CREATE INDEX 索引的名字 ON tablename (列名1，列名2,…); &lt;/li&gt;
-  &lt;li&gt;修改表，例如ALTER TABLE tablename ADD INDEX 索引的名字 (列名1，列名2,…); &lt;/li&gt;
-  &lt;li&gt;创建表的时候指定索引，例如CREATE TABLE tablename ( […], INDEX 索引的名字 (列名1，列名
-2,…) );&lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;唯一索引
-   这种索引和前面的“普通索引”基本相同，但有一个区别：索引列的所有值都只能出现一次，即必须唯一。唯一性索引可以用以下几种方式创建： &lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;创建索引，例如CREATE UNIQUE INDEX 索引的名字 ON tablename (列的列表); &lt;/li&gt;
-  &lt;li&gt;修改表，例如ALTER TABLE tablename ADD UNIQUE 索引的名字 (列的列表); &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;创建表的时候指定索引，例如CREATE TABLE tablename ( […], UNIQUE 索引的名字 (列的列
-     表) );&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;主键&lt;/p&gt;
-
-    &lt;p&gt;主键是一种唯一性索引，但它必须指定为“PRIMARY KEY”。如果你曾经用过AUTO_INCREMENT类型的列，你可能已经熟悉主键之类的概念了。主键一般在创建表的时候指定，例如“CREATE TABLE tablename ( […], PRIMARY KEY (列的列表) ); ”。但是，我们也可以通过修改表的方式加入主键，例如“ALTER TABLE tablename ADD PRIMARY KEY (列的列表); ”。每个表只能有一个主键。 （主键相当于聚合索引，是查找最快的索引）&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;单列索引和多列索引&lt;/p&gt;
-
-    &lt;p&gt;索引可以是单列索引，也可以是多列索引。
- 1. 单列索引就是常用的一个列字段的索引，常见的索引。
- 2. 多列索引就是含有多个列字段的索引&lt;/p&gt;
-
-    &lt;pre&gt;&lt;code&gt; 	 alter table student add index sy(name,age，score);
- 	 索引sy就为多列索引，多列索引在以下几中情况下才能有效：
- 	 select * from student where name=&#39;jia&#39; and age&amp;gt;=&#39;12&#39; //where条件中含有索引的首列字段和
-		   第二个字段
- 	 select * from student where name=&#39;jia&#39; //where条件中只含有首列字段
- 	 select * from student where name=&#39;jia&#39; and score&amp;lt;60//where条件中含有首列字段和第三个字
-		  段
-		 总结：多列索引只有在where条件中含有索引中的首列字段时才有效
-&lt;/code&gt;&lt;/pre&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;选择索引列&lt;/p&gt;
-
-    &lt;p&gt;应该怎样选择索引列，首先要看查询条件，一般将查询条件中的列作为索引&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;&lt;strong&gt;联合索引使用结论:&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;查询条件中出现联合索引第一列,或者全部,则能利用联合索引.&lt;/li&gt;
-  &lt;li&gt;条件列中只要条件相连在一起,以本文例子来说就是:
-last_name=’1′ and first_name=’1′与first_name=’1′ and last_name=’1′
-,无论前后,都会利用上联合索引.&lt;/li&gt;
-  &lt;li&gt;查询条件中没有出现联合索引的第一列,而出现联合索引的第二列,或者第三列,都不会利用联合索引查询.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;&lt;strong&gt;单一列索引的应用结论:&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;只要条件列中出现索引列,无论在什么位置,都能利用索引查询.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;两者的共同点:&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;要想利用索引,都要符合SARG标准.&lt;/li&gt;
-  &lt;li&gt;都是为了提高查询速度.&lt;/li&gt;
-  &lt;li&gt;都需要额外的系统开销,磁盘空间.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;补充说明: stmtText信息来产生,在查询语句前面加上:SET STATISTICS PROFILE on.可以通过运行它,来观察你的查询是否合理,这样才能真正做到优化.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;主旨:讨论什么情况下能利用上索引.&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;索引:创建索引可以根据查询业务的不同分为两种:单一列的索引,联合索引. 顾名思义,单一列索引就是指在表的某一列上创建索引,联合索引是在多个列上联合创建索引.&lt;/p&gt;
-
-&lt;p&gt;优缺点比较:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;索引所占用空间:单一列索引相对要小.&lt;/li&gt;
-  &lt;li&gt;索引创建时间:单一列索引相对短.&lt;/li&gt;
-  &lt;li&gt;索引对insert,update,delete的影响程序:单一列索引要相对低.&lt;/li&gt;
-  &lt;li&gt;在多条件查询时,联合索引效率要高.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;索引的使用范围:单一列索引可以出现在where 条件中的任何位置,而联合索引需要按一定的顺序来写. &lt;/p&gt;
-
-</description>
-        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2014/09/27/DB-Index.html</link>
-        <guid isPermaLink="true">index.html/blog/2014/09/27/DB-Index.html</guid>
+        <link>index.html/blog/2014/09/27/sql-frist-day.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/sql-frist-day.html</guid>
         
         <category>db</category>
+        
+      </item>
+    
+      <item>
+        <title>mysql 性能session</title>
+        <description>&lt;p&gt;mysql&lt;/p&gt;
+
+&lt;p&gt;主从：&lt;/p&gt;
+
+&lt;p&gt;外围app只能从主数据库中写入数据，从从数据库中读取数据，从而减小数据压力&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;要实现主从数据库之间的同步复制，需要用户授权，使得从数据库可以登录主数据库并拷贝数据
+grant all “.” to rob@172.20.29.29 identified by “123”&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;bin_log 日志(保存数据库的增删改数据操作，用作数据恢复)&lt;/p&gt;
+
+    &lt;p&gt;A:binlog日志打开方法&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; 在my.cnf这个文件中加一行（Windows为my.ini）。
+
+     #vi /etc/my.cnf
+ [mysqld]
+ log-bin=mysqlbin-log #添加这一行就ok了=号后面的名字自己定义吧
+ 然后我们可以对数据库做简单的操作后到mysql数据文件所在的目录来看binlog文件。
+&lt;/code&gt;&lt;/pre&gt;
+
+    &lt;p&gt;B:关于bin-log日志的相关命令：&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; 查看当前bin_log情况 show BINARY logs
+ 查看当前bin_log情况 show master logs
+ 查看log_bin相关配置 show variables like ‘%log_bin%’
+ 切换bin_log日志（生成一个新的日志文件） flush logs
+ 删除mysqlbin.000002之前的bin_log，并修改index中相关数据 PURGE BINARY LOGS TO ‘mysqlbin.000002′
+ 删除2011-07-09 12:40:26之前的bin_log，并修改index中相关数据 PURGE BINARY LOGS BEFORE ’2011-07-09 12:40:26′
+ 删除2011-07-09之前的bin_log，并修改index中相关数据 PURGE BINARY LOGS BEFORE ’2011-07-09′
+ 设置bin_log过期日期 set global expire_logs_days=5;
+ 重设bin_log日志，以前的所有日志将被删除并且重设index中的数据 reset master;
+&lt;/code&gt;&lt;/pre&gt;
+
+    &lt;p&gt;C:利用bin-log日志恢复数据：&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; mysqlbinlog --no-defaults --start-position=&quot;102&quot; --stop-position=&quot;201&quot; mysql_bin.000001 |mysql -uroot -p123456
+ 亦可导出为sql文件，再导入至数据库中：
+ mysqlbinlog --no-defaults --start-date=&quot;2012-10-15 16:30:00&quot; --stop-date=&quot;2012-10-15 17:00:00&quot; mysql_bin.000001 &amp;gt;d:\1.sql
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;mysql 数据备份
+ mysqldump -uroot -p123456 test -l -F &amp;gt; “/tmp/test.sql”
+ 备份数据库两个主要方法是用 mysqldump 程序或直接拷贝数据库文件（如用 cp、cpio 或 tar 等）。每种方法都有其优缺点：&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;mysqldump 与 MySQL 服务器协同操作。直接拷贝方法在服务器外部进行，并且你必须采取措施保证没有客户正在修改你将拷贝的表。&lt;/p&gt;
+
+&lt;p&gt;如果你想用文件系统备份来备份数据库，也会发生同样的问题：如果数据库表在文件系统备份过程中被修改，
+进入备份的表文件主语不一致的状态，而对以后的恢复表将失去意义。文件系统备份与直接拷贝文件的区别是对后者你完全控制了
+备份过程，这样你能采取措施确保服务器让表不受干扰。
+mysqldump 比直接拷贝要慢些。
+mysqldump 生成能够移植到其它机器的文本文件，甚至那些有不同硬件结构的机器上。直接拷贝文件不能移植到其它机器上，
+除非你正在拷贝的表使用 MyISAM 存储格式。ISAM 表只能在相似的硬件结构的机器上拷贝。在 MySQL 3.23 中引入的 MyISAM 表
+存储格式解决了该问题，因为该格式是机器无关的，所以直接拷贝文件可以移植到具有不同硬件结构的机器上。只要满足两个条件
+：另一台机器必须也运行 MySQL 3.23 或以后版本，而且文件必须以 MyISAM 格式表示，而不是 ISAM 格式。&lt;/p&gt;
+
+&lt;p&gt;1 使用 mysqldump 备份和拷贝数据库&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;当你使用 mysqldumo 程序产生数据库备份文件时，缺省地，文件内容包含创建正在倾倒的表的
+CREATE 语句和包含表中行数据的 INSERT 语句。换句话说，mysqldump 产生的输出可在以后用
+作 mysql 的输入来重建数据库。
+你可以将整个数据库倾倒进一个单独的文本文件中，如下：
+%mysqldump samp_db &amp;gt;/usr/archives/mysql/samp_db.1999-10-02
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;主从复制的配置&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; A:保证所有主从的server id 唯一
+ B:主服务器只需要保证开启bin-log，并且配置server id
+ C:从服务器需要配置：bin-log,server id, master-host,master-user,master-password,master-port
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;分表， 分区&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; RANGE 分区：基于属于一个给定连续区间的列值，把多行分配给分区。
+ LIST 分 区：类似于按RANGE分区，区别在于LIST分区是基于列值匹配一个离散值集合中的某个值来进行选择。
+ HASH分区：基于用户定义的表达式的返 回值来进行选择的分区，该表达式使用将要插入到表中的这些行的列值进行计算。这个函数可以包含MySQL 中 有效的、产生非负整数值的任何表达式。
+ KEY 分 区：类似于按HASH分区，区别在于KEY分区只支持计算一列或多列，且MySQL 服务器 提供其自身的哈希函数。必须有一列或多列包含整数值。
+ CREATE TABLE employees (
+ id INT NOT NULL,
+ fname VARCHAR(30),
+ lname VARCHAR(30),
+ hired DATE NOT NULL DEFAULT &#39;1970-01-01&#39;,
+ separated DATE NOT NULL DEFAULT &#39;9999-12-31&#39;,
+ job_code INT NOT NULL,
+ store_id INT NOT NULL
+ )
+ PARTITION BY RANGE (store_id) (
+ PARTITION p0 VALUES LESS THAN (6),
+ PARTITION p1 VALUES LESS THAN (11),
+ PARTITION p2 VALUES LESS THAN (16),
+ PARTITION p3 VALUES LESS THAN (21)
+ )；
+ CREATE TABLE employees (
+ id INT NOT NULL,
+ fname VARCHAR(30),
+ lname VARCHAR(30),
+ hired DATE NOT NULL DEFAULT &#39;1970-01-01&#39;,
+ separated DATE NOT NULL DEFAULT &#39;9999-12-31&#39;,
+ job_code INT,
+ store_id INT
+ )
+ PARTITION BY LIST(store_id)
+ PARTITION pNorth VALUES IN (3,5,6,9,17),
+ PARTITION pEast VALUES IN (1,2,10,11,19,20),
+ PARTITION pWest VALUES IN (4,12,13,14,18),
+ PARTITION pCentral VALUES IN (7,8,15,16)
+ )；
+ CREATE TABLE employees (
+ id INT NOT NULL,
+ fname VARCHAR(30),
+ lname VARCHAR(30),
+ hired DATE NOT NULL DEFAULT &#39;1970-01-01&#39;,
+ separated DATE NOT NULL DEFAULT &#39;9999-12-31&#39;,
+ job_code INT,
+ store_id INT
+ )
+ PARTITION BY HASH(store_id)
+ PARTITIONS 4；
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;sql 优化&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; A：查看slow log
+ B: 判断是否需要index
+	
+ 优化目标
+ 减少 IO 次数
+ IO永远是数据库最容易瓶颈的地方，这是由数据库的职责所决定的，大部分数据库操作中超过90%的时间都是 IO 操作所占用的，
+ 减少 IO 次数是 SQL 优化中需要第一优先考虑，当然，也是收效最明显的优化手段。
+ 降低 CPU 计算
+ 除了 IO 瓶颈之外，SQL优化中需要考虑的就是 CPU 运算量的优化了。order by, group by,distinct …
+ 都是消耗 CPU 的大户（这些操作基本上都是 CPU 处理内存中的数据比较运算）。当我们的 IO 优化做到一定阶段之后，
+ 降低 CPU 计算也就成为了我们 SQL 优化的重要目标
+	
+ 优化方法
+ 改变 SQL 执行计划
+ 明确了优化目标之后，我们需要确定达到我们目标的方法。对于 SQL 语句来说，达到上述2个目标的方法其实只有一个，
+ 那就是改变 SQL 的执行计划，让他尽量“少走弯路”，尽量通过各种“捷径”来找到我们需要的数据，
+ 以达到 “减少 IO 次数” 和 “降低 CPU 计算” 的目标
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;常见误区&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;count(1)和count(primary_key) 优于 count(*)
+很多人为了统计记录条数，就使用 count(1) 和 count
+(primary_key) 而不是 count(*) ，他们认为这样性能更好，
+其实这是一个误区。对于有些场景，这样做可能性能会更差，应为数据库对 count(*) 计数操作做了一些特别的优化。
+count(column) 和 count(*) 是一样的
+这个误区甚至在很多的资深工程师或者是 DBA 中都普遍存在，很多人都会认为这是理所当然的。
+实际上，count(column) 和 count(*) 是一个完全不一样的操作，所代表的意义也完全不一样。
+count(column) 是表示结果集中有多少个column字段不为空的记录
+count(*) 是表示整个结果集有多少条记录
+select a,b from … 比 select a,b,c from … 可以让数据库访问更少的数据量
+这个误区主要存在于大量的开发人员中，主要原因是对数据库的存储原理不是太了解。
+实际上，大多数关系型数据库都是按照行（row）的方式存储，而数据存取操作都是以一个固定大小的IO单元
+（被称作 block 或者 page）为单位，一般为4KB，8KB… 大多数时候，每个IO单元中存储了多行，
+每行都是存储了该行的所有字段（lob等特殊类型字段除外）。
+所以，我们是取一个字段还是多个字段，实际上数据库在表中需要访问的数据量其实是一样的。
+当然，也有例外情况，那就是我们的这个查询在索引中就可以完成，也就是说当只取 a,b两个字段的时候，
+不需要回表，而c这个字段不在使用的索引中，需要回表取得其数据。在这样的情况下，二者的IO量会有较大差异。
+order by 一定需要排序操作
+我们知道索引数据实际上是有序的，如果我们的需要的数据和某个索引的顺序一致，而且我们的查询又通过这个索引来执行，
+那么数据库一般会省略排序操作，而直接将数据返回，因为数据库知道数据已经满足我们的排序需求了。
+实际上，利用索引来优化有排序需求的 SQL，是一个非常重要的优化手段
+延伸阅读：MySQL ORDER BY 的实现分析 ，MySQL 中 GROUP BY 基本实现原理 以及 MySQL DISTINCT 的基本实现原理
+执行计划中有 filesort 就会进行磁盘文件排序
+有这个误区其实并不能怪我们，而是因为 MySQL 开发者在用词方面的问题。
+filesort 是我们在使用 explain 命令查看一条 SQL 的执行计划的时候可能会看到在 “Extra” 一列显示的信息。
+实际上，只要一条 SQL 语句需要进行排序操作，都会显示“Using filesort”，这并不表示就会有文件排序操作。
+延伸阅读：理解 MySQL Explain 命令输出中的filesort，我在这里有更为详细的介绍
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;基本原则&lt;/p&gt;
+
+&lt;p&gt;尽量少 join&lt;/p&gt;
+
+&lt;p&gt;MySQL 的优势在于简单，但这在某些方面其实也是其劣势。MySQL 优化器效率高，但是由于其统计信息的量有限，
+优化器工作过程出现偏差的可能性也就更多。对于复杂的多表 Join，一方面由于其优化器受限，
+再者在 Join 这方面所下的功夫还不够，所以性能表现离 Oracle 等关系型数据库前辈还是有一定距离。
+但如果是简单的单表查询，这一差距就会极小甚至在有些场景下要优于这些数据库前辈。&lt;/p&gt;
+
+&lt;p&gt;尽量少排序&lt;/p&gt;
+
+&lt;p&gt;排序操作会消耗较多的 CPU 资源，所以减少排序可以在缓存命中率高等 IO 能力足够的场景下会较大影响 SQL 的响应时间。
+对于MySQL来说，减少排序有多种办法，比如：
+上面误区中提到的通过利用索引来排序的方式进行优化
+减少参与排序的记录条数
+非必要不对数据进行排序
+…&lt;/p&gt;
+
+&lt;p&gt;尽量避免 select *&lt;/p&gt;
+
+&lt;p&gt;很多人看到这一点后觉得比较难理解，上面不是在误区中刚刚说 select 子句中字段的多少并不会影响到读取的数据吗？
+是的，大多数时候并不会影响到 IO 量，但是当我们还存在 order by 操作的时候，
+select 子句中的字段多少会在很大程度上影响到我们的排序效率，这一点可以通过我之前一篇介绍 MySQL ORDER BY
+的实现分析 的文章中有较为详细的介绍。
+此外，上面误区中不是也说了，只是大多数时候是不会影响到 IO 量，当我们的查询结果仅仅只需要在索引中就能找到的时候，
+还是会极大减少 IO 量的。&lt;/p&gt;
+
+&lt;p&gt;尽量用 join 代替子查询&lt;/p&gt;
+
+&lt;p&gt;虽然 Join 性能并不佳，但是和 MySQL 的子查询比起来还是有非常大的性能优势。
+MySQL 的子查询执行计划一直存在较大的问题，虽然这个问题已经存在多年，
+但是到目前已经发布的所有稳定版本中都普遍存在，一直没有太大改善。虽然官方也在很早就承认这一问题，
+并且承诺尽快解决，但是至少到目前为止我们还没有看到哪一个版本较好的解决了这一问题。&lt;/p&gt;
+
+&lt;p&gt;尽量少 or&lt;/p&gt;
+
+&lt;p&gt;当 where 子句中存在多个条件以“或”并存的时候，MySQL 的优化器并没有很好的解决其执行计划优化问题，
+再加上 MySQL 特有的 SQL 与 Storage 分层架构方式，造成了其性能比较低下，很多时候使用 union all
+或者是union（必要的时候）的方式来代替“or”会得到更好的效果。
+尽量用 union all 代替 union
+union 和 union all 的差异主要是前者需要将两个（或者多个）结果集合并后再进行唯一性过滤操作，
+这就会涉及到排序，增加大量的 CPU 运算，加大资源消耗及延迟。所以当我们可以确认不可能出现重复结果集或者
+不在乎重复结果集的时候，尽量使用 union all 而不是 union。&lt;/p&gt;
+
+&lt;p&gt;尽量早过滤&lt;/p&gt;
+
+&lt;p&gt;这一优化策略其实最常见于索引的优化设计中（将过滤性更好的字段放得更靠前）。
+在 SQL 编写中同样可以使用这一原则来优化一些 Join 的 SQL。比如我们在多个表进行分页数据查询的时候，
+我们最好是能够在一个表上先过滤好数据分好页，然后再用分好页的结果集与另外的表 Join，
+这样可以尽可能多的减少不必要的 IO 操作，大大节省 IO 操作所消耗的时间。&lt;/p&gt;
+
+&lt;p&gt;避免类型转换&lt;/p&gt;
+
+&lt;p&gt;这里所说的“类型转换”是指 where 子句中出现 column 字段的类型和传入的参数类型不一致的时候发生的类型转换：&lt;/p&gt;
+
+&lt;p&gt;人为在column_name 上通过转换函数进行转换
+直接导致 MySQL（实际上其他数据库也会有同样的问题）无法使用索引，如果非要转换，应该在传入的参数上进行转换
+由数据库自己进行转换
+如果我们传入的数据类型和字段类型不一致，同时我们又没有做任何类型转换处理，MySQL
+可能会自己对我们的数据进行类型转换操作，也可能不进行处理而交由存储引擎去处理，这样一来，
+就会出现索引无法使用的情况而造成执行计划问题。
+优先优化高并发的 SQL，而不是执行频率低某些“大”SQL
+对于破坏性来说，高并发的 SQL 总是会比低频率的来得大，因为高并发的 SQL 一旦出现问题，
+甚至不会给我们任何喘息的机会就会将系统压跨。而对于一些虽然需要消耗大量 IO 而且响应很慢的 SQL，
+由于频率低，即使遇到，最多就是让整个系统响应慢一点，但至少可能撑一会儿，让我们有缓冲的机会。
+从全局出发优化，而不是片面调整
+SQL 优化不能是单独针对某一个进行，而应充分考虑系统中所有的 SQL，尤其是在通过调整索引优化 SQL
+的执行计划的时候，千万不能顾此失彼，因小失大。
+尽可能对每一条运行在数据库中的SQL进行 explain&lt;/p&gt;
+
+&lt;p&gt;优化 SQL，需要做到心中有数，知道 SQL 的执行计划才能判断是否有优化余地，才能判断是否存在执行计划问题。
+在对数据库中运行的 SQL 进行了一段时间的优化之后，很明显的问题 SQL 可能已经很少了，大多都需要去发掘，
+这时候就需要进行大量的 explain 操作收集执行计划，并判断是否需要进行优化。&lt;/p&gt;
+</description>
+        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/09/27/mysql-session.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/mysql-session.html</guid>
+        
+        <category>db</category>
+        
+      </item>
+    
+      <item>
+        <title>mysql inputformat简单实现</title>
+        <description>&lt;pre&gt;&lt;code&gt;import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
+public class MySqlInputFormat extends InputFormat&amp;lt;LongWritable, Person&amp;gt; {
+
+@Override
+public List&amp;lt;InputSplit&amp;gt; getSplits(JobContext context) throws IOException,
+InterruptedException {
+String connString = &quot;jdbc:mysql://172.20.29.29:3306/MapReduceInputTest&quot;;
+String sql = &quot;select count(*) as num from person&quot;;
+try {
+Class.forName(&quot;com.mysql.jdbc.Driver&quot;);
+} catch (ClassNotFoundException e) {
+e.printStackTrace();
+}
+
+Connection conn = null;
+Statement stmt = null;
+ResultSet rs = null;
+try {
+conn = java.sql.DriverManager.getConnection(connString
++ &quot;?useUnicode=true&amp;amp;characterEncoding=utf8&quot;, &quot;admin&quot;,
+&quot;admin&quot;);
+stmt = conn.createStatement();
+rs = stmt.executeQuery(sql);
+long count = 0;
+if (rs.next()) {
+count = rs.getLong(&quot;num&quot;);
+}
+System.out.println(count);
+List&amp;lt;InputSplit&amp;gt; splits = new ArrayList&amp;lt;InputSplit&amp;gt;();
+
+long mapNum = count % 3 == 0 ? (count) / 3 : (count / 3 + 1);
+
+for (long i = 0; i &amp;lt; mapNum; i++) {
+long start = i * 3;
+long end = (i + 1) * 3;
+MysqlInputSplit mysqlInputSplit = new MysqlInputSplit(start,
+end);
+splits.add(mysqlInputSplit);
+}
+return splits;
+} catch (Exception ex) {
+ex.printStackTrace();
+try {
+rs.close();
+stmt.close();
+conn.close();
+} catch (SQLException e) {
+e.printStackTrace();
+}
+}
+
+return null;
+}
+
+@Override
+public RecordReader&amp;lt;LongWritable, Person&amp;gt; createRecordReader(
+InputSplit split, TaskAttemptContext context) throws IOException,
+InterruptedException {
+return new MySqlRecordReader((MysqlInputSplit) split);
+}
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;=====================================================================================================&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapreduce.InputSplit;
+
+public class MysqlInputSplit extends InputSplit implements Writable {
+private long end = 0;
+private long start = 0;
+
+public MysqlInputSplit(long start, long end) {
+this.start = start;
+this.end = end;
+}
+
+public MysqlInputSplit() {
+}
+
+public void readFields(DataInput dataInput) throws IOException {
+this.start = dataInput.readLong();
+this.end = dataInput.readLong();
+}
+
+public void write(DataOutput dataOutput) throws IOException {
+dataOutput.writeLong(start);
+dataOutput.writeLong(end);
+}
+
+@Override
+public long getLength() throws IOException {
+return end - start;
+}
+
+@Override
+public String[] getLocations() throws IOException {
+return new String[] {};
+}
+
+public long getStart() {
+return start;
+}
+
+public long getEnd() {
+return end;
+}
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;=====================================================================================================&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
+public class MySqlRecordReader extends RecordReader&amp;lt;LongWritable, Person&amp;gt; {
+
+private ResultSet results = null;
+
+@Override
+public void initialize(InputSplit split, TaskAttemptContext context)
+throws IOException, InterruptedException {
+// do nothing
+
+}
+
+private final MysqlInputSplit split;
+private long pos = 0;
+
+private LongWritable key = null;
+
+private Person value = null;
+
+private Connection conn;
+
+protected PreparedStatement statement;
+
+public MySqlRecordReader(InputSplit split) {
+this.split = (MysqlInputSplit) split;
+}
+
+@Override
+public boolean nextKeyValue() throws IOException, InterruptedException {
+//System.out.println(&quot;ddd&quot;);
+try {
+if (key == null) {
+key = new LongWritable();
+}
+if (value == null) {
+value = new Person();
+}
+if (null == this.results) {
+String connString = &quot;jdbc:mysql://172.20.29.29:3306/MapReduceInputTest&quot;;
+String sql = &quot;select * from person LIMIT &quot; + split.getLength()
++ &quot; OFFSET &quot; + split.getStart();
+Class.forName(&quot;com.mysql.jdbc.Driver&quot;);
+conn = java.sql.DriverManager.getConnection(connString
++ &quot;?useUnicode=true&amp;amp;characterEncoding=utf8&quot;, &quot;admin&quot;,
+&quot;admin&quot;);
+statement = conn.prepareStatement(sql);
+this.results = statement.executeQuery();
+}
+
+if (!results.next()) {
+return false;
+}
+
+// Set the key field value as the output key value
+
+key.set(pos + split.getStart());
+value.setAge(results.getInt(&quot;age&quot;));
+value.setName(results.getString(&quot;name&quot;));
+pos++;
+} catch (Exception e) {
+e.printStackTrace();
+throw new IOException(&quot;SQLException in nextKeyValue&quot;, e);
+}
+return true;
+}
+
+@Override
+public LongWritable getCurrentKey() throws IOException,
+InterruptedException {
+return key;
+}
+
+@Override
+public Person getCurrentValue() throws IOException, InterruptedException {
+return value;
+}
+
+@Override
+public float getProgress() throws IOException, InterruptedException {
+// TODO Auto-generated method stub
+return 0;
+}
+
+@Override
+public void close() throws IOException {
+try {
+if (null != results) {
+results.close();
+}
+if (null != statement) {
+statement.close();
+}
+if (null != conn) {
+conn.close();
+}
+} catch (SQLException e) {
+throw new IOException(e.getMessage());
+}
+
+}
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+</description>
+        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/09/27/mysql-inputformat.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/mysql-inputformat.html</guid>
+        
+        <category>hadoop</category>
+        
+      </item>
+    
+      <item>
+        <title>mysql远程连接配置</title>
+        <description>&lt;ol&gt;
+  &lt;li&gt;将my.cnf中与127.0.0.1的绑定 删除或是注释&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;将mysql数据库中user表&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; GRANT ALL ON *.* TO admin@&#39;%&#39; IDENTIFIED BY &#39;admin&#39; WITH GRANT OPTION;
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;这句话的意思 ，允许任何IP地址（上面的 % 就是这个意思）的电脑 用admin帐户  和密码（admin）来访问这个MySQL Server
+在没有第一步的情况下必须加类似这样的帐户，才可以远程登陆。root帐户是无法远程登陆的，只可以本地登陆&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;测试：mysql -h172.21.5.29 -uadmin -padmin
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;有人遇到问题：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;mysql&amp;gt; use mysql;
+mysql&amp;gt; GRANT ALL ON *.* TO admin@&#39;%&#39; IDENTIFIED BY &#39;admin&#39; WITH GRANT OPTION;
+#这句话的意思 ，允许任何IP地址（上面的 % 就是这个意思）的电脑 用admin帐户  和密码（admin）来访问这个MySQL Server
+#必须加类似这样的帐户，才可以远程登陆。 root帐户是无法远程登陆的，只可以本地登陆
+我发现一个问题， 如果上面的命令你执行完毕， 你在 本地就是localhost ， 执行 :
+Sql代码
+mysql -hlocalhost -uadmin -padmin
+mysql -hlocalhost -uadmin -padmin 结果是失败的。 原来 上面的 % 竟然不包括localhost
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/09/27/mysql.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/mysql.html</guid>
+        
+        <category>db</category>
+        
+      </item>
+    
+      <item>
+        <title>mashup</title>
+        <description>&lt;p&gt;mashup是糅合，是当今网络上新出现的一种网络现象，
+将两种以上使用公共或者私有数据库的web应用，加在一起，形成一个整合应用。&lt;/p&gt;
+
+&lt;p&gt;现在，我们将Windows，操作系统替换成网络。那么同样的，就会有许多公司来提供哪些APIs。
+比如yahoo,google.例如一个叫EVDB的公司，它是一个事件日历的数据库，
+可以提醒你什么时间到哪里做什么事情。
+也包括像 Amazon 和 eBay，又比如Technorati ，
+所有这些不同的公司把APIs放到网上使开发者可以访问。
+现在假如你是一个Web开发者，你通过一个API 找到你附近哪些地方会有犯罪。然后你访问Google 地图API，把这两个内容整合在一起，那么你就得到了一个标有犯罪纪录的地图。
+这个新的地图就叫Mashup。因为开发者通过来自多个网站的APIs，
+把他们合并在一起，成为了一个新的很cool的应用程序。
+典型应用&lt;/p&gt;
+
+&lt;p&gt;地图 Mashup&lt;/p&gt;
+
+&lt;p&gt;在这个阶段的信息技术中，人们搜集大量有关事物和行为的数据，二者都常常具有位置注释信息。所有这些包含位置数据的不同数据集均可利用地图通过令人惊奇的图形化方式呈现出来。mashup 蓬勃发展的一种主要动力就是 Google 公开了自己的 Google Maps API。这仿佛打开了一道大门，让 Web 开发人员(包括爱好者、修补程序开发人员和其他一些人)可以在地图中包含所有类型的数据(从原子弹灾难到波士顿的 CowParade 奶牛都可以)。为了不落于人后，Microsoft(Virtual Earth)、Yahoo(Yahoo Maps)和 AOL(MapQuest)也很快相继公开了自己的 API。&lt;/p&gt;
+
+&lt;p&gt;视频和图象 Mashup&lt;/p&gt;
+
+&lt;p&gt;图像主机和社交网络站点(例如 Flickr 使用自己的 API 来共享图像)的兴起导致出现了很多有趣的 mashup。由于内容提供者拥有与其保存的图像相关的元数据(例如谁拍的照片，照片的内容是什么，在何时何地拍摄的等等)，mashup 的设计者可以将这些照片和其他与元数据相关的信息放到一起。例如，mashup 可以对图片进行分析，从而将相关照片拼接在一起，或者基于相同的照片元数据(标题、时间戳或其他元数据)显示社交网络图。另外一个例子可能以一个 Web 站点(例如 CNN 之类的新闻站点)作为输入，并在新闻中通过照片匹配而将照片中的内容以文字的形式呈现出来。&lt;/p&gt;
+
+&lt;p&gt;搜索和购物 Mashup&lt;/p&gt;
+
+&lt;p&gt;搜索和购物 mashup 在 mashup 这个术语出现之前就已经存在很长时间了。在 Web API 出现之前，有相当多的购物工具，例如 BizRate、PriceGrabber、MySimon 和 Google 的 Froogle，都使用了 B2B 技术或屏幕抓取的方式来累计相关的价格数据。为了促进 mashup 和其他有趣的 Web 应用程序的发展，诸如 eBay 和 Amazon 之类的消费网站已经为通过编程访问自己的内容而发布了自己的 API。
+新闻 Mashup
+新闻源(例如纽约时报、BBC 或路透社)已从 2002 年起使用 RSS 和 Atom 之类的联合技术来发布各个主题的新闻提要。以联合技术为基础的 mashup 可以聚集一名用户的提要，并将其通过 Web 呈现出来，创建个性化的报纸，从而满足读者独特的兴趣。&lt;/p&gt;
+
+&lt;p&gt;微博 Mashup&lt;/p&gt;
+
+&lt;p&gt;将多个微博在一个平台上进行聚合显示， 在一个平台上可以同时绑定多个微博(腾讯微博、新浪微博、搜狐微博、网易微博、人人网、豆瓣、饭否、嘀咕、Follow5、天涯微博、人间网、做啥、9911、同学网、开心网等)，从而满足用户同步多个平台的要求，提供了微博信息汇总表，让用户方便查看自己所有平台的粉丝，关注和微博数，轻松实现在不同微博间自由切换。并且提供多微博评论列表读取，跨平台分享，聚合收藏等功能。使用户可在同一屏幕中同步收发信息，实现了真正意义上的社交网站双向聚合。类似网站功能的有玛撒网，微博通等。&lt;/p&gt;
+</description>
+        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/09/27/mashup.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/mashup.html</guid>
+        
+        <category>不懂</category>
+        
+      </item>
+    
+      <item>
+        <title>log4j配置解释</title>
+        <description>&lt;p&gt;Log4j说明&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;log4j.rootCategory=INFO, stdout , R&lt;/p&gt;
+
+    &lt;p&gt;此句为将等级为INFO的日志信息输出到stdout和R这两个目的地，
+stdout和R的定义在下面的代码，可以任意起名。
+等级可分为OFF、 FATAL、ERROR、WARN、INFO、DEBUG、ALL，
+如果配置OFF则不打出任何信息，如果配置为INFO这样只显示INFO, WARN, ERROR的log信息，
+而DEBUG信息不会被显示。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+ 此句为定义名为stdout的输出端是哪种类型，可以是
+ org.apache.log4j.ConsoleAppender（控制台），
+ org.apache.log4j.FileAppender（文件），
+ org.apache.log4j.DailyRollingFileAppender（每天产生一个日志文件），
+ org.apache.log4j.RollingFileAppender（文件大小到达指定尺寸的时候产生一个新的文件）
+ org.apache.log4j.WriterAppender（将日志信息以流格式发送到任意指定的地方）&lt;/li&gt;
+  &lt;li&gt;log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+ 此句为定义名为stdout的输出端的layout是哪种类型，可以是
+ org.apache.log4j.HTMLLayout（以HTML表格形式布局），
+ org.apache.log4j.PatternLayout（可以灵活地指定布局模式），
+ org.apache.log4j.SimpleLayout（包含日志信息的级别和信息字符串），
+ org.apache.log4j.TTCCLayout（包含日志产生的时间、线程、类别等等信息）&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;log4j.appender.stdout.layout.ConversionPattern= [QC] %p [%t] %C.%M(%L) | %m%n
+ 如果使用pattern布局就要指定的打印信息的具体格式ConversionPattern，
+ 打印参数如下：
+ %m 输出代码中指定的消息
+ %p 输出优先级，即DEBUG，INFO，WARN，ERROR，FATAL
+ %r 输出自应用启动到输出该log信息耗费的毫秒数
+ %c 输出所属的类目，通常就是所在类的全名
+ %t 输出产生该日志事件的线程名
+ %n 输出一个回车换行符，Windows平台为“rn”，Unix平台为“n”
+ %d 输出日志时间点的日期或时间，默认格式为ISO8601，也可以在其后指定格式，
+ 比如：%d{yyyy MMM dd HH:mm:ss,SSS}，输出类似：2002年10月18日 22：10：28，921
+ %l 输出日志事件的发生位置，包括类目名、发生的线程，以及在代码中的行数。&lt;/p&gt;
+
+    &lt;p&gt;[QC]是log信息的开头，可以为任意字符，一般为项目简称。
+ 输出的信息
+ [TS] DEBUG [main] AbstractBeanFactory.getBean(189) | Returning cached instance of singleton bean ‘MyAutoProxy’&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;log4j.appender.R=org.apache.log4j.DailyRollingFileAppender
+ 此句与第3行一样。定义名为R的输出端的类型为每天产生一个日志文件。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;log4j.appender.R.File=D:\Tomcat 5.5\logs\qc.log&lt;/p&gt;
+
+    &lt;p&gt;此句为定义名为R的输出端的文件名为D:\Tomcat 5.5\logs\qc.log&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;log4j.appender.R.layout=org.apache.log4j.PatternLayout
+ 与第4行相同。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;10 log4j.appender.R.layout.ConversionPattern=%d-[TS] %p %t %c - %m%n
+与第5行相同。&lt;/p&gt;
+
+&lt;p&gt;12 log4j.logger.com. neusoft =DEBUG
+指定com.neusoft包下的所有类的等级为DEBUG。
+可以把com.neusoft改为自己项目所用的包名。&lt;/p&gt;
+
+&lt;p&gt;13 log4j.logger.com.opensymphony.oscache=ERROR
+14 log4j.logger.net.sf.navigator=ERROR
+这两句是把这两个包下出现的错误的等级设为ERROR，如果项目中没有配置EHCache，则不需要这两句。&lt;/p&gt;
+
+&lt;p&gt;15 log4j.logger.org.apache.commons=ERROR
+16 log4j.logger.org.apache.struts=WARN
+这两句是struts的包。&lt;/p&gt;
+
+&lt;p&gt;17 log4j.logger.org.displaytag=ERROR
+这句是displaytag的包。（QC问题列表页面所用）&lt;/p&gt;
+
+&lt;p&gt;18 log4j.logger.org.springframework=DEBUG
+此句为Spring的包。&lt;/p&gt;
+
+&lt;p&gt;24 log4j.logger.org.hibernate.ps.PreparedStatementCache=WARN
+25 log4j.logger.org.hibernate=DEBUG
+此两句是hibernate的包。&lt;/p&gt;
+
+</description>
+        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/09/27/log4j.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/log4j.html</guid>
+        
+        <category>java</category>
+        
+      </item>
+    
+      <item>
+        <title>linux command下解压命令大全</title>
+        <description>&lt;p&gt;From: http://www.cnblogs.com/eoiioe/archive/2008/09/20/1294681.html&lt;/p&gt;
+
+&lt;p&gt;.tar&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解包：tar xvf FileName.tar
+打包：tar cvf FileName.tar DirName
+（注：tar是打包，不是压缩！）
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.gz&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解压1：gunzip FileName.gz
+解压2：gzip -d FileName.gz
+压缩：gzip FileName
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.tar.gz 和 .tgz&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解压：tar zxvf FileName.tar.gz
+压缩：tar zcvf FileName.tar.gz DirName
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.bz2&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解压1：bzip2 -d FileName.bz2
+解压2：bunzip2 FileName.bz2
+压缩： bzip2 -z FileName
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.tar.bz2&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解压：tar jxvf FileName.tar.bz2
+压缩：tar jcvf FileName.tar.bz2 DirName
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.bz&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解压1：bzip2 -d FileName.bz
+解压2：bunzip2 FileName.bz 压缩：未知
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.tar.bz&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解压：tar jxvf FileName.tar.bz ———————————————
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.Z&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解压：uncompress FileName.Z
+压缩：compress FileName
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.tar.Z&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解压：tar Zxvf FileName.tar.Z
+压缩：tar Zcvf FileName.tar.Z DirName ———————————————
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.zip&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解压：unzip FileName.zip
+压缩：zip FileName.zip DirName ———————————————
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.rar&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解压：rar x FileName.rar
+压缩：rar a FileName.rar DirName ———————————————
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.lha&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解压：lha -e FileName.lha
+压缩：lha -a FileName.lha FileName ———————————————
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.rpm&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解包：rpm2cpio FileName.rpm | cpio -div ———————————————
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.deb&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解包：ar p FileName.deb data.tar.gz | tar zxf - ———————————————
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.tar .tgz .tar.gz .tar.Z .tar.bz .tar.bz2 .zip .cpio .rpm .deb .slp .arj .rar .ace .lha .lzh .lzx .lzs .arc .sda .sfx .lnx .zoo .cab .kar .cpt .pit .sit .sea&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;解压：sEx x FileName.*
+压缩：sEx a FileName.* FileName
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;sEx只是调用相关程序，本身并无压缩、解压功能，请注意！&lt;/p&gt;
+
+&lt;p&gt;gzip 命令&lt;/p&gt;
+
+&lt;p&gt;减少文件大小有两个明显的好处，一是可以减少存储空间，二是通过网络传输文件时，可以减少传输的时间。gzip 是在 Linux 系统中经常使用的一个对文件进行压缩和解压缩的命令，既方便又好用。&lt;/p&gt;
+
+&lt;p&gt;语法：gzip [选项] 压缩（解压缩）的文件名该命令的各选项含义如下：&lt;/p&gt;
+
+&lt;p&gt;-c 将输出写到标准输出上，并保留原有文件。&lt;/p&gt;
+
+&lt;p&gt;-d 将压缩文件解压。&lt;/p&gt;
+
+&lt;p&gt;-l 对每个压缩文件，显示下列字段：     压缩文件的大小；未压缩文件的大小；压缩比；未压缩文件的名字&lt;/p&gt;
+
+&lt;p&gt;-r 递归式地查找指定目录并压缩其中的所有文件或者是解压缩。&lt;/p&gt;
+
+&lt;p&gt;-t 测试，检查压缩文件是否完整。&lt;/p&gt;
+
+&lt;p&gt;-v 对每一个压缩和解压的文件，显示文件名和压缩比。&lt;/p&gt;
+
+&lt;p&gt;-num 用指定的数字 num 调整压缩的速度，-1 或 –fast 表示最快压缩方法（低压缩比），-9 或–best表示最慢压缩方法（高压缩比）。系统缺省值为 6。指令实例：&lt;/p&gt;
+
+&lt;p&gt;gzip *% 把当前目录下的每个文件压缩成 .gz 文件。gzip -dv *% 把当前目录下每个压缩的文件解压，并列出详细的信息。gzip -l *% 详细显示例1中每个压缩的文件的信息，并不解压。gzip usr.tar% 压缩 tar 备份文件 usr.tar，此时压缩文件的扩展名为.tar.gz。&lt;/p&gt;
+</description>
+        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/09/27/linux-command.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/linux-command.html</guid>
+        
+        <category>linux</category>
+        
+      </item>
+    
+      <item>
+        <title>js 基础session</title>
+        <description>&lt;ol&gt;
+  &lt;li&gt;html java javascript 都应遵循codingstyle&lt;/li&gt;
+  &lt;li&gt;事件不写在html中， 应按照mvc的模式 各个层之间应实现低耦合
+m: 功能模块
+v: html
+c: 事件&lt;/li&gt;
+  &lt;li&gt;Javascript 中字符串的拼接 应向Java中一样 使用buffer&lt;/li&gt;
+  &lt;li&gt;++ 和 +1 是有区别的 ++ 为原子操作， 推荐使用&lt;/li&gt;
+  &lt;li&gt;Modle层的命名与表示层不应该有关联
+应该只与功能有关。如delete/add之类&lt;/li&gt;
+  &lt;li&gt;常量字面量在比较时应该放在左边&lt;/li&gt;
+  &lt;li&gt;var a = function(){};
+funtion a(){};
+之间的区别：
+第一种是变量式声明，
+第二种是定义式声明。
+js在解析的时候，先解析定义式方法，在解析其他的
+变量式和普通变量定义一样，&lt;/li&gt;
+  &lt;li&gt;js的方法没有重载，只会覆盖&lt;/li&gt;
+  &lt;li&gt;arguments 指向实参数组
+方法对象的length指向型参长度&lt;/li&gt;
+  &lt;li&gt;方法在没有return时 返回undefind&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;对象的创建方式：
+a: new Object();
+Object 的类型为Function
+是由Function对象产生对象
+b: jeson
+var o = {};
+o 对象类型为object
+c: 构造函数
+构造方法必须采用定义式， 首字母大写&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;this 执行当前的执行环境&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;构造方法会有一个prototype对象。
+而由构造方法产生的对象没有prototype对象&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;继承的两种实现：
+a:对象冒充
+缺点： 冒充对象只能接受原对象里的东西，不能接收到其原型对象中的东西
+b:原型链&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;闭包&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;function
+全局方法: this—&amp;gt;window对象
+对象内方法： this—&amp;gt;当前对象
+构造方法： 初始化构造方法需要new关键字， 否则就会当成全局方法定义
+构造方法首字母大写&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;apply和call方法
+apply（指定调用方法中的this, 方法的参数数组）;
+call(指定调用方法中的this, 方法的参数列表);
+foo.call(this, arg1,arg2,arg3) == foo.apply(this, arguments)==this.foo(arg1, arg2, arg3)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;在JavaScript中,代码总是有一个上下文对象,代码处理该对象之内. 上下文对象是通过this变量来体现的, 这个this变量永远指向当前代码所处的对象中.&lt;/p&gt;
+
+&lt;p&gt;此类方法的应用场景：
+A, B类都有一个message属性(面向对象中所说的成员),A有获取消息的getMessage方法,B有设置消息的setMessage方法
+//创建一个B类实例对象
+var b = new B();
+//给对象a动态指派b的setMessage方法,注意,a本身是没有这方法的!
+b.setMessage.call(a, “a的消息”);
+//下面将显示”a的消息”
+alert(a.getMessage());&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;argments
+方法的参数数组，一般在实现不定长参数的方法时会用到这个属性
+可以通过它获得参数长度，参数值。
+一般情况不通过它修改参数值。&lt;/li&gt;
+&lt;/ol&gt;
+
+</description>
+        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/09/27/js-session.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/js-session.html</guid>
+        
+        <category>f2e</category>
         
       </item>
     
