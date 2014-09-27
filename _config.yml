@@ -1,19 +1,19 @@
+# Build settings
 markdown: kramdown
-highlighter: pygments
+highlighter: rouge/pygments
 permalink: blog/:year/:month/:day/:title.html
 paginate: 6
 paginate_path: page/:num
-
 blog:
-    name:                                                # 博客名称
-    description:                                         # 博客描述
-    title:                                               # 网页标题
-    url:                                                 # 博客地址
-    duoshuo:                                             # 多说ID
-    tongji:                                              # 百度统计ID
-    qiniu:                                               # 七牛云地址
+    name: willgo
+    description: 最好的从未错过
+    title: Will go, Just do it.
+    url: index.html
+    duoshuo: 5312914
+    tongji: will_go8
+    qiniu: 979827772@qq.com
 author:
-    name:                                                # 作者名称
-    email:                                               # 邮箱地址
-    weibo:                                               # 微博地址
-    github:                                              # GitHub地址
+    name: Will.Quan
+    email: WillQuan0815@gmail.com
+    weibo: http://weibo.com/u/2369015654
+    github: https://github.com/will0815/will0815.github.io

@@ -1,0 +1,661 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>RSS - willgo</title>
+    <description>willgo - 最好的从未错过</description>
+    <link>index.html</link>
+    <atom:link href="index.html/page/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Sat, 27 Sep 2014 16:09:07 +0800</pubDate>
+    <lastBuildDate>Sat, 27 Sep 2014 16:09:07 +0800</lastBuildDate>
+    <generator>Will.Quan</generator>
+    
+      <item>
+        <title>arraylist&amp;arraylink</title>
+        <description>&lt;p&gt;&lt;strong&gt;区别&lt;/strong&gt;：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;array 在定义的时候必须实例化(至少申明大小)，arraylist则可以只是申明&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;int[] array = new array[3]&lt;/li&gt;
+      &lt;li&gt;int[] array = {1,2,3}&lt;/li&gt;
+      &lt;li&gt;ArrayList arrayList;&lt;/li&gt;
+      &lt;li&gt;int[] array;则不合法&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Array只能存储同构对象，ArrayList则可以存储异构对象，当然object[]和使用泛型的arraylist不适用此条。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;在CRL的托管方式不一样
+ Array是连续存储，Arraylist则不一定是连续存储&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Array的大小是定义的时候指定的，Arraylist则可以动态扩容&lt;/li&gt;
+  &lt;li&gt;Array不能随意添加或删除其中的项，ArrayList则可以随意添加删除&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;相似&lt;/strong&gt;：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;都具有索引，即可以通过索引来直接添加和修改任意项&lt;/li&gt;
+  &lt;li&gt;所创建的对象都托管在堆中&lt;/li&gt;
+  &lt;li&gt;都能够对自身进行枚举（因为实现了IEnumerable接口）&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;ArrayList 源码摘要：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;1. public class ArrayList&amp;lt;E&amp;gt; extends AbstractList&amp;lt;E&amp;gt;  
+2.         implements List&amp;lt;E&amp;gt;, RandomAccess, Cloneable, java.io.Serializable  
+3. {  
+4.     ......  
+5.   
+6.     /** 
+7.      * The array buffer into which the elements of the ArrayList are stored. 
+8.      * The capacity of the ArrayList is the length of this array buffer. 
+9.      */  
+10.     private transient E[] elementData;  
+11.   
+12.   
+13.     /** 
+14.      * The size of the ArrayList (the number of elements it contains). 
+15.      * 
+16.      * @serial 
+17.      */  
+18.     private int size;  
+19.    ......  
+20. }  
+21. 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;底层两个属性一个object[] 一个size&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;ArrayList底层通过object[] 复制的方式（System.arraycopy()）来处理数组的增长&lt;/li&gt;
+  &lt;li&gt;当ArrayList 的容量不足时，其扩充容量的方式：先将容量扩充至当前容量的1.5倍，若还不够，则将容量扩充至当前需要的数量。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;ArrayList与Vector的区别&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;1） vector 是线程同步 的，所以它也是线程安全 的，而arraylist 是线程异步 的，是不安全的 。如果不考虑到线程的安全因素，一般用 arraylist效率比较高。&lt;/p&gt;
+
+&lt;p&gt;2） 如果集合中的元素的数目大于目前集合数组的长度时，vector 增长率为目前数组长度的100%, 而arraylist 增长率为目前数组长度的50% .如果在集合中使用数据量比较大的数据，用vector有一定的优势。&lt;/p&gt;
+
+&lt;p&gt;3） 如果查找一个指定位置的数据 ，vector和arraylist使用的时间是相同 的，都是O(1) ,这个时候使用vector和arraylist都可以。&lt;/p&gt;
+
+&lt;p&gt;而如果移动一个指定位置的数据花费的时间为O(n-i)n为总长度 ，这个时候就应该考虑到使用linklist ,因为它移动一个指定位置的数据所花费的时间为0(1),而查询一个指定位置的数据时花费的时间为0(i)。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;ArrayList和LinkedList的大致区别：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;ArrayList是实现了基于动态数组的数据结构，LinkedList基于链表的数据结构。&lt;/li&gt;
+  &lt;li&gt;对于随机访问get和set，ArrayList觉得优于LinkedList，因为LinkedList要移动指针。&lt;/li&gt;
+  &lt;li&gt;对于新增和删除操作add和remove，LinedList比较占优势，因为ArrayList要移动数据。 &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;ArrayList和LinkedList在性能上各有优缺点，都有各自所适用的地方，总的说来可以描述如下：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;对ArrayList和LinkedList而言，在列表末尾增加一个元素所花的开销都是固定的。对ArrayList而言，主要是在内部数组中增加一项，指向所添加的元素，偶尔可能会导致对数组重新进行分配；而对LinkedList而言，这个开销是统一的，分配一个内部Entry对象。&lt;/li&gt;
+  &lt;li&gt;在ArrayList的中间插入或删除一个元素意味着这个列表中剩余的元素都会被移动；而在LinkedList的中间插入或删除一个元素的开销是固定的。&lt;/li&gt;
+  &lt;li&gt;LinkedList不支持高效的随机元素访问。&lt;/li&gt;
+  &lt;li&gt;ArrayList的空间浪费主要体现在在list列表的结尾预留一定的容量空间，而LinkedList的空间花费则体现在它的每一个元素都需要消耗相当的空间&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;可以这样说：当操作是在一列数据的后面添加数据而不是在前面或中间,并且需要随机地访问其中的元素时,使用ArrayList会提供比较好的性能；当你的操作是在一列数据的前面或中间添加或删除数据,并且按照顺序访问其中的元素时,就应该使用LinkedList了。&lt;/p&gt;
+
+</description>
+        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/09/27/arraylistarraylink.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/arraylistarraylink.html</guid>
+        
+        <category>java</category>
+        
+      </item>
+    
+      <item>
+        <title>Java class loader</title>
+        <description>&lt;p&gt;&lt;strong&gt;java classloader 结构：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Bootstrap classloader(启动类加载器)
+主要负责jdk_home/lib目录下的核心API或-Xbootclasspath选项指定的jar包的装入工作&lt;/li&gt;
+  &lt;li&gt;Extension Classloader(扩展类加载器)
+负责jdk_home/lib/ext目录下的jar包或者-Djava.ext.dirs指定目录下的jar包装入工作
+3.System classloader(系统类加载器)
+负责Java -classpath/-Djava.class.path所指定的类与jar包的装入&lt;/li&gt;
+  &lt;li&gt;User Custom classloader（用户自定义类加载器（java.lang.ClassLoader的子类））
+以上每一个classloader都会维护一份自己的名称空间，同一个名称空间不能出现两个同名的类。
+为了实现Java安全沙箱模型顶层的类加载器安全机制，Java默认采用 双亲委派的加载链 结构&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;在jvm启动时就会构建bootstrap classloader 负责Java平台核心库&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;每个ClassLoader加载Class的过程是：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;检测此Class是否载入过（即在cache中是否有此Class），如果有到8,如果没有到2&lt;/li&gt;
+  &lt;li&gt;如果parent classloader不存在（没有parent，那parent一定是bootstrap classloader了），到4&lt;/li&gt;
+  &lt;li&gt;请求parent classloader载入，如果成功到8，不成功到5&lt;/li&gt;
+  &lt;li&gt;请求jvm从bootstrap classloader中载入，如果成功到8&lt;/li&gt;
+  &lt;li&gt;寻找Class文件（从与此classloader相关的类路径中寻找）。如果找不到则到7.&lt;/li&gt;
+  &lt;li&gt;从文件中载入Class，到8.&lt;/li&gt;
+  &lt;li&gt;抛出ClassNotFoundException.&lt;/li&gt;
+  &lt;li&gt;返回Class.&lt;/li&gt;
+&lt;/ol&gt;
+
+</description>
+        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/09/27/Java-class-loader.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/Java-class-loader.html</guid>
+        
+        <category>java</category>
+        
+      </item>
+    
+      <item>
+        <title>Java Serialization</title>
+        <description>&lt;p&gt;目的：&lt;/p&gt;
+
+&lt;p&gt;保存对象的状态，并且可以把保存的对象状态再读取出来进行恢复。&lt;/p&gt;
+
+&lt;p&gt;场景：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;需要把内存中对象状态保存到一个文件中或者数据库中时&lt;/li&gt;
+  &lt;li&gt;需要用套接字在网络上传送对象时&lt;/li&gt;
+  &lt;li&gt;需要通过RMI传输对象时
+特点：&lt;/li&gt;
+  &lt;li&gt;序列化时 只对对象的状态进行保存 而不管对象的方法&lt;/li&gt;
+  &lt;li&gt;当一个父类实现序列化，子类自动实现序列化 无须显式实现Serializable借口&lt;/li&gt;
+  &lt;li&gt;当一个对象的实例变量引用其他对象，序列化该对象时也会把引用对象进行序列化&lt;/li&gt;
+  &lt;li&gt;并非所有对象都可以序列化：
+socket/thread&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Serialization 是一种将对象以一连串的字节描述的过程，deserialization 将这些字节重构成一个对象的过程。Java序列化API提供一种处理对象序列化的标准机制。&lt;/p&gt;
+
+&lt;h2 id=&quot;section&quot;&gt;进阶问题：&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;序列化ID的问题&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;serialVersionID即 序列化的版本号，是为了保证不同版本之间的兼容性。向前兼容以及向后兼容。
+两种生成方式：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;使用默认的1L&lt;/li&gt;
+  &lt;li&gt;根据类名 接口名 成员方法以及属性来生成&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;如果一个类实现了序列化 但没有显示的申明序列化版本号  在程序编译的时候会自动生成一个版本号。存储在文件中，如果类有改动版本号也会随之改变。 在反序列化的时候JVM会将文件中的ID与本地相应实体类的ID比较  两者一致才能够序列化成功。否则会抛InvalidClassException异常。&lt;/p&gt;
+
+&lt;p&gt;静态化变量的序列化&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;                    //初始时staticVar为5
+                    ObjectOutputStream out = new ObjectOutputStream(
+                                    new FileOutputStream(&quot;result.obj&quot;));
+                    out.writeObject(new Test());
+                    out.close();
+
+                    //序列化后修改为10
+                    Test.staticVar = 10;
+
+                    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
+                                    &quot;result.obj&quot;));
+                    Test t = (Test) oin.readObject();
+                    oin.close();
+                    //再读取，通过t.staticVar打印新的值
+                    System.out.println(t.staticVar); 以上代码的输出结果为10.。。因为序列化并不保存静态化变量。
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;父类的序列化&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;一个子类实现了Serializable接口  它的父类没有实现Serializable接口   序列化该子类对象然后反序列化输出父类定义的某变量的数值  该数值与序列化时的数值不同&lt;/p&gt;
+
+&lt;p&gt;在父类没有实现Serializable接口时  JVM将不会序列化父类对象  而一个Java对象的构造必须有父类对象 所以在反序列化时 只能调用父类的无参构造器作为默认的父对象  所以这是可以在父类的无参构造器中对变量进行初始化 否则父类变量都是默认的值&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Transient关键字&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Transient关键字的作用是控制变量的序列化，在变量申明前加上次关键字可以阻止该变量被序列化&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;序列化存储规则&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; ObjectOutputStream out = new ObjectOutputStream(
+                                    new FileOutputStream(&quot;result.obj&quot;));
+    Test test = new Test();
+    //试图将对象两次写入文件
+    out.writeObject(test);
+    out.flush();
+    System.out.println(new File(&quot;result.obj&quot;).length());
+    out.writeObject(test);
+    out.close();
+    System.out.println(new File(&quot;result.obj&quot;).length());
+
+    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
+                    &quot;result.obj&quot;));
+    //从文件依次读出两个文件
+    Test t1 = (Test) oin.readObject();
+    Test t2 = (Test) oin.readObject();
+    oin.close();
+    //判断两个引用是否指向同一个对象
+    System.out.println(t1 == t2);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;同一对象两次写入文件，打印出写入一次对象后的存储大小和写入两次后的存储大小，然后从文件中反序列化出两个对象，比较这两个对象是否为同一对象。一般的思维是，两次写入对象，文件大小会变为两倍的大小，反序列化时，由于从文件读取，生成了两个对象，判断相等时应该是输入 false 才对，最后却为TRUE。&lt;/p&gt;
+
+&lt;p&gt;因为：Java 序列化机制为了节省磁盘空间，具有特定的存储规则，当写入文件的为同一对象时，并不会再将对象的内容进行存储，而只是再次存储一份引用，上面增加的 5 字节的存储空间就是新增引用和一些控制信息的空间。反序列化时，恢复引用关系，使得清单 3 中的 t1 和 t2 指向唯一的对象，二者相等，输出 true。该存储规则极大的节省了存储空间。&lt;/p&gt;
+
+</description>
+        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/09/27/Java-Serialization.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/Java-Serialization.html</guid>
+        
+        <category>java</category>
+        
+      </item>
+    
+      <item>
+        <title>Java File</title>
+        <description>&lt;p&gt;/**
+ * @author Toby 通用工具类
+ */
+public class Utils {&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/**
+ * @param args
+ * @throws Exception
+ * @throws IOException
+ */
+public static void main(String[] args) throws IOException, Exception {
+    // TODO Auto-generated method stub
+    // File file = new File(&quot;D:/user/mms.xml&quot;);
+    // System.out.println(file.renameTo(new File(&quot;D:/user/mms5.xml&quot;)));
+
+    // 1
+    // compress(&quot;D:/user/test&quot;, &quot;D:/user/test.zip&quot;);
+
+    /*
+     * String fileName = &quot;D:/user/88.zip&quot;; try {
+     * System.out.println(encryptBASE64(readFileToBytes(fileName))); } catch
+     * (Exception e) { // TODO Auto-generated catch block
+     * e.printStackTrace(); }
+     */
+
+    /*
+     * String mi
+     * =&quot;UEsDBBQACAA&quot;;
+     * RandomAccessFile inOut = new RandomAccessFile(
+     * &quot;D:/user/sample.&quot;,&quot;rw&quot;); inOut.write(decryptBASE64(mi));
+     * inOut.close();
+     */
+
+    // System.out.println(new String(decryptBASE64(&quot;5rWL6K+V&quot;),&quot;utf-8&quot;));
+    // 2
+    // String xml =
+    // createXML(&quot;1828&quot;,&quot;qww&quot;,&quot;123456&quot;,&quot;10658103619033&quot;,&quot;15918542546&quot;,encryptBASE64(&quot;两款茶饮润肺护肤防过敏&quot;.getBytes()),encryptBASE64(readFileToBytes(&quot;D:/user/test.zip&quot;)));
+    // System.out.println(xml);
+    /*
+     * String xml = &quot;&amp;lt;?xml version=\&quot;1.0\&quot; encoding=\&quot;UTF-8\&quot;
+     * standalone=\&quot;yes\&quot;?&amp;gt;&amp;lt;TaskDataTransfer4ERsp
+     * xmlns=\&quot;http://www.aspirehld.com/iecp/TaskDataTransfer4ERsp\&quot;&amp;gt;&amp;lt;ResultCode&amp;gt;2000&amp;lt;/ResultCode&amp;gt;&amp;lt;TaskId&amp;gt;&amp;lt;/TaskId&amp;gt;&amp;lt;ResultMSG&amp;gt;没有获得IP鉴权!&amp;lt;/ResultMSG&amp;gt;&amp;lt;/TaskDataTransfer4ERsp&amp;gt;&quot;;
+     * 
+     * Document doc = DocumentHelper.parseText(xml); // 将字符串转为XML Element
+     * rootElt = doc.getRootElement(); // 获取根节点
+     * 
+     * String resultCode = rootElt.element(&quot;ResultCode&quot;).getTextTrim();
+     * String TaskId = rootElt.element(&quot;TaskId&quot;).getTextTrim(); String
+     * ResultMSG = rootElt.element(&quot;ResultMSG&quot;).getTextTrim();
+     * System.out.println(&quot; &quot;+resultCode+&quot; &quot;+TaskId+&quot; &quot;+ResultMSG);
+     */
+
+}
+
+/**
+ * BASE64解密
+ * 
+ * @param key
+ * @return
+ * @throws Exception
+ */
+public static byte[] decryptBASE64(String key) throws Exception {
+    return (new BASE64Decoder()).decodeBuffer(key);
+}
+
+/**
+ * BASE64加密
+ * 
+ * @param key
+ * @return
+ * @throws Exception
+ */
+public static String encryptBASE64(byte[] key) throws Exception {
+    return (new BASE64Encoder()).encodeBuffer(key);
+}
+
+/**
+ * 获取路径下所有文件名
+ * 
+ * @param path
+ * @return
+ */
+public static String[] getFile(String path) {
+    File file = new File(path);
+    String[] name = file.list();
+    return name;
+}
+
+/**
+ * 
+ * @param sourceDirPath
+ * @param targetDirPath
+ * @throws IOException
+ */
+public static void copyDir(String sourceDirPath, String targetDirPath) throws IOException {
+    // 创建目标文件夹
+    (new File(targetDirPath)).mkdirs();
+    // 获取源文件夹当前下的文件或目录
+    File[] file = (new File(sourceDirPath)).listFiles();
+    for (int i = 0; i &amp;lt; file.length; i++) {
+        if (file[i].isFile()) {
+            // 复制文件
+            String type = file[i].getName().substring(file[i].getName().lastIndexOf(&quot;.&quot;) + 1);
+
+            if (type.equalsIgnoreCase(&quot;txt&quot;))
+                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()), MTOServerConstants.CODE_UTF_8,
+                        MTOServerConstants.CODE_GBK);
+            else
+                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()));
+        }
+        if (file[i].isDirectory()) {
+            // 复制目录
+            String sourceDir = sourceDirPath + File.separator + file[i].getName();
+            String targetDir = targetDirPath + File.separator + file[i].getName();
+            FileUtil.copyDirectiory(sourceDir, targetDir);
+        }
+    }
+}
+
+/**
+ * 读取文件中内容
+ * 
+ * @param path
+ * @return
+ * @throws IOException
+ */
+public static String readFileToString(String path) throws IOException {
+    String resultStr = null;
+    FileInputStream fis = null;
+    try {
+        fis = new FileInputStream(path);
+        byte[] inBuf = new byte[2000];
+        int len = inBuf.length;
+        int off = 0;
+        int ret = 0;
+        while ((ret = fis.read(inBuf, off, len)) &amp;gt; 0) {
+            off += ret;
+            len -= ret;
+        }
+        resultStr = new String(new String(inBuf, 0, off, MTOServerConstants.CODE_GBK).getBytes());
+    } finally {
+        if (fis != null)
+            fis.close();
+    }
+    return resultStr;
+}
+
+/**
+ * 文件转成字节数组
+ * 
+ * @param path
+ * @return
+ * @throws IOException
+ */
+public static byte[] readFileToBytes(String path) throws IOException {
+    byte[] b = null;
+    InputStream is = null;
+    File f = new File(path);
+    try {
+        is = new FileInputStream(f);
+        b = new byte[(int) f.length()];
+        is.read(b);
+    } finally {
+        if (is != null)
+            is.close();
+    }
+    return b;
+}
+
+/**
+ * 将byte写入文件中
+ * 
+ * @param fileByte
+ * @param filePath
+ * @throws IOException
+ */
+public static void byteToFile(byte[] fileByte, String filePath) throws IOException {
+    OutputStream os = null;
+    try {
+        os = new FileOutputStream(new File(filePath));
+        os.write(fileByte);
+        os.flush();
+    } finally {
+        if (os != null)
+            os.close();
+    }
+}
+
+/**
+ * 将目录文件打包成zip
+ * 
+ * @param srcPathName
+ * @param zipFilePath
+ * @return 成功打包true 失败false
+ */
+public static boolean compress(String srcPathName, String zipFilePath) {
+    if (strIsNull(srcPathName) || strIsNull(zipFilePath))
+        return false;
+
+    File zipFile = new File(zipFilePath);
+    File srcdir = new File(srcPathName);
+    if (!srcdir.exists())
+        return false;
+    Project prj = new Project();
+    Zip zip = new Zip();
+    zip.setProject(prj);
+    zip.setDestFile(zipFile);
+    FileSet fileSet = new FileSet();
+    fileSet.setProject(prj);
+    fileSet.setDir(srcdir);
+    zip.addFileset(fileSet);
+    zip.execute();
+    return zipFile.exists();
+}
+
+/**
+ * 判空字串
+ * 
+ * @param str
+ * @return 为空true
+ */
+public static boolean strIsNull(String str) {
+    return str == null || str.equals(&quot;&quot;);
+}
+
+/**
+ * 折分数组
+ * 
+ * @param ary
+ * @param subSize
+ * @return
+ */
+public static List&amp;lt;List&amp;lt;Object&amp;gt;&amp;gt; splitAry(Object[] ary, int subSize) {
+    int count = ary.length % subSize == 0 ? ary.length / subSize : ary.length / subSize + 1;
+
+    List&amp;lt;List&amp;lt;Object&amp;gt;&amp;gt; subAryList = new ArrayList&amp;lt;List&amp;lt;Object&amp;gt;&amp;gt;();
+
+    for (int i = 0; i &amp;lt; count; i++) {
+        int index = i * subSize;
+
+        List&amp;lt;Object&amp;gt; list = new ArrayList&amp;lt;Object&amp;gt;();
+        int j = 0;
+        while (j &amp;lt; subSize &amp;amp;&amp;amp; index &amp;lt; ary.length) {
+            list.add(ary[index++]);
+            j++;
+        }
+
+        subAryList.add(list);
+    }
+
+    return subAryList;
+}
+
+/**
+ * @param mobile
+ * @return
+ */
+public static String ArrayToString(Object[] mobile) {
+    String destId = &quot;&quot;;
+    for (Object phone : mobile) {
+        destId += &quot; &quot; + (String) phone;
+    }
+    return destId.trim();
+} }
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/09/27/Java-File.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/Java-File.html</guid>
+        
+        <category>java</category>
+        
+      </item>
+    
+      <item>
+        <title>DB Index</title>
+        <description>&lt;p&gt;理解索引结构     &lt;/p&gt;
+
+&lt;p&gt;实际上，可以把索引理解为一种特殊的目录。微软的SQL SERVER提供了两种索引：聚集索引（clustered index，也称聚类索引、簇集索引）和非聚集索引（nonclustered index，也称非聚类索引、非簇集索引）。下面，我们举例来说明一下聚集索引和非聚集索引的区别： &lt;/p&gt;
+
+&lt;p&gt;其实，我们的汉语字典的正文本身就是一个聚集索引。比如，我们要查”安”字，就会很自然地翻开字典的前几页，因为”安”的拼音是”an”，而按照拼音排序汉字的字典是以英文字母”a”开头并以”z”结尾的，那么”安”字就自然地排在字典的前部。如果您翻完了所有以”a”开头的部分仍然找不到这个字，那么就说明您的字典中没有这个字；同样的，如果查”张”字，那您也会将您的字典翻到最后部分，因为”张”的拼音是”zhang”。也就是说，字典的正文部分本身就是一个目录，您不需要再去查其他目录来找到您需要找的内容。  &lt;/p&gt;
+
+&lt;p&gt;我们把这种正文内容本身就是一种按照一定规则排列的目录称为”聚集索引”。      &lt;/p&gt;
+
+&lt;p&gt;如果您认识某个字，您可以快速地从自动中查到这个字。但您也可能会遇到您不认识的字，不知道它的发音，这时候，您就不能按照刚才的方法找到您要查的字，而需要去根据”偏旁部首”查到您要找的字，然后根据这个字后的页码直接翻到某页来找到您要找的字。但您结合”部首目录”和”检字表”而查到的字的排序并不是真正的正文的排序方法，比如您查”张”字，我们可以看到在查部首之后的检字表中”张”的页码是672页，检字表中”张”的上面是”驰”字，但页码却是63页，”张”的下面是”弩”字，页面是390页。很显然，这些字并不是真正的分别位于”张”字的上下方，现在您看到的连续的”驰、张、弩”三字实际上就是他们在非聚集索引中的排序，是字典正文中的字在非聚集索引中的映射。我们可以通过这种方式来找到您所需要的字，但它需要两个过程，先找到目录中的结果，然后再翻到您所需要的页码。 &lt;/p&gt;
+
+&lt;p&gt;我们把这种目录纯粹是目录，正文纯粹是正文的排序方式称为”非聚集索引”。 &lt;/p&gt;
+
+&lt;p&gt;何时使用聚集索引或非聚集索引    &lt;br /&gt;
+下面的表总结了何时使用聚集索引或非聚集索引（很重要）。   &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;	动作描述        使用聚集索引 使用非聚集索引     
+	列经常被分组排序      应        应     
+	返回某范围内的数据          应      不应        
+	一个或极少不同值           不应     不应     
+	小数目的不同值                应     不应     
+	大数目的不同值              不应    应     
+	频繁更新的列                 不应   应     
+	外键列                  应 应     
+	主键列               应   应     
+	频繁修改索引列       不应      应        
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;几种常见的MySQL索引类型。&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;普通型索引
+ 这是最基本的索引类型，而且它没有唯一性之类的限制。普通索引可以通过以下几种方式创建： &lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;创建索引，例如CREATE INDEX 索引的名字 ON tablename (列名1，列名2,…); &lt;/li&gt;
+  &lt;li&gt;修改表，例如ALTER TABLE tablename ADD INDEX 索引的名字 (列名1，列名2,…); &lt;/li&gt;
+  &lt;li&gt;创建表的时候指定索引，例如CREATE TABLE tablename ( […], INDEX 索引的名字 (列名1，列名
+2,…) );&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;唯一索引
+   这种索引和前面的“普通索引”基本相同，但有一个区别：索引列的所有值都只能出现一次，即必须唯一。唯一性索引可以用以下几种方式创建： &lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;创建索引，例如CREATE UNIQUE INDEX 索引的名字 ON tablename (列的列表); &lt;/li&gt;
+  &lt;li&gt;修改表，例如ALTER TABLE tablename ADD UNIQUE 索引的名字 (列的列表); &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;创建表的时候指定索引，例如CREATE TABLE tablename ( […], UNIQUE 索引的名字 (列的列
+     表) );&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;主键&lt;/p&gt;
+
+    &lt;p&gt;主键是一种唯一性索引，但它必须指定为“PRIMARY KEY”。如果你曾经用过AUTO_INCREMENT类型的列，你可能已经熟悉主键之类的概念了。主键一般在创建表的时候指定，例如“CREATE TABLE tablename ( […], PRIMARY KEY (列的列表) ); ”。但是，我们也可以通过修改表的方式加入主键，例如“ALTER TABLE tablename ADD PRIMARY KEY (列的列表); ”。每个表只能有一个主键。 （主键相当于聚合索引，是查找最快的索引）&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;单列索引和多列索引&lt;/p&gt;
+
+    &lt;p&gt;索引可以是单列索引，也可以是多列索引。
+ 1. 单列索引就是常用的一个列字段的索引，常见的索引。
+ 2. 多列索引就是含有多个列字段的索引&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; 	 alter table student add index sy(name,age，score);
+ 	 索引sy就为多列索引，多列索引在以下几中情况下才能有效：
+ 	 select * from student where name=&#39;jia&#39; and age&amp;gt;=&#39;12&#39; //where条件中含有索引的首列字段和
+		   第二个字段
+ 	 select * from student where name=&#39;jia&#39; //where条件中只含有首列字段
+ 	 select * from student where name=&#39;jia&#39; and score&amp;lt;60//where条件中含有首列字段和第三个字
+		  段
+		 总结：多列索引只有在where条件中含有索引中的首列字段时才有效
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;选择索引列&lt;/p&gt;
+
+    &lt;p&gt;应该怎样选择索引列，首先要看查询条件，一般将查询条件中的列作为索引&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;联合索引使用结论:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;查询条件中出现联合索引第一列,或者全部,则能利用联合索引.&lt;/li&gt;
+  &lt;li&gt;条件列中只要条件相连在一起,以本文例子来说就是:
+last_name=’1′ and first_name=’1′与first_name=’1′ and last_name=’1′
+,无论前后,都会利用上联合索引.&lt;/li&gt;
+  &lt;li&gt;查询条件中没有出现联合索引的第一列,而出现联合索引的第二列,或者第三列,都不会利用联合索引查询.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;单一列索引的应用结论:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;只要条件列中出现索引列,无论在什么位置,都能利用索引查询.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;两者的共同点:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;要想利用索引,都要符合SARG标准.&lt;/li&gt;
+  &lt;li&gt;都是为了提高查询速度.&lt;/li&gt;
+  &lt;li&gt;都需要额外的系统开销,磁盘空间.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;补充说明: stmtText信息来产生,在查询语句前面加上:SET STATISTICS PROFILE on.可以通过运行它,来观察你的查询是否合理,这样才能真正做到优化.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;主旨:讨论什么情况下能利用上索引.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;索引:创建索引可以根据查询业务的不同分为两种:单一列的索引,联合索引. 顾名思义,单一列索引就是指在表的某一列上创建索引,联合索引是在多个列上联合创建索引.&lt;/p&gt;
+
+&lt;p&gt;优缺点比较:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;索引所占用空间:单一列索引相对要小.&lt;/li&gt;
+  &lt;li&gt;索引创建时间:单一列索引相对短.&lt;/li&gt;
+  &lt;li&gt;索引对insert,update,delete的影响程序:单一列索引要相对低.&lt;/li&gt;
+  &lt;li&gt;在多条件查询时,联合索引效率要高.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;索引的使用范围:单一列索引可以出现在where 条件中的任何位置,而联合索引需要按一定的顺序来写. &lt;/p&gt;
+
+</description>
+        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/09/27/DB-Index.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/09/27/DB-Index.html</guid>
+        
+        <category>db</category>
+        
+      </item>
+    
+  </channel>
+</rss>

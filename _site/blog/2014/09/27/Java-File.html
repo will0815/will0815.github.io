@@ -1,0 +1,364 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="Java File, willgo, Will.Quan">
+  <title>Java File - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/09/27/Java-File.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?will_go8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;时间轴</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;阅读</a></li>
+    
+      <li><a href="/life/index.html"target="_blank"><i class="fa fa-eyedropper"></i>&nbsp;记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/will0815.github.io" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+    <div class="main">
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2014/09/27/Java-File.html">Java File</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2014年09月27日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#java">java</a>	
+  </p>
+</header>
+<div class="post-main">
+<p>/**
+ * @author Toby 通用工具类
+ */
+public class Utils {</p>
+
+<pre><code>/**
+ * @param args
+ * @throws Exception
+ * @throws IOException
+ */
+public static void main(String[] args) throws IOException, Exception {
+    // TODO Auto-generated method stub
+    // File file = new File("D:/user/mms.xml");
+    // System.out.println(file.renameTo(new File("D:/user/mms5.xml")));
+
+    // 1
+    // compress("D:/user/test", "D:/user/test.zip");
+
+    /*
+     * String fileName = "D:/user/88.zip"; try {
+     * System.out.println(encryptBASE64(readFileToBytes(fileName))); } catch
+     * (Exception e) { // TODO Auto-generated catch block
+     * e.printStackTrace(); }
+     */
+
+    /*
+     * String mi
+     * ="UEsDBBQACAA";
+     * RandomAccessFile inOut = new RandomAccessFile(
+     * "D:/user/sample.","rw"); inOut.write(decryptBASE64(mi));
+     * inOut.close();
+     */
+
+    // System.out.println(new String(decryptBASE64("5rWL6K+V"),"utf-8"));
+    // 2
+    // String xml =
+    // createXML("1828","qww","123456","10658103619033","15918542546",encryptBASE64("两款茶饮润肺护肤防过敏".getBytes()),encryptBASE64(readFileToBytes("D:/user/test.zip")));
+    // System.out.println(xml);
+    /*
+     * String xml = "&lt;?xml version=\"1.0\" encoding=\"UTF-8\"
+     * standalone=\"yes\"?&gt;&lt;TaskDataTransfer4ERsp
+     * xmlns=\"http://www.aspirehld.com/iecp/TaskDataTransfer4ERsp\"&gt;&lt;ResultCode&gt;2000&lt;/ResultCode&gt;&lt;TaskId&gt;&lt;/TaskId&gt;&lt;ResultMSG&gt;没有获得IP鉴权!&lt;/ResultMSG&gt;&lt;/TaskDataTransfer4ERsp&gt;";
+     * 
+     * Document doc = DocumentHelper.parseText(xml); // 将字符串转为XML Element
+     * rootElt = doc.getRootElement(); // 获取根节点
+     * 
+     * String resultCode = rootElt.element("ResultCode").getTextTrim();
+     * String TaskId = rootElt.element("TaskId").getTextTrim(); String
+     * ResultMSG = rootElt.element("ResultMSG").getTextTrim();
+     * System.out.println(" "+resultCode+" "+TaskId+" "+ResultMSG);
+     */
+
+}
+
+/**
+ * BASE64解密
+ * 
+ * @param key
+ * @return
+ * @throws Exception
+ */
+public static byte[] decryptBASE64(String key) throws Exception {
+    return (new BASE64Decoder()).decodeBuffer(key);
+}
+
+/**
+ * BASE64加密
+ * 
+ * @param key
+ * @return
+ * @throws Exception
+ */
+public static String encryptBASE64(byte[] key) throws Exception {
+    return (new BASE64Encoder()).encodeBuffer(key);
+}
+
+/**
+ * 获取路径下所有文件名
+ * 
+ * @param path
+ * @return
+ */
+public static String[] getFile(String path) {
+    File file = new File(path);
+    String[] name = file.list();
+    return name;
+}
+
+/**
+ * 
+ * @param sourceDirPath
+ * @param targetDirPath
+ * @throws IOException
+ */
+public static void copyDir(String sourceDirPath, String targetDirPath) throws IOException {
+    // 创建目标文件夹
+    (new File(targetDirPath)).mkdirs();
+    // 获取源文件夹当前下的文件或目录
+    File[] file = (new File(sourceDirPath)).listFiles();
+    for (int i = 0; i &lt; file.length; i++) {
+        if (file[i].isFile()) {
+            // 复制文件
+            String type = file[i].getName().substring(file[i].getName().lastIndexOf(".") + 1);
+
+            if (type.equalsIgnoreCase("txt"))
+                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()), MTOServerConstants.CODE_UTF_8,
+                        MTOServerConstants.CODE_GBK);
+            else
+                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()));
+        }
+        if (file[i].isDirectory()) {
+            // 复制目录
+            String sourceDir = sourceDirPath + File.separator + file[i].getName();
+            String targetDir = targetDirPath + File.separator + file[i].getName();
+            FileUtil.copyDirectiory(sourceDir, targetDir);
+        }
+    }
+}
+
+/**
+ * 读取文件中内容
+ * 
+ * @param path
+ * @return
+ * @throws IOException
+ */
+public static String readFileToString(String path) throws IOException {
+    String resultStr = null;
+    FileInputStream fis = null;
+    try {
+        fis = new FileInputStream(path);
+        byte[] inBuf = new byte[2000];
+        int len = inBuf.length;
+        int off = 0;
+        int ret = 0;
+        while ((ret = fis.read(inBuf, off, len)) &gt; 0) {
+            off += ret;
+            len -= ret;
+        }
+        resultStr = new String(new String(inBuf, 0, off, MTOServerConstants.CODE_GBK).getBytes());
+    } finally {
+        if (fis != null)
+            fis.close();
+    }
+    return resultStr;
+}
+
+/**
+ * 文件转成字节数组
+ * 
+ * @param path
+ * @return
+ * @throws IOException
+ */
+public static byte[] readFileToBytes(String path) throws IOException {
+    byte[] b = null;
+    InputStream is = null;
+    File f = new File(path);
+    try {
+        is = new FileInputStream(f);
+        b = new byte[(int) f.length()];
+        is.read(b);
+    } finally {
+        if (is != null)
+            is.close();
+    }
+    return b;
+}
+
+/**
+ * 将byte写入文件中
+ * 
+ * @param fileByte
+ * @param filePath
+ * @throws IOException
+ */
+public static void byteToFile(byte[] fileByte, String filePath) throws IOException {
+    OutputStream os = null;
+    try {
+        os = new FileOutputStream(new File(filePath));
+        os.write(fileByte);
+        os.flush();
+    } finally {
+        if (os != null)
+            os.close();
+    }
+}
+
+/**
+ * 将目录文件打包成zip
+ * 
+ * @param srcPathName
+ * @param zipFilePath
+ * @return 成功打包true 失败false
+ */
+public static boolean compress(String srcPathName, String zipFilePath) {
+    if (strIsNull(srcPathName) || strIsNull(zipFilePath))
+        return false;
+
+    File zipFile = new File(zipFilePath);
+    File srcdir = new File(srcPathName);
+    if (!srcdir.exists())
+        return false;
+    Project prj = new Project();
+    Zip zip = new Zip();
+    zip.setProject(prj);
+    zip.setDestFile(zipFile);
+    FileSet fileSet = new FileSet();
+    fileSet.setProject(prj);
+    fileSet.setDir(srcdir);
+    zip.addFileset(fileSet);
+    zip.execute();
+    return zipFile.exists();
+}
+
+/**
+ * 判空字串
+ * 
+ * @param str
+ * @return 为空true
+ */
+public static boolean strIsNull(String str) {
+    return str == null || str.equals("");
+}
+
+/**
+ * 折分数组
+ * 
+ * @param ary
+ * @param subSize
+ * @return
+ */
+public static List&lt;List&lt;Object&gt;&gt; splitAry(Object[] ary, int subSize) {
+    int count = ary.length % subSize == 0 ? ary.length / subSize : ary.length / subSize + 1;
+
+    List&lt;List&lt;Object&gt;&gt; subAryList = new ArrayList&lt;List&lt;Object&gt;&gt;();
+
+    for (int i = 0; i &lt; count; i++) {
+        int index = i * subSize;
+
+        List&lt;Object&gt; list = new ArrayList&lt;Object&gt;();
+        int j = 0;
+        while (j &lt; subSize &amp;&amp; index &lt; ary.length) {
+            list.add(ary[index++]);
+            j++;
+        }
+
+        subAryList.add(list);
+    }
+
+    return subAryList;
+}
+
+/**
+ * @param mobile
+ * @return
+ */
+public static String ArrayToString(Object[] mobile) {
+    String destId = "";
+    for (Object phone : mobile) {
+        destId += " " + (String) phone;
+    }
+    return destId.trim();
+} }
+</code></pre>
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2014/09/27/DB-Index.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;DB Index</a>
+
+
+<a class="pagination-item older" href="/blog/2014/09/27/Java-Serialization.html">Java Serialization&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="Java File" data-thread-key="/blog/2014/09/27/Java-File" data-url="index.html/blog/2014/09/27/Java-File.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"5312914"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>
