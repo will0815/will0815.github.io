@@ -10,7 +10,7 @@
   icon:  fa fa-book
   title: 阅读
 
-- href: /page/read.html
+- href: /page/life.html
   icon: fa fa-eyedropper
   title: 记录
   newblank: false

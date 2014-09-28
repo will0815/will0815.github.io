@@ -5,14 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta name="description" content="Will go, Just do it.">
   <meta name="author" content="Will.Quan">
-  <meta name="keywords" content="关于, willgo, Will.Quan">
-  <title>关于 - willgo</title>
-  <link rel="canonical" href="index.html/page/about.html">
+  <meta name="keywords" content="生活记录, willgo, 生活记录 - willgo">
+  <title>生活记录 - willgo</title>
   <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="canonical" href="index.html/page/life.html">
   <link rel="stylesheet" href="/res/css/public.css">
+  <!--
+  <link rel="stylesheet" href="/res/css/life.css">
+  -->
   <link rel="stylesheet" href="/res/css/light.css">
-  <script src="/res/js/light.js"></script>
   <script type="text/javascript">
 var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
 document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
@@ -20,8 +22,8 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 
 </head>
 <body>
-  <div id="blog">
-    <div class="sidebar">
+  <div class="main">
+	<div class="sidebar">
   <div class="profilepic">
     <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
   </div>
@@ -52,17 +54,30 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
   </div>
 </div>
-    <div class="main">
-    <h3 id="section">我不是宿命论者 但遭什么事情 跟个性有很大的关系 我不知道未来 我把将来交给冥冥中手里 只是一步步的往前走</h3>
+    <div class="title">生活记录</div>
+    <div class="post-info"><i class="fa fa-clock-o"></i>&nbsp;--</div>
+    <div class="content">
+    <link rel="stylesheet" href="/res/css/page.css">
+<div>
 
-<h2 id="email-willquan0815gmailcom">Email： WillQuan0815@gmail.com</h2>
-
-<p><img src="/res/img/about-bg.jpg" alt="" /></p>
-
-    
+</div>
+<br/>
+<script>
+$(function() {
+  var tags_a = $(".point-time");
+  tags_a.each(function(){
+    var x = 5;
+    var y = 0;
+    var rand = parseInt(Math.random() * (x - y + 1) + y);
+    $(this).addClass("point"+rand);
+  });
+});
+</script>
     </div>
-  </div>    
+    
+  </div>
   <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  <script src="/res/js/light.js"></script>
   
 </body>
 </html>

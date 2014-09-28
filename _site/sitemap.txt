@@ -10,6 +10,7 @@ index.html/page/test.html
 index.html/sitemap.txt
 index.html/life/sanya.html
 index.html/page/read.html
+index.html/page/life.html
 index.html/index.html
 index.html/page/feed.xml
 index.html/page/category.html
@@ -48,12 +49,12 @@ index.html/blog/2014/09/27/Java-class-loader.html
 index.html/blog/2014/09/27/Java-Serialization.html
 index.html/blog/2014/09/27/Java-File.html
 index.html/blog/2014/09/27/InputFormat.html
-index.html/blog/2014/09/27/HashMap-equalshashCode.html
 index.html/blog/2014/09/27/Hadoop.html
 index.html/blog/2014/09/27/HDFS.html
-index.html/blog/2014/09/27/HBasesession.html
 index.html/blog/2014/09/27/HBASE.html
 index.html/blog/2014/09/27/EJob.html
 index.html/blog/2014/09/27/Dflinux.html
 index.html/blog/2014/09/27/DB-Index.html
 index.html/blog/2014/09/27/AMD--CMD.html
+index.html/blog/2014/06/08/HBasesession.html
+index.html/blog/2014/05/21/HashMap-equalshashCode.html

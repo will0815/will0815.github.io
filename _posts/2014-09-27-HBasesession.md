@@ -2,7 +2,7 @@
 layout: post
 title: HBase第一次session记录
 category: Hadoop
-date: 2014-09-27
+date: 2014-06-08
 ---
 1. 数据本地化(Data Localization)
 数据存在当前JVM 或是当前磁盘
