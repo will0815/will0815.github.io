@@ -1,6 +1,6 @@
 - href: /page/timing.html
   icon: fa fa-clock-o
-  title: 资料时间线
+  title: 资料时间
 
 - href: /page/category.html
   icon: fa fa-tags
@@ -8,7 +8,7 @@
 
 - href: /page/read.html
   icon:  fa fa-book
-  title: 假寐书屋
+  title: 逗绊读书
 
 - href: /page/life.html
   icon: fa fa-eyedropper
@@ -17,4 +17,4 @@
 
 - href: /page/about.html
   icon: fa fa-paper-plane-o
-  title: 也弄个关于
+  title: 假装关于
