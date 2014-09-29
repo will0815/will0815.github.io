@@ -8,7 +8,7 @@ layout: null
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
-  <title>找不到页面了...</title>
+  <title>Error Page</title>
   <link rel="stylesheet" href="/res/css/404.css">
   {% include tongji.html %}
 </head>
@@ -24,11 +24,11 @@ layout: null
   <div id="cloud" class="png"></div>
 </body>
 <script>
-  var t = 99999999;
+  var t = 9999;
   setInterval("testTime()", 1000);
   function testTime() {
-    view.innerHTML = t + " 秒后跳转至首页...";
-    if(t == 0) {
+    view.innerHTML = t + " 秒后自动返回首页...";
+    if(t == 9990) {
       location="/";
     }
     t--;
