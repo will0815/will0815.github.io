@@ -24,12 +24,12 @@ layout: null
   <div id="cloud" class="png"></div>
 </body>
 <script>
-  var t = 5;
+  var t = 3;
   setInterval("testTime()", 1000);
   function testTime() {
     view.innerHTML = t + " 秒后跳转至首页...";
     if(t == 0) {
-      location="{{ site.blog.url }}";
+      location="willgo.cc";
     }
     t--;
   }
