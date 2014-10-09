@@ -17,6 +17,7 @@ index.html/page/category.html
 index.html/page/about.html
 index.html/404.html
 
+index.html/blog/2014/10/09/Holographic-user-portrait.html
 index.html/blog/2014/09/27/ubuntueclipse.html
 index.html/blog/2014/09/27/sqoop.html
 index.html/blog/2014/09/27/sql-frist-day.html

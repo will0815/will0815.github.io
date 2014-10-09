@@ -30,21 +30,21 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
   <nav id="nav">
     <ul>
     
-      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;时间轴</a></li>
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
     
-      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;分类</a></li>
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
     
-      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;阅读</a></li>
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
     
-      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;记录</a></li>
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
     
-      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;关于</a></li>
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
     
     </ul>
   </nav>  
   <nav id="sub-nav">
     <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
-    <a class="github" href="https://github.com/will0815/will0815.github.io" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
     <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
   </nav>
   <div id="license">
@@ -54,6 +54,90 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 </div>
     <div class="main">
     
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/java-SSH-.html">java SSH 远程操作</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <pre><code>public class RmtShellExecutor {
+private static Logger logger = Logger.getLogger(RmtShellExecutor.class);
+private static Connection conn;
+private static String ip;
+private static String usr;
+
+private static boolean connection() throws IOException, URISyntaxException {
+try {
+conn = new Connection(ip);
+conn.connect();
+} catch (IOException e) {
+logger.error("Login remote machine failed" + ip, e);
+throw new IOException("Login remote machine failed" + ip, e);
+}
+return conn.authenticateWithPublicKey(usr, new File(RmtShellExecutor.class.getClassLoader().getResource("id_rsa").toURI())
+, null);
+}
+
+public static Map&lt;String, Object&gt; exec(String ipStr, String userNameStr, String cmds) throws Exception {
+ip = ipStr;
+usr = userNameStr;
+Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+InputStream stdOut = null;
+InputStream stdErr = null;
+String outStr = "";
+String outErr = "";
+try {
+if (connection()) {
+Session session = conn.openSession();
+session.execCommand(cmds);
+stdOut = new StreamGobbler(session.getStdout());
+outStr = processStream(stdOut, charset);
+stdErr = new StreamGobbler(session.getStderr());
+outErr = processStream(stdErr, charset);
+map.put(Constants.STATUS, Constants.PROCESSING);
+System.out.println("outStr=" + outStr);
+System.out.println("outErr=" + outErr);
+ret = session.getExitStatus();
+} else {
+logger.error("Login remote machine failed" + ip);
+throw new Exception("Login remote machine failed" + ip);
+}
+} catch(Exception e){
+logger.error("Login remote machine failed" + ip, e);
+throw new Exception("Login remote machine failed" + ip, e);
+} finally {
+if (conn != null) {
+conn.close();
+}
+IOUtils.closeQuietly(stdOut);
+IOUtils.closeQuietly(stdErr);
+}
+return map;
+}
+
+public static String processStream(InputStream in, String charset) throws Exception {
+byte[] buf = new byte[1024];
+StringBuilder sb = new StringBuilder();
+while (in.read(buf) != -1) {
+sb.append(new String(buf, charset));
+}
+return sb.toString();
+}
+}
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/java-SSH-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
 <div class="posts">
   <section class="post">
     <header class="post-header">
@@ -514,118 +598,6 @@ ugi = UserGroupInformation.getCurrentUser();不过看hdfs权限策略这操行�
 
 
       <div class="readall"><a href="/blog/2014/09/27/eclipse-hadoop-job.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/arraylistarraylink.html">arraylist&arraylink</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#java">java</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p><strong>区别</strong>：</p>
-
-<ol>
-  <li>
-    <p>array 在定义的时候必须实例化(至少申明大小)，arraylist则可以只是申明</p>
-
-    <ul>
-      <li>int[] array = new array[3]</li>
-      <li>int[] array = {1,2,3}</li>
-      <li>ArrayList arrayList;</li>
-      <li>int[] array;则不合法</li>
-    </ul>
-  </li>
-  <li>
-    <p>Array只能存储同构对象，ArrayList则可以存储异构对象，当然object[]和使用泛型的arraylist不适用此条。</p>
-  </li>
-  <li>
-    <p>在CRL的托管方式不一样
- Array是连续存储，Arraylist则不一定是连续存储</p>
-  </li>
-  <li>Array的大小是定义的时候指定的，Arraylist则可以动态扩容</li>
-  <li>Array不能随意添加或删除其中的项，ArrayList则可以随意添加删除</li>
-</ol>
-
-<p><strong>相似</strong>：</p>
-
-<ol>
-  <li>都具有索引，即可以通过索引来直接添加和修改任意项</li>
-  <li>所创建的对象都托管在堆中</li>
-  <li>都能够对自身进行枚举（因为实现了IEnumerable接口）</li>
-</ol>
-
-<p><strong>ArrayList 源码摘要：</strong></p>
-
-<pre><code>1. public class ArrayList&lt;E&gt; extends AbstractList&lt;E&gt;  
-2.         implements List&lt;E&gt;, RandomAccess, Cloneable, java.io.Serializable  
-3. {  
-4.     ......  
-5.   
-6.     /** 
-7.      * The array buffer into which the elements of the ArrayList are stored. 
-8.      * The capacity of the ArrayList is the length of this array buffer. 
-9.      */  
-10.     private transient E[] elementData;  
-11.   
-12.   
-13.     /** 
-14.      * The size of the ArrayList (the number of elements it contains). 
-15.      * 
-16.      * @serial 
-17.      */  
-18.     private int size;  
-19.    ......  
-20. }  
-21. 
-</code></pre>
-
-<p>底层两个属性一个object[] 一个size</p>
-
-<ol>
-  <li>ArrayList底层通过object[] 复制的方式（System.arraycopy()）来处理数组的增长</li>
-  <li>当ArrayList 的容量不足时，其扩充容量的方式：先将容量扩充至当前容量的1.5倍，若还不够，则将容量扩充至当前需要的数量。</li>
-</ol>
-
-<p><strong>ArrayList与Vector的区别</strong></p>
-
-<p>1） vector 是线程同步 的，所以它也是线程安全 的，而arraylist 是线程异步 的，是不安全的 。如果不考虑到线程的安全因素，一般用 arraylist效率比较高。</p>
-
-<p>2） 如果集合中的元素的数目大于目前集合数组的长度时，vector 增长率为目前数组长度的100%, 而arraylist 增长率为目前数组长度的50% .如果在集合中使用数据量比较大的数据，用vector有一定的优势。</p>
-
-<p>3） 如果查找一个指定位置的数据 ，vector和arraylist使用的时间是相同 的，都是O(1) ,这个时候使用vector和arraylist都可以。</p>
-
-<p>而如果移动一个指定位置的数据花费的时间为O(n-i)n为总长度 ，这个时候就应该考虑到使用linklist ,因为它移动一个指定位置的数据所花费的时间为0(1),而查询一个指定位置的数据时花费的时间为0(i)。</p>
-
-<p><strong>ArrayList和LinkedList的大致区别：</strong></p>
-
-<ol>
-  <li>ArrayList是实现了基于动态数组的数据结构，LinkedList基于链表的数据结构。</li>
-  <li>对于随机访问get和set，ArrayList觉得优于LinkedList，因为LinkedList要移动指针。</li>
-  <li>对于新增和删除操作add和remove，LinedList比较占优势，因为ArrayList要移动数据。 </li>
-</ol>
-
-<p><strong>ArrayList和LinkedList在性能上各有优缺点，都有各自所适用的地方，总的说来可以描述如下：</strong></p>
-
-<ol>
-  <li>对ArrayList和LinkedList而言，在列表末尾增加一个元素所花的开销都是固定的。对ArrayList而言，主要是在内部数组中增加一项，指向所添加的元素，偶尔可能会导致对数组重新进行分配；而对LinkedList而言，这个开销是统一的，分配一个内部Entry对象。</li>
-  <li>在ArrayList的中间插入或删除一个元素意味着这个列表中剩余的元素都会被移动；而在LinkedList的中间插入或删除一个元素的开销是固定的。</li>
-  <li>LinkedList不支持高效的随机元素访问。</li>
-  <li>ArrayList的空间浪费主要体现在在list列表的结尾预留一定的容量空间，而LinkedList的空间花费则体现在它的每一个元素都需要消耗相当的空间</li>
-</ol>
-
-<p>可以这样说：当操作是在一列数据的后面添加数据而不是在前面或中间,并且需要随机地访问其中的元素时,使用ArrayList会提供比较好的性能；当你的操作是在一列数据的前面或中间添加或删除数据,并且按照顺序访问其中的元素时,就应该使用LinkedList了。</p>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/arraylistarraylink.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

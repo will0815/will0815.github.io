@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
-  <title>找不到页面了...</title>
+  <title>Error Page</title>
   <link rel="stylesheet" href="/res/css/404.css">
   <script type="text/javascript">
 var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
@@ -24,12 +24,12 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
   <div id="cloud" class="png"></div>
 </body>
 <script>
-  var t = 5;
+  var t = 9999;
   setInterval("testTime()", 1000);
   function testTime() {
-    view.innerHTML = t + " 秒后跳转至首页...";
-    if(t == 0) {
-      location="index.html";
+    view.innerHTML = t + " 秒后自动返回首页...";
+    if(t == 9990) {
+      location="/";
     }
     t--;
   }

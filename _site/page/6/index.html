@@ -30,21 +30,21 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
   <nav id="nav">
     <ul>
     
-      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;时间轴</a></li>
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
     
-      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;分类</a></li>
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
     
-      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;阅读</a></li>
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
     
-      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;记录</a></li>
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
     
-      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;关于</a></li>
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
     
     </ul>
   </nav>  
   <nav id="sub-nav">
     <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
-    <a class="github" href="https://github.com/will0815/will0815.github.io" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
     <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
   </nav>
   <div id="license">
@@ -54,6 +54,115 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 </div>
     <div class="main">
     
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Java-Serialization.html">Java Serialization</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>目的：</p>
+
+<p>保存对象的状态，并且可以把保存的对象状态再读取出来进行恢复。</p>
+
+<p>场景：</p>
+
+<ol>
+  <li>需要把内存中对象状态保存到一个文件中或者数据库中时</li>
+  <li>需要用套接字在网络上传送对象时</li>
+  <li>需要通过RMI传输对象时
+特点：</li>
+  <li>序列化时 只对对象的状态进行保存 而不管对象的方法</li>
+  <li>当一个父类实现序列化，子类自动实现序列化 无须显式实现Serializable借口</li>
+  <li>当一个对象的实例变量引用其他对象，序列化该对象时也会把引用对象进行序列化</li>
+  <li>并非所有对象都可以序列化：
+socket/thread</li>
+</ol>
+
+<p>Serialization 是一种将对象以一连串的字节描述的过程，deserialization 将这些字节重构成一个对象的过程。Java序列化API提供一种处理对象序列化的标准机制。</p>
+
+<h2 id="section">进阶问题：</h2>
+
+<p><strong>序列化ID的问题</strong></p>
+
+<p>serialVersionID即 序列化的版本号，是为了保证不同版本之间的兼容性。向前兼容以及向后兼容。
+两种生成方式：</p>
+
+<ol>
+  <li>使用默认的1L</li>
+  <li>根据类名 接口名 成员方法以及属性来生成</li>
+</ol>
+
+<p>如果一个类实现了序列化 但没有显示的申明序列化版本号  在程序编译的时候会自动生成一个版本号。存储在文件中，如果类有改动版本号也会随之改变。 在反序列化的时候JVM会将文件中的ID与本地相应实体类的ID比较  两者一致才能够序列化成功。否则会抛InvalidClassException异常。</p>
+
+<p>静态化变量的序列化</p>
+
+<pre><code>                    //初始时staticVar为5
+                    ObjectOutputStream out = new ObjectOutputStream(
+                                    new FileOutputStream("result.obj"));
+                    out.writeObject(new Test());
+                    out.close();
+
+                    //序列化后修改为10
+                    Test.staticVar = 10;
+
+                    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
+                                    "result.obj"));
+                    Test t = (Test) oin.readObject();
+                    oin.close();
+                    //再读取，通过t.staticVar打印新的值
+                    System.out.println(t.staticVar); 以上代码的输出结果为10.。。因为序列化并不保存静态化变量。
+</code></pre>
+
+<p><strong>父类的序列化</strong></p>
+
+<p>一个子类实现了Serializable接口  它的父类没有实现Serializable接口   序列化该子类对象然后反序列化输出父类定义的某变量的数值  该数值与序列化时的数值不同</p>
+
+<p>在父类没有实现Serializable接口时  JVM将不会序列化父类对象  而一个Java对象的构造必须有父类对象 所以在反序列化时 只能调用父类的无参构造器作为默认的父对象  所以这是可以在父类的无参构造器中对变量进行初始化 否则父类变量都是默认的值</p>
+
+<p><strong>Transient关键字</strong></p>
+
+<p>Transient关键字的作用是控制变量的序列化，在变量申明前加上次关键字可以阻止该变量被序列化</p>
+
+<p><strong>序列化存储规则</strong></p>
+
+<pre><code> ObjectOutputStream out = new ObjectOutputStream(
+                                    new FileOutputStream("result.obj"));
+    Test test = new Test();
+    //试图将对象两次写入文件
+    out.writeObject(test);
+    out.flush();
+    System.out.println(new File("result.obj").length());
+    out.writeObject(test);
+    out.close();
+    System.out.println(new File("result.obj").length());
+
+    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
+                    "result.obj"));
+    //从文件依次读出两个文件
+    Test t1 = (Test) oin.readObject();
+    Test t2 = (Test) oin.readObject();
+    oin.close();
+    //判断两个引用是否指向同一个对象
+    System.out.println(t1 == t2);
+</code></pre>
+
+<p>同一对象两次写入文件，打印出写入一次对象后的存储大小和写入两次后的存储大小，然后从文件中反序列化出两个对象，比较这两个对象是否为同一对象。一般的思维是，两次写入对象，文件大小会变为两倍的大小，反序列化时，由于从文件读取，生成了两个对象，判断相等时应该是输入 false 才对，最后却为TRUE。</p>
+
+<p>因为：Java 序列化机制为了节省磁盘空间，具有特定的存储规则，当写入文件的为同一对象时，并不会再将对象的内容进行存储，而只是再次存储一份引用，上面增加的 5 字节的存储空间就是新增引用和一些控制信息的空间。反序列化时，恢复引用关系，使得清单 3 中的 t1 和 t2 指向唯一的对象，二者相等，输出 true。该存储规则极大的节省了存储空间。</p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/Java-Serialization.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
 <div class="posts">
   <section class="post">
     <header class="post-header">
@@ -1068,118 +1177,6 @@ PV计算：通过在HBase写端内存中，累加计数，维护PV值的更新�
 <p>总之，概括来讲，对系统进行优化时，首先定位到影响你的程序运行性能的瓶颈之处，然后有的放矢进行针对行的优化。如果优化后满足你的期望，那么就可以停止优化；否则继续寻找新的瓶颈之处，开始新的优化，直到满足性能要求。</p>
 
       <div class="readall"><a href="/blog/2014/09/27/HBASE.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/EJob.html">EJob</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <pre><code>import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
-
-public class EJob {
-
-// To declare global field
-private static List&lt;URL&gt; classPath = new ArrayList&lt;URL&gt;();
-
-// To declare method
-public static File createTempJar(String root) throws IOException {
-if (!new File(root).exists()) {
-return null;
-}
-Manifest manifest = new Manifest();
-manifest.getMainAttributes().putValue("Manifest-Version", "1.0");
-final File jarFile = File.createTempFile("EJob-", ".jar", new File(
-System.getProperty("java.io.tmpdir")));
-
-Runtime.getRuntime().addShutdownHook(new Thread() {
-public void run() {
-jarFile.delete();
-}
-});
-
-JarOutputStream out = new JarOutputStream(
-new FileOutputStream(jarFile), manifest);
-createTempJarInner(out, new File(root), "");
-out.flush();
-out.close();
-return jarFile;
-}
-
-private static void createTempJarInner(JarOutputStream out, File f,
-String base) throws IOException {
-if (f.isDirectory()) {
-File[] fl = f.listFiles();
-if (base.length() &gt; 0) {
-base = base + "/";
-}
-for (int i = 0; i &lt; fl.length; i++) {
-createTempJarInner(out, fl[i], base + fl[i].getName());
-}
-} else {
-out.putNextEntry(new JarEntry(base));
-FileInputStream in = new FileInputStream(f);
-byte[] buffer = new byte[1024];
-int n = in.read(buffer);
-while (n != -1) {
-out.write(buffer, 0, n);
-n = in.read(buffer);
-}
-in.close();
-}
-}
-
-public static ClassLoader getClassLoader() {
-ClassLoader parent = Thread.currentThread().getContextClassLoader();
-if (parent == null) {
-parent = EJob.class.getClassLoader();
-}
-if (parent == null) {
-parent = ClassLoader.getSystemClassLoader();
-}
-return new URLClassLoader(classPath.toArray(new URL[0]), parent);
-}
-
-public static void addClasspath(String component) {
-
-if ((component != null) &amp;&amp; (component.length() &gt; 0)) {
-try {
-File f = new File(component);
-
-if (f.exists()) {
-URL key = f.getCanonicalFile().toURL();
-if (!classPath.contains(key)) {
-classPath.add(key);
-}
-}
-} catch (IOException e) {
-}
-}
-}
-}
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/09/27/EJob.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
