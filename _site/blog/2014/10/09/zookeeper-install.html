@@ -1,0 +1,200 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="zookeeper install, willgo, Will.Quan">
+  <title>zookeeper install - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/10/09/zookeeper-install.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+    <div class="main">
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2014/10/09/zookeeper-install.html">zookeeper install</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2014年10月09日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
+  </p>
+</header>
+<div class="post-main">
+<p><strong>Zookeeper集群安装配置</strong></p>
+
+<ol>
+  <li>
+    <p>修改zookeeper配置文件zoo.cfg</p>
+
+    <p>在Linux系统下解压zookeeper安装包zookeeper-3.4.3.tar.gz ，进入到conf目录，将zoo_sample.cfg拷贝一份命名为zoo.cfg（Zookeeper 在启动时会找这个文件作为默认配置文件），打开该文件进行修改为以下格式</p>
+
+    <pre><code> dataDir=/home/hadoop/temp/zookeeper/data
+ server.23=192.168.6.23:2888:3888
+ server.24=192.168.6.24:2888:3888
+ server.25=192.168.6.25:2888:3888
+</code></pre>
+  </li>
+  <li>
+    <p>新建目录、新建并编辑myid文件
+（本次配置myid文件放在/home/hadoop/temp/zookeeper/data目录下）</p>
+
+    <pre><code> mkdir /home/hadoop/will/zookeeper/data	//dataDir目录
+ vi /home/hadoop/temp/zookeeper/data/myid  注意myid文件中的内容为：Master中为0，Slave1中为1，Slave2中为2，分别与zoo.cfg中对应起来。
+</code></pre>
+  </li>
+  <li>
+    <p>同步安装包</p>
+
+    <p>将解压修改后的zookeeper-3.4.3文件夹分别拷贝到Master、Slave1、Slave2的相同zookeeper安装路径下。注意：myid文件的内容不是一样的，各服务器中分别是对应zoo.cfg中的设置。</p>
+  </li>
+  <li>
+    <p>启动zookeeper
+ Zookeeper的启动与hadoop不一样，需要每个节点都执行，分别进入3个节点的zookeeper-3.4.3目录，启动zookeeper：</p>
+
+    <pre><code> bin/zkServer.sh start  注意：此时如果报错先不理会，需要继续在另两台服务器中执行相同操作。 
+</code></pre>
+  </li>
+  <li>
+    <p>检查zookeeper是否配置成功
+ 待3台服务器均启动后，如果过程正确的话zookeeper应该已经自动选好leader，进入每台服务器的zookeeper-3.4.3目录，执行以下操作查看zookeeper启动状态：</p>
+
+    <pre><code> bin/zkServer.sh status  如果出现以下代码表示安装成功了。
+
+ [java] view plaincopy
+ JMX enabled by default  
+ Using config: /home/hadoop/zookeeper-3.4.3/bin/../conf/zoo.cfg  
+ Mode: follower	//或者有且只有一个leader
+</code></pre>
+  </li>
+</ol>
+
+<h2 id="zookeeper">2 - 解读zookeeper的配置项</h2>
+<p>zookeeper的默认配置文件为zookeeper/conf/zoo_sample.cfg，需要将其修改为zoo.cfg。其中各配置项的含义，解释如下：</p>
+
+<ol>
+  <li>
+    <p>tickTime：CS通信心跳数</p>
+
+    <p>Zookeeper 服务器之间或客户端与服务器之间维持心跳的时间间隔，也就是每个 tickTime 时间就会发送一个心跳。tickTime以毫秒为单位。
+ 1.tickTime=2000  </p>
+  </li>
+  <li>
+    <p>initLimit：LF初始通信时限</p>
+
+    <p>集群中的follower服务器(F)与leader服务器(L)之间初始连接时能容忍的最多心跳数（tickTime的数量）。
+ 1.initLimit=5  </p>
+  </li>
+  <li>
+    <p>syncLimit：LF同步通信时限</p>
+
+    <p>集群中的follower服务器与leader服务器之间请求和应答之间能容忍的最多心跳数（tickTime的数量）。
+ 1.syncLimit=2  
+ </p>
+  </li>
+  <li>
+    <p>dataDir：数据文件目录</p>
+
+    <p>Zookeeper保存数据的目录，默认情况下，Zookeeper将写数据的日志文件也保存在这个目录里。
+ 1.dataDir=/home/michael/opt/zookeeper/data  </p>
+  </li>
+  <li>
+    <p>dataLogDir：日志文件目录</p>
+
+    <p>Zookeeper保存日志文件的目录。
+ 1.dataLogDir=/home/michael/opt/zookeeper/log  </p>
+  </li>
+  <li>
+    <p>clientPort：客户端连接端口</p>
+
+    <p>客户端连接 Zookeeper 服务器的端口，Zookeeper 会监听这个端口，接受客户端的访问请求。
+ 1.clientPort=2333  </p>
+  </li>
+  <li>
+    <p>服务器名称与地址：集群信息（服务器编号，服务器地址，LF通信端口，选举端口）</p>
+
+    <p>这个配置项的书写格式比较特殊，规则如下：
+ 1.server.N=YYY:A:B  </p>
+
+    <p>其中N表示服务器编号，YYY表示服务器的IP地址，A为LF通信端口，表示该服务器与集群中的leader交换的信息的端口。B为选举端口，表示选举新leader时服务器间相互通信的端口（当leader挂掉时，其余服务器会相互通信，选择出新的leader）。一般来说，集群中每个服务器的A端口都是一样，每个服务器的B端口也是一样。但是当所采用的为伪集群时，IP地址都一样，只能时A端口和B端口不一样。
+ 如：</p>
+
+    <pre><code> 1.server.0=192.168.6.23:2008:6008  
+ 2.server.1=192.168.6.24:2008:6008  
+ 3.server.2=192.168.6.25:2008:6008  
+ 4.server.3=192.168.6.26:2008:6008  
+</code></pre>
+  </li>
+</ol>
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2014/10/09/Holographic-user-portrait.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Holographic user portrait</a>
+
+
+<span class="pagination-item older">下一篇&nbsp;<i class="fa fa-chain-broken"></i></span>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="zookeeper install" data-thread-key="/blog/2014/10/09/zookeeper-install" data-url="index.html/blog/2014/10/09/zookeeper-install.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

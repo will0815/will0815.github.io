@@ -57,6 +57,271 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/mysql-inputformat.html">mysql inputformat简单实现</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <pre><code>import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
+public class MySqlInputFormat extends InputFormat&lt;LongWritable, Person&gt; {
+
+@Override
+public List&lt;InputSplit&gt; getSplits(JobContext context) throws IOException,
+InterruptedException {
+String connString = "jdbc:mysql://172.20.29.29:3306/MapReduceInputTest";
+String sql = "select count(*) as num from person";
+try {
+Class.forName("com.mysql.jdbc.Driver");
+} catch (ClassNotFoundException e) {
+e.printStackTrace();
+}
+
+Connection conn = null;
+Statement stmt = null;
+ResultSet rs = null;
+try {
+conn = java.sql.DriverManager.getConnection(connString
++ "?useUnicode=true&amp;characterEncoding=utf8", "admin",
+"admin");
+stmt = conn.createStatement();
+rs = stmt.executeQuery(sql);
+long count = 0;
+if (rs.next()) {
+count = rs.getLong("num");
+}
+System.out.println(count);
+List&lt;InputSplit&gt; splits = new ArrayList&lt;InputSplit&gt;();
+
+long mapNum = count % 3 == 0 ? (count) / 3 : (count / 3 + 1);
+
+for (long i = 0; i &lt; mapNum; i++) {
+long start = i * 3;
+long end = (i + 1) * 3;
+MysqlInputSplit mysqlInputSplit = new MysqlInputSplit(start,
+end);
+splits.add(mysqlInputSplit);
+}
+return splits;
+} catch (Exception ex) {
+ex.printStackTrace();
+try {
+rs.close();
+stmt.close();
+conn.close();
+} catch (SQLException e) {
+e.printStackTrace();
+}
+}
+
+return null;
+}
+
+@Override
+public RecordReader&lt;LongWritable, Person&gt; createRecordReader(
+InputSplit split, TaskAttemptContext context) throws IOException,
+InterruptedException {
+return new MySqlRecordReader((MysqlInputSplit) split);
+}
+
+}
+</code></pre>
+
+<p>=====================================================================================================</p>
+
+<pre><code>import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapreduce.InputSplit;
+
+public class MysqlInputSplit extends InputSplit implements Writable {
+private long end = 0;
+private long start = 0;
+
+public MysqlInputSplit(long start, long end) {
+this.start = start;
+this.end = end;
+}
+
+public MysqlInputSplit() {
+}
+
+public void readFields(DataInput dataInput) throws IOException {
+this.start = dataInput.readLong();
+this.end = dataInput.readLong();
+}
+
+public void write(DataOutput dataOutput) throws IOException {
+dataOutput.writeLong(start);
+dataOutput.writeLong(end);
+}
+
+@Override
+public long getLength() throws IOException {
+return end - start;
+}
+
+@Override
+public String[] getLocations() throws IOException {
+return new String[] {};
+}
+
+public long getStart() {
+return start;
+}
+
+public long getEnd() {
+return end;
+}
+
+}
+</code></pre>
+
+<p>=====================================================================================================</p>
+
+<pre><code>import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
+public class MySqlRecordReader extends RecordReader&lt;LongWritable, Person&gt; {
+
+private ResultSet results = null;
+
+@Override
+public void initialize(InputSplit split, TaskAttemptContext context)
+throws IOException, InterruptedException {
+// do nothing
+
+}
+
+private final MysqlInputSplit split;
+private long pos = 0;
+
+private LongWritable key = null;
+
+private Person value = null;
+
+private Connection conn;
+
+protected PreparedStatement statement;
+
+public MySqlRecordReader(InputSplit split) {
+this.split = (MysqlInputSplit) split;
+}
+
+@Override
+public boolean nextKeyValue() throws IOException, InterruptedException {
+//System.out.println("ddd");
+try {
+if (key == null) {
+key = new LongWritable();
+}
+if (value == null) {
+value = new Person();
+}
+if (null == this.results) {
+String connString = "jdbc:mysql://172.20.29.29:3306/MapReduceInputTest";
+String sql = "select * from person LIMIT " + split.getLength()
++ " OFFSET " + split.getStart();
+Class.forName("com.mysql.jdbc.Driver");
+conn = java.sql.DriverManager.getConnection(connString
++ "?useUnicode=true&amp;characterEncoding=utf8", "admin",
+"admin");
+statement = conn.prepareStatement(sql);
+this.results = statement.executeQuery();
+}
+
+if (!results.next()) {
+return false;
+}
+
+// Set the key field value as the output key value
+
+key.set(pos + split.getStart());
+value.setAge(results.getInt("age"));
+value.setName(results.getString("name"));
+pos++;
+} catch (Exception e) {
+e.printStackTrace();
+throw new IOException("SQLException in nextKeyValue", e);
+}
+return true;
+}
+
+@Override
+public LongWritable getCurrentKey() throws IOException,
+InterruptedException {
+return key;
+}
+
+@Override
+public Person getCurrentValue() throws IOException, InterruptedException {
+return value;
+}
+
+@Override
+public float getProgress() throws IOException, InterruptedException {
+// TODO Auto-generated method stub
+return 0;
+}
+
+@Override
+public void close() throws IOException {
+try {
+if (null != results) {
+results.close();
+}
+if (null != statement) {
+statement.close();
+}
+if (null != conn) {
+conn.close();
+}
+} catch (SQLException e) {
+throw new IOException(e.getMessage());
+}
+
+}
+
+}
+</code></pre>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/mysql-inputformat.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
       <h1 class="post-title"><a href="/blog/2014/09/27/mysql.html">mysql远程连接配置</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
@@ -474,75 +739,6 @@ alert(a.getMessage());</p>
 
 
       <div class="readall"><a href="/blog/2014/09/27/js-session.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/javascript-session-.html">javascript session 记录</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#f2e">f2e</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <ol>
-  <li>
-    <p>function
-全局方法:    this—&gt;window对象
-对象内方法： this—&gt;当前对象
-构造方法：   初始化构造方法需要new关键字， 否则就会当成全局方法定义
-构造方法首字母大写</p>
-  </li>
-  <li>
-    <p>apply和call方法
-apply（指定调用方法中的this, 方法的参数数组）;
-call(指定调用方法中的this, 方法的参数列表);
-foo.call(this, arg1,arg2,arg3) == foo.apply(this, arguments)==this.foo(arg1, arg2, arg3)
-在JavaScript中,代码总是有一个上下文对象,代码处理该对象之内. 上下文对象是通过this变量来体现的, 这个this变量永远指向当前代码所处的对象中.</p>
-  </li>
-</ol>
-
-<p>此类方法的应用场景：
-A, B类都有一个message属性(面向对象中所说的成员),A有获取消息的getMessage方法,B有设置消息的setMessage方法
-//创建一个B类实例对象
-var b = new B();
-//给对象a动态指派b的setMessage方法,注意,a本身是没有这方法的!
-b.setMessage.call(a, “a的消息”);
-//下面将显示”a的消息”
-alert(a.getMessage());</p>
-
-<ol>
-  <li>
-    <p>argments
-方法的参数数组，一般在实现不定长参数的方法时会用到这个属性
-可以通过它获得参数长度，参数值。
-一般情况不通过它修改参数值。</p>
-  </li>
-  <li>
-    <p>闭包问题</p>
-  </li>
-  <li>
-    <p>module</p>
-  </li>
-  <li>
-    <p>继承，
-javascript的继承发生在对象与对象之间，
-可以通过以下方法实现：
-objectCreate(o) {
-var F = function() {};
-F.prototype = o;
-return new F();
-}</p>
-  </li>
-</ol>
-
-      <div class="readall"><a href="/blog/2014/09/27/javascript-session-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

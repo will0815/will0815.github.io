@@ -57,6 +57,75 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/javascript-session-.html">javascript session 记录</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#f2e">f2e</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <ol>
+  <li>
+    <p>function
+全局方法:    this—&gt;window对象
+对象内方法： this—&gt;当前对象
+构造方法：   初始化构造方法需要new关键字， 否则就会当成全局方法定义
+构造方法首字母大写</p>
+  </li>
+  <li>
+    <p>apply和call方法
+apply（指定调用方法中的this, 方法的参数数组）;
+call(指定调用方法中的this, 方法的参数列表);
+foo.call(this, arg1,arg2,arg3) == foo.apply(this, arguments)==this.foo(arg1, arg2, arg3)
+在JavaScript中,代码总是有一个上下文对象,代码处理该对象之内. 上下文对象是通过this变量来体现的, 这个this变量永远指向当前代码所处的对象中.</p>
+  </li>
+</ol>
+
+<p>此类方法的应用场景：
+A, B类都有一个message属性(面向对象中所说的成员),A有获取消息的getMessage方法,B有设置消息的setMessage方法
+//创建一个B类实例对象
+var b = new B();
+//给对象a动态指派b的setMessage方法,注意,a本身是没有这方法的!
+b.setMessage.call(a, “a的消息”);
+//下面将显示”a的消息”
+alert(a.getMessage());</p>
+
+<ol>
+  <li>
+    <p>argments
+方法的参数数组，一般在实现不定长参数的方法时会用到这个属性
+可以通过它获得参数长度，参数值。
+一般情况不通过它修改参数值。</p>
+  </li>
+  <li>
+    <p>闭包问题</p>
+  </li>
+  <li>
+    <p>module</p>
+  </li>
+  <li>
+    <p>继承，
+javascript的继承发生在对象与对象之间，
+可以通过以下方法实现：
+objectCreate(o) {
+var F = function() {};
+F.prototype = o;
+return new F();
+}</p>
+  </li>
+</ol>
+
+      <div class="readall"><a href="/blog/2014/09/27/javascript-session-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
       <h1 class="post-title"><a href="/blog/2014/09/27/java-SSH-.html">java SSH 远程操作</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
@@ -512,92 +581,6 @@ count mytable</li>
 
 
       <div class="readall"><a href="/blog/2014/09/27/hbase-import-export.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/eclipse-hadoop-job.html">eclipse hadoop job</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>使用EJob提交jar
-在run中添加：</p>
-
-<pre><code>     conf.set("fs.default.name", "hdfs://192.168.241.7:9000");
-      conf.set("mapred.job.tracker", "192.168.241.7:9001");
-      Job job = new Job(conf, "....... my  job ......");
-      try {
-        File jarFile = EJob.createTempJar("bin");
-        ((JobConf) job.getConfiguration()).setJar(jarFile.toString());
-    } catch (IOException e) {
-        throw new IOException(e);
-    }
-</code></pre>
-
-<p>修改hadoop的hdfs-site.xml 关闭权限校验</p>
-
-<pre><code> &lt;property&gt; 
-      &lt;name&gt;dfs.permissions&lt;/name&gt; 
-      &lt;value&gt;false&lt;/value&gt; 
- &lt;/property&gt; 
-</code></pre>
-
-<p><strong>其他解决办法：</strong></p>
-
-<p>hdfs的权限判断十分简单，就是拿发出指令的user name和文件的user name 做比较</p>
-
-  	private void check(INode inode, FsAction access
-<pre><code>  ) throws AccessControlException {
-if (inode == null) {
-  return;
-}
-FsPermission mode = inode.getFsPermission();
-
-if (user.equals(inode.getUserName())) { //user class
-  if (mode.getUserAction().implies(access)) { return; }
-}
-else if (groups.contains(inode.getGroupName())) { //group class
-  if (mode.getGroupAction().implies(access)) { return; }
-}
-else { //other class
-  if (mode.getOtherAction().implies(access)) { return; }
-}
-throw new AccessControlException("Permission denied: user=" + user
-    + ", access=" + access + ", inode=" + inode);
- 	 }
-}
-</code></pre>
-
-<p>在多用户提交任务时遇到Permission denied, 的原因和任务提交的过程有关。</p>
-
-<ol>
-  <li>首先提交任务的客户端会把任务相关文件打包放在hadoop.tmp.dir中，这是本地目录，需要通过本地系统权限验证。由于是临时目录直接设置成为777就行.</li>
-  <li>
-    <p>客户端会将任务文件打包写入hdfs的	</p>
-
-    <pre><code>mapreduce.jobtracker.staging.root.dir + "/" + user + "/.staging" 目录，需要经过hdfs权限验证。通常可以选择两种方法解决。
-
-1) 保持mapreduce.jobtracker.staging.root.dir为默认，将此目录chmod 777
-2) 在hdfs的/user目录下建立用户目录，并且chown为该用户，相当于在hdfs下创建一个用户。
-然后设置mapreduce.jobtracker.staging.root.dir为/user,  这是官方推荐的，可以看到这个属性的描述是这样写的：
-The root of the staging area for users' job files In practice, this should be the directory where users' home directories are located (usually /user)。
-3）有人说可以在启动任务时加入hadoop.job.ugi属性指定用户和群组。 我验证这样不行。看源码里也是直接获取
-ugi = UserGroupInformation.getCurrentUser();不过看hdfs权限策略这操行应该可以设置。
-</code></pre>
-  </li>
-</ol>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/eclipse-hadoop-job.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
