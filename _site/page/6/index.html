@@ -57,6 +57,295 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/MVC.html">MVC框架简单实现</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#f2e">f2e</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>MVC框架实现</p>
+
+<p>1.MVC（Model—View—Controler)介绍</p>
+
+<p>MVC模式最早由Trygve Reenskaug在1978年提出，是施乐帕罗奥多研究中心（Xerox PARC）在20世纪80年代为程序语言Smalltalk发明的一种软件设计模式。当前备受推崇的一种设计模式，更是web项目的标配。</p>
+
+<p>MVC强制将程序的input、process和output分割独立分别由对应的mvc组建负责。控制器接受用户的请求，调用相应的模型来进行业务处理，并返回数据给控制器。控制器调用相应的视图来显示处理的结果。并通过视图呈现给用户。</p>
+
+<p>优点：</p>
+
+<pre><code>MVC模式的目的是实现动态的程序设计开发，使得开发或维护过程中对程序的修改和扩展变得更加简单，
+程序的复用性变得更好。
+提高了程序的灵活性和可配置性。
+程序结构更加直观。
+各个组建对应功能明确，开发人员能够更好的发挥所长分工作业。
+</code></pre>
+
+<p>缺陷：</p>
+
+<pre><code>技术论坛里，时不时会有MVC已死的声音。现在如日中天的MVC是否真的廉颇老矣？这里摘取《Object Design: Roles, Responsibilities, and Collaborations》一书中对MVC集中式控制器总结了一下四大缺点：
+
+Control logic can get overly complex.
+
+控制器会变得复杂，很多人在Struts的Action控制器中写业务代码已经变得很常见。
+
+Controllers can become dependent on information holders' contents.
+
+控制器变得依赖信息数据中心或数据库了，控制器做很多事情。
+
+Objects can become coupled indirectly through the actions of their controller.
+
+对象将间接地通过控制器的action耦合在一起，一个对象在控制器中查询获得，然后复制给另外一个对象，这两个对象就耦合在一起。
+
+The only interesting work is done in the controller.
+
+唯一有趣的工作是做控制器，Responsibilities职责被吸进控制器对象，只将一些行为留给角色模型完成，重要的事情都集中在控制器中了。
+
+传说中的替代架构：DCI(Data Context Interactions)
+</code></pre>
+
+<ol>
+  <li>
+    <p>流行实现框架分析</p>
+
+    <p>闲话休多，好与坏都需要自己亲身去实践，需要透彻的了解这种设计。本篇文章旨在通过参考现今主流MVC框架的设计思路自己实现一个简单的mvc框架，从而更加深入透彻的理解与掌握MVC。</p>
+
+    <p>首先简单分析一下流行的MVC框架 如struts2 和 springmvc</p>
+  </li>
+</ol>
+
+<p>Struts2
+请求流程：</p>
+
+<p><img src="/image/strus-workflow.png" alt="" /></p>
+
+<p>struts request 流程图
+上面这张图是官方给出的struts2.0请求处理流程图，struts2.0对一个请求的处理可以分为以下几个步骤：</p>
+
+<pre><code>客户端发送请求。
+
+请求先通过ActionContextCleanUp--&gt;FilterDispatcher。
+
+FilterDispatcher通过ActionMapper来决定这个Request需要调用哪个Action。
+
+如果ActionMapper决定调用某个Action，FilterDispatcher把请求的处理交给ActionProxy，这儿已经转到它的Delegate—Dispatcher来执行。
+
+ActionProxy根据ActionMapping和ConfigurationManager找到需要调用的Action类
+
+ActionProxy创建一个ActionInvocation的实例。
+
+ActionInvocation调用真正的Action，当然这涉及到相关拦截器的调用。
+
+Action执行完毕，ActionInvocation创建Result并返回，当然，如果要在返回之前做些什么，可以实现PreResultListener。添加PreResultListener可以在Interceptor中实现。
+</code></pre>
+
+<p>springmvc
+请求流程：
+<img src="../image/Spring1.jpg" alt="" /></p>
+
+<p>具体流程步骤如下：</p>
+
+<pre><code>1. 首先用户发送请求=&gt;DispatcherServlet，前端控制器收到请求后自己不进行处理，而是委托给其他的解析器进行处理，作为统一访问点，进行全局的流程控制。
+
+2. DispatcherServlet=&gt;HandlerMapping， HandlerMapping将会把请求映射为HandlerExecutionChain对象（包含一个Handler处理器（页面控制器）对象、多个HandlerInterceptor拦截器）对象，通过这种策略模式，很容易添加新的映射策略。
+
+3. DispatcherServlet=&gt;HandlerAdapter，HandlerAdapter将会把处理器包装为适配器，从而支持多种类型的处理器。
+
+4. HandlerAdapter=&gt;处理器功能处理方法的调用，HandlerAdapter将会根据适配的结果调用真正的处理器的功能处理方法，完成功能处理；并返回一个ModelAndView对象（包含模型数据、逻辑视图名）。
+
+5. ModelAndView的逻辑视图名=&gt; ViewResolver， ViewResolver将把逻辑视图名解析为具体的View。
+
+6. View=&gt;渲染，View会根据传进来的Model模型数据进行渲染，此处的Model实际是一个Map数据结构，因此很容易支持其他视图技术；
+
+7. 返回控制权给DispatcherServlet，由DispatcherServlet返回响应给用户，流程结束。
+</code></pre>
+
+<ol>
+  <li>实现</li>
+</ol>
+
+<p>经过对struts2和springmvc的分析，可以看出要实现mvc这样的表现层框架，总体上来说需要实现以下三点：</p>
+
+<p>URL到框架的映射。</p>
+
+<p>Http请求参数绑定。</p>
+
+<p>Http响应的生成和输出。</p>
+
+<p>将其具体到实现可以分为：</p>
+
+<p>配置元素的对象化（解析配置文件，初始化环境）。</p>
+
+<pre><code>publicvoid init() throws ServletException {
+
+super.init();
+
+try {
+
+actionConfigs = XMLUtil.parseConfig();
+
+} catch (Exception e) {
+
+e.printStackTrace();
+
+}
+
+}
+</code></pre>
+
+<ol>
+  <li>
+    <p>对Http请求进行初步处理，查找与之对应的处理类（方法）</p>
+
+    <pre><code> String handlerMappingClassName = handlerBeanConfigs.get(Constants.HAND LER_MAPPING).getClazz();
+	
+ String actionName = ((HandlerMapping)
+	
+ ReflectUtil.getInstance(handlerMappingClassName)).handlerMapping(req);
+</code></pre>
+  </li>
+  <li>
+    <p>调用相应的处理类（方法）完成业务逻辑对处理类（方法）</p>
+
+    <pre><code> ActionConfig actionConfig = actionConfigs.get(actionName);
+	
+ String handlerAdapterClassName = handlerBeanConfigs.
+	
+ get(Constants.HANDLER_ADAPTER).getClazz();
+	
+ String result = ((HandlerAdapter)ReflectUtil.
+	
+ getInstance(handlerAdapterClassName))
+	
+ .handlerAdapter(req, actionConfig, actionName);
+</code></pre>
+  </li>
+  <li>
+    <p>根据处理类（方法）的调用结果，进行Http响应处理</p>
+
+    <pre><code> String handlerViewClassName = handlerBeanConfigs.
+	
+ get(Constants.HANDLER_VIEW).getClazz();
+	
+ ((HandlerView) ReflectUtil.getInstance(handlerViewClassName)).
+	
+ handlerView(req, resp, actionConfig, result);
+</code></pre>
+  </li>
+</ol>
+
+<p>以上是整个框架处理的核心流程,核心流程的控制在DispatcherServlet类中完成。同时整个流程又分为以上的几个步骤，对于每个步骤的具体实现,采用开放接口的方式提供给框架使用者。可以实现其中的对应接口,并在配置文件中注册具体实现类。即可实现修改框架默认定制属于自己实现。</p>
+
+<p>具体提供以下三个接口分别对应上面2，3，4步的处理逻辑，分别为：</p>
+
+<p>HandlerMapping</p>
+
+<p>HandlerAdapter</p>
+
+<p>HandlerView</p>
+
+<p>扩展举例：实现定制Http请求进行初步处理，查找与之对应的处理类（方法）</p>
+
+<pre><code>publicclass HandlerURLMapping implements HandlerMapping {
+
+@Override
+
+public String handlerMapping(HttpServletRequest request) throws Exception {
+
+String contextPath = request.getContextPath();
+
+String uri = request.getRequestURI();
+
+String actionName = uri.substring(contextPath.length() + 1, uri.length());
+
+return actionName;
+
+}
+
+}
+</code></pre>
+
+<p>框架request请求执行逻辑图如下：</p>
+
+<p><img src="/image/my-mvc.png" alt="" /></p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/MVC.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Linux-SSH-.html">Linux SSH 登录</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>服务器IP地址为192.168.1.1，机器名：will_s
+客户端IP地址为172.16.16.1，机器名：will_c
+客户端用户will需要使用ssh无密码登录服务器的will帐户</p>
+
+<p>实现原理
+使用”公私钥”认证的方式来进行ssh登录.
+在客户端上创建一对公私钥 （公钥文件：~/.ssh/id_rsa.pub； 私钥文件：~/.ssh/id_rsa）
+然后把公钥放到服务器上（~/.ssh/authorized_keys）, 自己保留好私钥
+当ssh登录时,ssh程序会发送私钥去和服务器上的公钥做匹配.如果匹配成功就可以登录了</p>
+
+<p>设置如下：</p>
+
+<ol>
+  <li>
+    <p>以will用户登录客户机器并在客户端机器上执行”ssh-keygen -t rsa”
+(注：每次执行”ssh-keygen -t rsa”产生的私钥文件都会不同)</p>
+
+    <p>a）如果文件”~/.ssh/id_rsa”存在，会提示是否覆盖该文件，此时可选择”n”不覆盖该文件而使用已有的id_rsa文件；
+ 如果选择”y”则会重新生成”~/.ssh/id_rsa”文件，接下来会提示输入passphrase，
+ 回车确定使用空的passphrase，再次回车确认（这里也可以输出passphrase，相当于ssh时登录的密码）。
+ 然后会重新生成”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件。</p>
+
+    <p>b）如果”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件不存在则会自动创建新的”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件，
+ passphrase设置同上。</p>
+  </li>
+  <li>
+    <p>使用ssh will@192.168.1.1登录到服务器，编辑服务器上”~/.ssh/authorized_keys”文件，
+将客户端机器上的”~/.ssh/id_rsa.pub”文件内容追加到”~/.ssh/authorized_keys”文件中。
+（注：可以在客户端机器上使用以下命令来实现：</p>
+
+    <pre><code> cat ~/.ssh/id_rsa.pub | ssh will@192.168.1.1 "cat - &gt;&gt; ~/.ssh/authorized_keys" 此时会要求输入will用户在服务器上的登录密码，输入后即会将客户端机器上的"~/.ssh/id_rsa.pub"文件内容追加到服务器上的 "~/.ssh/authorized_keys"文件中） 如果是首次连接服务器会出现以下的提示，确认连接并输入密码后其他直接回车确定。
+</code></pre>
+  </li>
+  <li>
+    <p>如果在第1步中使用了空的passphrase，则可以跳过第4步，此时在客户端即可以使用”ssh zhaoy@192.168.1.1”即可无密码登录到服务器；
+如果第一步中设置了passphrase，则继续执行以下步骤。</p>
+  </li>
+  <li>
+    <p>如果第1步中设置了passphrase，则此时需要输入该passphrase登录服务器。
+此时前面我们把输入密码变成了输入passphrase，这没有带来任何方便。
+但是我们可以通过ssh-agent来帮助我们自动输入passphrase(只是看起来像是自动输入而已)，
+我们只要在第一次登录时输入一次passphrase, 以后的工作就可以交给ssh-agent。在客户端机器上执行命令ssh-add，
+这里会提示输入一次passphrase。输入第一步中设置的passphrase之后会修改”~/.ssh/id_rsa”文件。
+再在客户端执行”ssh will@192.168.1.1”即可无密码登录到服务器端。</p>
+  </li>
+</ol>
+
+      <div class="readall"><a href="/blog/2014/09/27/Linux-SSH-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
       <h1 class="post-title"><a href="/blog/2014/09/27/Java-class-loader.html">Java class loader</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
@@ -557,281 +846,6 @@ compareTo方法，根据具体逻辑实现对实现对象的比较，用于map/r
 </ol>
 
       <div class="readall"><a href="/blog/2014/09/27/InputFormat.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Hadoop.html">单节点伪分布式Hadoop搭建</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#"></a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>单节点伪分布式Hadoop配置</p>
-
-<p>第一步： 安装JDK</p>
-
-<p>因为 Hadoop 运行必须安装 JDK 环境，因此在安装好 Linux 后进入系统的第一步 便是安装 JDK ，安装过程和在 Windows 环境中的安装步骤很类似，首先去 Oracle 官网 去下载安装包，然后直接进行解压。我自己解压在路径 /usr/jvm 下面，假如你的安装包现在已经下载在 jvm 文件夹下面，然后 按 Ctrl+Alt+t 进去命令行，然后输入</p>
-
-<pre><code>cd  /usr/jvm
-</code></pre>
-
-<p>进入到jvm文件夹下面，然后再输入如下命令进行解压：</p>
-
-<pre><code>sudo tar  -zxvf  jdk-7u40-linux-i586.tar.gz
-</code></pre>
-
-<p>第二步： 配置环境变量</p>
-
-<p>解压结束以后，像在 Windows 系统中一样，需要配置环境变量，在 Ubuntu 中设置 环境变量的过程为打开文件 /etc/profile ，因为权限的问题，因此在命令行需要输入 的是</p>
-
-<pre><code>sudo gedit /etc/profile
-</code></pre>
-
-<p>然后在根据提示输入用户密码即可，然后在文件最下面添加如下：</p>
-
-<pre><code>export JAVA_HOME=/usr/jvm/jdk1.7.0_40
-
-export CLASSPATH=".:$JAVA_HOME/lib:$JAVA_HOME/jre/lib$CLASSPATH"
-
-export PATH="$JAVA_HOME/bin:$JAVA_HOME/jre/bin:/usr/hadoop/hadoop-1.2.1/bin:$PATH"
-</code></pre>
-
-<p>上面这三个以单词 export 开始的三个语句就类似于我们在 Windows 中的环境变量中设置一样，而且在这个里面和 Windows 中不同的是，在 Windows 中使用 “；” 号来表示分隔，但是在 Ubuntu 中是以 “：” 号来表示分隔。还需要注意的是，上面的路径都是我自己配置的时候的路径，因为我的 JDK 解压在 /usr/jvm 中，所以我的 JAVA_HOME 设置的是那个路径，而且如果安装的 JDK 版本不同那么后面的也不一样。同理在 CLASSPATH 路径中也是因为我自己的安装路径进行设置的，因此在配置过程中需要读者注意。在 PATH 路径中最后面还将 Hadoop 的路径也添加了进去，因此在读者安装了 Hadoop 后也将这个路径添加进环境变量 PATH 中去。</p>
-
-<p>在配置完环境变量后，我们来将我们安装的 JDK 设置为 Ubuntu 系统默认的 JDK ，因为之前系统里面自带 openjdk ，在命令行里面输入如下：</p>
-
-<pre><code>sudo update-alternatives  --install  /usr/bin/java  java  /usr/jvm/jdk1.7.0_40/bin/java 300
-
-sudo update-alternatives  --install  /usr/bin/javac  javac  /usr/jvm/jdk1.7.0_40/bin/javac 300
-
-sudo update-alternatives  --config  java
-</code></pre>
-
-<p>然后我们就可以在命令行输入 java -version 来进行察看 JDK 是否已经配置好了。</p>
-
-<p>第三步： 安装Hadoop  </p>
-
-<p>我们可以去 Hadoop 官网上去下载安装包，我自己下载使用的是 hadoop-1.2.1.tar.gz ，然后当安装包下载结束后，将安装包解压到指定位置，我将安装包解压到了 /usr/hadoop 目录下面。</p>
-
-<p>具体步骤是，像解压 JDK 一样，首先加入下载的 Hadoop 安装包在 /usr/hadoop 文件夹下面。然后在命令行下进入 /usr/hadoop 文件，类似于上面的。然后输入解压命令如下</p>
-
-<pre><code>sudo  tar  -zxvf  hadoop-1.2.1.tar.gz  
-</code></pre>
-
-<p>后面的 Hadoop 安装包名称具体看你下载的版本，我下载的是1.2.1版本的。 为了以后操作 /usr/hadoop 文件夹里面的文件方便，我们设置一下文件夹的权限，在命令行输入如下</p>
-
-<pre><code>sudo  chown  -hR  long  /usr/hadoop
-</code></pre>
-
-<p>注意：在上面的命令中，long是我自己此时登陆的用户名，因此你需要将那个改成你自己的用户名。</p>
-
-<p>第四步： 配置Hadoop环境变量</p>
-
-<p>在上面解压完 Hadoop 以后，现在我们来设置环境变量，其实在上面刚才我们配置 JDK 环境变量的时候，已经在 PATH 路径后面添加了 Hadoop 安装目录的 bin 目录的路径，所以那个就代表环境变量已经设置好了，但是读者一定要注意，不要 Copy ，要明确自己的 Hadoop 安装路径来进行配置。</p>
-
-<p>第五步： 设置SSH（安全外壳协议）</p>
-
-<p>推荐安装 OpenSSH ， Hadoop 需要通过 SSH 来启动 Slave 列表中各台主机的守护进程，因此 SSH 是必需安装的。虽然我们现在搭建的是一个伪分布式的平台，但是 Hadoop 没有区分开集群式和伪分布式，对于伪分布式， Hadoop 会采用与集群相同的处理方式，即按次序启动文件 conf/slaves 中记载的主机进程，只不过在伪分布式中 Salve 为 localhost 而已，所以对于伪分布式， SSH 是必须的。</p>
-
-<p>配置过程（首先确保连接上网络）：</p>
-
-<p>① 安装SSH，在命令行输入如下</p>
-
-<pre><code>sudo  apt-get install openssh-server
-</code></pre>
-
-<p>② 配置可以免密码登陆本机</p>
-
-<p>在命令行输入（注意其中的ssh前面还有一个 “ . ” 不要遗漏）</p>
-
-<pre><code>ssh-keygen  -t  dsa -P '' -f  ~/.ssh/id_dsa 
-</code></pre>
-
-<p>（解释一下上面这条命令， ssh-keygen  代表生成密钥； -t  表示指定生成的密钥 类型； dsa  是 dsa 密钥认证的意思； -P  用于提供密语（接着后面是两个单引号， 不要打错）； -f  表示指定生成密钥文件）</p>
-
-<p>这条命令完成后，会在当前文件夹下面的 .ssh 文件夹下创建 id_dsa 和 id_dsa.pub 两个文件，这是 SSH 的一对私钥和公钥，把 id_dsa.pub （公钥）追加到授权的 key 中去，输入如下命令：</p>
-
-<pre><code>cat  ~/.ssh/id_dsa.pub  &gt;&gt;  ~/.ssh/authorized_keys
-</code></pre>
-
-<p>至此，免密码登陆本机已经配置完毕。</p>
-
-<p>说明：一般来说，安装SSH时会自动在当前用户下创建.ssh这个隐藏文件夹，一般不会直接看到，除非安装好了以后，在命令行使用命令ls才会看到。</p>
-
-<p>③ 输入 ssh  localhost ，显示登陆成功信息。</p>
-
-<p>第六步： 配置Hadoop伪分布式模式</p>
-
-<p>现在进入到安装 Hadoop 的文件夹，找到里面的 conf 文件夹，点击进去。</p>
-
-<p>配置 hadoop 环境文件 hadoop-env.sh</p>
-
-<p>打开文件，找到某行有 ”# export JAVA_HOME = …”  字样的地方，去掉 “#” ，然后在等号后面填写你自己的 JDK 路径，比如像我自己的 JDK 路径，那就改为了 如下所示</p>
-
-<pre><code>“export  JAVA_HOME=/usr/jvm/jdk1.7.0_40”
-</code></pre>
-
-<p>配置 Hadoop 的核心文件 core-site.xml</p>
-
-<p>打开文件，会发现标签 <configuration></configuration> 中是空的，在空的地方添加如下配置</p>
-
-<pre><code>&lt;property&gt;
-
-            &lt;name&gt;fs.default.name&lt;/name&gt;
-
-            &lt;value&gt;hdfs://localhost:9000&lt;/value&gt;
-
-     &lt;/property&gt;
-
-
-
-     &lt;property&gt;
-
-             &lt;name&gt;dfs.replication&lt;/name&gt;
-
-             &lt;value&gt;1&lt;/value&gt;
-
-     &lt;/property&gt;
-
-
-
-     &lt;property&gt;
-
-              &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
-
-              &lt;value&gt;/home/long/tmp&lt;/value&gt;
-
-     &lt;/property&gt;
-</code></pre>
-
-<p>（注意：在最后一个value值中，上面是long，是因为那是我的用户名，所以你需要将那个修改为你自己的用户名）</p>
-
-<p>配置 Hadoop 中 MapReduce 的配置文件 mapred-site.xml</p>
-
-<p>打开文件，会发现标签 <configuration></configuration> 中是空的，在空的地方添加如下配置</p>
-
-<pre><code>&lt;property&gt;
-
-     &lt;name&gt;mapred.job.tracker&lt;/name&gt;
-
-     &lt;value&gt;localhost:9001&lt;/value&gt;
-
-&lt;/property&gt;
-</code></pre>
-
-<p>第七步： 格式化Hadoop文件系统HDFS并启动Hadoop</p>
-
-<p>首次运行 hadoop 必须进行格式化 Hadoop 文件系统，以后运行即可跳过。打开命令行，进入安装了 Hadoop 的文件路径下，然后在命令行输入</p>
-
-<pre><code>bin/hadoop  namenode -format
-</code></pre>
-
-<p>格式化文件系统，然后启动 Hadoop ，在命令行里面输入
-	bin/start-all.sh</p>
-
-<p>验证是否正常启动，在命令行里面输入 jps ，然后回车，如果在命令行里面出现如下类似画面（因为前面的数字可以不同）</p>
-
-<pre><code>3235 NameNode
-
-4113 Jps
-
-3819 JobTracker
-
-4059 TaskTracker
-
-3721 SecondaryNameNode
-
-3487 DataNode
-</code></pre>
-
-<p>则说明已经正常启动。如果以后需要关闭 Hadoop 的话，在 Hadoop 安装的文件夹路径下面在命令行输入</p>
-
-<pre><code>bin/stop-all.sh
-</code></pre>
-
-<p>来关闭 Hadoop 。</p>
-
-<p>第八步： 跑一个Hadoop中自带的WordCount程序，来体验一把</p>
-
-<p>步骤如下（我在自己平台上的，读者可仿照实验）：</p>
-
-<p>1)  准备一个文本文件</p>
-
-<p>首先我在桌面，新建了一个空白文档 test ，在里面输入一段话，或是几一些什么 单 词什么的，保存。</p>
-
-<p>2)  将文本文件上传到 dfs 文件系统中的 input 目录下，打开命令行，进入到安装 hadoop 的文件夹下，然后输入如下</p>
-
-<pre><code>bin/hadoop  dfs  -copyFromLocal  /home/long/桌面/test  input
-</code></pre>
-
-<p>（注：如果 dfs 中不包含 input 目录的话就会自动创建一个）</p>
-
-<p>3)  然后在命令行中输入如下命令，执行 WordCount 程序</p>
-
- 	 bin/hadoop  jar  hadoop-examples-1.2.1.jar  wordcount  input  output
-
-<p>（注：因为这个程序是 Hadoop 安装包里面自带的，就在 hadoop-examples-1.2.1.jar 中，后面的数字因为版本号的不同而不同，后面的 input 代表输入文件夹， output 代表输出文件夹 ， 系统输出时会自动创建）</p>
-
-<p>读者如果这个执行成功了，就会发现有很多输出信息，从屏幕上显示，当程序运行结束后。</p>
-
-<p>4)  察看结果 在命令行里面输入</p>
-
-<pre><code>bin/hadoop  dfs  -cat  output/part-r-00000
-</code></pre>
-
-<p>现在你就可以看见自己刚才输入文本里面的单词计数了。</p>
-
-<p>至此，伪分布式搭建结束!</p>
-
-      <div class="readall"><a href="/blog/2014/09/27/Hadoop.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/HDFS.html">HDFS超租约异常</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>HDFS超租约异常总结（org.apache.hadoop.hdfs.server.namenode.LeaseExpiredException）
-http://www.cnblogs.com/wangxiaowei/p/3317479.html</p>
-
-<p>hbase.regionserver.lease.period 客户端租期超时阀值；scan量大时可以考虑增大；否则”Lease Exception: lease -70000000000000001 does not exist”</p>
-
-<p>这个log通常出现在regionserver挂掉之前。通常regionserver因为某种原因从zookeeper上掉线，需要flush以及删除region对应的WAL，而如果接管的regionserver在此之前已经读取完成WAL并且删除的话，那么就会出现如上文件已经不存在的错误</p>
-
-<p><strong>解决办法，调整xcievers参数</strong></p>
-
-<pre><code>默认是4096，改为8192，hdfs-site.xml
-&lt;property&gt;
-&lt;name&gt;dfs.datanode.max.xcievers&amp;lt;/name&gt;
-&lt;value&gt;8192&amp;lt;/value&gt;
-&lt;/property&gt;
-dfs.datanode.max.xcievers 参数说明 一个 Hadoop HDFS Datanode 有一个同时处理文件的上限. 这个参数叫 xcievers (Hadoop的作者把这个单词拼错了). 在你加载之前，先确认下你有没有配置这个文件conf/hdfs-site.xml里面的xceivers参数，至少要有4096:
-
-&lt;property&gt;
-&lt;name&gt;dfs.datanode.max.xcievers&amp;lt;/name&gt;
-&lt;value&gt;4096&lt;/value&gt;
-&lt;/property&gt;
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/09/27/HDFS.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

@@ -57,6 +57,586 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Page-Block.html">Page Block</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#f2e">f2e</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>页面block划分</p>
+
+<ol>
+  <li>场景分析
+一个网站整体布局以及风格一般会保持一致，整个网站各个页面有很多共同的地方，例如整站导航，友情链接等等。我们会看到很多类似下面的页面：</li>
+</ol>
+
+<p><img src="/image/page-block.png" alt="" /></p>
+
+<p>如上图我们会发现整个网站中绝大多数页面都会有上面的Header，Left 和footer 这几个部分。这些相同部分无论是前端展示还是后台数据支持都几乎是一致的。如果按照传统开发方式我们开发可能会这样：</p>
+
+<p>（现在有a,b,c三个页面，这三个页面都有上图中left这一部分）首先前端我们可以选择直接code复制或是独立left部分的code在各个要用的地方引用。后台根据request获取数据返回这样的操作同样也是和前端类似的处理方式。</p>
+
+<pre><code>a页面前端：
+
+&lt;div&gt;header page&lt;/div&gt;
+
+。。。。。。
+
+。。。。。。
+
+&lt;div&gt;left page&lt;/div&gt;
+
+。。。。。。
+
+。。。。。。
+
+&lt;div&gt;footer page&lt;/div&gt;
+
+a页面后台：
+
+Aaction{
+
+getDataForHeader(...);
+
+。。。。。。
+
+。。。。。。
+
+getDataForLeft(...);
+
+。。。。。。
+
+。。。。。。
+
+getDataForFooter(...);
+
+。。。。。。
+
+。。。。。。
+
+getDataForASelf(...);
+
+}
+</code></pre>
+
+<p>b,c页面的开发与上面雷同，&lt;div&gt;left page&lt;/div&gt;，getDataForLeft(…)这样的代码会在每个页面前后台都会出现。这样我们就会发现left这个区块，其实它是一个内聚型的独立部分（展现+数据），它不需要依赖于所在页面的其它部分，这里我称之为block。</p>
+
+<p>对于这样的场景我们为了提高开发效率提高代码复用性，block我们应该将其与其他部分独立，如将这个页面分为Header，Left，Footer，Main这么几个block，每个block负责自己的展示以及数据的获取最后输出最终的展示html代码，这样他们就完全独立于所在页面，在其他有用到header，left，footer的页面直接在调用对应的block。另外页面分为很多块，其中有些是很少发生变化有些是经常更新的，其实在每次页面request的中，其实是有很多没有必要的后台处理。当这个页面PV量达到一定量时，这样的开销会变得很可观。这时我们可以将这样很少发生变化的block最后输出的html存放在缓存中（如memcache）,从而减少后台处理开销提高网站性能。</p>
+
+<p>实现技术选择：springMVC + freemarker.</p>
+
+<ol>
+  <li>技术介绍</li>
+</ol>
+
+<p>FreeMarker
+What:
+<img src="/image/FreeMarker.jpg" alt="" /></p>
+
+<p>Template engine：一个基于Java的模板引擎。
+可应用于任何文本类型输出(更多的是用于web应用)
+开源项目</p>
+
+<p>Why：</p>
+
+<p>使用template engine来代替JSP, 设计将变得简单，语法更简单，出错信息更易读，工具也更用户化。
+template优势（也即jsp的不足）</p>
+
+<ol>
+  <li>使前台脱离Java代码</li>
+  <li>减少工作量，template更加简洁</li>
+  <li>出错信息更加精准
+ JSP常有一些让人头疼的出错信息。因为页面首先被转换成为一个servlet然后才进行编译。即使有好的 JSP 工具可以相对增加找到出错位置的可能性，那也是不是一件容易的事儿。
+ 由于template engine可以在template文件中直接产生而没有任何戏剧性的向代码转化，所以可以非常容易地给出适当的出错报告。</li>
+  <li>不依赖编译器
+JSP需要一个置放在webserver中的编译器。但这样的编译器并不能在所有平台上顺利工作(用 C++写成的) 也不利于建立纯Java 的web服务器。</li>
+  <li>减少空间的浪费
+JSP消耗了额外的内存和硬盘空间。对服务器上每30K的JSP文件，必须要有相应的大于30K的类文件产生。实际上使得硬盘空间加倍。考虑到JSP文件随时可以很容易地通过 ＜%@ include＞包含一个大的数据文件。同时，每一个JSP的类文件数据必须加载到服务器的内存中，这意味着服务器的内存必须永远地将整个JSP文档树保存下去。对template engines由于没有产生第二个文件，所以节省了空间。Template engines还为程序员提供对templates</li>
+</ol>
+
+<p>在内存中进行缓存的完全控制。</p>
+
+<ol>
+  <li>利于实现页面block划分，实现页面的静态化。</li>
+</ol>
+
+<p>spring MVC
+what：</p>
+
+<p>Spring MVC框架是有一个MVC框架，通过实现Model-View-Controller模式来很好地将数据、业务与展现进行分离。Spring MVC的设计是围绕DispatcherServlet展开的，DispatcherServlet负责将请求派发到特定的handler。通过可配置的handler mappings、view resolution、locale以及theme resolution来处理请求并且转到对应的视图。</p>
+
+<p>Why：</p>
+
+<p>学习难度小于, 小于Struts2.
+易于开发性能优秀的程序。
+灵活性强，强大扩展性。</p>
+
+<ol>
+  <li>实例</li>
+</ol>
+
+<p>requirement</p>
+
+<pre><code>功能：实现用户登录显示用户信息
+要求：使用freemarker替代jsp,作为view层组件
+页面划分为Header，Left，Footer，Main三个block，block间相互独立
+模板文件存放在数据库
+具备较高的扩展性
+易维护
+实现技术：springMVC，freemarker, mybatis
+</code></pre>
+
+<p>impletement</p>
+
+<p>程序结构图：
+ <img src="/image/page-block-impl.png" alt="" /></p>
+
+<p>建立如下工程目录：</p>
+
+<p><img src="/image/page-block-project.png" alt="" /></p>
+
+<p>web.xml：(配置springMVC)</p>
+
+<pre><code>&lt;context-param&gt;
+
+&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+
+&lt;param-value&gt;classpath:*Context.xml&lt;/param-value&gt;
+
+&lt;/context-param&gt;
+
+&lt;listener&gt;
+
+&lt;display-name&gt;contextLoaderListener&lt;/display-name&gt;
+
+&lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener
+
+&lt;/listener-class&gt;
+
+&lt;/listener&gt;
+
+&lt;listener&gt;
+
+&lt;listener-class&gt;org.springframework.web.context.request.
+
+RequestContextListener
+
+&lt;/listener-class&gt;
+
+&lt;/listener&gt;
+
+&lt;servlet&gt;
+
+&lt;servlet-name&gt;springmvc&lt;/servlet-name&gt;
+
+&lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet
+
+&lt;/servlet-class&gt;
+
+&lt;init-param&gt;
+
+&lt;description&gt;mvc.xml&lt;/description&gt;
+
+&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+
+&lt;param-value&gt;classpath:test-mvc.xml&lt;/param-value&gt;
+
+&lt;/init-param&gt;
+
+&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+
+&lt;/servlet&gt;
+
+&lt;servlet-mapping&gt;
+
+&lt;servlet-name&gt;springmvc&lt;/servlet-name&gt;
+
+&lt;url-pattern&gt;/&lt;/url-pattern&gt;
+
+&lt;/servlet-mapping&gt;
+
+test-mvc.xml：
+&lt;mvc:annotation-driven/&gt;
+
+&lt;!-- 静态的资源文件不要spring的过滤 --&gt;
+
+&lt;mvc:resources mapping="/img/**" location="/img/" /&gt;
+
+&lt;context:component-scan base-package="com.**.controller" /&gt;
+
+&lt;bean id="viewResolver"
+
+class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewRes olver"&gt;
+
+&lt;property name="cache" value="true" /&gt;
+
+&lt;property name="prefix" value="" /&gt;
+
+&lt;property name="suffix" value=".ftl" /&gt;
+
+&lt;property name="contentType" value="text/html;charset=UTF-8" /&gt;
+
+&lt;property name="requestContextAttribute" value="request" /&gt;
+
+&lt;!-- 使用这些宏，必须设置FreeMarkerViewResolver的exposeMacroHelpers属性为true：
+
+在所有需要使用&lt;@spring.bind&gt;和&lt;@spring.bindEscaped&gt;的FreeMarker模板的
+
+顶部增加以下一行：&lt;#import "/spring.ftl" as spring /&gt;
+
+这一行会在模板中导入Spring的FreeMarker宏。
+
+--&gt;
+
+&lt;property name="exposeSpringMacroHelpers" value="true" /&gt;
+
+&lt;!-- 将请求和会话属性作为变量暴露给FreeMarker模板使用 --&gt;
+
+&lt;property name="exposeRequestAttributes" value="true" /&gt;
+
+&lt;property name="exposeSessionAttributes" value="true" /&gt;
+
+&lt;/bean&gt;
+
+在resource中的applicationContext.xml
+中配置freemarker和页面所需要的各个block，具体配置如下：
+&lt;!-- freemarker 配置 --&gt;
+
+&lt;bean id="freemarkerConfig"
+
+class="org.springframework.web.servlet.view.freemarker.
+
+FreeMarkerConfigurer"&gt;
+
+&lt;property name="templateLoaderPath" value="/WEB-INF/" /&gt;
+
+&lt;property name="freemarkerSettings"&gt;
+
+&lt;props&gt;
+
+&lt;prop key="template_update_delay"&gt;0&lt;/prop&gt;
+
+&lt;prop key="default_encoding"&gt;UTF-8&lt;/prop&gt;
+
+&lt;prop key="number_format"&gt;0.##########&lt;/prop&gt;
+
+&lt;prop key="datetime_format"&gt;yyyy-MM-dd HH:mm:ss&lt;/prop&gt;
+
+&lt;prop key="classic_compatible"&gt;true&lt;/prop&gt;
+
+&lt;prop key="template_exception_handler"&gt;ignore&lt;/prop&gt;
+
+&lt;/props&gt;
+
+&lt;/property&gt;
+
+&lt;/bean&gt;
+
+&lt;!-- 配置各个block,每个block包含对应的ftl模板文件在数据库对应的名字
+
+和freemarkerConfig对象以及其他所需属性 --&gt;
+
+&lt;beanid="baseBlack"abstract="true"&gt;
+
+&lt;property name="freemarkerConfig" ref="freemarkerConfig"/&gt;
+
+&lt;/bean&gt;
+
+&lt;bean id="blockManager" class="com.au.common.BlockManager"
+
+factory-method="getInstance" /&gt;
+
+&lt;bean id="headBlock" class="com.au.cms.block.HeadBlock" parent="baseBlack"&gt;
+
+&lt;property name="template" value="headBlock"&gt;&lt;/property&gt;
+
+&lt;/bean&gt;
+
+&lt;bean id="middleBlock" class="com.au.cms.block.MiddleBlock" parent="baseBlack"&gt;
+
+&lt;property name="template" value="middleBlock"&gt;&lt;/property&gt;
+
+&lt;property name="userDao" ref="userDao"/&gt;
+
+&lt;/bean&gt;
+
+&lt;bean id="footBlock" class="com.au.cms.block.FootBlock" parent="baseBlack"&gt;
+
+&lt;property name="template" value="footBlock"&gt;&lt;/property&gt;
+
+&lt;/bean&gt;
+</code></pre>
+
+<p>主要类实现</p>
+
+<p>Controller类：</p>
+
+<pre><code>	@Autowired
+	
+	private BlockManager blockManager;
+	
+	@RequestMapping(value = "welcome", method=RequestMethod.GET)
+	
+	public ModelAndView getFirstPage(HttpServletRequest request) {
+	
+	ModelAndView mvc = new ModelAndView("layout/welcome");
+	
+	return mvc;
+	
+	}
+</code></pre>
+
+<p>BlockManager实现一个自定函数用于调用对应的Block并包含show方法如下：</p>
+
+<pre><code>publicclass BlockManager implements TemplateMethodModel {
+
+@SuppressWarnings("rawtypes")
+
+@Override
+
+public Object exec(List args) throws TemplateModelException {
+
+String blockId = args.get(0).toString();
+
+ApplicationContext context = ApplicationContextUtil.getApplicationContext();
+
+HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+
+.getRequest();
+
+if (context.containsBean(blockId)) {
+
+Block block = (Block) context.getBean(blockId);
+
+return block.execute(request);
+
+}
+
+return"";
+
+}
+
+}
+
+AbstractBlock（impletement Block 接口）：
+
+protected String template;
+
+protected FreeMarkerConfigurationFactory freemarkerConfig;
+
+publicvoid setTemplate(String template) {
+
+this.template = template;
+
+}
+
+publicvoid setFreemarkerConfig(FreeMarkerConfigurationFactory freemarkerConfig) {
+
+this.freemarkerConfig = freemarkerConfig;
+
+}
+
+abstractprotected Map&lt;String, Object&gt; preExecute(HttpServletRequest request);
+
+@Override
+
+public String execute(HttpServletRequest request) {
+
+Map&lt;String, Object&gt; map = preExecute(request);
+
+String templateByUser = (String)map.get("BLOCK_TEMPLATE_FILE");
+
+String content = "";
+
+if (templateByUser != null &amp;&amp; !templateByUser.trim().equals("")) {
+
+content = TemplateUtil.process(map, freemarkerConfig, templateByUser);
+
+}
+
+if (templateByUser != null &amp;&amp; templateByUser.trim().equals("")) {
+
+return"";
+
+}
+
+if (templateByUser == null) {
+
+content = TemplateUtil.process(map, freemarkerConfig, template);
+
+}
+
+return postExecute(content);
+
+}
+
+protected String postExecute(String content) {
+
+return content;
+
+}
+
+MiddleBlock（继承AbstractBlock，实现preExcute方法，获取数据）：
+
+@Override
+
+protected Map&lt;String, Object&gt; preExecute(HttpServletRequest request) {
+
+String name = request.getParameter("name");
+
+User user = userDao.getUserByName(name);
+
+Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+
+map.put("user", user);
+
+return map;
+
+}
+
+TemplateDataMerge（从数据库取出模板文件merge数据）
+
+Configuration conf = ((FreeMarkerConfigurer) freemarkerConfig).getConfiguration();
+
+FtlSourceDao ftlSourceDao = (FtlSourceDao) ApplicationContextUtil.getApplicationContext().getBean("ftlSourceDao");
+
+FtlSource ftl = ftlSourceDao.getFtlSourceByName(ftlName);
+
+Reader reader = new StringReader(ftl.getFtlSource());
+
+Template template = new Template(ftlName, reader, conf, "UTF-8");
+
+writer = new StringWriter();
+
+template.process(map, writer);
+
+String rs = writer.toString();
+</code></pre>
+
+<p>至此程序的主要逻辑已经清楚，其他代码如model,service,dao等就不一一附上。如需要可联系我们</p>
+
+<p>4.测试
+访问项目结果如下</p>
+
+<p><img src="/image/page-block-res.png" alt="" /></p>
+
+<p>完。。。</p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/Page-Block.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Nginx.html">初始Nginx</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#ws">ws</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>Nginx 是一个轻量级，以占用系统资源少，运行效率而成为web服务器的后起之秀，国内现在很多大型网站都以使用nginx。
+直接php+mysql这是Linux web服务器的黄金组合。今天我们一来学如何在ubuntu 12.04 中架设lnmp。</p>
+
+<pre><code>1. 使用官方PPA安装 Nginx 最新版本，使用以下命令：
+sudo add-apt-repository ppa:nginx/stable
+sudo apt-get update
+sudo apt-get install nginx
+</code></pre>
+
+<p>Nginx相关控制命令：
+启动 Nginx：</p>
+
+<pre><code>sudo /etc/init.d/nginx start
+</code></pre>
+
+<p>浏览器浏览运行情况输入：http://localhost ;如果现实”Welcome to nginx!”，表明你的 Nginx 服务器安装成功！</p>
+
+<pre><code>关闭 Nginx：sudo /etc/init.d/nginx stop;
+重启 nginx：sudo /etc/init.d/nginx restart;
+</code></pre>
+
+<ol>
+  <li>
+    <p>安装 PHP，输入以下命令：</p>
+
+    <pre><code> sudo apt-get install php5-cli php5-cgi php5-fpm php5-mcrypt php5-mysql
+</code></pre>
+  </li>
+</ol>
+
+<p>以用户rob在本机localhost的9100端口下运行一个PHP FastCGI进程，输入以下命令</p>
+
+<pre><code>/usr/bin/spawn-fcgi -a 127.0.0.1 -p 9100 -u rob -g rob -f /usr/bin/php5-cgi -P /var/run/fastcgi-php.pid 加入开机运行，以免每次开机运行此命令。
+
+vi /etc/rc.local 在最后一行加入下面语句（在exit前面）。
+
+[...]
+/usr/bin/spawn-fcgi -a 127.0.0.1 -p 9100 -u rob -g rob -f /usr/bin/php5-cgi -P /var/run/fastcgi-php.pid
+[...]
+</code></pre>
+
+<p>配置Nginx站点，设置：</p>
+
+<pre><code>sudo vi /etc/nginx/sites-available/default
+</code></pre>
+
+<p>修改 “index” 为：“index index.html index.htm index.php;”
+删除以下内容：</p>
+
+<pre><code>location ~ \.php$ {
+fastcgi_pass 127.0.0.1:9000;
+fastcgi_index index.php;
+include fastcgi_params;
+} 测试，创建网站目录
+
+sudo mkdir /var/www/
+</code></pre>
+
+<p>建立一个虚拟站点：</p>
+
+<pre><code>sudo vi /etc/nginx/sites-available/default
+</code></pre>
+
+<p>修改root目录: “root /var/www;”
+建立一个测试页面：</p>
+
+<pre><code>sudo vi /var/www/test.php
+</code></pre>
+
+<p>在测试页面test.php中加入以下代码:</p>
+
+<pre><code>&lt;?php phpinfo();?&gt; 重启nginx
+
+sudo /etc/init.d/nginx restart
+</code></pre>
+
+<p>浏览器输入以下地址，看看有没有安装成功！</p>
+
+<p>http://localhost/test.php
+3.安装 MySQL 数据库：</p>
+
+<pre><code>sudo apt-get install mysql-server
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/Nginx.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
       <h1 class="post-title"><a href="/blog/2014/09/27/Mysql-outputformat.html">Mysql outputformat简单实现</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
@@ -660,295 +1240,6 @@ context.write();方法在当写入量超过一定值后，会写入文件。</p>
 没有必要重新编译整个hadoop的类。</p>
 
       <div class="readall"><a href="/blog/2014/09/27/MapReduce.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/MVC.html">MVC框架简单实现</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#f2e">f2e</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>MVC框架实现</p>
-
-<p>1.MVC（Model—View—Controler)介绍</p>
-
-<p>MVC模式最早由Trygve Reenskaug在1978年提出，是施乐帕罗奥多研究中心（Xerox PARC）在20世纪80年代为程序语言Smalltalk发明的一种软件设计模式。当前备受推崇的一种设计模式，更是web项目的标配。</p>
-
-<p>MVC强制将程序的input、process和output分割独立分别由对应的mvc组建负责。控制器接受用户的请求，调用相应的模型来进行业务处理，并返回数据给控制器。控制器调用相应的视图来显示处理的结果。并通过视图呈现给用户。</p>
-
-<p>优点：</p>
-
-<pre><code>MVC模式的目的是实现动态的程序设计开发，使得开发或维护过程中对程序的修改和扩展变得更加简单，
-程序的复用性变得更好。
-提高了程序的灵活性和可配置性。
-程序结构更加直观。
-各个组建对应功能明确，开发人员能够更好的发挥所长分工作业。
-</code></pre>
-
-<p>缺陷：</p>
-
-<pre><code>技术论坛里，时不时会有MVC已死的声音。现在如日中天的MVC是否真的廉颇老矣？这里摘取《Object Design: Roles, Responsibilities, and Collaborations》一书中对MVC集中式控制器总结了一下四大缺点：
-
-Control logic can get overly complex.
-
-控制器会变得复杂，很多人在Struts的Action控制器中写业务代码已经变得很常见。
-
-Controllers can become dependent on information holders' contents.
-
-控制器变得依赖信息数据中心或数据库了，控制器做很多事情。
-
-Objects can become coupled indirectly through the actions of their controller.
-
-对象将间接地通过控制器的action耦合在一起，一个对象在控制器中查询获得，然后复制给另外一个对象，这两个对象就耦合在一起。
-
-The only interesting work is done in the controller.
-
-唯一有趣的工作是做控制器，Responsibilities职责被吸进控制器对象，只将一些行为留给角色模型完成，重要的事情都集中在控制器中了。
-
-传说中的替代架构：DCI(Data Context Interactions)
-</code></pre>
-
-<ol>
-  <li>
-    <p>流行实现框架分析</p>
-
-    <p>闲话休多，好与坏都需要自己亲身去实践，需要透彻的了解这种设计。本篇文章旨在通过参考现今主流MVC框架的设计思路自己实现一个简单的mvc框架，从而更加深入透彻的理解与掌握MVC。</p>
-
-    <p>首先简单分析一下流行的MVC框架 如struts2 和 springmvc</p>
-  </li>
-</ol>
-
-<p>Struts2
-请求流程：</p>
-
-<p><img src="/image/strus-workflow.png" alt="" /></p>
-
-<p>struts request 流程图
-上面这张图是官方给出的struts2.0请求处理流程图，struts2.0对一个请求的处理可以分为以下几个步骤：</p>
-
-<pre><code>客户端发送请求。
-
-请求先通过ActionContextCleanUp--&gt;FilterDispatcher。
-
-FilterDispatcher通过ActionMapper来决定这个Request需要调用哪个Action。
-
-如果ActionMapper决定调用某个Action，FilterDispatcher把请求的处理交给ActionProxy，这儿已经转到它的Delegate—Dispatcher来执行。
-
-ActionProxy根据ActionMapping和ConfigurationManager找到需要调用的Action类
-
-ActionProxy创建一个ActionInvocation的实例。
-
-ActionInvocation调用真正的Action，当然这涉及到相关拦截器的调用。
-
-Action执行完毕，ActionInvocation创建Result并返回，当然，如果要在返回之前做些什么，可以实现PreResultListener。添加PreResultListener可以在Interceptor中实现。
-</code></pre>
-
-<p>springmvc
-请求流程：
-<img src="../image/Spring1.jpg" alt="" /></p>
-
-<p>具体流程步骤如下：</p>
-
-<pre><code>1. 首先用户发送请求=&gt;DispatcherServlet，前端控制器收到请求后自己不进行处理，而是委托给其他的解析器进行处理，作为统一访问点，进行全局的流程控制。
-
-2. DispatcherServlet=&gt;HandlerMapping， HandlerMapping将会把请求映射为HandlerExecutionChain对象（包含一个Handler处理器（页面控制器）对象、多个HandlerInterceptor拦截器）对象，通过这种策略模式，很容易添加新的映射策略。
-
-3. DispatcherServlet=&gt;HandlerAdapter，HandlerAdapter将会把处理器包装为适配器，从而支持多种类型的处理器。
-
-4. HandlerAdapter=&gt;处理器功能处理方法的调用，HandlerAdapter将会根据适配的结果调用真正的处理器的功能处理方法，完成功能处理；并返回一个ModelAndView对象（包含模型数据、逻辑视图名）。
-
-5. ModelAndView的逻辑视图名=&gt; ViewResolver， ViewResolver将把逻辑视图名解析为具体的View。
-
-6. View=&gt;渲染，View会根据传进来的Model模型数据进行渲染，此处的Model实际是一个Map数据结构，因此很容易支持其他视图技术；
-
-7. 返回控制权给DispatcherServlet，由DispatcherServlet返回响应给用户，流程结束。
-</code></pre>
-
-<ol>
-  <li>实现</li>
-</ol>
-
-<p>经过对struts2和springmvc的分析，可以看出要实现mvc这样的表现层框架，总体上来说需要实现以下三点：</p>
-
-<p>URL到框架的映射。</p>
-
-<p>Http请求参数绑定。</p>
-
-<p>Http响应的生成和输出。</p>
-
-<p>将其具体到实现可以分为：</p>
-
-<p>配置元素的对象化（解析配置文件，初始化环境）。</p>
-
-<pre><code>publicvoid init() throws ServletException {
-
-super.init();
-
-try {
-
-actionConfigs = XMLUtil.parseConfig();
-
-} catch (Exception e) {
-
-e.printStackTrace();
-
-}
-
-}
-</code></pre>
-
-<ol>
-  <li>
-    <p>对Http请求进行初步处理，查找与之对应的处理类（方法）</p>
-
-    <pre><code> String handlerMappingClassName = handlerBeanConfigs.get(Constants.HAND LER_MAPPING).getClazz();
-	
- String actionName = ((HandlerMapping)
-	
- ReflectUtil.getInstance(handlerMappingClassName)).handlerMapping(req);
-</code></pre>
-  </li>
-  <li>
-    <p>调用相应的处理类（方法）完成业务逻辑对处理类（方法）</p>
-
-    <pre><code> ActionConfig actionConfig = actionConfigs.get(actionName);
-	
- String handlerAdapterClassName = handlerBeanConfigs.
-	
- get(Constants.HANDLER_ADAPTER).getClazz();
-	
- String result = ((HandlerAdapter)ReflectUtil.
-	
- getInstance(handlerAdapterClassName))
-	
- .handlerAdapter(req, actionConfig, actionName);
-</code></pre>
-  </li>
-  <li>
-    <p>根据处理类（方法）的调用结果，进行Http响应处理</p>
-
-    <pre><code> String handlerViewClassName = handlerBeanConfigs.
-	
- get(Constants.HANDLER_VIEW).getClazz();
-	
- ((HandlerView) ReflectUtil.getInstance(handlerViewClassName)).
-	
- handlerView(req, resp, actionConfig, result);
-</code></pre>
-  </li>
-</ol>
-
-<p>以上是整个框架处理的核心流程,核心流程的控制在DispatcherServlet类中完成。同时整个流程又分为以上的几个步骤，对于每个步骤的具体实现,采用开放接口的方式提供给框架使用者。可以实现其中的对应接口,并在配置文件中注册具体实现类。即可实现修改框架默认定制属于自己实现。</p>
-
-<p>具体提供以下三个接口分别对应上面2，3，4步的处理逻辑，分别为：</p>
-
-<p>HandlerMapping</p>
-
-<p>HandlerAdapter</p>
-
-<p>HandlerView</p>
-
-<p>扩展举例：实现定制Http请求进行初步处理，查找与之对应的处理类（方法）</p>
-
-<pre><code>publicclass HandlerURLMapping implements HandlerMapping {
-
-@Override
-
-public String handlerMapping(HttpServletRequest request) throws Exception {
-
-String contextPath = request.getContextPath();
-
-String uri = request.getRequestURI();
-
-String actionName = uri.substring(contextPath.length() + 1, uri.length());
-
-return actionName;
-
-}
-
-}
-</code></pre>
-
-<p>框架request请求执行逻辑图如下：</p>
-
-<p><img src="/image/my-mvc.png" alt="" /></p>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/MVC.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Linux-SSH-.html">Linux SSH 登录</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#linux">linux</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>服务器IP地址为192.168.1.1，机器名：will_s
-客户端IP地址为172.16.16.1，机器名：will_c
-客户端用户will需要使用ssh无密码登录服务器的will帐户</p>
-
-<p>实现原理
-使用”公私钥”认证的方式来进行ssh登录.
-在客户端上创建一对公私钥 （公钥文件：~/.ssh/id_rsa.pub； 私钥文件：~/.ssh/id_rsa）
-然后把公钥放到服务器上（~/.ssh/authorized_keys）, 自己保留好私钥
-当ssh登录时,ssh程序会发送私钥去和服务器上的公钥做匹配.如果匹配成功就可以登录了</p>
-
-<p>设置如下：</p>
-
-<ol>
-  <li>
-    <p>以will用户登录客户机器并在客户端机器上执行”ssh-keygen -t rsa”
-(注：每次执行”ssh-keygen -t rsa”产生的私钥文件都会不同)</p>
-
-    <p>a）如果文件”~/.ssh/id_rsa”存在，会提示是否覆盖该文件，此时可选择”n”不覆盖该文件而使用已有的id_rsa文件；
- 如果选择”y”则会重新生成”~/.ssh/id_rsa”文件，接下来会提示输入passphrase，
- 回车确定使用空的passphrase，再次回车确认（这里也可以输出passphrase，相当于ssh时登录的密码）。
- 然后会重新生成”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件。</p>
-
-    <p>b）如果”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件不存在则会自动创建新的”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件，
- passphrase设置同上。</p>
-  </li>
-  <li>
-    <p>使用ssh will@192.168.1.1登录到服务器，编辑服务器上”~/.ssh/authorized_keys”文件，
-将客户端机器上的”~/.ssh/id_rsa.pub”文件内容追加到”~/.ssh/authorized_keys”文件中。
-（注：可以在客户端机器上使用以下命令来实现：</p>
-
-    <pre><code> cat ~/.ssh/id_rsa.pub | ssh will@192.168.1.1 "cat - &gt;&gt; ~/.ssh/authorized_keys" 此时会要求输入will用户在服务器上的登录密码，输入后即会将客户端机器上的"~/.ssh/id_rsa.pub"文件内容追加到服务器上的 "~/.ssh/authorized_keys"文件中） 如果是首次连接服务器会出现以下的提示，确认连接并输入密码后其他直接回车确定。
-</code></pre>
-  </li>
-  <li>
-    <p>如果在第1步中使用了空的passphrase，则可以跳过第4步，此时在客户端即可以使用”ssh zhaoy@192.168.1.1”即可无密码登录到服务器；
-如果第一步中设置了passphrase，则继续执行以下步骤。</p>
-  </li>
-  <li>
-    <p>如果第1步中设置了passphrase，则此时需要输入该passphrase登录服务器。
-此时前面我们把输入密码变成了输入passphrase，这没有带来任何方便。
-但是我们可以通过ssh-agent来帮助我们自动输入passphrase(只是看起来像是自动输入而已)，
-我们只要在第一次登录时输入一次passphrase, 以后的工作就可以交给ssh-agent。在客户端机器上执行命令ssh-add，
-这里会提示输入一次passphrase。输入第一步中设置的passphrase之后会修改”~/.ssh/id_rsa”文件。
-再在客户端执行”ssh will@192.168.1.1”即可无密码登录到服务器端。</p>
-  </li>
-</ol>
-
-      <div class="readall"><a href="/blog/2014/09/27/Linux-SSH-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

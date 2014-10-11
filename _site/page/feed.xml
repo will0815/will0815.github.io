@@ -5,9 +5,181 @@
     <description>willgo - 最好的从未错过</description>
     <link>index.html</link>
     <atom:link href="index.html/page/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 09 Oct 2014 21:28:01 +0800</pubDate>
-    <lastBuildDate>Thu, 09 Oct 2014 21:28:01 +0800</lastBuildDate>
+    <pubDate>Sun, 12 Oct 2014 00:30:25 +0800</pubDate>
+    <lastBuildDate>Sun, 12 Oct 2014 00:30:25 +0800</lastBuildDate>
     <generator>Will.Quan</generator>
+    
+      <item>
+        <title>nosql&amp;hbase</title>
+        <description>&lt;h2 id=&quot;nosqlhbase&quot;&gt;NoSQL/Hbase&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;NoSQL (Not Only SQL )&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;一项全新的数据库革命性运动，早期就有人提出，发展至2009年趋势越发高涨。NoSQL的拥护者们提倡运用非关系型的数据存储，相对于铺天盖地的关系型数据库运用，这一概念无疑是一种全新的思维的注入。任何技术的流行都有着现实的强烈需求，NoSQL也是如此，随着互联网的移动化、大数据化，超大规模和高并发的现实需求 传统的关系型数据暴露出越来越多难以满足的缺陷。如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;1、High performance - 对数据库高并发读写的需求
+2、Huge Storage - 对海量数据的高效率存储和访问的需求
+3、High Scalability &amp;amp;&amp;amp; High Availability- 对数据库的高可扩展性和高可用性的需求
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;什么是NoSQL：&lt;/p&gt;
+
+&lt;p&gt;wiki上的定义是“NoSQL is a movement promoting a loosely defined class of non-relational data stores that break with a long history of relational databases”。其实并不存在一个叫NoSQL的产品，它是一类non-relational data stores的集合。NoSQL的重点是non-relational，而传统的数据库是relational。传统关系型数据库的最大缺陷是扩展性，虽然各个数据库厂家都有cluster的解决方案，但是不管是share storage还是share nothing的解决方案，扩展性都十分有限。目前解决数据库扩展性的思路主要有两个：第一是数据分片(sharding)或者功能分区，虽然说可以很好的解决数据库扩展性的问题，但是在实际使用过程中，一旦采用数据分片或者功能分区，必然会导致牺牲“关系型”数据库的最大优势-join，对业务局限性非常大，而数据库也退化成为一个简单的存储系统。另外一个思路是通过maser-slave复制的方式，通过读写分离技术在某种程度上解决扩展性的问题，但这种方案中，由于每个数据库节点必须保存所有的数据，这样每个存储的IO subsystem必然成为扩展的瓶颈，而且masert节点也是一个瓶颈。总的来说，传统关系型数据库的扩展能力十分有限。&lt;/p&gt;
+
+&lt;p&gt;NoSQL与关系型数据库在概念上的不同：&lt;/p&gt;
+
+&lt;p&gt;CAP：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Consistency(一致性)，数据一致更新，所有数据变动都是同步的
+Availability(可用性)，好的响应性能
+Partition tolerance(分区容错性) 可靠性 CAP原理告诉我们，这三个因素最多只能满足两个，不可能三者兼顾。对于分布式系统来说，分区容错是基本要求，所以必然要放弃一致性。对于大型网站来说，分区容错和可用性的要求更高，所以一般都会选择适当放弃一致性。对应CAP理论，NoSQL追求的是AP，而传统数据库追求的是CA，这也可以解释为什么传统数据库的扩展能力有限的原因。
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;BASE：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Basically Availble：基本可用
+Soft-state： 软状态/柔性事务
+Eventual Consistency：最终一致性 BASE模型是传统ACID模型的反面，不同与ACID，BASE强调牺牲高一致性，从而获得可用性，数据允许在一段时间内的不一致，只要保证最终一致就可以了。最终一致性是整个NoSQL中的一个核心理念。
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;现如今NoSQL产品分类：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Key-Value模型：Key-Value模型是最简单，也是使用最方便的数据模型，它支持简单的key对value的键值存储和提取；Key-Value模型的一个大问题是它通常是由HashTable实现的，所以无法进行范围查询，所以有序Key-Value模型就出现了，有序Key-Value支持范围查询；
+
+Ordered Key-Value：虽然有序Key-Value模型能够解决范围查询和问题，但是其Value值依然是无结构的二进制码或纯字符串，通常我们只能在应用层去解析相应的结构。
+
+BigTable的数据模型，能够支持结构化的数据，包括列、列簇、时间戳以及版本控制等元数据的存储；
+文档型存储相对到类BigTable存储又有两个大的提升，一是其Value值支持复杂的结构定义，二是支持数据库索引的定义；全文索引模型与文档型存储的主要区别在于文档型存储的索引主要是按照字段名来组织的，而全文索引模型是按字段的具体值来组织的；
+
+图数据库模型也可以看作是从Key-Value模型发展出来的一个分支，不同的是它的数据之间有着广泛的关联，并且这种模型支持一些图结构的算法。
+他们之间的关系幽默的表示如下： ![](/image/nosql.jpg)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;目前NoSQL几个分类的代表产品： &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Key-Value 存储：Oracle Coherence、Redis、Kyoto Cabinet
+类BigTable存储：Apache HBase、Apache Cassandra
+文档数据库：MongoDB、CouchDB
+全文索引：Apache Lucene、Apache Solr
+图数据库：neo4j、FlockDB
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;NoSQL 之Hbase&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Hbase是从hadoop中分离出来的apache顶级开源项目。用java实现了Google的Bigtable系统大部分特性，是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，利用HBase技术可在廉价PC Server上搭建起大规模结构化存储集群。类似Google Bigtable利用GFS作为其文件存储系统，HBase利用Hadoop HDFS作为其文件存储系统；Google Bigtable利用 Chubby作为协同服务，HBase利用Zookeeper作为对应。&lt;/p&gt;
+
+&lt;p&gt;Hbase在Hadoop 生态环境中的位置：
+&lt;img src=&quot;/image/hbase-local-in-hadooop.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;如上图HBase位于Hadoop ecosystem结构化存储层，Hadoop HDFS为HBase提供了高可靠性的底层存储支持，Hadoop MapReduce为HBase提供了高性能的计算能力，Zookeeper为HBase提供了稳定服务和failover机制。此外，Pig和Hive还为HBase提供了高层语言支持，使得在HBase上进行数据统计处理变的非常简单。 Sqoop则为HBase提供了方便的RDBMS数据导入功能，使得传统数据库数据向HBase中迁移变的非常方便。与hadoop一样，Hbase目标主要依靠横向扩展，通过不断增加廉价的商用服务器，来增加计算和存储能力。&lt;/p&gt;
+
+&lt;p&gt;HBase中的表一般有这样的特点：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;1 大：一个表可以有上亿行，上百万列
+2 面向列:面向列(族)的存储和权限控制，列(族)独立检索。
+3 稀疏:对于为空(null)的列，并不占用存储空间，因此，表可以设计的非常稀疏。
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;HBase数据模型&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Table:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;table
+  |-column family
+  	|-column
+  		|-cell
+			|-rowkey
+			|-timestamp
+  			|-value HBase没有database的概念。rowkey是数据的一部分，其必须人工指定。 column family 在定义表时需指明。数据存储逻辑视图如下：
+
+Row Key	Timestamp	Column Family
+		URI	Parser
+r1	T3	url=http://www.xxxx.com	title=xxxx
+	T2	host=xxxx.com	 
+	T1	 	 
+r2	T2	url=http://www.xxxx.com	content=xxxx…
+	T1	host=xxxx.com	 
+
+Ø Row Key: 行键，Table的主键，Table中的记录按照Row Key排序
+Ø Timestamp: 时间戳，每次数据操作对应的时间戳，可以看作是数据的version number
+Ø Column Family：列簇，Table在水平方向有一个或者多个Column Family组成，
+一个Column Family中可以由任意多个Column组成，即Column Family支持动态扩展，
+无需预先定义Column的数量以及类型，所有Column均以二进制格式存储，用户需要自行进行类型转换。
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Region:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;当Table随着记录数不断增加而变大后，会逐渐分裂成多份splits，成为regions，一个region由
+[startkey,endkey)表示，不同的region会被Master分配给相应的RegionServer进行管理：
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;-ROOT- &amp;amp;&amp;amp; .META. Table&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;HBase中有两张特殊的Table，-ROOT-和.META.
+Ø .META.：记录了用户表的Region信息，.META.可以有多个regoin
+Ø -ROOT-：记录了.META.表的Region信息，-ROOT-只有一个region
+Ø Zookeeper中记录了-ROOT-表的location
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Hbase整体寻址结构如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; ![](/image/hbase-addre.jpg)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Client访问用户数据之前需要首先访问zookeeper，然后访问-ROOT-表，接着访问.META.表，最后才能找到用户数据的位置去访问，中间需要多次网络操作，不过client端会做cache缓存。
+HBase系统架构&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/hbase-structure.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Client&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;HBase Client使用HBase的RPC机制与HMaster和HRegionServer进行通信，对于管理类操作，
+Client与HMaster进行RPC；对于数据读写类操作，Client与HRegionServer进行RPC Zookeeper
+
+Zookeeper Quorum中除了存储了-ROOT-表的地址和HMaster的地址，HRegionServer也会把自己以
+Ephemeral方式注册到 Zookeeper中，使得HMaster可以随时感知到各个HRegionServer的健康状态
+。此外，Zookeeper也避免了HMaster的 单点问题。 HMaster
+
+HMaster没有单点问题，HBase中可以启动多个HMaster，通过Zookeeper的Master Election机
+制保证总有一个Master运行，HMaster在功能上主要负责Table和Region的管理工作：
+1.       管理用户对Table的增、删、改、查操作
+2.       管理HRegionServer的负载均衡，调整Region分布
+3.       在Region Split后，负责新Region的分配
+4.       在HRegionServer停机后，负责失效HRegionServer 上的Regions迁移 HRegionServer
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/region-server.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;HRegionServer主要负责响应用户I/O请求，向HDFS文件系统中读写数据，是HBase中最核心的模块。
+HRegionServer内部管理了一系列HRegion对象，每个HRegion对应了Table中的一个Region，HRegion中由多 个HStore组成。每个HStore对应了Table中的一个Column Family的存储，可以看出每个Column Family其实就是一个集中的存储单元，因此最好将具备共同IO特性的column放在一个Column Family中，这样最高效。&lt;/p&gt;
+
+&lt;p&gt;HStore存储是HBase存储的核心了，其中由两部分组成，一部分是MemStore，一部分是StoreFiles。MemStore是 Sorted Memory Buffer，用户写入的数据首先会放入MemStore，当MemStore满了以后会Flush成一个StoreFile（底层实现是HFile）， 当StoreFile文件数量增长到一定阈值，会触发Compact合并操作，将多个StoreFiles合并成一个StoreFile，合并过程中会进 行版本合并和数据删除，因此可以看出HBase其实只有增加数据，所有的更新和删除操作都是在后续的compact过程中进行的，这使得用户的写操作只要 进入内存中就可以立即返回，保证了HBase I/O的高性能。当StoreFiles Compact后，会逐步形成越来越大的StoreFile，当单个StoreFile大小超过一定阈值后，会触发Split操作，同时把当前 Region Split成2个Region，父Region会下线，新Split出的2个孩子Region会被HMaster分配到相应的HRegionServer 上，使得原先1个Region的压力得以分流到2个Region上。下图描述了Compaction和Split的过程：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/region-compacte.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;在理解了上述HStore的基本原理后，还必须了解一下HLog的功能，因为上述的HStore在系统正常工作的前提下是没有问题的，但是在分布式 系统环境中，无法避免系统出错或者宕机，因此一旦HRegionServer意外退出，MemStore中的内存数据将会丢失，这就需要引入HLog了。 每个HRegionServer中都有一个HLog对象，HLog是一个实现Write Ahead Log的类，在每次用户操作写入MemStore的同时，也会写一份数据到HLog文件中，HLog文件定期会滚动出新的，合并删除旧的文件（已持久化到StoreFile中的数据）。当HRegionServer意外终止后，HMaster会通过Zookeeper感知到，HMaster首先会处理遗留的 HLog文件，将其中不同Region的Log数据进行拆分，分别放到相应region的目录下，然后再将失效的region重新分配，领取 到这些region的HRegionServer在Load Region的过程中，会发现有历史HLog需要处理，因此会Replay HLog中的数据到MemStore中，然后flush到StoreFiles，完成数据恢复。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;HBase实践总结：
+column family 不应超过两个，因为一个column family 对应一个store，flush和compaction的触发的基本单位都是Region级别，所以当一个column family有大量的数据的时候会触发整个region里面的其他column family的memstore（其实这些memstore可能仅有少量的数据，还不需要flush的）也发生flush动作；另外compaction触发的条件是当store file的个数（不是总的store file的大小）达到一定数量的时候会发生，而flush产生的大量store file通常会导致compaction，flush/compaction会发生很多IO相关的负载，这对Hbase的整体性能有很大影响。
+
+一个table对应一个或多个region，在map/reduce 中对应一个map 一个column family 对应一个store。 store 中含一个menstore 和多个fileStore 当menstore 存储到达一定阀值就生成一个filestore， fileStore存放在hdfs上， 当fileStore 数量到达一定阀值就将其合并成一个大的file。
+
+在插入rowkey时，不考虑region的大小及状态，只是根据它的access 编码排序，找到对应的startkey，endkey,确定插入的位置。
+HBase两张管理表：+ .META.:管理用户region，它可以有多个region。 ROOT: 管理.META.的region，它只有一个region。 所以读写数据的流程为： client–&amp;gt;ROOT–&amp;gt;META–&amp;gt;regionserver 在数据的读写过程中client不会与master产生关系 master只是负责管理表结构。
+
+利用backup-master机制，解决master单点的问题。
+region在存储的数据到达一定阀值后将split，split的同时更形.META.和ROOT表的相关数据。 split region的过程不需要master的参与，master只负责将split后新的region分配到对应的regionserver。
+
+HBase的数据安全机制之一：在插入数据时先写Hlog然后在写到内存。 一个regionserver中只有一个Hlog， Hlog中只记录内存中存放的数据。 当机器挂掉后，master会根据Hlog中region将其分割，然后分配到不同的机器加载，做数据恢复。
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        <pubDate>Sun, 12 Oct 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/10/12/nosqlhbase.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/10/12/nosqlhbase.html</guid>
+        
+        <category>hadoop</category>
+        
+      </item>
     
       <item>
         <title>zookeeper install</title>
@@ -120,6 +292,144 @@
         <pubDate>Thu, 09 Oct 2014 00:00:00 +0800</pubDate>
         <link>index.html/blog/2014/10/09/zookeeper-install.html</link>
         <guid isPermaLink="true">index.html/blog/2014/10/09/zookeeper-install.html</guid>
+        
+        <category>hadoop</category>
+        
+      </item>
+    
+      <item>
+        <title>Tuning Hadoop</title>
+        <description>&lt;h2 id=&quot;hadoop&quot;&gt;Hadoop集群性能调优&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;mapred-site.xml&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;mapred.child.java.opts&lt;/p&gt;
+
+    &lt;p&gt;配置每个map或reduce使用的内存数量。默认的是200M。网友推荐：如果内存是8G，CPU有8个核，那么就设置成1G就可以了。实际上，在map和reduce的过程中对内存的消耗并不大，但是如果配置的太小，则有可能出现”无可分配内存”的错误。对于Hadoop环境独占的机器可以考虑：总内存 / (Map/Reduce 并发数) * 80%&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;dfs.block.size &lt;/p&gt;
+
+    &lt;p&gt;生的map来综合考量的。一般来说，文件大，集群数量少，还是建议将block size设置大一些的好。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;mapred.compress.map.output &lt;/p&gt;
+
+    &lt;p&gt;几乎所有会产生大量map output的hadoop作业，都能够通过将中间文件用Lzo进行压缩来提升性能。尽管lzo会使得cpu的load有所增高，但是reduce在shuffle阶段的disk IO通常都能节省不少时间，对job的性能有好处。
+ 当采用map中间结果压缩的情况下，用户还可以选择压缩时采用另外几种压缩格式进行压缩，现在hadoop支持的压缩格式 有：GzipCodec，LzoCodec，BZip2Codec，LzmaCodec等压缩格式。通常来说，想要达到比较平衡的cpu和磁盘压缩 比，LzoCodec比较适合。但也要取决于job的具体情况。&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; &amp;lt;property&amp;gt;
+     &amp;lt;name&amp;gt;mapred.compress.map.output&amp;lt;/name&amp;gt;
+     &amp;lt;value&amp;gt;true&amp;lt;/value&amp;gt;
+   &amp;lt;/property&amp;gt;
+ &amp;lt;property&amp;gt; 
+     &amp;lt;name&amp;gt;mapred.map.output.compression.codec&amp;lt;/name&amp;gt; 
+     &amp;lt;value&amp;gt;com.hadoop.compression.lzo.LzoCodec&amp;lt;/value&amp;gt; 
+ &amp;lt;/property&amp;gt;  
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;mapred.tasktracker.map.tasks.maximum&lt;/p&gt;
+
+    &lt;p&gt;The maximum number of map tasks that will be run simultaneously by a task tracker.&lt;/p&gt;
+
+    &lt;p&gt;一个tasktracker最多可以同时运行的map任务数量
+ 默认值：2
+ mapred.tasktracker.map.tasks.maximum = cpu数量
+ Sanders: 应该设置成为等于或略小于CPU总核数
+ cpu数量 = 服务器CPU总核数 / 每个CPU的核数
+ 服务器CPU总核数 = more  /proc/cpuinfo | grep ‘processor’ | wc -l
+ 每个CPU的核数 = more  /proc/cpuinfo | grep ‘cpu cores’&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;mapred.map.tasks&lt;/p&gt;
+
+    &lt;p&gt;The default number of map tasks per job
+ 一个Job会使用task tracker的map任务槽数量，这个值 ≤ mapred.tasktracker.map.tasks.maximum
+ 默认值：2
+ 优化值：
+ CPU数量 （我们目前的实践值）
+ (CPU数量 &amp;gt; 2) ? (CPU数量 * 0.75) : 1  （mapr的官方建议）&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;io.sort.mb    &lt;/p&gt;
+
+    &lt;p&gt;每一个map都会对应存在一个内存 buffer， map会将已经产生的部分结果先写入到该buffer中，这个buffer默认是100MB大小. 当map的产生数据非常大时，并且把io.sort.mb调 大，那么map在整个计算过程中spill的次数就势必会降低，map task对磁盘的操作就会变少，如果map tasks的瓶颈在磁盘上，这样调整就会大大提高map的计算性能。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;io.sort.spill.percent  &lt;br /&gt;
+ 这个值就是上述buffer的阈值，默认是0.8，既80%，当buffer中的数据达到这个阈值，后台线程会起来对buffer中已有的数据进行排序，然后写入磁盘，此时map输出的数据继续往剩余的20% buffer写数据，如果buffer的剩余20%写满，排序还没结束，map task被block等待。&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;io.sort.factor   &lt;br /&gt;
+ 当一个map task执行完之后，本地磁盘上(mapred.local.dir)有若干个spill文件，map task最后做的一件事就是执行merge sort，把这些spill文件合成一个文件（partition），有时候我们会自定义partition函数，就是在这个时候被调用。&lt;/p&gt;
+
+    &lt;p&gt;当map的中间结果非常大，调大io.sort.factor，有利于减少merge次数，进而减少 map对磁盘的读写频率，有可能达到优化作业的目的。&lt;/p&gt;
+
+    &lt;p&gt;默认是10&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;Reducer&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;mapred.tasktracker.reduce.tasks.maximum&lt;/p&gt;
+
+    &lt;p&gt;The maximum number of reduce tasks that will be run simultaneously by a task tracker.
+ 一个task tracker最多可以同时运行的reduce任务数量
+ 默认值：2
+ 优化值： (CPU数量 &amp;gt; 2) ? (CPU数量 * 0.50): 1 （mapr的官方建议）&lt;/p&gt;
+
+    &lt;p&gt;如果使用fair的调度模式，设置成相同，应该是可以的，但是如果是FIFO模式，我个人认为在map或是reduce阶段，CPU的核数没有得到充分的利用，有些可惜，所以，FIFO模式下，还是尽量配置的map并发数量多于redcue并发数量&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;mapred.reduce.tasks
+ The default number of reduce tasks per job. Typically set to 99% of the cluster’s reduce capacity, so that if a node fails the reduces can  still be executed in a single wave.&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; 一个Job会使用task tracker的reduce任务槽数量
+ 默认值：1
+ 优化值：
+ 1.0.95 * mapred.tasktracker.tasks.maximum
+ 理由：启用95%的reduce任务槽运行task, recude task运行一轮就可以完成。剩余5%的任务槽永远失败任务，重新执行
+ 2.1.75 * mapred.tasktracker.tasks.maximum
+ 理由：因为reduce task数量超过reduce槽数，所以需要两轮才能完成所有reduce task。具体快的原理还没有完全理解.  io.sort.mb/io.sort.factor/ io.sort.spill.percent  和Map类似
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;mapred.reduce.parallel.copies    &lt;/p&gt;
+
+    &lt;p&gt;Reduce copy数据的线程数量，默认值是5&lt;/p&gt;
+
+    &lt;p&gt;Reduce task在做shuffle时，实际上就是从不同的已经完成的map上去下载属于自己这个reduce的部分数据，由于map通常有许多个，所以对一个reduce来说，下载也可以是并行的从多个map下载
+ Reduce到每个完成的Map Task copy数据（通过RPC调用），默认同时启动5个线程到map节点取数据。这个配置还是很关键的，如果你的map输出数据很大，有时候会发现map早就100%了，reduce一直在1% 2%。。。。。。缓慢的变化，那就是copy数据太慢了，5个线程copy 10G的数据，确实会很慢，这时就要调整这个参数了，但是调整的太大，又会事倍功半，容易造成集群拥堵，所以 Job tuning的同时，也是个权衡的过程，你要熟悉你的数据&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;mapred.job.shuffle.input.buffer.percent&lt;/p&gt;
+
+    &lt;p&gt;Reduce在shuffle阶段对下载来的map数据，并不是立刻就写入磁盘的，而是会先缓存在内存中，然后当使用内存达到一定量的时候才刷入磁盘。当指定了JVM的堆内存最大值以后，上面这个配置项就是Reduce用来存放从Map节点取过来的数据所用的内存占堆内存的比例，默认是70%&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;mapred.job.shuffle.merge.percent &lt;/p&gt;
+
+    &lt;p&gt;同Map的io.sort.spill.percent 一样，当shuffle时不是等到buffer满后再在flush到磁盘，而是达到一定阈值后写入磁盘，其默认值是0.66&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;mapred.job.reduce.input.buffer.percent &lt;/p&gt;
+
+    &lt;p&gt;当reduce task真正进入reduce函数的计算阶段的时候，在读取reduce需要的数据时需要多 少的内存百分比来作为reduce读已经sort好的数据的buffer百分比。默认情况下为0，也就是说，默认情况下，reduce是全部从磁盘开始读 处理数据。如果这个参数大于0，那么就会有一定量的数据被缓存在内存并输送给reduce，当reduce计算逻辑消耗内存很小时，可以分一部分内存用来 缓存数据&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;mapred.inmem.merge.threshold&lt;/p&gt;
+
+    &lt;p&gt;从map节点取过来的文件个数，当达到这个个数之后，也进行merger sort，然后写到reduce节点的本地磁盘；mapred.job.shuffle.merge.percent优先判断.默认值1000，完全取决于map输出数据的大小
+ 默认值1000&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        <pubDate>Thu, 09 Oct 2014 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2014/10/09/Tuning-Hadoop.html</link>
+        <guid isPermaLink="true">index.html/blog/2014/10/09/Tuning-Hadoop.html</guid>
         
         <category>hadoop</category>
         
@@ -900,139 +1210,6 @@ mysql -hlocalhost -uadmin -padmin 结果是失败的。 原来 上面的 % 竟�
         <guid isPermaLink="true">index.html/blog/2014/09/27/mysql.html</guid>
         
         <category>db</category>
-        
-      </item>
-    
-      <item>
-        <title>mashup</title>
-        <description>&lt;p&gt;mashup是糅合，是当今网络上新出现的一种网络现象，
-将两种以上使用公共或者私有数据库的web应用，加在一起，形成一个整合应用。&lt;/p&gt;
-
-&lt;p&gt;现在，我们将Windows，操作系统替换成网络。那么同样的，就会有许多公司来提供哪些APIs。
-比如yahoo,google.例如一个叫EVDB的公司，它是一个事件日历的数据库，
-可以提醒你什么时间到哪里做什么事情。
-也包括像 Amazon 和 eBay，又比如Technorati ，
-所有这些不同的公司把APIs放到网上使开发者可以访问。
-现在假如你是一个Web开发者，你通过一个API 找到你附近哪些地方会有犯罪。然后你访问Google 地图API，把这两个内容整合在一起，那么你就得到了一个标有犯罪纪录的地图。
-这个新的地图就叫Mashup。因为开发者通过来自多个网站的APIs，
-把他们合并在一起，成为了一个新的很cool的应用程序。
-典型应用&lt;/p&gt;
-
-&lt;p&gt;地图 Mashup&lt;/p&gt;
-
-&lt;p&gt;在这个阶段的信息技术中，人们搜集大量有关事物和行为的数据，二者都常常具有位置注释信息。所有这些包含位置数据的不同数据集均可利用地图通过令人惊奇的图形化方式呈现出来。mashup 蓬勃发展的一种主要动力就是 Google 公开了自己的 Google Maps API。这仿佛打开了一道大门，让 Web 开发人员(包括爱好者、修补程序开发人员和其他一些人)可以在地图中包含所有类型的数据(从原子弹灾难到波士顿的 CowParade 奶牛都可以)。为了不落于人后，Microsoft(Virtual Earth)、Yahoo(Yahoo Maps)和 AOL(MapQuest)也很快相继公开了自己的 API。&lt;/p&gt;
-
-&lt;p&gt;视频和图象 Mashup&lt;/p&gt;
-
-&lt;p&gt;图像主机和社交网络站点(例如 Flickr 使用自己的 API 来共享图像)的兴起导致出现了很多有趣的 mashup。由于内容提供者拥有与其保存的图像相关的元数据(例如谁拍的照片，照片的内容是什么，在何时何地拍摄的等等)，mashup 的设计者可以将这些照片和其他与元数据相关的信息放到一起。例如，mashup 可以对图片进行分析，从而将相关照片拼接在一起，或者基于相同的照片元数据(标题、时间戳或其他元数据)显示社交网络图。另外一个例子可能以一个 Web 站点(例如 CNN 之类的新闻站点)作为输入，并在新闻中通过照片匹配而将照片中的内容以文字的形式呈现出来。&lt;/p&gt;
-
-&lt;p&gt;搜索和购物 Mashup&lt;/p&gt;
-
-&lt;p&gt;搜索和购物 mashup 在 mashup 这个术语出现之前就已经存在很长时间了。在 Web API 出现之前，有相当多的购物工具，例如 BizRate、PriceGrabber、MySimon 和 Google 的 Froogle，都使用了 B2B 技术或屏幕抓取的方式来累计相关的价格数据。为了促进 mashup 和其他有趣的 Web 应用程序的发展，诸如 eBay 和 Amazon 之类的消费网站已经为通过编程访问自己的内容而发布了自己的 API。
-新闻 Mashup
-新闻源(例如纽约时报、BBC 或路透社)已从 2002 年起使用 RSS 和 Atom 之类的联合技术来发布各个主题的新闻提要。以联合技术为基础的 mashup 可以聚集一名用户的提要，并将其通过 Web 呈现出来，创建个性化的报纸，从而满足读者独特的兴趣。&lt;/p&gt;
-
-&lt;p&gt;微博 Mashup&lt;/p&gt;
-
-&lt;p&gt;将多个微博在一个平台上进行聚合显示， 在一个平台上可以同时绑定多个微博(腾讯微博、新浪微博、搜狐微博、网易微博、人人网、豆瓣、饭否、嘀咕、Follow5、天涯微博、人间网、做啥、9911、同学网、开心网等)，从而满足用户同步多个平台的要求，提供了微博信息汇总表，让用户方便查看自己所有平台的粉丝，关注和微博数，轻松实现在不同微博间自由切换。并且提供多微博评论列表读取，跨平台分享，聚合收藏等功能。使用户可在同一屏幕中同步收发信息，实现了真正意义上的社交网站双向聚合。类似网站功能的有玛撒网，微博通等。&lt;/p&gt;
-</description>
-        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2014/09/27/mashup.html</link>
-        <guid isPermaLink="true">index.html/blog/2014/09/27/mashup.html</guid>
-        
-        <category>不懂</category>
-        
-      </item>
-    
-      <item>
-        <title>log4j配置解释</title>
-        <description>&lt;p&gt;Log4j说明&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;log4j.rootCategory=INFO, stdout , R&lt;/p&gt;
-
-    &lt;p&gt;此句为将等级为INFO的日志信息输出到stdout和R这两个目的地，
-stdout和R的定义在下面的代码，可以任意起名。
-等级可分为OFF、 FATAL、ERROR、WARN、INFO、DEBUG、ALL，
-如果配置OFF则不打出任何信息，如果配置为INFO这样只显示INFO, WARN, ERROR的log信息，
-而DEBUG信息不会被显示。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;log4j.appender.stdout=org.apache.log4j.ConsoleAppender
- 此句为定义名为stdout的输出端是哪种类型，可以是
- org.apache.log4j.ConsoleAppender（控制台），
- org.apache.log4j.FileAppender（文件），
- org.apache.log4j.DailyRollingFileAppender（每天产生一个日志文件），
- org.apache.log4j.RollingFileAppender（文件大小到达指定尺寸的时候产生一个新的文件）
- org.apache.log4j.WriterAppender（将日志信息以流格式发送到任意指定的地方）&lt;/li&gt;
-  &lt;li&gt;log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
- 此句为定义名为stdout的输出端的layout是哪种类型，可以是
- org.apache.log4j.HTMLLayout（以HTML表格形式布局），
- org.apache.log4j.PatternLayout（可以灵活地指定布局模式），
- org.apache.log4j.SimpleLayout（包含日志信息的级别和信息字符串），
- org.apache.log4j.TTCCLayout（包含日志产生的时间、线程、类别等等信息）&lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;log4j.appender.stdout.layout.ConversionPattern= [QC] %p [%t] %C.%M(%L) | %m%n
- 如果使用pattern布局就要指定的打印信息的具体格式ConversionPattern，
- 打印参数如下：
- %m 输出代码中指定的消息
- %p 输出优先级，即DEBUG，INFO，WARN，ERROR，FATAL
- %r 输出自应用启动到输出该log信息耗费的毫秒数
- %c 输出所属的类目，通常就是所在类的全名
- %t 输出产生该日志事件的线程名
- %n 输出一个回车换行符，Windows平台为“rn”，Unix平台为“n”
- %d 输出日志时间点的日期或时间，默认格式为ISO8601，也可以在其后指定格式，
- 比如：%d{yyyy MMM dd HH:mm:ss,SSS}，输出类似：2002年10月18日 22：10：28，921
- %l 输出日志事件的发生位置，包括类目名、发生的线程，以及在代码中的行数。&lt;/p&gt;
-
-    &lt;p&gt;[QC]是log信息的开头，可以为任意字符，一般为项目简称。
- 输出的信息
- [TS] DEBUG [main] AbstractBeanFactory.getBean(189) | Returning cached instance of singleton bean ‘MyAutoProxy’&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;log4j.appender.R=org.apache.log4j.DailyRollingFileAppender
- 此句与第3行一样。定义名为R的输出端的类型为每天产生一个日志文件。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;log4j.appender.R.File=D:\Tomcat 5.5\logs\qc.log&lt;/p&gt;
-
-    &lt;p&gt;此句为定义名为R的输出端的文件名为D:\Tomcat 5.5\logs\qc.log&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;log4j.appender.R.layout=org.apache.log4j.PatternLayout
- 与第4行相同。&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;10 log4j.appender.R.layout.ConversionPattern=%d-[TS] %p %t %c - %m%n
-与第5行相同。&lt;/p&gt;
-
-&lt;p&gt;12 log4j.logger.com. neusoft =DEBUG
-指定com.neusoft包下的所有类的等级为DEBUG。
-可以把com.neusoft改为自己项目所用的包名。&lt;/p&gt;
-
-&lt;p&gt;13 log4j.logger.com.opensymphony.oscache=ERROR
-14 log4j.logger.net.sf.navigator=ERROR
-这两句是把这两个包下出现的错误的等级设为ERROR，如果项目中没有配置EHCache，则不需要这两句。&lt;/p&gt;
-
-&lt;p&gt;15 log4j.logger.org.apache.commons=ERROR
-16 log4j.logger.org.apache.struts=WARN
-这两句是struts的包。&lt;/p&gt;
-
-&lt;p&gt;17 log4j.logger.org.displaytag=ERROR
-这句是displaytag的包。（QC问题列表页面所用）&lt;/p&gt;
-
-&lt;p&gt;18 log4j.logger.org.springframework=DEBUG
-此句为Spring的包。&lt;/p&gt;
-
-&lt;p&gt;24 log4j.logger.org.hibernate.ps.PreparedStatementCache=WARN
-25 log4j.logger.org.hibernate=DEBUG
-此两句是hibernate的包。&lt;/p&gt;
-
-</description>
-        <pubDate>Sat, 27 Sep 2014 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2014/09/27/log4j.html</link>
-        <guid isPermaLink="true">index.html/blog/2014/09/27/log4j.html</guid>
-        
-        <category>java</category>
         
       </item>
     
