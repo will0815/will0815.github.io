@@ -4,16 +4,25 @@ title: 生活记录
 ---
 
 <link rel="stylesheet" href="/res/css/page.css">
+<style type="text/css">
+    body{font-family:"华文行楷";}
+</style>
 <div>
-{% for post in site.life reverse %}
-{% capture y %}{{post.date | date:"%Y"}}{% endcapture %}
-{% if year != y %}{% assign year = y %}<h1 class="year">{{ post.date | date: "%Y" }}</h1>{% endif %}
-<div class="timing">
-  <time class="time">{{ post.date | date: "%m" }}-{{ post.date | date: "%d" }}</time>
-  <div class="link"><a href="{{ post.url }}">{{post.title}}</a></div>
-  <div class="point-time "></div>
-</div>
-{% endfor %}
+	<div class="timing">
+	  <time class="time">2014-09-4</time>
+	  <div class="link"><a href="../life/sanya.html">三亚</a></div>
+	  <div class="point-time "></div>
+	</div>
+	<div class="timing">
+	  <time class="time">2014-10-12</time>
+	  <div class="link"><a href="../life/i-want-go.html">我喜欢出发</a></div>
+	  <div class="point-time "></div>
+	</div>
+	<div class="timing">
+	  <time class="time">2014-10-15</time>
+	  <div class="link"><a href="../life/think-in-yesterday.html">Think in yesterday</a></div>
+	  <div class="point-time "></div>
+	</div>
 </div>
 <br/>
 <script>

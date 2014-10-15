@@ -7,12 +7,14 @@ index.html/page/4/index.html
 index.html/page/3/index.html
 index.html/page/2/index.html
 index.html/page/timing.html
+index.html/life/think-in-yesterday.html
 index.html/page/test.html
 index.html/sitemap.txt
 index.html/life/sanya.html
 index.html/page/read.html
 index.html/page/life.html
 index.html/index.html
+index.html/life/i-want-go.html
 index.html/page/feed.xml
 index.html/page/category.html
 index.html/page/about.html
