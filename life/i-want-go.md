@@ -1,6 +1,8 @@
 ---
 layout: life
 title: 我喜欢出发
+duoshuo: true
+share: true
 ---
 ##文：汪国真
 
