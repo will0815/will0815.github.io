@@ -1,6 +1,6 @@
 ---
 layout: life
-title: erweima
+title: QR Code
 duoshuo: true
 share: true
 ---
