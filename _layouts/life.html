@@ -20,12 +20,6 @@
 <body>
   <div class="main">
 	{% include sidebar.html %}
-	 <div style="font-family: segoepr;font-size: 40px;
-              margin-top:-5px; color:#fff;">
-            <script type="text/javascript" 
-            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
-            </script>
-        </div>
     <div class="title">{{ page.title }}</div>
     {% if page.meta != false %}<div class="post-info"><i class="fa fa-clock-o"></i>&nbsp;{{ page.date | date: "%Y" }}-{{ page.date | date: "%m" }}-{{ page.date | date: "%d" }}</div>{% endif %}
     <div class="content">
