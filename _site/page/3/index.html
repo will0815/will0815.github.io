@@ -52,8 +52,115 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
   </div>
 </div>
+
     <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
     
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/log4j.html">log4j配置解释</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>Log4j说明</p>
+
+<ol>
+  <li>
+    <p>log4j.rootCategory=INFO, stdout , R</p>
+
+    <p>此句为将等级为INFO的日志信息输出到stdout和R这两个目的地，
+stdout和R的定义在下面的代码，可以任意起名。
+等级可分为OFF、 FATAL、ERROR、WARN、INFO、DEBUG、ALL，
+如果配置OFF则不打出任何信息，如果配置为INFO这样只显示INFO, WARN, ERROR的log信息，
+而DEBUG信息不会被显示。</p>
+  </li>
+  <li>log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+ 此句为定义名为stdout的输出端是哪种类型，可以是
+ org.apache.log4j.ConsoleAppender（控制台），
+ org.apache.log4j.FileAppender（文件），
+ org.apache.log4j.DailyRollingFileAppender（每天产生一个日志文件），
+ org.apache.log4j.RollingFileAppender（文件大小到达指定尺寸的时候产生一个新的文件）
+ org.apache.log4j.WriterAppender（将日志信息以流格式发送到任意指定的地方）</li>
+  <li>log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+ 此句为定义名为stdout的输出端的layout是哪种类型，可以是
+ org.apache.log4j.HTMLLayout（以HTML表格形式布局），
+ org.apache.log4j.PatternLayout（可以灵活地指定布局模式），
+ org.apache.log4j.SimpleLayout（包含日志信息的级别和信息字符串），
+ org.apache.log4j.TTCCLayout（包含日志产生的时间、线程、类别等等信息）</li>
+  <li>
+    <p>log4j.appender.stdout.layout.ConversionPattern= [QC] %p [%t] %C.%M(%L) | %m%n
+ 如果使用pattern布局就要指定的打印信息的具体格式ConversionPattern，
+ 打印参数如下：
+ %m 输出代码中指定的消息
+ %p 输出优先级，即DEBUG，INFO，WARN，ERROR，FATAL
+ %r 输出自应用启动到输出该log信息耗费的毫秒数
+ %c 输出所属的类目，通常就是所在类的全名
+ %t 输出产生该日志事件的线程名
+ %n 输出一个回车换行符，Windows平台为“rn”，Unix平台为“n”
+ %d 输出日志时间点的日期或时间，默认格式为ISO8601，也可以在其后指定格式，
+ 比如：%d{yyyy MMM dd HH:mm:ss,SSS}，输出类似：2002年10月18日 22：10：28，921
+ %l 输出日志事件的发生位置，包括类目名、发生的线程，以及在代码中的行数。</p>
+
+    <p>[QC]是log信息的开头，可以为任意字符，一般为项目简称。
+ 输出的信息
+ [TS] DEBUG [main] AbstractBeanFactory.getBean(189) | Returning cached instance of singleton bean ‘MyAutoProxy’</p>
+  </li>
+  <li>
+    <p>log4j.appender.R=org.apache.log4j.DailyRollingFileAppender
+ 此句与第3行一样。定义名为R的输出端的类型为每天产生一个日志文件。</p>
+  </li>
+  <li>
+    <p>log4j.appender.R.File=D:\Tomcat 5.5\logs\qc.log</p>
+
+    <p>此句为定义名为R的输出端的文件名为D:\Tomcat 5.5\logs\qc.log</p>
+  </li>
+  <li>log4j.appender.R.layout=org.apache.log4j.PatternLayout
+ 与第4行相同。</li>
+</ol>
+
+<p>10 log4j.appender.R.layout.ConversionPattern=%d-[TS] %p %t %c - %m%n
+与第5行相同。</p>
+
+<p>12 log4j.logger.com. neusoft =DEBUG
+指定com.neusoft包下的所有类的等级为DEBUG。
+可以把com.neusoft改为自己项目所用的包名。</p>
+
+<p>13 log4j.logger.com.opensymphony.oscache=ERROR
+14 log4j.logger.net.sf.navigator=ERROR
+这两句是把这两个包下出现的错误的等级设为ERROR，如果项目中没有配置EHCache，则不需要这两句。</p>
+
+<p>15 log4j.logger.org.apache.commons=ERROR
+16 log4j.logger.org.apache.struts=WARN
+这两句是struts的包。</p>
+
+<p>17 log4j.logger.org.displaytag=ERROR
+这句是displaytag的包。（QC问题列表页面所用）</p>
+
+<p>18 log4j.logger.org.springframework=DEBUG
+此句为Spring的包。</p>
+
+<p>24 log4j.logger.org.hibernate.ps.PreparedStatementCache=WARN
+25 log4j.logger.org.hibernate=DEBUG
+此两句是hibernate的包。</p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/log4j.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
 <div class="posts">
   <section class="post">
     <header class="post-header">
@@ -541,41 +648,6 @@ hive&gt;
 
 
       <div class="readall"><a href="/blog/2014/09/27/hive-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/hbaseenable.html">hbase表无法enable</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>在enable表时，发现耗时很长都未结束，就ctrl+c退出hbase shell，再进入继续enable表，但此时出现如下错误：</p>
-
-<pre><code>ERROR: org.apache.hadoop.hbase.TableNotDisabledException:
-</code></pre>
-
-<p>错误说表未禁用，但进行disable表操作时，又出现如下错误：
-ERROR: org.apache.hadoop.hbase.TableNotEnabledException
-那肯定是刚才强行退出导致出问题了，根据大家的经验，指出这是因为zookeeper保持了要enable的这个表信息，只需要登录zk删除该记录就行。
-登录到zookeeper也有两种方式，一是到zk目录运行脚本连接，而是直接在hbase安装目录bin下运行：</p>
-
-<pre><code>hbase zkcli 之后就能连接上zookeeper了，跟着删除/hbase/table下对应的表项就行：
-
-delete /hbase/table/user_video_recommend2 之后就可以成功的enable表了。 如果此时仍然失败，则可以运行一下命了修复META：
-
-hbase hbck -fixMeta -fixAssignments
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/09/27/hbaseenable.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

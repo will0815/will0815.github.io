@@ -52,8 +52,95 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
   </div>
 </div>
+
     <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
     
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/MapReduce.html">Map/Reduce第一次开发记录</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>1.main()
+作用：配置job, 提交job
+main()运行于JobTracker</p>
+
+<ol>
+  <li>
+    <p>map/reduce运行流程：</p>
+
+    <pre><code> map(k1, v1)--&gt;(k2, v2)--&gt;combiner(k2, v2)--&gt;(k3, v3)--&gt;reduce(k3, v3)--&gt;(k4, v4)
+ InputFormat  程序逻辑          map的输出               combiner的输出  最终输出
+</code></pre>
+  </li>
+  <li>
+    <p>不要在map类中自己实现combiner或reduce的功能。可能导致内存不足。
+context.write();方法在当写入量超过一定值后，会写入文件。</p>
+  </li>
+  <li>
+    <p>setNumReduce() 设置reduce的个数，默认为1. 另外当map/reduce运行在本地时此方法的设置无效。
+对于reduce的个数一般由metadata来决定。</p>
+  </li>
+  <li>
+    <p>map/reduce 程序的运行方式：</p>
+
+    <p>a: 将写好的程序，打成jar包，将其和其依赖的jar包放置于 hadoop安装环境上 然后在hadoop上以 hadoop -jar /path/***.jar
+ b：在eclipse中run
+ c: 编写servlet, 在servlet 中调用a方法中的命令 运行程序。</p>
+  </li>
+  <li>
+    <p>Combiner</p>
+
+    <p>在map端实现对key的聚合，然后再有reduce从聚合以后的数据中获取，从而减少map于reduce之间的数据传输，提高程序效率。
+ 另外使用Combiner,应考虑使用combiner对数据的聚合程度。如果聚合量太少，是没有必要的。</p>
+  </li>
+  <li>
+    <p>Partitioner  (shuffle)
+ Partitioner 实现将map或是combiner的输出发送到对应的reduce的功能.
+ 可以自定义实现。默认为HashPartitioner</p>
+  </li>
+  <li>
+    <p>configuration：作用：实现对job的配置
+ 可以作为jobtracker,map,reduce之间的参数传递，configuration对象在设置后，在程序的任何地方都能获取。</p>
+  </li>
+  <li>
+    <p>在本地run map/redcue 程序时 需要修改源码中FileUtil类如下：</p>
+
+    <pre><code> private static void checkReturnValue(boolean rv, File p,
+ FsPermission permission
+ ) throws IOException {
+ // if (!rv) {
+ // throw new IOException("Failed to set permissions of path: " + p +
+ // " to " +
+ // String.format("%04o", permission.toShort()));
+ // }
+ }
+</code></pre>
+  </li>
+</ol>
+
+<p>可以把这个类copy到你eclipse工程中的源程序中，包名和类名都不变。
+在eclipse中运行时将优先使用你copy过来修改的那个类。
+没有必要重新编译整个hadoop的类。</p>
+
+      <div class="readall"><a href="/blog/2014/09/27/MapReduce.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
 <div class="posts">
   <section class="post">
     <header class="post-header">
@@ -780,72 +867,6 @@ public static String ArrayToString(Object[] mobile) {
 </code></pre>
 
       <div class="readall"><a href="/blog/2014/09/27/Java-File.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/InputFormat.html">InputFormat实现流程</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>自定义InputFormat类步骤：</p>
-
-<ol>
-  <li>
-    <p>继承InputFormat抽象类，InputFormat&lt;K, V&gt;</p>
-  </li>
-  <li>
-    <p>根据具体需求逻辑，实现自定义key,value.
-自定义key,value类，需要实现WritableComparable接口，
-实现其中的readFields, write, compareTo 方法
-readFields，write 分别实现对读写的序列化和反序列化
-注：对于实现类的属性，在实现readFields和write方法是必须保持顺序一致。
-compareTo方法，根据具体逻辑实现对实现对象的比较，用于map/reduce过程中的排序。</p>
-  </li>
-  <li>
-    <p>在继承InputFormat抽象类后，需要实现其中的两个抽象方法。</p>
-
-    <pre><code> List&lt;InputSplit&gt; getSplits(JobContext context)
- RecordReader&lt;K,V&gt; createRecordReader(InputSplit split, TaskAttemptContext context )  3.1
-</code></pre>
-
-    <p>List<inputsplit> getSplits(JobContext context)：
- 在该方法中我们需要实现对待处理文件按需求进行分割，方法返回值List的大小即为map的个数。
- 若需要我们自定义我们的分割方法我们需要需要继承InputSplit抽象类，该抽象类中拥有</inputsplit></p>
-
-    <pre><code> long getLength()        返回split的大小
- String[] getLocations() 返回获取数据的位置。
- 注：在继承InputSplit类时，必须实现Writable接口，否则此split无法在hadoop中传递。
- 实现Writable接口： 需要实现其中的 readFields，write 分别实现对读写的序列化和反序列化
-</code></pre>
-
-    <p>3.2</p>
-
-    <p>RecordReader&lt;K,V&gt; createRecordReader(InputSplit split, TaskAttemptContext context )
- 在该方法中我们需要实现根据split对数据的读取，返回值RecordReader&lt;K, V&gt; 即map的输入键值。
- 由此我们需要继承RecodReader&lt;K, V&gt;抽象类，来实现我们的读取逻辑。
- 该抽象类的中方法：</p>
-
-    <pre><code> abstract void initialize(InputSplit split, TaskAttemptContext context ) ：初始化方法，一般在此读取数据
- abstract boolean nextKeyValue()     ：返回是否还有下一个键值对，并对其赋值。
- abstract KEYIN getCurrentKey()      ：Get the current key
- abstract  VALUEIN getCurrentValue() ：Get the current value.
- abstract float getProgress()        ：获取处理进度
- abstract void close()               ：结束方法， 销毁资源之类的操作
-</code></pre>
-  </li>
-</ol>
-
-      <div class="readall"><a href="/blog/2014/09/27/InputFormat.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

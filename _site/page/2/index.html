@@ -52,8 +52,132 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
   </div>
 </div>
+
     <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
     
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/sqoop.html">sqoop安装</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>1、下载sqoop压缩包，并解压</p>
+
+<p>压缩包分别是：sqoop-1.2.0-CDH3B4.tar.gz，hadoop-0.20.2-CDH3B4.tar.gz， Mysql JDBC驱动包mysql-connector-java-5.1.10-bin.jar</p>
+
+<pre><code>[root@node1 ~]# ll
+drwxr-xr-x 15 root  root      4096 Feb 22  2011 hadoop-0.20.2-CDH3B4
+-rw-r--r--  1 root  root    724225 Sep 15 06:46 mysql-connector-java-5.1.10-bin.jar
+drwxr-xr-x 11 root  root      4096 Feb 22  2011 sqoop-1.2.0-CDH3B4
+</code></pre>
+
+<p>2、将sqoop-1.2.0-CDH3B4拷贝到/home/hadoop目录下，并将Mysql JDBC驱动包和hadoop-0.20.2-CDH3B4下的hadoop-core-0.20.2-CDH3B4.jar至sqoop-1.2.0-CDH3B4/lib下，最后修改一下属主。</p>
+
+<pre><code>[root@node1 ~]# cp mysql-connector-java-5.1.10-bin.jar sqoop-1.2.0-CDH3B4/lib
+[root@node1 ~]# cp hadoop-0.20.2-CDH3B4/hadoop-core-0.20.2-CDH3B4.jar sqoop-1.2.0-CDH3B4/lib
+[root@node1 ~]# chown -R hadoop:hadoop sqoop-1.2.0-CDH3B4
+[root@node1 ~]# mv sqoop-1.2.0-CDH3B4 /home/hadoop
+[root@node1 ~]# ll /home/hadoop
+total 35748
+-rw-rw-r--  1 hadoop hadoop      343 Sep 15 05:13 derby.log
+drwxr-xr-x 13 hadoop hadoop     4096 Sep 14 16:16 hadoop-0.20.2
+drwxr-xr-x  9 hadoop hadoop     4096 Sep 14 20:21 hive-0.10.0
+-rw-r--r--  1 hadoop hadoop 36524032 Sep 14 20:20 hive-0.10.0.tar.gz
+drwxr-xr-x  8 hadoop hadoop     4096 Sep 25  2012 jdk1.7
+drwxr-xr-x 12 hadoop hadoop     4096 Sep 15 00:25 mahout-distribution-0.7
+drwxrwxr-x  5 hadoop hadoop     4096 Sep 15 05:13 metastore_db
+-rw-rw-r--  1 hadoop hadoop      406 Sep 14 16:02 scp.sh
+drwxr-xr-x 11 hadoop hadoop     4096 Feb 22  2011 sqoop-1.2.0-CDH3B4
+drwxrwxr-x  3 hadoop hadoop     4096 Sep 14 16:17 temp
+drwxrwxr-x  3 hadoop hadoop     4096 Sep 14 15:59 user
+</code></pre>
+
+<p>3、配置configure-sqoop，注释掉对于HBase和ZooKeeper的检查</p>
+
+<pre><code>[root@node1 bin]# pwd
+/home/hadoop/sqoop-1.2.0-CDH3B4/bin
+[root@node1 bin]# vi configure-sqoop 
+
+#!/bin/bash
+#
+# Licensed to Cloudera, Inc. under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+.
+.
+.
+# Check: If we can't find our dependencies, give up here.
+if [ ! -d "${HADOOP_HOME}" ]; then
+  	echo "Error: $HADOOP_HOME does not exist!"
+  	echo 'Please set $HADOOP_HOME to the root of your Hadoop installation.'
+  	exit 1
+fi
+#if [ ! -d "${HBASE_HOME}" ]; then
+#  echo "Error: $HBASE_HOME does not exist!"
+#  echo 'Please set $HBASE_HOME to the root of your HBase installation.'
+#  exit 1
+#fi
+#if [ ! -d "${ZOOKEEPER_HOME}" ]; then
+#  echo "Error: $ZOOKEEPER_HOME does not exist!"
+#  echo 'Please set $ZOOKEEPER_HOME to the root of your ZooKeeper installation.'
+#  exit 1
+#fi
+</code></pre>
+
+<p>4、修改/etc/profile和.bash_profile文件，添加Hadoop_Home,调整PATH
+	[hadoop@node1 ~]$ vi .bash_profile </p>
+
+<pre><code># .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+
+# User specific environment and startup programs
+
+HADOOP_HOME=/home/hadoop/hadoop-0.20.2
+PATH=$HADOOP_HOME/bin:$PATH:$HOME/bin
+export HIVE_HOME=/home/hadoop/hive-0.10.0
+export MAHOUT_HOME=/home/hadoop/mahout-distribution-0.7
+export PATH HADOOP_HOME
+</code></pre>
+
+<p>三、测试Sqoop</p>
+
+<ol>
+  <li>
+    <p>查看mysql中的数据库：</p>
+
+    <pre><code> [hadoop@node1 bin]$ ./sqoop list-databases --connect jdbc:mysql://192.168.1.152:3306/ --username sqoop --password sqoop
+</code></pre>
+  </li>
+  <li>
+    <p>将mysql的表导入到hive中：</p>
+
+    <pre><code> [hadoop@node1 bin]$ ./sqoop import --connect jdbc:mysql://192.168.1.152:3306/sqoop --username sqoop --password sqoop --table test --hive-import -m 1
+</code></pre>
+  </li>
+</ol>
+
+      <div class="readall"><a href="/blog/2014/09/27/sqoop.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
 <div class="posts">
   <section class="post">
     <header class="post-header">
@@ -713,106 +837,6 @@ mysql -hlocalhost -uadmin -padmin 结果是失败的。 原来 上面的 % 竟�
 <p>将多个微博在一个平台上进行聚合显示， 在一个平台上可以同时绑定多个微博(腾讯微博、新浪微博、搜狐微博、网易微博、人人网、豆瓣、饭否、嘀咕、Follow5、天涯微博、人间网、做啥、9911、同学网、开心网等)，从而满足用户同步多个平台的要求，提供了微博信息汇总表，让用户方便查看自己所有平台的粉丝，关注和微博数，轻松实现在不同微博间自由切换。并且提供多微博评论列表读取，跨平台分享，聚合收藏等功能。使用户可在同一屏幕中同步收发信息，实现了真正意义上的社交网站双向聚合。类似网站功能的有玛撒网，微博通等。</p>
 
       <div class="readall"><a href="/blog/2014/09/27/mashup.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/log4j.html">log4j配置解释</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#java">java</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>Log4j说明</p>
-
-<ol>
-  <li>
-    <p>log4j.rootCategory=INFO, stdout , R</p>
-
-    <p>此句为将等级为INFO的日志信息输出到stdout和R这两个目的地，
-stdout和R的定义在下面的代码，可以任意起名。
-等级可分为OFF、 FATAL、ERROR、WARN、INFO、DEBUG、ALL，
-如果配置OFF则不打出任何信息，如果配置为INFO这样只显示INFO, WARN, ERROR的log信息，
-而DEBUG信息不会被显示。</p>
-  </li>
-  <li>log4j.appender.stdout=org.apache.log4j.ConsoleAppender
- 此句为定义名为stdout的输出端是哪种类型，可以是
- org.apache.log4j.ConsoleAppender（控制台），
- org.apache.log4j.FileAppender（文件），
- org.apache.log4j.DailyRollingFileAppender（每天产生一个日志文件），
- org.apache.log4j.RollingFileAppender（文件大小到达指定尺寸的时候产生一个新的文件）
- org.apache.log4j.WriterAppender（将日志信息以流格式发送到任意指定的地方）</li>
-  <li>log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
- 此句为定义名为stdout的输出端的layout是哪种类型，可以是
- org.apache.log4j.HTMLLayout（以HTML表格形式布局），
- org.apache.log4j.PatternLayout（可以灵活地指定布局模式），
- org.apache.log4j.SimpleLayout（包含日志信息的级别和信息字符串），
- org.apache.log4j.TTCCLayout（包含日志产生的时间、线程、类别等等信息）</li>
-  <li>
-    <p>log4j.appender.stdout.layout.ConversionPattern= [QC] %p [%t] %C.%M(%L) | %m%n
- 如果使用pattern布局就要指定的打印信息的具体格式ConversionPattern，
- 打印参数如下：
- %m 输出代码中指定的消息
- %p 输出优先级，即DEBUG，INFO，WARN，ERROR，FATAL
- %r 输出自应用启动到输出该log信息耗费的毫秒数
- %c 输出所属的类目，通常就是所在类的全名
- %t 输出产生该日志事件的线程名
- %n 输出一个回车换行符，Windows平台为“rn”，Unix平台为“n”
- %d 输出日志时间点的日期或时间，默认格式为ISO8601，也可以在其后指定格式，
- 比如：%d{yyyy MMM dd HH:mm:ss,SSS}，输出类似：2002年10月18日 22：10：28，921
- %l 输出日志事件的发生位置，包括类目名、发生的线程，以及在代码中的行数。</p>
-
-    <p>[QC]是log信息的开头，可以为任意字符，一般为项目简称。
- 输出的信息
- [TS] DEBUG [main] AbstractBeanFactory.getBean(189) | Returning cached instance of singleton bean ‘MyAutoProxy’</p>
-  </li>
-  <li>
-    <p>log4j.appender.R=org.apache.log4j.DailyRollingFileAppender
- 此句与第3行一样。定义名为R的输出端的类型为每天产生一个日志文件。</p>
-  </li>
-  <li>
-    <p>log4j.appender.R.File=D:\Tomcat 5.5\logs\qc.log</p>
-
-    <p>此句为定义名为R的输出端的文件名为D:\Tomcat 5.5\logs\qc.log</p>
-  </li>
-  <li>log4j.appender.R.layout=org.apache.log4j.PatternLayout
- 与第4行相同。</li>
-</ol>
-
-<p>10 log4j.appender.R.layout.ConversionPattern=%d-[TS] %p %t %c - %m%n
-与第5行相同。</p>
-
-<p>12 log4j.logger.com. neusoft =DEBUG
-指定com.neusoft包下的所有类的等级为DEBUG。
-可以把com.neusoft改为自己项目所用的包名。</p>
-
-<p>13 log4j.logger.com.opensymphony.oscache=ERROR
-14 log4j.logger.net.sf.navigator=ERROR
-这两句是把这两个包下出现的错误的等级设为ERROR，如果项目中没有配置EHCache，则不需要这两句。</p>
-
-<p>15 log4j.logger.org.apache.commons=ERROR
-16 log4j.logger.org.apache.struts=WARN
-这两句是struts的包。</p>
-
-<p>17 log4j.logger.org.displaytag=ERROR
-这句是displaytag的包。（QC问题列表页面所用）</p>
-
-<p>18 log4j.logger.org.springframework=DEBUG
-此句为Spring的包。</p>
-
-<p>24 log4j.logger.org.hibernate.ps.PreparedStatementCache=WARN
-25 log4j.logger.org.hibernate=DEBUG
-此两句是hibernate的包。</p>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/log4j.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
