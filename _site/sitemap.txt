@@ -19,6 +19,8 @@ index.html/page/feed.xml
 index.html/life/erweima.html
 index.html/life/daqi.html
 index.html/page/category.html
+index.html/life/book.html
+index.html/life/best-me.html
 index.html/page/about.html
 index.html/404.html
 
