@@ -1,7 +1,7 @@
 ---
 layout: post
-title: mahout 初识
-category: 
+title: mahout--初学
+category: hadoop
 date: 2014-11-04
 ---
 ##Mahout

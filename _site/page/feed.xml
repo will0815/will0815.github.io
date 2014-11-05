@@ -5,12 +5,12 @@
     <description>willgo - 最好的从未错过</description>
     <link>index.html</link>
     <atom:link href="index.html/page/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 05 Nov 2014 21:57:34 +0800</pubDate>
-    <lastBuildDate>Wed, 05 Nov 2014 21:57:34 +0800</lastBuildDate>
+    <pubDate>Wed, 05 Nov 2014 22:06:55 +0800</pubDate>
+    <lastBuildDate>Wed, 05 Nov 2014 22:06:55 +0800</lastBuildDate>
     <generator>Will.Quan</generator>
     
       <item>
-        <title>mahout 初识</title>
+        <title>mahout--初学</title>
         <description>&lt;h2 id=&quot;mahout&quot;&gt;Mahout&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;What is Mahout&lt;/strong&gt;&lt;/p&gt;
 
@@ -168,6 +168,8 @@ Canopy 聚类算法的基本原则是：首先应用成本低的近似的距离�
         <pubDate>Tue, 04 Nov 2014 00:00:00 +0800</pubDate>
         <link>index.html/blog/2014/11/04/mahout-xiangjie.html</link>
         <guid isPermaLink="true">index.html/blog/2014/11/04/mahout-xiangjie.html</guid>
+        
+        <category>hadoop</category>
         
       </item>
     
