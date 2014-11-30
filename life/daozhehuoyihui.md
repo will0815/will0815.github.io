@@ -1,7 +1,7 @@
 ---
 layout: life
-title: daozhehuoyihui
+title: 我想倒着活一回
 duoshuo: true
-shareL true
+share: true
 ---
-![](/image/daozhehuoyihui.jpg)
+![](/image/daqi/daozhehuoyihui.jpg)
