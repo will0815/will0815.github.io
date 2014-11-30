@@ -26,7 +26,8 @@ Canopy算法流程
 	      1、从PointList中取一个Point ，寻找已经建立好的Canopy 计算这个点于所有的Canopy的距离。如果和某一个Canopy的距离小于T1，则把这个点加到Canopy中，如果没有Canopy则选择这个点为一个Canopy的中心。  
 	      2、如果这个店Point和某个Canopy的距离小于T2,则把这个点从PointList中删除（这个点以后做不了其他的Canopy的中心了）。  
 	      3、循环直到所有的Point都被加入进来，然后计算各个Canopy的Center和Radius。
-模型MapReduce版本：
+
+MapReduce：
 
 	  1、把数据整理成SequcnceFile格式（Mahout-InputMapper）作为初始化文件PointFile  
 	  2、CanopyMapper阶段本机聚成小的Canopy 中间文件写成SequenceFile 这一步的T1、T2 和Reduce的T1、T2可以是不同的（ index、Canpy）  
