@@ -64,7 +64,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/InputFormat.html">InputFormat实现流程</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/hive-.html">hive 安装</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
@@ -74,55 +74,98 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
       </p>
     </header>
     <div class="post-main">
-      <p>自定义InputFormat类步骤：</p>
+      <p>Hive安装</p>
 
 <ol>
   <li>
-    <p>继承InputFormat抽象类，InputFormat&lt;K, V&gt;</p>
+    <p>下载Hive</p>
   </li>
   <li>
-    <p>根据具体需求逻辑，实现自定义key,value.
-自定义key,value类，需要实现WritableComparable接口，
-实现其中的readFields, write, compareTo 方法
-readFields，write 分别实现对读写的序列化和反序列化
-注：对于实现类的属性，在实现readFields和write方法是必须保持顺序一致。
-compareTo方法，根据具体逻辑实现对实现对象的比较，用于map/reduce过程中的排序。</p>
+    <p>把Hive移动到/home/hadoop目录下并解压</p>
+
+    <pre><code> hadoop@ubuntu:~/下载$ mv hive-0.9.0.tar.gz /home/hadoop/
+ hadoop@ubuntu:~$ cd /home/hadoop/
+ hadoop@ubuntu:~$ tar -zxvf hive-0.9.0.tar.gz 
+</code></pre>
   </li>
   <li>
-    <p>在继承InputFormat抽象类后，需要实现其中的两个抽象方法。</p>
+    <p>用root用户给hive-0.9.0授权</p>
 
-    <pre><code> List&lt;InputSplit&gt; getSplits(JobContext context)
- RecordReader&lt;K,V&gt; createRecordReader(InputSplit split, TaskAttemptContext context )  3.1
-</code></pre>
-
-    <p>List<inputsplit> getSplits(JobContext context)：
- 在该方法中我们需要实现对待处理文件按需求进行分割，方法返回值List的大小即为map的个数。
- 若需要我们自定义我们的分割方法我们需要需要继承InputSplit抽象类，该抽象类中拥有</inputsplit></p>
-
-    <pre><code> long getLength()        返回split的大小
- String[] getLocations() 返回获取数据的位置。
- 注：在继承InputSplit类时，必须实现Writable接口，否则此split无法在hadoop中传递。
- 实现Writable接口： 需要实现其中的 readFields，write 分别实现对读写的序列化和反序列化
-</code></pre>
-
-    <p>3.2</p>
-
-    <p>RecordReader&lt;K,V&gt; createRecordReader(InputSplit split, TaskAttemptContext context )
- 在该方法中我们需要实现根据split对数据的读取，返回值RecordReader&lt;K, V&gt; 即map的输入键值。
- 由此我们需要继承RecodReader&lt;K, V&gt;抽象类，来实现我们的读取逻辑。
- 该抽象类的中方法：</p>
-
-    <pre><code> abstract void initialize(InputSplit split, TaskAttemptContext context ) ：初始化方法，一般在此读取数据
- abstract boolean nextKeyValue()     ：返回是否还有下一个键值对，并对其赋值。
- abstract KEYIN getCurrentKey()      ：Get the current key
- abstract  VALUEIN getCurrentValue() ：Get the current value.
- abstract float getProgress()        ：获取处理进度
- abstract void close()               ：结束方法， 销毁资源之类的操作
+    <pre><code> hadoop@ubuntu:~$ su -
+ 密码：
+ root@ubuntu:~# cd /home/hadoop/
+ root@ubuntu:/home/hadoop# sudo chown -R hadoop:hadoop hive-0.9.0
 </code></pre>
   </li>
 </ol>
 
-      <div class="readall"><a href="/blog/2014/09/27/InputFormat.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<p>4.添加hive-0.9.0环境变量</p>
+
+<pre><code>	/etc/profile
+	在以上 文件中添加如下内容：
+
+#set java environment
+HIVE_HOME=/home/hadoop/hive-0.9.0
+HADOOP_HOME=/home/hadoop/hadoop-1.1.1
+JAVA_HOME=/home/hadoop/jdk1.7.0
+PATH=$JAVA_HOME/bin:$HIVE_HOME/bin:$HADOOP_HOME/bin:$PATH
+CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$HIVE_HOME/lib:$JAVA_HOME/lib/tools.jar
+export HADOOP_HOME
+export JAVA_HOME
+export HIVE_HOME
+export PATH
+export CLASSPATH 
+</code></pre>
+
+<ol>
+  <li>配置 Hive 配置文件</li>
+</ol>
+
+<p>a.配置 hive-conf.sh</p>
+
+<p>在“/home/hadoop/hive-0.9.0/bin”目录下,“hive-conf.sh”,然后在里面添加下面内容。</p>
+
+<pre><code>#set java environment
+HIVE_HOME=/home/hadoop/hive-0.9.0
+HADOOP_HOME=/home/hadoop/hadoop-1.1.1
+JAVA_HOME=/home/hadoop/jdk1.7.0
+PATH=$JAVA_HOME/bin:$HIVE_HOME/bin:$HADOOP_HOME/bin:$PATH
+CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$HIVE_HOME/lib:$JAVA_HOME/lib/tools.jar
+export HADOOP_HOME
+export JAVA_HOME
+export HIVE_HOME
+export PATH
+export CLASSPATH 
+</code></pre>
+
+<p>b.配置 hive-default.xml 和 hive-site.xml</p>
+
+<p>在“/home/hadoop/hive-0.9.0/conf”目录下,没有这两个文件,只有一个“hive-default.xml.template”,所以我们要复制两个“hive-default.xml.template”,并分别命名为“hive-default.xml”和“hive-site.xml” 因为我们当前是 root 用户,。所以还要把两个的文件的授权给 hadoop 用户。</p>
+
+<pre><code>root@ubuntu:/home/hadoop/hive-0.9.0/conf# cp hive-default.xml.template hive-default.xml
+root@ubuntu:/home/hadoop/hive-0.9.0/conf# chown -R hadoop:hadoop hive-default.xml
+root@ubuntu:/home/hadoop/hive-0.9.0/conf# cp hive-default.xml.template hive-site.xml
+root@ubuntu:/home/hadoop/hive-0.9.0/conf# chown -R hadoop:hadoop hive-site.xml
+root@ubuntu:/home/hadoop/hive-0.9.0/conf# ls -l
+</code></pre>
+
+<p>备注: “hive-default.xml”用于保留默认配置,“hive-site.xml”用于个性化配置,可覆盖默认配置。</p>
+
+<ol>
+  <li>启动 Hive</li>
+</ol>
+
+<p>此时切换用户至 hadoop 用户,在命令行输入“hive”命令进行测试。</p>
+
+<pre><code>hadoop@ubuntu:~$ hive
+WARNING: org.apache.hadoop.metrics.jvm.EventCounter is deprecated. Please use org.apache.hadoop.log.metrics.EventCounter in all the log4j.properties files.
+Logging initialized using configuration in jar:file:/home/hadoop/hive-0.9.0/lib/hive-common-0.9.0.jar!/hive-log4j.properties
+Hive history file=/tmp/hadoop/hive_job_log_hadoop_201303041031_876597921.txt
+hive&gt;
+</code></pre>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/hive-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -130,242 +173,7 @@ compareTo方法，根据具体逻辑实现对实现对象的比较，用于map/r
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Hadoop.html">单节点伪分布式Hadoop搭建</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#"></a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>单节点伪分布式Hadoop配置</p>
-
-<p>第一步： 安装JDK</p>
-
-<p>因为 Hadoop 运行必须安装 JDK 环境，因此在安装好 Linux 后进入系统的第一步 便是安装 JDK ，安装过程和在 Windows 环境中的安装步骤很类似，首先去 Oracle 官网 去下载安装包，然后直接进行解压。我自己解压在路径 /usr/jvm 下面，假如你的安装包现在已经下载在 jvm 文件夹下面，然后 按 Ctrl+Alt+t 进去命令行，然后输入</p>
-
-<pre><code>cd  /usr/jvm
-</code></pre>
-
-<p>进入到jvm文件夹下面，然后再输入如下命令进行解压：</p>
-
-<pre><code>sudo tar  -zxvf  jdk-7u40-linux-i586.tar.gz
-</code></pre>
-
-<p>第二步： 配置环境变量</p>
-
-<p>解压结束以后，像在 Windows 系统中一样，需要配置环境变量，在 Ubuntu 中设置 环境变量的过程为打开文件 /etc/profile ，因为权限的问题，因此在命令行需要输入 的是</p>
-
-<pre><code>sudo gedit /etc/profile
-</code></pre>
-
-<p>然后在根据提示输入用户密码即可，然后在文件最下面添加如下：</p>
-
-<pre><code>export JAVA_HOME=/usr/jvm/jdk1.7.0_40
-
-export CLASSPATH=".:$JAVA_HOME/lib:$JAVA_HOME/jre/lib$CLASSPATH"
-
-export PATH="$JAVA_HOME/bin:$JAVA_HOME/jre/bin:/usr/hadoop/hadoop-1.2.1/bin:$PATH"
-</code></pre>
-
-<p>上面这三个以单词 export 开始的三个语句就类似于我们在 Windows 中的环境变量中设置一样，而且在这个里面和 Windows 中不同的是，在 Windows 中使用 “；” 号来表示分隔，但是在 Ubuntu 中是以 “：” 号来表示分隔。还需要注意的是，上面的路径都是我自己配置的时候的路径，因为我的 JDK 解压在 /usr/jvm 中，所以我的 JAVA_HOME 设置的是那个路径，而且如果安装的 JDK 版本不同那么后面的也不一样。同理在 CLASSPATH 路径中也是因为我自己的安装路径进行设置的，因此在配置过程中需要读者注意。在 PATH 路径中最后面还将 Hadoop 的路径也添加了进去，因此在读者安装了 Hadoop 后也将这个路径添加进环境变量 PATH 中去。</p>
-
-<p>在配置完环境变量后，我们来将我们安装的 JDK 设置为 Ubuntu 系统默认的 JDK ，因为之前系统里面自带 openjdk ，在命令行里面输入如下：</p>
-
-<pre><code>sudo update-alternatives  --install  /usr/bin/java  java  /usr/jvm/jdk1.7.0_40/bin/java 300
-
-sudo update-alternatives  --install  /usr/bin/javac  javac  /usr/jvm/jdk1.7.0_40/bin/javac 300
-
-sudo update-alternatives  --config  java
-</code></pre>
-
-<p>然后我们就可以在命令行输入 java -version 来进行察看 JDK 是否已经配置好了。</p>
-
-<p>第三步： 安装Hadoop  </p>
-
-<p>我们可以去 Hadoop 官网上去下载安装包，我自己下载使用的是 hadoop-1.2.1.tar.gz ，然后当安装包下载结束后，将安装包解压到指定位置，我将安装包解压到了 /usr/hadoop 目录下面。</p>
-
-<p>具体步骤是，像解压 JDK 一样，首先加入下载的 Hadoop 安装包在 /usr/hadoop 文件夹下面。然后在命令行下进入 /usr/hadoop 文件，类似于上面的。然后输入解压命令如下</p>
-
-<pre><code>sudo  tar  -zxvf  hadoop-1.2.1.tar.gz  
-</code></pre>
-
-<p>后面的 Hadoop 安装包名称具体看你下载的版本，我下载的是1.2.1版本的。 为了以后操作 /usr/hadoop 文件夹里面的文件方便，我们设置一下文件夹的权限，在命令行输入如下</p>
-
-<pre><code>sudo  chown  -hR  long  /usr/hadoop
-</code></pre>
-
-<p>注意：在上面的命令中，long是我自己此时登陆的用户名，因此你需要将那个改成你自己的用户名。</p>
-
-<p>第四步： 配置Hadoop环境变量</p>
-
-<p>在上面解压完 Hadoop 以后，现在我们来设置环境变量，其实在上面刚才我们配置 JDK 环境变量的时候，已经在 PATH 路径后面添加了 Hadoop 安装目录的 bin 目录的路径，所以那个就代表环境变量已经设置好了，但是读者一定要注意，不要 Copy ，要明确自己的 Hadoop 安装路径来进行配置。</p>
-
-<p>第五步： 设置SSH（安全外壳协议）</p>
-
-<p>推荐安装 OpenSSH ， Hadoop 需要通过 SSH 来启动 Slave 列表中各台主机的守护进程，因此 SSH 是必需安装的。虽然我们现在搭建的是一个伪分布式的平台，但是 Hadoop 没有区分开集群式和伪分布式，对于伪分布式， Hadoop 会采用与集群相同的处理方式，即按次序启动文件 conf/slaves 中记载的主机进程，只不过在伪分布式中 Salve 为 localhost 而已，所以对于伪分布式， SSH 是必须的。</p>
-
-<p>配置过程（首先确保连接上网络）：</p>
-
-<p>① 安装SSH，在命令行输入如下</p>
-
-<pre><code>sudo  apt-get install openssh-server
-</code></pre>
-
-<p>② 配置可以免密码登陆本机</p>
-
-<p>在命令行输入（注意其中的ssh前面还有一个 “ . ” 不要遗漏）</p>
-
-<pre><code>ssh-keygen  -t  dsa -P '' -f  ~/.ssh/id_dsa 
-</code></pre>
-
-<p>（解释一下上面这条命令， ssh-keygen  代表生成密钥； -t  表示指定生成的密钥 类型； dsa  是 dsa 密钥认证的意思； -P  用于提供密语（接着后面是两个单引号， 不要打错）； -f  表示指定生成密钥文件）</p>
-
-<p>这条命令完成后，会在当前文件夹下面的 .ssh 文件夹下创建 id_dsa 和 id_dsa.pub 两个文件，这是 SSH 的一对私钥和公钥，把 id_dsa.pub （公钥）追加到授权的 key 中去，输入如下命令：</p>
-
-<pre><code>cat  ~/.ssh/id_dsa.pub  &gt;&gt;  ~/.ssh/authorized_keys
-</code></pre>
-
-<p>至此，免密码登陆本机已经配置完毕。</p>
-
-<p>说明：一般来说，安装SSH时会自动在当前用户下创建.ssh这个隐藏文件夹，一般不会直接看到，除非安装好了以后，在命令行使用命令ls才会看到。</p>
-
-<p>③ 输入 ssh  localhost ，显示登陆成功信息。</p>
-
-<p>第六步： 配置Hadoop伪分布式模式</p>
-
-<p>现在进入到安装 Hadoop 的文件夹，找到里面的 conf 文件夹，点击进去。</p>
-
-<p>配置 hadoop 环境文件 hadoop-env.sh</p>
-
-<p>打开文件，找到某行有 ”# export JAVA_HOME = …”  字样的地方，去掉 “#” ，然后在等号后面填写你自己的 JDK 路径，比如像我自己的 JDK 路径，那就改为了 如下所示</p>
-
-<pre><code>“export  JAVA_HOME=/usr/jvm/jdk1.7.0_40”
-</code></pre>
-
-<p>配置 Hadoop 的核心文件 core-site.xml</p>
-
-<p>打开文件，会发现标签 <configuration></configuration> 中是空的，在空的地方添加如下配置</p>
-
-<pre><code>&lt;property&gt;
-
-            &lt;name&gt;fs.default.name&lt;/name&gt;
-
-            &lt;value&gt;hdfs://localhost:9000&lt;/value&gt;
-
-     &lt;/property&gt;
-
-
-
-     &lt;property&gt;
-
-             &lt;name&gt;dfs.replication&lt;/name&gt;
-
-             &lt;value&gt;1&lt;/value&gt;
-
-     &lt;/property&gt;
-
-
-
-     &lt;property&gt;
-
-              &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
-
-              &lt;value&gt;/home/long/tmp&lt;/value&gt;
-
-     &lt;/property&gt;
-</code></pre>
-
-<p>（注意：在最后一个value值中，上面是long，是因为那是我的用户名，所以你需要将那个修改为你自己的用户名）</p>
-
-<p>配置 Hadoop 中 MapReduce 的配置文件 mapred-site.xml</p>
-
-<p>打开文件，会发现标签 <configuration></configuration> 中是空的，在空的地方添加如下配置</p>
-
-<pre><code>&lt;property&gt;
-
-     &lt;name&gt;mapred.job.tracker&lt;/name&gt;
-
-     &lt;value&gt;localhost:9001&lt;/value&gt;
-
-&lt;/property&gt;
-</code></pre>
-
-<p>第七步： 格式化Hadoop文件系统HDFS并启动Hadoop</p>
-
-<p>首次运行 hadoop 必须进行格式化 Hadoop 文件系统，以后运行即可跳过。打开命令行，进入安装了 Hadoop 的文件路径下，然后在命令行输入</p>
-
-<pre><code>bin/hadoop  namenode -format
-</code></pre>
-
-<p>格式化文件系统，然后启动 Hadoop ，在命令行里面输入
-	bin/start-all.sh</p>
-
-<p>验证是否正常启动，在命令行里面输入 jps ，然后回车，如果在命令行里面出现如下类似画面（因为前面的数字可以不同）</p>
-
-<pre><code>3235 NameNode
-
-4113 Jps
-
-3819 JobTracker
-
-4059 TaskTracker
-
-3721 SecondaryNameNode
-
-3487 DataNode
-</code></pre>
-
-<p>则说明已经正常启动。如果以后需要关闭 Hadoop 的话，在 Hadoop 安装的文件夹路径下面在命令行输入</p>
-
-<pre><code>bin/stop-all.sh
-</code></pre>
-
-<p>来关闭 Hadoop 。</p>
-
-<p>第八步： 跑一个Hadoop中自带的WordCount程序，来体验一把</p>
-
-<p>步骤如下（我在自己平台上的，读者可仿照实验）：</p>
-
-<p>1)  准备一个文本文件</p>
-
-<p>首先我在桌面，新建了一个空白文档 test ，在里面输入一段话，或是几一些什么 单 词什么的，保存。</p>
-
-<p>2)  将文本文件上传到 dfs 文件系统中的 input 目录下，打开命令行，进入到安装 hadoop 的文件夹下，然后输入如下</p>
-
-<pre><code>bin/hadoop  dfs  -copyFromLocal  /home/long/桌面/test  input
-</code></pre>
-
-<p>（注：如果 dfs 中不包含 input 目录的话就会自动创建一个）</p>
-
-<p>3)  然后在命令行中输入如下命令，执行 WordCount 程序</p>
-
- 	 bin/hadoop  jar  hadoop-examples-1.2.1.jar  wordcount  input  output
-
-<p>（注：因为这个程序是 Hadoop 安装包里面自带的，就在 hadoop-examples-1.2.1.jar 中，后面的数字因为版本号的不同而不同，后面的 input 代表输入文件夹， output 代表输出文件夹 ， 系统输出时会自动创建）</p>
-
-<p>读者如果这个执行成功了，就会发现有很多输出信息，从屏幕上显示，当程序运行结束后。</p>
-
-<p>4)  察看结果 在命令行里面输入</p>
-
-<pre><code>bin/hadoop  dfs  -cat  output/part-r-00000
-</code></pre>
-
-<p>现在你就可以看见自己刚才输入文本里面的单词计数了。</p>
-
-<p>至此，伪分布式搭建结束!</p>
-
-      <div class="readall"><a href="/blog/2014/09/27/Hadoop.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/HDFS.html">HDFS超租约异常</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/hbaseenable.html">hbase表无法enable</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
@@ -375,29 +183,24 @@ sudo update-alternatives  --config  java
       </p>
     </header>
     <div class="post-main">
-      <p>HDFS超租约异常总结（org.apache.hadoop.hdfs.server.namenode.LeaseExpiredException）
-http://www.cnblogs.com/wangxiaowei/p/3317479.html</p>
+      <p>在enable表时，发现耗时很长都未结束，就ctrl+c退出hbase shell，再进入继续enable表，但此时出现如下错误：</p>
 
-<p>hbase.regionserver.lease.period 客户端租期超时阀值；scan量大时可以考虑增大；否则”Lease Exception: lease -70000000000000001 does not exist”</p>
-
-<p>这个log通常出现在regionserver挂掉之前。通常regionserver因为某种原因从zookeeper上掉线，需要flush以及删除region对应的WAL，而如果接管的regionserver在此之前已经读取完成WAL并且删除的话，那么就会出现如上文件已经不存在的错误</p>
-
-<p><strong>解决办法，调整xcievers参数</strong></p>
-
-<pre><code>默认是4096，改为8192，hdfs-site.xml
-&lt;property&gt;
-&lt;name&gt;dfs.datanode.max.xcievers&amp;lt;/name&gt;
-&lt;value&gt;8192&amp;lt;/value&gt;
-&lt;/property&gt;
-dfs.datanode.max.xcievers 参数说明 一个 Hadoop HDFS Datanode 有一个同时处理文件的上限. 这个参数叫 xcievers (Hadoop的作者把这个单词拼错了). 在你加载之前，先确认下你有没有配置这个文件conf/hdfs-site.xml里面的xceivers参数，至少要有4096:
-
-&lt;property&gt;
-&lt;name&gt;dfs.datanode.max.xcievers&amp;lt;/name&gt;
-&lt;value&gt;4096&lt;/value&gt;
-&lt;/property&gt;
+<pre><code>ERROR: org.apache.hadoop.hbase.TableNotDisabledException:
 </code></pre>
 
-      <div class="readall"><a href="/blog/2014/09/27/HDFS.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<p>错误说表未禁用，但进行disable表操作时，又出现如下错误：
+ERROR: org.apache.hadoop.hbase.TableNotEnabledException
+那肯定是刚才强行退出导致出问题了，根据大家的经验，指出这是因为zookeeper保持了要enable的这个表信息，只需要登录zk删除该记录就行。
+登录到zookeeper也有两种方式，一是到zk目录运行脚本连接，而是直接在hbase安装目录bin下运行：</p>
+
+<pre><code>hbase zkcli 之后就能连接上zookeeper了，跟着删除/hbase/table下对应的表项就行：
+
+delete /hbase/table/user_video_recommend2 之后就可以成功的enable表了。 如果此时仍然失败，则可以运行一下命了修复META：
+
+hbase hbck -fixMeta -fixAssignments
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/hbaseenable.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -405,7 +208,7 @@ dfs.datanode.max.xcievers 参数说明 一个 Hadoop HDFS Datanode 有一个同�
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/HBASE.html">HBASE性能优化方法总结</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/hbase-time.html">hbase time集群时间不一致无法启动</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
@@ -415,382 +218,48 @@ dfs.datanode.max.xcievers 参数说明 一个 Hadoop HDFS Datanode 有一个同�
       </p>
     </header>
     <div class="post-main">
-      <p>From :http://www.blogjava.net/paulwong/archive/2012/11/29/392232.html</p>
+      <p>hbase 分布式时可能因为各个机器的时间不一致导致无法启动
+两种解决方案：</p>
 
 <ol>
   <li>
-    <p>表的设计</p>
+    <p>联网更新时间：</p>
 
-    <p>1.1 Pre-Creating Regions</p>
-
-    <p>默认情况下，在创建HBase表的时候会自动创建一个region分区，当导入数据的时候，所有的HBase客户端都向这一个region写数据，直到这个region足够大了才进行切分。一种可以加快批量写入速度的方法是通过预先创建一些空的regions，这样当数据写入HBase时，会按照region分区情况，在集群内做数据的负载均衡。</p>
-
-    <p>有关预分区，详情参见：Table Creation: Pre-Creating Regions，下面是一个例子：
-     publicstaticbooleancreateTable(HBaseAdmin admin, HTableDescriptor table,byte[][] splits)
-     throwsIOException {
-       try{
-         admin.createTable(table, splits);
-         returntrue;
-       }catch(TableExistsException e) {
-         logger.info(“table “+ table.getNameAsString() +” already exists”);
-         // the table already exists
-         returnfalse;
-       }
-     }</p>
-
-    <pre><code> publicstaticbyte[][] getHexSplits(String startKey, String endKey,intnumRegions) {
-   byte[][] splits =newbyte[numRegions-1][];
-   BigInteger lowestKey =newBigInteger(startKey,16);
-   BigInteger highestKey =newBigInteger(endKey,16);
-   BigInteger range = highestKey.subtract(lowestKey);
-   BigInteger regionIncrement = range.divide(BigInteger.valueOf(numRegions));
-   lowestKey = lowestKey.add(regionIncrement);
-   for(inti=0; i &lt; numRegions-1;i++) {
-     BigInteger key = lowestKey.add(regionIncrement.multiply(BigInteger.valueOf(i)));
-     byte[] b = String.format("%016x", key).getBytes();
-     splits[i] = b;
-   }
-   returnsplits;
- }
+    <pre><code> sudo tzconfig， 如果命令不存在请使用 dpkg-reconfigure tzdata 然后按照提示选择 Asia对应的序号，选完后会显示一堆新的提示—输入城市名， 如Shanghai或Chongqing，最后再用 sudo date -s “” 来修改本地时间。 按照提示进行选择时区，然后： www.2cto.com sudo cp /usr/share/zoneinfo/Asia/ShangHai /etc/localtime 上面的命令是防止系统重启后时区改变。
 </code></pre>
-
-    <p>1.2 Row Key</p>
-
-    <p>HBase中row key用来检索表中的记录，支持以下三种方式：</p>
-
-    <p>通过单个row key访问：即按照某个row key键值进行get操作；
- 通过row key的range进行scan：即通过设置startRowKey和endRowKey，在这个范围内进行扫描；
- 全表扫描：即直接扫描整张表中所有行记录。
- 在HBase中，row key可以是任意字符串，最大长度64KB，实际应用中一般为10~100bytes，存为byte[]字节数组，一般设计成定长的。</p>
-
-    <p>row key是按照字典序存储，因此，设计row key时，要充分利用这个排序特点，将经常一起读取的数据存储到一块，将最近可能会被访问的数据放在一块。</p>
-
-    <p>举个例子：如果最近写入HBase表中的数据是最可能被访问的，可以考虑将时间戳作为row key的一部分，由于是字典序排序，所以可以使用Long.MAX_VALUE – timestamp作为row key，这样能保证新写入的数据在读取时可以被快速命中。</p>
-
-    <p>1.3 Column Family</p>
-
-    <p>不要在一张表里定义太多的column family。目前Hbase并不能很好的处理超过2~3个column family的表。因为某个column family在flush的时候，它邻近的column family也会因关联效应被触发flush，最终导致系统产生更多的I/O。感兴趣的同学可以对自己的HBase集群进行实际测试，从得到的测试结果数据验证一下。</p>
-
-    <p>1.4 In Memory</p>
-
-    <p>创建表的时候，可以通过HColumnDescriptor.setInMemory(true)将表放到RegionServer的缓存中，保证在读取的时候被cache命中。</p>
-
-    <p>1.5 Max Version</p>
-
-    <p>创建表的时候，可以通过HColumnDescriptor.setMaxVersions(int maxVersions)设置表中数据的最大版本，如果只需要保存最新版本的数据，那么可以设置setMaxVersions(1)。</p>
-
-    <p>1.6 Time To Live</p>
-
-    <p>创建表的时候，可以通过HColumnDescriptor.setTimeToLive(int timeToLive)设置表中数据的存储生命期，过期数据将自动被删除，例如如果只需要存储最近两天的数据，那么可以设置setTimeToLive(2 * 24 * 60 * 60)。</p>
-
-    <p>1.7 Compact &amp; Split</p>
-
-    <p>在HBase中，数据在更新时首先写入WAL 日志(HLog)和内存(MemStore)中，MemStore中的数据是排序的，当MemStore累计到一定阈值时，就会创建一个新的MemStore，并且将老的MemStore添加到flush队列，由单独的线程flush到磁盘上，成为一个StoreFile。于此同时， 系统会在zookeeper中记录一个redo point，表示这个时刻之前的变更已经持久化了(minor compact)。</p>
-
-    <p>StoreFile是只读的，一旦创建后就不可以再修改。因此Hbase的更新其实是不断追加的操作。当一个Store中的StoreFile达到一定的阈值后，就会进行一次合并(major compact)，将对同一个key的修改合并到一起，形成一个大的StoreFile，当StoreFile的大小达到一定阈值后，又会对 StoreFile进行分割(split)，等分为两个StoreFile。</p>
-
-    <p>由于对表的更新是不断追加的，处理读请求时，需要访问Store中全部的StoreFile和MemStore，将它们按照row key进行合并，由于StoreFile和MemStore都是经过排序的，并且StoreFile带有内存中索引，通常合并过程还是比较快的。</p>
-
-    <p>实际应用中，可以考虑必要时手动进行major compact，将同一个row key的修改进行合并形成一个大的StoreFile。同时，可以将StoreFile设置大些，减少split的发生。</p>
-  </li>
-  <li>
-    <p>写表操作</p>
-
-    <p>2.1 多HTable并发写
- 创建多个HTable客户端用于写操作，提高写数据的吞吐量，一个例子：</p>
-
-    <pre><code> staticfinalConfiguration conf = HBaseConfiguration.create();
- staticfinalString table_log_name = “user_log”;
- wTableLog =newHTable[tableN];
- for(inti =0; i &lt; tableN; i++) {
- wTableLog[i] =newHTable(conf, table_log_name);
- wTableLog[i].setWriteBufferSize(5*1024*1024);//5MB
- wTableLog[i].setAutoFlush(false);
- }  2.2 HTable参数设置
-</code></pre>
-
-    <p>2.2.1 Auto Flush</p>
-
-    <p>通过调用HTable.setAutoFlush(false)方法可以将HTable写客户端的自动flush关闭，这样可以批量写入数据到HBase，而不是有一条put就执行一次更新，只有当put填满客户端写缓存时，才实际向HBase服务端发起写请求。默认情况下auto flush是开启的。</p>
-
-    <p>2.2.2 Write Buffer</p>
-
-    <p>通过调用HTable.setWriteBufferSize(writeBufferSize)方法可以设置HTable客户端的写buffer大小，如果新设置的buffer小于当前写buffer中的数据时，buffer将会被flush到服务端。其中，writeBufferSize的单位是byte字节数，可以根据实际写入数据量的多少来设置该值。</p>
-
-    <p>.2.3 WAL Flag</p>
-
-    <p>在HBae中，客户端向集群中的RegionServer提交数据时（Put/Delete操作），首先会先写WAL（Write Ahead Log）日志（即HLog，一个RegionServer上的所有Region共享一个HLog），只有当WAL日志写成功后，再接着写MemStore，然后客户端被通知提交数据成功；如果写WAL日志失败，客户端则被通知提交失败。这样做的好处是可以做到RegionServer宕机后的数据恢复。</p>
-
-    <p>因此，对于相对不太重要的数据，可以在Put/Delete操作时，通过调用Put.setWriteToWAL(false)或Delete.setWriteToWAL(false)函数，放弃写WAL日志，从而提高数据写入的性能。</p>
-
-    <p>值得注意的是：谨慎选择关闭WAL日志，因为这样的话，一旦RegionServer宕机，Put/Delete的数据将会无法根据WAL日志进行恢复。</p>
-
-    <p>2.3 批量写</p>
-
-    <p>通过调用HTable.put(Put)方法可以将一个指定的row key记录写入HBase，同样HBase提供了另一个方法：通过调用HTable.put(List<put>)方法可以将指定的row key列表，批量写入多行记录，这样做的好处是批量执行，只需要一次网络I/O开销，这对于对数据实时性要求高，网络传输RTT高的情景下可能带来明显的性能提升。</put></p>
-
-    <p>2.4 多线程并发写</p>
-
-    <p>在客户端开启多个HTable写线程，每个写线程负责一个HTable对象的flush操作，这样结合定时flush和写buffer（writeBufferSize），可以既保证在数据量小的时候，数据可以在较短时间内被flush（如1秒内），同时又保证在数据量大的时候，写buffer一满就及时进行flush。下面给个具体的例子：</p>
-
-    <pre><code> for(inti =0; i &lt; threadN; i++) {
- Thread th =newThread() {
- publicvoidrun() {
- while(true) {
- try{
- sleep(1000);//1 second
- }catch(InterruptedException e) {
- e.printStackTrace();
- }
- synchronized(wTableLog[i]) {
- try{
- wTableLog[i].flushCommits();
- }catch(IOException e) {
- e.printStackTrace();
- }
- }
- }
- }
- };
- th.setDaemon(true);
- th.start();
- }
-</code></pre>
-  </li>
-  <li>
-    <p>读表操作</p>
-
-    <p>3.1 多HTable并发读
- 创建多个HTable客户端用于读操作，提高读数据的吞吐量，一个例子：</p>
-
-    <p>staticfinalConfiguration conf = HBaseConfiguration.create();
- staticfinalString table_log_name = “user_log”;
- rTableLog =newHTable[tableN];
- for(inti =0; i &lt; tableN; i++) {
- rTableLog[i] =newHTable(conf, table_log_name);
- rTableLog[i].setScannerCaching(50);
- }</p>
-
-    <p>3.2 HTable参数设置
- 3.2.1 Scanner Caching
- 通过调用HTable.setScannerCaching(int scannerCaching)可以设置HBase scanner一次从服务端抓取的数据条数，默认情况下一次一条。通过将此值设置成一个合理的值，可以减少scan过程中next()的时间开销，代价是scanner需要通过客户端的内存来维持这些被cache的行记录。</p>
-
-    <p>3.2.2 Scan Attribute Selection
- scan时指定需要的Column Family，可以减少网络传输数据量，否则默认scan操作会返回整行所有Column Family的数据。</p>
-
-    <p>3.2.3 Close ResultScanner
- 通过scan取完数据后，记得要关闭ResultScanner，否则RegionServer可能会出现问题（对应的Server资源无法释放）。</p>
-
-    <p>3.3 批量读
- 通过调用HTable.get(Get)方法可以根据一个指定的row key获取一行记录，同样HBase提供了另一个方法：通过调用HTable.get(List)方法可以根据一个指定的row key列表，批量获取多行记录，这样做的好处是批量执行，只需要一次网络I/O开销，这对于对数据实时性要求高而且网络传输RTT高的情景下可能带来明显的性能提升。</p>
-
-    <p>3.4 多线程并发读
- 在客户端开启多个HTable读线程，每个读线程负责通过HTable对象进行get操作。下面是一个多线程并发读取HBase，获取店铺一天内各分钟PV值的例子：</p>
-
-    <pre><code> publicclassDataReaderServer {
- //获取店铺一天内各分钟PV值的入口函数
- publicstaticConcurrentHashMap getUnitMinutePV(longuid,longstartStamp,longendStamp){
- longmin = startStamp;
- intcount = (int)((endStamp - startStamp) / (60*1000));
- List lst =newArrayList();
- for(inti =0; i &lt;= count; i++) {
- min = startStamp + i *60*1000;
- lst.add(uid +"_"+ min);
- }
- returnparallelBatchMinutePV(lst);
- }
- //多线程并发查询，获取分钟PV值
- privatestaticConcurrentHashMap parallelBatchMinutePV(List lstKeys){
- ConcurrentHashMap hashRet =newConcurrentHashMap();
- intparallel =3;
- List&lt;List&lt;String&gt;&gt; lstBatchKeys =null;
- if(lstKeys.size() &lt; parallel ){
- lstBatchKeys =newArrayList&lt;List&lt;String&gt;&gt;(1);
- lstBatchKeys.add(lstKeys);
- }
- else{
- lstBatchKeys =newArrayList&lt;List&lt;String&gt;&gt;(parallel);
- for(inti =0; i &lt; parallel; i++ ){
- List lst =newArrayList();
- lstBatchKeys.add(lst);
- }
-	
- for(inti =0; i &lt; lstKeys.size() ; i ++ ){
- lstBatchKeys.get(i%parallel).add(lstKeys.get(i));
- }
- }
-	
- List &gt;&gt; futures =newArrayList &gt;&gt;(5);
-	
- ThreadFactoryBuilder builder =newThreadFactoryBuilder();
- builder.setNameFormat("ParallelBatchQuery");
- ThreadFactory factory = builder.build();
- ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(lstBatchKeys.size(), factory);
-	
- for(List keys : lstBatchKeys){
- Callable&lt; ConcurrentHashMap &gt; callable =newBatchMinutePVCallable(keys);
- FutureTask&lt; ConcurrentHashMap &gt; future = (FutureTask&lt; ConcurrentHashMap &gt;) executor.submit(callable);
- futures.add(future);
- }
- executor.shutdown();
-	
- // Wait for all the tasks to finish
- try{
- booleanstillRunning = !executor.awaitTermination(
- 5000000, TimeUnit.MILLISECONDS);
- if(stillRunning) {
- try{
- executor.shutdownNow();
- }catch(Exception e) {
- // TODO Auto-generated catch block
- e.printStackTrace();
- }
- }
- }catch(InterruptedException e) {
- try{
- Thread.currentThread().interrupt();
- }catch(Exception e1) {
- // TODO Auto-generated catch block
- e1.printStackTrace();
- }
- }
-	
- // Look for any exception
- for(Future f : futures) {
- try{
- if(f.get() !=null)
- {
- hashRet.putAll((ConcurrentHashMap)f.get());
- }
- }catch(InterruptedException e) {
- try{
- Thread.currentThread().interrupt();
- }catch(Exception e1) {
- // TODO Auto-generated catch block
- e1.printStackTrace();
- }
- }catch(ExecutionException e) {
- e.printStackTrace();
- }
- }
-	
- returnhashRet;
- }
- //一个线程批量查询，获取分钟PV值
- protectedstaticConcurrentHashMap getBatchMinutePV(List lstKeys){
- ConcurrentHashMap hashRet =null;
- List lstGet =newArrayList();
- String[] splitValue =null;
- for(String s : lstKeys) {
- splitValue = s.split("_");
- longuid = Long.parseLong(splitValue[0]);
- longmin = Long.parseLong(splitValue[1]);
- byte[] key =newbyte[16];
- Bytes.putLong(key,0, uid);
- Bytes.putLong(key,8, min);
- Get g =newGet(key);
- g.addFamily(fp);
- lstGet.add(g);
- }
- Result[] res =null;
- try{
- res = tableMinutePV[rand.nextInt(tableN)].get(lstGet);
- }catch(IOException e1) {
- logger.error("tableMinutePV exception, e="+ e1.getStackTrace());
- }
-	
- if(res !=null&amp;&amp; res.length &gt;0) {
- hashRet =newConcurrentHashMap(res.length);
- for(Result re : res) {
- if(re !=null&amp;&amp; !re.isEmpty()) {
- try{
- byte[] key = re.getRow();
- byte[] value = re.getValue(fp, cp);
- if(key !=null&amp;&amp; value !=null) {
- hashRet.put(String.valueOf(Bytes.toLong(key,
- Bytes.SIZEOF_LONG)), String.valueOf(Bytes
- .toLong(value)));
- }
- }catch(Exception e2) {
- logger.error(e2.getStackTrace());
- }
- }
- }
- }
-	
- returnhashRet;
- }
- }
- //调用接口类，实现Callable接口
- classBatchMinutePVCallableimplementsCallable&gt;{
- privateList keys;
-	
- publicBatchMinutePVCallable(List lstKeys ) {
- this.keys = lstKeys;
- }
-	
- publicConcurrentHashMap call()throwsException {
- returnDataReadServer.getBatchMinutePV(keys);
- }
- }
-</code></pre>
-
-    <p>3.5 缓存查询结果
- 对于频繁查询HBase的应用场景，可以考虑在应用程序中做缓存，当有新的查询请求时，首先在缓存中查找，如果存在则直接返回，不再查询HBase；否则对HBase发起读请求查询，然后在应用程序中将查询结果缓存起来。至于缓存的替换策略，可以考虑LRU等常用的策略。</p>
-
-    <p>3.6 Blockcache
- HBase上Regionserver的内存分为两个部分，一部分作为Memstore，主要用来写；另外一部分作为BlockCache，主要用于读。</p>
-
-    <p>写请求会先写入Memstore，Regionserver会给每个region提供一个Memstore，当Memstore满64MB以后，会启动 flush刷新到磁盘。当Memstore的总大小超过限制时（heapsize * hbase.regionserver.global.memstore.upperLimit * 0.9），会强行启动flush进程，从最大的Memstore开始flush直到低于限制。</p>
-
-    <p>读请求先到Memstore中查数据，查不到就到BlockCache中查，再查不到就会到磁盘上读，并把读的结果放入BlockCache。由于BlockCache采用的是LRU策略，因此BlockCache达到上限(heapsize * hfile.block.cache.size * 0.85)后，会启动淘汰机制，淘汰掉最老的一批数据。</p>
-
-    <p>一个Regionserver上有一个BlockCache和N个Memstore，它们的大小之和不能大于等于heapsize * 0.8，否则HBase不能启动。默认BlockCache为0.2，而Memstore为0.4。对于注重读响应时间的系统，可以将 BlockCache设大些，比如设置BlockCache=0.4，Memstore=0.39，以加大缓存的命中率。</p>
-
-    <p>有关BlockCache机制，请参考这里：HBase的Block cache，HBase的blockcache机制，hbase中的缓存的计算与使用。</p>
   </li>
 </ol>
 
-<p>4.数据计算</p>
+<p>网上同步时间</p>
 
-<pre><code>4.1 服务端计算
-Coprocessor运行于HBase RegionServer服务端，各个Regions保持对与其相关的coprocessor实现类的引用，coprocessor类可以通过RegionServer上classpath中的本地jar或HDFS的classloader进行加载。
+<ol>
+  <li>
+    <p>安装ntpdate工具</p>
 
-目前，已提供有几种coprocessor：
-
-Coprocessor：提供对于region管理的钩子，例如region的open/close/split/flush/compact等；
-RegionObserver：提供用于从客户端监控表相关操作的钩子，例如表的get/put/scan/delete等；
-Endpoint：提供可以在region上执行任意函数的命令触发器。一个使用例子是RegionServer端的列聚合，这里有代码示例。
-以上只是有关coprocessor的一些基本介绍，本人没有对其实际使用的经验，对它的可用性和性能数据不得而知。感兴趣的同学可以尝试一下，欢迎讨论。
-
-4.2 写端计算
-
-4.2.1 计数
-
-HBase本身可以看作是一个可以水平扩展的Key-Value存储系统，但是其本身的计算能力有限（Coprocessor可以提供一定的服务端计算），因此，使用HBase时，往往需要从写端或者读端进行计算，然后将最终的计算结果返回给调用者。举两个简单的例子：
-
-PV计算：通过在HBase写端内存中，累加计数，维护PV值的更新，同时为了做到持久化，定期（如1秒）将PV计算结果同步到HBase中，这样查询端最多会有1秒钟的延迟，能看到秒级延迟的PV结果。
-分钟PV计算：与上面提到的PV计算方法相结合，每分钟将当前的累计PV值，按照rowkey + minute作为新的rowkey写入HBase中，然后在查询端通过scan得到当天各个分钟以前的累计PV值，然后顺次将前后两分钟的累计PV值相减，就得到了当前一分钟内的PV值，从而最终也就得到当天各个分钟内的PV值。
-
-4.2.2 去重
-
-对于UV的计算，就是个去重计算的例子。分两种情况：
-
-如果内存可以容纳，那么可以在Hash表中维护所有已经存在的UV标识，每当新来一个标识时，通过快速查找Hash确定是否是一个新的UV，若是则UV值加1，否则UV值不变。另外，为了做到持久化或提供给查询接口使用，可以定期（如1秒）将UV计算结果同步到HBase中。
-如果内存不能容纳，可以考虑采用Bloom Filter来实现，从而尽可能的减少内存的占用情况。除了UV的计算外，判断URL是否存在也是个典型的应用场景。
-
-4.3 读端计算
-
-如果对于响应时间要求比较苛刻的情况（如单次http请求要在毫秒级时间内返回），个人觉得读端不宜做过多复杂的计算逻辑，尽量做到读端功能单一化：即从HBase RegionServer读到数据（scan或get方式）后，按照数据格式进行简单的拼接，直接返回给前端使用。当然，如果对于响应时间要求一般，或者业务特点需要，也可以在读端进行一些计算逻辑。
+    <pre><code> # sudo apt-get install ntpdate
 </code></pre>
+  </li>
+  <li>
+    <p>设置系统时间与网络时间同步</p>
 
-<p>5.总结</p>
+    <pre><code> # ntpdate cn.pool.ntp.org
+</code></pre>
+  </li>
+  <li>
+    <p>将系统时间写入硬件时间</p>
 
-<p>作为一个Key-Value存储系统，HBase并不是万能的，它有自己独特的地方。因此，基于它来做应用时，我们往往需要从多方面进行优化改进（表设计、读表操作、写表操作、数据计算等），有时甚至还需要从系统级对HBase进行配置调优，更甚至可以对HBase本身进行优化。这属于不同的层次范畴。</p>
+    <p># hwclock –systohc</p>
+  </li>
+  <li>
+    <p>修改hbase的时间检查， 其默认的时间为30000ms</p>
 
-<p>总之，概括来讲，对系统进行优化时，首先定位到影响你的程序运行性能的瓶颈之处，然后有的放矢进行针对行的优化。如果优化后满足你的期望，那么就可以停止优化；否则继续寻找新的瓶颈之处，开始新的优化，直到满足性能要求。</p>
+    <pre><code> hbase.master.maxclockskew
+ 180000
+</code></pre>
+  </li>
+</ol>
 
-      <div class="readall"><a href="/blog/2014/09/27/HBASE.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/hbase-time.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -798,7 +267,7 @@ PV计算：通过在HBase写端内存中，累加计数，维护PV值的更新�
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/EJob.html">EJob</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/hbase-import-export.html">hbase import export</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
@@ -808,101 +277,164 @@ PV计算：通过在HBase写端内存中，累加计数，维护PV值的更新�
       </p>
     </header>
     <div class="post-main">
-      <pre><code>import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
+      <ol>
+  <li>
+    <p>导出HFlie
+使用org.apache.hadoop.hbase.mapreduce.Export类
+参数: MR配置参数 需导出的表 导出路径 时间戳版本（默认为1）时间戳起始结束时间 可加正则的RowFilter或PrefixFilter</p>
 
-public class EJob {
+    <pre><code> Export [-D &lt;property=value&gt;]* &lt;tablename&gt; &lt;outputdir&gt; [&lt;versions&gt; [&lt;starttime&gt; [&lt;endtime&gt;]] [^[regex pattern] or [Prefix] to filter]]
+ Note: -D properties will be applied to the conf used.
+ For example:
+ -D mapred.output.compress=true
+ -D mapred.output.compression.codec=org.apache.hadoop.io.compress.GzipCodec
+ -D mapred.output.compression.type=BLOCK
+ Additionally, the following SCAN properties can be specified
+ to control/limit what is exported..
+ -D hbase.mapreduce.scan.column.family=&lt;familyName&gt;
+ -D hbase.mapreduce.include.deleted.rows=true
+ For performance consider the following properties:
+ -Dhbase.client.scanner.caching=100
+ -Dmapred.map.tasks.speculative.execution=false
+ -Dmapred.reduce.tasks.speculative.execution=false
+ 可直接运行也可以利用Driver如：
+ hbase org.apache.hadoop.hbase.mapreduce.Driver export &lt;hbase 表&gt; &lt;导出路径&gt;
+ hbase org.apache.hadoop.hbase.mapreduce.Driver export my_table /tmp/my_file
+</code></pre>
+  </li>
+  <li>
+    <p>导入HFlie</p>
 
-// To declare global field
-private static List&lt;URL&gt; classPath = new ArrayList&lt;URL&gt;();
+    <pre><code> 使用org.apache.hadoop.hbase.mapreduce.Import类
+ 参数: Import [options] &lt;tablename&gt; &lt;inputdir&gt;
+ By default Import will load data directly into HBase. To instead generate
+ HFiles of data to prepare for a bulk data load, pass the option:
+ -Dimport.bulk.output=/path/for/output
+ For performance consider the following options:
+ -Dmapred.map.tasks.speculative.execution=false
+ -Dmapred.reduce.tasks.speculative.execution=false
+ 可直接运行也可以用Driver如：
+ hbase org.apache.hadoop.hbase.mapreduce.Driver import &lt;hbase 表&gt; &lt;导入路径&gt;
+ hbase org.apache.hadoop.hbase.mapreduce.Driver import my_table /tmp/my_file
+</code></pre>
+  </li>
+  <li>
+    <p>批量导入HFlie（导入到已存在的表）</p>
 
-// To declare method
-public static File createTempJar(String root) throws IOException {
-if (!new File(root).exists()) {
-return null;
-}
-Manifest manifest = new Manifest();
-manifest.getMainAttributes().putValue("Manifest-Version", "1.0");
-final File jarFile = File.createTempFile("EJob-", ".jar", new File(
-System.getProperty("java.io.tmpdir")));
-
-Runtime.getRuntime().addShutdownHook(new Thread() {
-public void run() {
-jarFile.delete();
-}
-});
-
-JarOutputStream out = new JarOutputStream(
-new FileOutputStream(jarFile), manifest);
-createTempJarInner(out, new File(root), "");
-out.flush();
-out.close();
-return jarFile;
-}
-
-private static void createTempJarInner(JarOutputStream out, File f,
-String base) throws IOException {
-if (f.isDirectory()) {
-File[] fl = f.listFiles();
-if (base.length() &gt; 0) {
-base = base + "/";
-}
-for (int i = 0; i &lt; fl.length; i++) {
-createTempJarInner(out, fl[i], base + fl[i].getName());
-}
-} else {
-out.putNextEntry(new JarEntry(base));
-FileInputStream in = new FileInputStream(f);
-byte[] buffer = new byte[1024];
-int n = in.read(buffer);
-while (n != -1) {
-out.write(buffer, 0, n);
-n = in.read(buffer);
-}
-in.close();
-}
-}
-
-public static ClassLoader getClassLoader() {
-ClassLoader parent = Thread.currentThread().getContextClassLoader();
-if (parent == null) {
-parent = EJob.class.getClassLoader();
-}
-if (parent == null) {
-parent = ClassLoader.getSystemClassLoader();
-}
-return new URLClassLoader(classPath.toArray(new URL[0]), parent);
-}
-
-public static void addClasspath(String component) {
-
-if ((component != null) &amp;&amp; (component.length() &gt; 0)) {
-try {
-File f = new File(component);
-
-if (f.exists()) {
-URL key = f.getCanonicalFile().toURL();
-if (!classPath.contains(key)) {
-classPath.add(key);
-}
-}
-} catch (IOException e) {
-}
-}
-}
-}
+    <pre><code> org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles
+ 参数: completebulkload &lt;/path/to/hfileoutputformat-output&gt; &lt;tablename&gt;
+ 可直接运行也可以用Driver如：
+ hbase org.apache.hadoop.hbase.mapreduce.Driver completebulkload &lt;导入路径&gt; &lt;hbase 表&gt;
+ hbase org.apache.hadoop.hbase.mapreduce.Driver completebulkload /tmp/my_file my_table
 </code></pre>
 
-      <div class="readall"><a href="/blog/2014/09/27/EJob.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    <p>后面几个工具MR没有测试：</p>
+  </li>
+  <li>
+    <p>导入TSV文件</p>
+
+    <pre><code> org.apache.hadoop.hbase.mapreduce.ImportTsv类
+ 参数: importtsv -Dimporttsv.columns=a,b,c &lt;tablename&gt; &lt;inputdir&gt;
+ 必须用-Dimporttsv.columns指定导入的TSV文件的列，列与列之间用逗号隔开
+ 一个列对应hbase的columnfamily，
+
+ By default importtsv will load data directly into HBase. To instead generate
+ HFiles of data to prepare for a bulk data load, pass the option:
+ -Dimporttsv.bulk.output=/path/for/output
+ Note: if you do not use this option, then the target table must already exist in HBase
+ Other options that may be specified with -D include:
+ -Dimporttsv.skip.bad.lines=false - fail if encountering an invalid line
+ '-Dimporttsv.separator=|' - eg separate on pipes instead of tabs
+ -Dimporttsv.timestamp=currentTimeAsLong - use the specified timestamp for the import
+ -Dimporttsv.mapper.class=my.Mapper - A user-defined Mapper to use instead of org.apache.hadoop.hbase.mapreduce.TsvImporterMapper
+ For performance consider the following options:
+ -Dmapred.map.tasks.speculative.execution=false
+ -Dmapred.reduce.tasks.speculative.execution=false
+ 可直接运行也可以用Driver如：
+ hbase org.apache.hadoop.hbase.mapreduce.Driver importtsv Dimporttsv.columns=name,age &lt;hbase 表&gt; &lt;导入路径&gt;
+ hbase org.apache.hadoop.hbase.mapreduce.Driver importtsv Dimporttsv.columns=name,age my_table /tmp/my_tsvFile
+</code></pre>
+  </li>
+  <li>
+    <p>表复制</p>
+
+    <p>org.apache.hadoop.hbase.mapreduce.CopyTable类</p>
+
+    <p>Usage: CopyTable [general options] [–starttime=X] [–endtime=Y] [–new.name=NEW] [–peer.adr=ADR] <tablename>
+ Options:
+ rs.class hbase.regionserver.class of the peer cluster
+ specify if different from current cluster
+ rs.impl hbase.regionserver.impl of the peer cluster
+ starttime beginning of the time range (unixtime in millis)
+ without endtime means from starttime to forever
+ endtime end of the time range. Ignored if no starttime specified.
+ versions number of cell versions to copy
+ new.name new table's name
+ peer.adr Address of the peer cluster given in the format
+ hbase.zookeeer.quorum:hbase.zookeeper.client.port:zookeeper.znode.parent
+ families comma-separated list of families to copy
+ To copy from cf1 to cf2, give sourceCfName:destCfName.
+ To keep the same name, just give "cfName"
+ all.cells also copy delete markers and deleted cells
+ Args:
+ tablename Name of the table to copy
+ Examples:
+ To copy 'TestTable' to a cluster that uses replication for a 1 hour window:
+ $ bin/hbase org.apache.hadoop.hbase.mapreduce.CopyTable
+ --starttime=1265875194289
+ --endtime=1265878794289
+ --peer.adr=server1,server2,server3:2181:/hbase
+ --families=myOldCf:myNewCf,cf2,cf3 TestTable
+ For performance consider the following general options:
+ -Dhbase.client.scanner.caching=100
+ -Dmapred.map.tasks.speculative.execution=false</tablename></p>
+  </li>
+  <li>
+    <p>Compares the data</p>
+
+    <p>org.apache.hadoop.hbase.mapreduce.replication.VerifyReplication类
+ Usage: verifyrep [–starttime=X] [–stoptime=Y] [–families=A] <peerid> <tablename>
+ Options:
+ starttime beginning of the time range
+ without endtime means from starttime to forever
+ stoptime end of the time range
+ families comma-separated list of families to copy
+ Args:
+ peerid Id of the peer used for verification, must match the one given for replication
+ tablename Name of the table to verify
+ Examples:
+ To verify the data replicated from TestTable for a 1 hour window with peer #5
+ $ bin/hbase org.apache.hadoop.hbase.mapreduce.replication.VerifyReplication --starttime=1265875194289 --stoptime=1265878794289 5 TestTable</tablename></peerid></p>
+  </li>
+</ol>
+
+<p>实例记录：</p>
+
+<ol>
+  <li>Export Production HBase table as following:
+hbase org.apache.hadoop.hbase.mapreduce.Export ‘mytable’ /hbase_bak/mytable</li>
+  <li>
+    <p>Copy HDFS files to local:
+hadoop fs -copyToLocal /hbase_bak/mytable /home/user/hbase_bak/mytable</p>
+  </li>
+  <li>
+    <p>Copy the local files from production to production extension server</p>
+  </li>
+  <li>Copy local file to HDFS:
+hadoop fs -copyFromLocal /home/user/hbase_bak/mytable /hbase_bak/mytable</li>
+  <li>Create table in production extension
+create ‘mytable’, {NAME=&gt;’log’, VERSION=&gt; 1}</li>
+  <li>Import the HDFS files into HBase:
+hbase org.apache.hadoop.hbase.mapreduce.Import ‘mytable’ /hbase_bak/mytable</li>
+  <li>Verify the result:
+hbase shell
+count mytable</li>
+</ol>
+
+<p>Find both the row count are same in production and production extension.</p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/hbase-import-export.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -910,77 +442,197 @@ classPath.add(key);
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Dflinux.html">Df命令linux系统以磁盘</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/eclipse-hadoop-job.html">eclipse hadoop job</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#linux">linux</a>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <p>Df命令是linux系统以磁盘分区为单位查看文件系统，可以加上参数查看磁盘剩余空间信息，命令格式：</p>
+      <p>使用EJob提交jar
+在run中添加：</p>
 
-<p>df -hl</p>
+<pre><code>     conf.set("fs.default.name", "hdfs://192.168.241.7:9000");
+      conf.set("mapred.job.tracker", "192.168.241.7:9001");
+      Job job = new Job(conf, "....... my  job ......");
+      try {
+        File jarFile = EJob.createTempJar("bin");
+        ((JobConf) job.getConfiguration()).setJar(jarFile.toString());
+    } catch (IOException e) {
+        throw new IOException(e);
+    }
+</code></pre>
 
-<p>显示格式为：</p>
+<p>修改hadoop的hdfs-site.xml 关闭权限校验</p>
 
-<p>文件系统              容量 已用 可用 已用% 挂载点　</p>
+<pre><code> &lt;property&gt; 
+      &lt;name&gt;dfs.permissions&lt;/name&gt; 
+      &lt;value&gt;false&lt;/value&gt; 
+ &lt;/property&gt; 
+</code></pre>
 
-<p>Filesystem            Size Used Avail Use% Mounted on</p>
+<p><strong>其他解决办法：</strong></p>
 
-<p>/dev/hda2              45G   19G   24G 44% /</p>
+<p>hdfs的权限判断十分简单，就是拿发出指令的user name和文件的user name 做比较</p>
 
-<p>/dev/hda1             494M   19M 450M   4% /boot</p>
+  	private void check(INode inode, FsAction access
+<pre><code>  ) throws AccessControlException {
+if (inode == null) {
+  return;
+}
+FsPermission mode = inode.getFsPermission();
 
-<p>/dev/hda6             4.9G 2.2G 2.5G 47% /home</p>
+if (user.equals(inode.getUserName())) { //user class
+  if (mode.getUserAction().implies(access)) { return; }
+}
+else if (groups.contains(inode.getGroupName())) { //group class
+  if (mode.getGroupAction().implies(access)) { return; }
+}
+else { //other class
+  if (mode.getOtherAction().implies(access)) { return; }
+}
+throw new AccessControlException("Permission denied: user=" + user
+    + ", access=" + access + ", inode=" + inode);
+ 	 }
+}
+</code></pre>
 
-<p>/dev/hda5             9.7G 2.9G 6.4G 31% /opt</p>
+<p>在多用户提交任务时遇到Permission denied, 的原因和任务提交的过程有关。</p>
 
-<p>none                 1009M     0 1009M   0% /dev/shm</p>
+<ol>
+  <li>首先提交任务的客户端会把任务相关文件打包放在hadoop.tmp.dir中，这是本地目录，需要通过本地系统权限验证。由于是临时目录直接设置成为777就行.</li>
+  <li>
+    <p>客户端会将任务文件打包写入hdfs的	</p>
 
-<p>/dev/hda3             9.7G 7.2G 2.1G 78% /usr/local</p>
+    <pre><code>mapreduce.jobtracker.staging.root.dir + "/" + user + "/.staging" 目录，需要经过hdfs权限验证。通常可以选择两种方法解决。
 
-<p>/dev/hdb2              75G   75G     0 100% /</p>
+1) 保持mapreduce.jobtracker.staging.root.dir为默认，将此目录chmod 777
+2) 在hdfs的/user目录下建立用户目录，并且chown为该用户，相当于在hdfs下创建一个用户。
+然后设置mapreduce.jobtracker.staging.root.dir为/user,  这是官方推荐的，可以看到这个属性的描述是这样写的：
+The root of the staging area for users' job files In practice, this should be the directory where users' home directories are located (usually /user)。
+3）有人说可以在启动任务时加入hadoop.job.ugi属性指定用户和群组。 我验证这样不行。看源码里也是直接获取
+ugi = UserGroupInformation.getCurrentUser();不过看hdfs权限策略这操行应该可以设置。
+</code></pre>
+  </li>
+</ol>
 
-<p>/dev/hdb2              75G   75G     0 100% /</p>
 
-<p>以上面的输出为例，表示的意思为：</p>
+      <div class="readall"><a href="/blog/2014/09/27/eclipse-hadoop-job.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
 
-<p>HD硬盘接口的第二个硬盘（b），第二个分区（2），容量是75G，用了75G，可用是0，因此利用率是100%， 被挂载到根分区目录上（/）。</p>
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/arraylistarraylink.html">arraylist&arraylink</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p><strong>区别</strong>：</p>
 
-<p>下面是相关命令的解释：</p>
+<ol>
+  <li>
+    <p>array 在定义的时候必须实例化(至少申明大小)，arraylist则可以只是申明</p>
 
-<p>df -hl 查看磁盘剩余空间</p>
+    <ul>
+      <li>int[] array = new array[3]</li>
+      <li>int[] array = {1,2,3}</li>
+      <li>ArrayList arrayList;</li>
+      <li>int[] array;则不合法</li>
+    </ul>
+  </li>
+  <li>
+    <p>Array只能存储同构对象，ArrayList则可以存储异构对象，当然object[]和使用泛型的arraylist不适用此条。</p>
+  </li>
+  <li>
+    <p>在CRL的托管方式不一样
+ Array是连续存储，Arraylist则不一定是连续存储</p>
+  </li>
+  <li>Array的大小是定义的时候指定的，Arraylist则可以动态扩容</li>
+  <li>Array不能随意添加或删除其中的项，ArrayList则可以随意添加删除</li>
+</ol>
 
-<p>df -h 查看每个根路径的分区大小</p>
+<p><strong>相似</strong>：</p>
 
-<p>du -sh [目录名] 返回该目录的大小</p>
+<ol>
+  <li>都具有索引，即可以通过索引来直接添加和修改任意项</li>
+  <li>所创建的对象都托管在堆中</li>
+  <li>都能够对自身进行枚举（因为实现了IEnumerable接口）</li>
+</ol>
 
-<p>du -sm [文件夹] 返回该文件夹总M数</p>
+<p><strong>ArrayList 源码摘要：</strong></p>
 
-<p>更多功能可以输入一下命令查看：</p>
+<pre><code>1. public class ArrayList&lt;E&gt; extends AbstractList&lt;E&gt;  
+2.         implements List&lt;E&gt;, RandomAccess, Cloneable, java.io.Serializable  
+3. {  
+4.     ......  
+5.   
+6.     /** 
+7.      * The array buffer into which the elements of the ArrayList are stored. 
+8.      * The capacity of the ArrayList is the length of this array buffer. 
+9.      */  
+10.     private transient E[] elementData;  
+11.   
+12.   
+13.     /** 
+14.      * The size of the ArrayList (the number of elements it contains). 
+15.      * 
+16.      * @serial 
+17.      */  
+18.     private int size;  
+19.    ......  
+20. }  
+21. 
+</code></pre>
 
-<p>df –help</p>
+<p>底层两个属性一个object[] 一个size</p>
 
-<p>du –help</p>
+<ol>
+  <li>ArrayList底层通过object[] 复制的方式（System.arraycopy()）来处理数组的增长</li>
+  <li>当ArrayList 的容量不足时，其扩充容量的方式：先将容量扩充至当前容量的1.5倍，若还不够，则将容量扩充至当前需要的数量。</li>
+</ol>
 
-<p>查看硬盘的分区 #sudo fdisk -l</p>
+<p><strong>ArrayList与Vector的区别</strong></p>
 
-<p>查看IDE硬盘信息 #sudo hdparm -i /dev/hda</p>
+<p>1） vector 是线程同步 的，所以它也是线程安全 的，而arraylist 是线程异步 的，是不安全的 。如果不考虑到线程的安全因素，一般用 arraylist效率比较高。</p>
 
-<p>查看STAT硬盘信息 #sudo hdparm -I /dev/sda 或 #sudo apt-get install blktool #sudo blktool /dev/sda id</p>
+<p>2） 如果集合中的元素的数目大于目前集合数组的长度时，vector 增长率为目前数组长度的100%, 而arraylist 增长率为目前数组长度的50% .如果在集合中使用数据量比较大的数据，用vector有一定的优势。</p>
 
-<p>查看硬盘剩余空间 #df -h #df -H</p>
+<p>3） 如果查找一个指定位置的数据 ，vector和arraylist使用的时间是相同 的，都是O(1) ,这个时候使用vector和arraylist都可以。</p>
 
-<p>查看目录占用空间 #du -hs 目录名</p>
+<p>而如果移动一个指定位置的数据花费的时间为O(n-i)n为总长度 ，这个时候就应该考虑到使用linklist ,因为它移动一个指定位置的数据所花费的时间为0(1),而查询一个指定位置的数据时花费的时间为0(i)。</p>
 
-<p>优盘没法卸载 #sync fuser -km /media/usbdisk</p>
+<p><strong>ArrayList和LinkedList的大致区别：</strong></p>
 
-<p>http://blog.163.com/yes___ican/blog/static/18506244920124394617622/</p>
+<ol>
+  <li>ArrayList是实现了基于动态数组的数据结构，LinkedList基于链表的数据结构。</li>
+  <li>对于随机访问get和set，ArrayList觉得优于LinkedList，因为LinkedList要移动指针。</li>
+  <li>对于新增和删除操作add和remove，LinedList比较占优势，因为ArrayList要移动数据。 </li>
+</ol>
 
-      <div class="readall"><a href="/blog/2014/09/27/Dflinux.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<p><strong>ArrayList和LinkedList在性能上各有优缺点，都有各自所适用的地方，总的说来可以描述如下：</strong></p>
+
+<ol>
+  <li>对ArrayList和LinkedList而言，在列表末尾增加一个元素所花的开销都是固定的。对ArrayList而言，主要是在内部数组中增加一项，指向所添加的元素，偶尔可能会导致对数组重新进行分配；而对LinkedList而言，这个开销是统一的，分配一个内部Entry对象。</li>
+  <li>在ArrayList的中间插入或删除一个元素意味着这个列表中剩余的元素都会被移动；而在LinkedList的中间插入或删除一个元素的开销是固定的。</li>
+  <li>LinkedList不支持高效的随机元素访问。</li>
+  <li>ArrayList的空间浪费主要体现在在list列表的结尾预留一定的容量空间，而LinkedList的空间花费则体现在它的每一个元素都需要消耗相当的空间</li>
+</ol>
+
+<p>可以这样说：当操作是在一列数据的后面添加数据而不是在前面或中间,并且需要随机地访问其中的元素时,使用ArrayList会提供比较好的性能；当你的操作是在一列数据的前面或中间添加或删除数据,并且按照顺序访问其中的元素时,就应该使用LinkedList了。</p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/arraylistarraylink.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -995,7 +647,10 @@ classPath.add(key);
   <a class="pagination-item older" href="/page/8">下一页&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
   
 </div>
-    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
     </div>
   </div>    
   <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>

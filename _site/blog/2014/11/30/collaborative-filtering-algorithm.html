@@ -1,0 +1,126 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="协同过滤简解, willgo, Will.Quan">
+  <title>协同过滤简解 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/11/30/collaborative-filtering-algorithm.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+
+    <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2014/11/30/collaborative-filtering-algorithm.html">协同过滤简解</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2014年11月30日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
+  </p>
+</header>
+<div class="post-main">
+<h2 id="section">协同过滤算法</h2>
+<p><strong>Collaborative Filtering</strong><br />
+基于一组兴趣相同的用户进行推荐。协同过滤基于这样的假设：为用户找到他真正感兴趣的内容的好方法是，首先找他与他兴趣相似的用户，然后将这些用户感兴趣的内容推荐给此用户</p>
+
+<p>协同过滤技术可以分为三类：<br />
+基于用户（User-based）的协同过滤；<br />
+基于项目（Item-based）的协同过滤；<br />
+基于模型（Model-based）的协同过滤</p>
+
+<p>步骤一，收集可以代表用户兴趣的信息。<br />
+如传统的打分的方式，豆瓣上的“我来评价”之类也是这种方法。这种方式被称为“显式评分”方法。其缺点是，收集数据比较困难，用户通常并不愿意费力气为你贡献这种数据。这导致这种系统通常更多出现在实验室或者论文里面。在实际的商业系统中，即使使用了这种方法，也多会被包装为一种更加有好如游戏方式。<br />
+另外一种被认为更有效的方法是“隐式评分”方法。这种方法不需要用户直接输入评价数据，而是根据用户的行为特征由系统代替用户完成评价。一种研究得比较多的方法是 Web Mining 。电子商务网站在隐式评分的数据获取上有先天的优势，用户购买的商品记录是非常有用的数据。</p>
+
+<p>步骤二，最近邻搜索。<br />
+协同过滤的出发点是与你兴趣相同的一组用户，术语叫做“最近邻”。最近邻搜索的核心是计算两个用户的相似度。例如用户A和用户B，首先需要获取用户A和用户B所有的评分项，然后选择一个合适的相似度计算方法，基于评分项数据，计算得到用户A和用户B的相似度数值。<br />
+目前使用比较多的相似度算法包括，皮尔森相关系数（Person Correlation Coefficient）、余弦相似性（Cosine-based Similarity）以及调整余弦相似性（Adjusted Consine Similarity）</p>
+
+<p>步骤三，生成推荐结果。<br />
+有了最近邻集合，就可以对目标用户的兴趣进行预测，生成推荐结果。通常根据推荐目的的不同，可以进行多种形式的推荐。最常见的推荐结果有两种，Top-N 推荐和关联推荐。<br />
+Top-N 推荐，这里的 Top-N 和一般网站（比如 digg）上见到的“最热门”列表是不同的。热门列表是基于全部数据集产生的，它对每个人都是一样的；Top-N 推荐是针对单个用户产生的，它对每个人是不一样的：通过对你的最近邻用户进行统计，选择出现频率最高且在你的评分项目中不存在的项目作为推荐结果。豆瓣上的“排行”栏目，应该是传统的“热门”列表，不是 Top-N 推荐。<br />
+关联推荐，也称为基于关联规则的推荐。与传统关联规则针对全部数据进行挖掘不同的是，此方法仅对最近邻用户的购买记录进行关联规则挖掘。如果你曾经购买过关联规则左边的商品，而没有购买过关联规则右边的商品，那么就把右边的这个商品推荐给你。它最突出的优点就是，可以帮助你发现你感兴趣的而以前却从来没有注意过的商品。在 Amazon 介绍书的详细信息的页面上，可以看到这种推荐的一个实际应用。例如在《The Search》的页面上，Amazon 给我的推荐是，</p>
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2014/11/30/clustering-algorithm.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;聚类以及增量聚类的简单理解</a>
+
+
+<a class="pagination-item older" href="/blog/2015/01/23/Linux-point1.html">Linux学习笔记1-文件安全与权限&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="协同过滤简解" data-thread-key="/blog/2014/11/30/collaborative-filtering-algorithm" data-url="index.html/blog/2014/11/30/collaborative-filtering-algorithm.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

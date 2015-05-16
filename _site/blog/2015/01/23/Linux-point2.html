@@ -1,0 +1,143 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="Linux学习笔记2-find和xargs, willgo, Will.Quan">
+  <title>Linux学习笔记2-find和xargs - willgo</title>
+  <link rel="canonical" href="index.html/blog/2015/01/23/Linux-point2.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+
+    <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point2.html">Linux学习笔记2-find和xargs</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2015年01月23日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#linux">linux</a>	
+  </p>
+</header>
+<div class="post-main">
+<p>Linux学习笔记2-find和xargs<br />
+Find命令的一般形式为：<br />
+find pathname -options [-print -exec -ok]<br />
+pathname find命令所查找的目录路径。例如用.来表示当前目录，用/来表示系统根目录。<br />
+-print find命令将匹配的文件输出到标准输出。<br />
+-exec find命令对匹配的文件执行该参数所给出的shell命令。相应命令的形式为’comm -and’{} \;，注意{ }和\；之间的空格。<br />
+-ok 和-exec的作用相同，只不过以一种更为安全的模式来执行该参数所给出的shell命令,在执行每一个命令之前，都会给出提示，让用户来确定是否执行。   </p>
+
+<p>find命令选项<br />
+find命令有很多选项或表达式，每一个选项前面跟随一个横杠-。让我们先来看一下该命令的主要选项，然后再给出一些例子。<br />
+-name 按照文件名查找文件。<br />
+-perm 按照文件权限来查找文件。 <br />
+-prune 使用这一选项可以使find命令不在当前指定的目录中查找，如果同时使用了
+- depth选项，那么- prune选项将被find命令忽略。<br />
+-user 按照文件属主来查找文件。<br />
+-group 按照文件所属的组来查找文件。<br />
+-mtime -n +n 按照文件的更改时间来查找文件， 
+- n表示文件更改时间距现在n天以内，+ n
+表示文件更改时间距现在n天以前。
+Find命令还有-atime和-ctime选项，但它们都和-mtime选项
+相似，所以我们在这里只介绍-mtime选项。
+-nogroup 查找无有效所属组的文件，即该文件所属的组在/etc/groups中不存在。<br />
+-nouser 查找无有效属主的文件，即该文件的属主在/etc/passwd中不存在。<br />
+-newer file1 !file2 查找更改时间比文件file1新但比文件file2旧的文件。<br />
+-type 查找某一类型的文件，诸如：<br />
+b - 块设备文件。<br />
+d - 目录。<br />
+c - 字符设备文件。<br />
+p - 管道文件。<br />
+l - 符号链接文件。<br />
+f - 普通文件。<br />
+-size n[c] 查找文件长度为n块的文件，带有c时表示文件长度以字节计。
+-depth 在查找文件时，首先查找当前目录中的文件，然后再在其子目录中查找。<br />
+-fstype 查找位于某一类型文件系统中的文件，这些文件系统类型通常可以在配置文件, /etc/fstab中找到，该配置文件中包含了本系统中有关文件系统的信息。
+-mount 在查找文件时不跨越文件系统mount点。<br />
+-follow 如果find命令遇到符号链接文件，就跟踪至链接所指向的文件。<br />
+-cpio 对匹配的文件使用cpio命令，将这些文件备份到磁带设备中。 </p>
+
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2015/01/23/Linux-point1.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Linux学习笔记1-文件安全与权限</a>
+
+
+<a class="pagination-item older" href="/blog/2015/01/23/Linux-point3.html">Linux学习笔记3 后台执行命令&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="Linux学习笔记2-find和xargs" data-thread-key="/blog/2015/01/23/Linux-point2" data-url="index.html/blog/2015/01/23/Linux-point2.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

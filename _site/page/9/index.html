@@ -1,0 +1,806 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="Will go, Just do it., willgo, 最好的从未错过, Will.Quan">
+  <title>Will go, Just do it.</title>
+  <link rel="canonical" href="index.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+
+    <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
+    
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Module.html">Module</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#f2e">f2e</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>Module模式是JavaScript编程中一个非常通用的模式，一般情况下，大家都知道基本用法，本文尝试着给大家更多该模式的高级使用方式。</p>
+
+<p>首先我们来看看Module模式的基本特征：</p>
+
+<p>模块化，可重用
+封装了变量和function，和全局的namaspace不接触，松耦合
+只暴露可用public的方法，其它私有方法全部隐藏
+关于Module模式，最早是由YUI的成员EricMiraglia在4年前提出了这个概念，
+我们将从一个简单的例子来解释一下基本的用法。</p>
+
+<p>基本用法
+先看一下最简单的一个实现，代码如下：</p>
+
+<pre><code>var Calculator = function (eq) {
+//这里可以声明私有成员
+var eqCtl = document.getElementById(eq);
+return {
+// 暴露公开的成员
+add: function (x, y) {
+var val = x + y;
+eqCtl.innerHTML = val;
+}
+};
+}; 我们可以通过如下的方式来调用：
+
+var calculator = new Calculator('eq');
+calculator.add(2, 2); 大家可能看到了，每次用的时候都要new一下，也就是说每个实例在内存里都是一份copy， 如果你不需要传参数或者没有一些特殊苛刻的要求的话，我们可以在最后一个}后面加上一个括号，来达到自执行的目的， 这样该实例在内存中只会存在一份copy，不过在展示他的优点之前，我们还是先来看看这个模式的基本使用方法吧。
+</code></pre>
+
+<p>匿名闭包</p>
+
+<p>匿名闭包是让一切成为可能的基础，而这也是JavaScript最好的特性，
+我们来创建一个最简单的闭包函数，函数内部的代码一直存在于闭包内，在整个运行周期内，
+该闭包都保证了内部的代码处于私有状态。</p>
+
+<p>(function () {
+// … 所有的变量和function都在这里声明，并且作用域也只能在这个匿名闭包里
+// … 但是这里的代码依然可以访问外部全局的对象
+}());
+注意，匿名函数后面的括号，这是JavaScript语言所要求的，因为如果你不声明的话，
+JavaScript解释器默认是声明一个function函数，有括号，就是创建一个函数表达式，也就是自执行，
+用的时候不用和上面那样在new了，当然你也可以这样来声明：
+(function () {/* 内部代码 */})();
+不过我们推荐使用第一种方式，关于函数自执行，我后面会有专门一篇文章进行详解，这里就不多说了。</p>
+
+<p>引用全局变量
+JavaScript有一个特性叫做隐式全局变量，不管一个变量有没有用过，
+JavaScript解释器反向遍历作用域链来查找整个变量的var声明，如果没有找到var，解释器则假定该变量是全局变量，
+如果该变量用于了赋值操作的话，之前如果不存在的话，解释器则会自动创建它，
+这就是说在匿名闭包里使用或创建全局变量非常容易，
+不过比较困难的是，代码比较难管理，尤其是阅读代码的人看着很多区分哪些变量是全局的，哪些是局部的。</p>
+
+<p>不过，好在在匿名函数里我们可以提供一个比较简单的替代方案，
+我们可以将全局变量当成一个参数传入到匿名函数然后使用，相比隐式全局变量，它又清晰又快，我们来看一个例子：</p>
+
+<p>(function ($, YAHOO) {
+// 这里，我们的代码就可以使用全局的jQuery对象了，YAHOO也是一样
+} (jQuery, YAHOO));</p>
+
+<p>现在很多类库里都有这种使用方式，比如jQuery源码。
+不过，有时候可能不仅仅要使用全局变量，而是也想声明全局变量，如何做呢？
+我们可以通过匿名函数的返回值来返回这个全局变量，这也就是一个基本的Module模式，来看一个完整的代码：</p>
+
+<pre><code>var blogModule = (function () {
+var my = {},privateName = "博客园";
+function privateAddTopic(data) {
+// 这里是内部处理代码
+}
+my.Name = privateName;
+my.AddTopic = function (data) {
+privateAddTopic(data);
+};
+
+    return my;
+} ()); 上面的代码声明了一个全局变量blogModule，并且带有2个可访问的属性：blogModule.AddTopic和blogModule.Name， 除此之外，其它代码都在匿名函数的闭包里保持着私有状态。同时根据上面传入全局变量的例子， 我们也可以很方便地传入其它的全局变量。
+</code></pre>
+
+<p>高级用法
+上面的内容对大多数用户已经很足够了，但我们还可以基于此模式延伸出更强大，易于扩展的结构，
+让我们一个一个来看。</p>
+
+<p>扩展</p>
+
+<p>Module模式的一个限制就是所有的代码都要写在一个文件，但是在一些大型项目里，
+将一个功能分离成多个文件是非常重要的，因为可以多人合作易于开发。再回头看看上面的全局参数导入例子，
+我们能否把blogModule自身传进去呢？答案是肯定的，我们先将blogModule传进去，添加一个函数属性，
+然后再返回就达到了我们所说的目的，上代码：</p>
+
+<pre><code>var blogModule = (function (my) {
+my.AddPhoto = function () {
+//添加内部代码
+};
+return my;
+} (blogModule)); 这段代码，看起来是不是有C#里扩展方法的感觉？有点类似，但本质不一样哦。同时尽管var不是必须的， 但为了确保一致，我们再次使用了它，代码执行以后，blogModule下的AddPhoto就可以使用了， 同时匿名函数内部的代码也依然保证了私密性和内部状态。
+</code></pre>
+
+<p>松耦合扩展</p>
+
+<p>上面的代码尽管可以执行，但是必须先声明blogModule，然后再执行上面的扩展代码，也就是说步骤不能乱，
+怎么解决这个问题呢？我们来回想一下，我们平时声明变量的都是都是这样的：</p>
+
+<pre><code>var cnblogs = cnblogs || {} ; 这是确保cnblogs对象，在存在的时候直接用，不存在的时候直接赋值为{}， 我们来看看如何利用这个特性来实现Module模式的任意加载顺序：
+
+var blogModule = (function (my) {
+// 添加一些功能
+return my;
+} (blogModule || {})); 通过这样的代码，每个单独分离的文件都保证这个结构，那么我们就可以实现任意顺序的加载， 所以，这个时候的var就是必须要声明的，因为不声明，其它文件读取不到哦。
+</code></pre>
+
+<p>紧耦合扩展</p>
+
+<p>虽然松耦合扩展很牛叉了，但是可能也会存在一些限制，比如你没办法重写你的一些属性或者函数，
+也不能在初始化的时候就是用Module的属性。
+紧耦合扩展限制了加载顺序，但是提供了我们重载的机会，看如下例子：</p>
+
+<pre><code>var blogModule = (function (my) {
+var oldAddPhotoMethod = my.AddPhoto;
+my.AddPhoto = function () {
+// 重载方法，依然可通过oldAddPhotoMethod调用旧的方法
+};
+return my;
+} (blogModule)); 通过这种方式，我们达到了重载的目的，当然如果你想在继续在内部使用原有的属性， 你可以调用oldAddPhotoMethod来用。
+</code></pre>
+
+<p>克隆与继承</p>
+
+<pre><code>var blogModule = (function (old) {
+var my = {}, key;
+for (key in old) {
+if (old.hasOwnProperty(key)) {
+my[key] = old[key];
+}
+}
+var oldAddPhotoMethod = old.AddPhoto;
+my.AddPhoto = function () {
+// 克隆以后，进行了重写，当然也可以继续调用oldAddPhotoMethod
+};
+return my;
+} (blogModule)); 这种方式灵活是灵活，但是也需要花费灵活的代价， 其实该对象的属性对象或function根本没有被复制，只是对同一个对象多了一种引用而已， 所以如果老对象去改变它，那克隆以后的对象所拥有的属性或function函数也会被改变， 解决这个问题，我们就得是用递归，但递归对function函数的赋值也不好用， 所以我们在递归的时候eval相应的function。不管怎么样，我还是把这一个方式放在这个帖子里了， 大家使用的时候注意一下就行了。
+</code></pre>
+
+<p>跨文件共享私有对象</p>
+
+<p>通过上面的例子，我们知道，如果一个module分割到多个文件的话，每个文件需要保证一样的结构，
+也就是说每个文件匿名函数里的私有对象都不能交叉访问，那如果我们非要使用，那怎么办呢？ 我们先看一段代码：</p>
+
+<pre><code>var blogModule = (function (my) {
+var _private = my._private = my._private || {},
+_seal = my._seal = my._seal || function () {
+delete my._private;
+delete my._seal;
+delete my._unseal;
+},_unseal = my._unseal = my._unseal || function () {
+my._private = _private;
+my._seal = _seal;
+my._unseal = _unseal;
+};
+return my;
+} (blogModule || {})); 任何文件都可以对他们的局部变量_private设属性， 并且设置对其他的文件也立即生效。一旦这个模块加载结束， 应用会调用 blogModule._seal()"上锁"，这会阻止外部接入内部的_private。 如果这个模块需要再次增生，应用的生命周期内，任何文件都可以调用_unseal() ”开锁”， 然后再加载新文件。加载后再次调用 _seal()”上锁”。
+</code></pre>
+
+<p>子模块</p>
+
+<p>最后一个也是最简单的使用方式，那就是创建子模块</p>
+
+<pre><code>blogModule.CommentSubModule = (function () {
+var my = {};
+// ...
+return my;
+} ()); 尽管非常简单，我还是把它放进来了，因为我想说明的是子模块也具有一般模块所有的高级使用方式， 也就是说你可以对任意子模块再次使用上面的一些应用方法。
+</code></pre>
+
+<p>总结</p>
+
+<p>上面的大部分方式都可以互相组合使用的，一般来说如果要设计系统，可能会用到松耦合扩展，
+私有状态和子模块这样的方式。另外，我这里没有提到性能问题，
+但我认为Module模式效率高，代码少，加载速度快。使用松耦合扩展允许并行加载，
+这更可以提升下载速度。不过初始化时间可能要慢一些，但是为了使用好的模式，这是值得的。</p>
+
+      <div class="readall"><a href="/blog/2014/09/27/Module.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/MapReduce.html">Map/Reduce第一次开发记录</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>1.main()
+作用：配置job, 提交job
+main()运行于JobTracker</p>
+
+<ol>
+  <li>
+    <p>map/reduce运行流程：</p>
+
+    <pre><code> map(k1, v1)--&gt;(k2, v2)--&gt;combiner(k2, v2)--&gt;(k3, v3)--&gt;reduce(k3, v3)--&gt;(k4, v4)
+ InputFormat  程序逻辑          map的输出               combiner的输出  最终输出
+</code></pre>
+  </li>
+  <li>
+    <p>不要在map类中自己实现combiner或reduce的功能。可能导致内存不足。
+context.write();方法在当写入量超过一定值后，会写入文件。</p>
+  </li>
+  <li>
+    <p>setNumReduce() 设置reduce的个数，默认为1. 另外当map/reduce运行在本地时此方法的设置无效。
+对于reduce的个数一般由metadata来决定。</p>
+  </li>
+  <li>
+    <p>map/reduce 程序的运行方式：</p>
+
+    <p>a: 将写好的程序，打成jar包，将其和其依赖的jar包放置于 hadoop安装环境上 然后在hadoop上以 hadoop -jar /path/***.jar
+ b：在eclipse中run
+ c: 编写servlet, 在servlet 中调用a方法中的命令 运行程序。</p>
+  </li>
+  <li>
+    <p>Combiner</p>
+
+    <p>在map端实现对key的聚合，然后再有reduce从聚合以后的数据中获取，从而减少map于reduce之间的数据传输，提高程序效率。
+ 另外使用Combiner,应考虑使用combiner对数据的聚合程度。如果聚合量太少，是没有必要的。</p>
+  </li>
+  <li>
+    <p>Partitioner  (shuffle)
+ Partitioner 实现将map或是combiner的输出发送到对应的reduce的功能.
+ 可以自定义实现。默认为HashPartitioner</p>
+  </li>
+  <li>
+    <p>configuration：作用：实现对job的配置
+ 可以作为jobtracker,map,reduce之间的参数传递，configuration对象在设置后，在程序的任何地方都能获取。</p>
+  </li>
+  <li>
+    <p>在本地run map/redcue 程序时 需要修改源码中FileUtil类如下：</p>
+
+    <pre><code> private static void checkReturnValue(boolean rv, File p,
+ FsPermission permission
+ ) throws IOException {
+ // if (!rv) {
+ // throw new IOException("Failed to set permissions of path: " + p +
+ // " to " +
+ // String.format("%04o", permission.toShort()));
+ // }
+ }
+</code></pre>
+  </li>
+</ol>
+
+<p>可以把这个类copy到你eclipse工程中的源程序中，包名和类名都不变。
+在eclipse中运行时将优先使用你copy过来修改的那个类。
+没有必要重新编译整个hadoop的类。</p>
+
+      <div class="readall"><a href="/blog/2014/09/27/MapReduce.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/MVC.html">MVC框架简单实现</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#f2e">f2e</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>MVC框架实现</p>
+
+<p>1.MVC（Model—View—Controler)介绍</p>
+
+<p>MVC模式最早由Trygve Reenskaug在1978年提出，是施乐帕罗奥多研究中心（Xerox PARC）在20世纪80年代为程序语言Smalltalk发明的一种软件设计模式。当前备受推崇的一种设计模式，更是web项目的标配。</p>
+
+<p>MVC强制将程序的input、process和output分割独立分别由对应的mvc组建负责。控制器接受用户的请求，调用相应的模型来进行业务处理，并返回数据给控制器。控制器调用相应的视图来显示处理的结果。并通过视图呈现给用户。</p>
+
+<p>优点：</p>
+
+<pre><code>MVC模式的目的是实现动态的程序设计开发，使得开发或维护过程中对程序的修改和扩展变得更加简单，
+程序的复用性变得更好。
+提高了程序的灵活性和可配置性。
+程序结构更加直观。
+各个组建对应功能明确，开发人员能够更好的发挥所长分工作业。
+</code></pre>
+
+<p>缺陷：</p>
+
+<pre><code>技术论坛里，时不时会有MVC已死的声音。现在如日中天的MVC是否真的廉颇老矣？这里摘取《Object Design: Roles, Responsibilities, and Collaborations》一书中对MVC集中式控制器总结了一下四大缺点：
+
+Control logic can get overly complex.
+
+控制器会变得复杂，很多人在Struts的Action控制器中写业务代码已经变得很常见。
+
+Controllers can become dependent on information holders' contents.
+
+控制器变得依赖信息数据中心或数据库了，控制器做很多事情。
+
+Objects can become coupled indirectly through the actions of their controller.
+
+对象将间接地通过控制器的action耦合在一起，一个对象在控制器中查询获得，然后复制给另外一个对象，这两个对象就耦合在一起。
+
+The only interesting work is done in the controller.
+
+唯一有趣的工作是做控制器，Responsibilities职责被吸进控制器对象，只将一些行为留给角色模型完成，重要的事情都集中在控制器中了。
+
+传说中的替代架构：DCI(Data Context Interactions)
+</code></pre>
+
+<ol>
+  <li>
+    <p>流行实现框架分析</p>
+
+    <p>闲话休多，好与坏都需要自己亲身去实践，需要透彻的了解这种设计。本篇文章旨在通过参考现今主流MVC框架的设计思路自己实现一个简单的mvc框架，从而更加深入透彻的理解与掌握MVC。</p>
+
+    <p>首先简单分析一下流行的MVC框架 如struts2 和 springmvc</p>
+  </li>
+</ol>
+
+<p>Struts2
+请求流程：</p>
+
+<p><img src="/image/strus-workflow.png" alt="" /></p>
+
+<p>struts request 流程图
+上面这张图是官方给出的struts2.0请求处理流程图，struts2.0对一个请求的处理可以分为以下几个步骤：</p>
+
+<pre><code>客户端发送请求。
+
+请求先通过ActionContextCleanUp--&gt;FilterDispatcher。
+
+FilterDispatcher通过ActionMapper来决定这个Request需要调用哪个Action。
+
+如果ActionMapper决定调用某个Action，FilterDispatcher把请求的处理交给ActionProxy，这儿已经转到它的Delegate—Dispatcher来执行。
+
+ActionProxy根据ActionMapping和ConfigurationManager找到需要调用的Action类
+
+ActionProxy创建一个ActionInvocation的实例。
+
+ActionInvocation调用真正的Action，当然这涉及到相关拦截器的调用。
+
+Action执行完毕，ActionInvocation创建Result并返回，当然，如果要在返回之前做些什么，可以实现PreResultListener。添加PreResultListener可以在Interceptor中实现。
+</code></pre>
+
+<p>springmvc
+请求流程：<br />
+<img src="/image/Spring1.jpg" alt="" />)</p>
+
+<p>具体流程步骤如下：</p>
+
+<pre><code>1. 首先用户发送请求=&gt;DispatcherServlet，前端控制器收到请求后自己不进行处理，而是委托给其他的解析器进行处理，作为统一访问点，进行全局的流程控制。
+
+2. DispatcherServlet=&gt;HandlerMapping， HandlerMapping将会把请求映射为HandlerExecutionChain对象（包含一个Handler处理器（页面控制器）对象、多个HandlerInterceptor拦截器）对象，通过这种策略模式，很容易添加新的映射策略。
+
+3. DispatcherServlet=&gt;HandlerAdapter，HandlerAdapter将会把处理器包装为适配器，从而支持多种类型的处理器。
+
+4. HandlerAdapter=&gt;处理器功能处理方法的调用，HandlerAdapter将会根据适配的结果调用真正的处理器的功能处理方法，完成功能处理；并返回一个ModelAndView对象（包含模型数据、逻辑视图名）。
+
+5. ModelAndView的逻辑视图名=&gt; ViewResolver， ViewResolver将把逻辑视图名解析为具体的View。
+
+6. View=&gt;渲染，View会根据传进来的Model模型数据进行渲染，此处的Model实际是一个Map数据结构，因此很容易支持其他视图技术；
+
+7. 返回控制权给DispatcherServlet，由DispatcherServlet返回响应给用户，流程结束。
+</code></pre>
+
+<ol>
+  <li>实现</li>
+</ol>
+
+<p>经过对struts2和springmvc的分析，可以看出要实现mvc这样的表现层框架，总体上来说需要实现以下三点：</p>
+
+<p>URL到框架的映射。</p>
+
+<p>Http请求参数绑定。</p>
+
+<p>Http响应的生成和输出。</p>
+
+<p>将其具体到实现可以分为：</p>
+
+<p>配置元素的对象化（解析配置文件，初始化环境）。</p>
+
+<pre><code>publicvoid init() throws ServletException {
+
+super.init();
+
+try {
+
+actionConfigs = XMLUtil.parseConfig();
+
+} catch (Exception e) {
+
+e.printStackTrace();
+
+}
+
+}
+</code></pre>
+
+<ol>
+  <li>
+    <p>对Http请求进行初步处理，查找与之对应的处理类（方法）</p>
+
+    <pre><code> String handlerMappingClassName = handlerBeanConfigs.get(Constants.HAND LER_MAPPING).getClazz();
+	
+ String actionName = ((HandlerMapping)
+	
+ ReflectUtil.getInstance(handlerMappingClassName)).handlerMapping(req);
+</code></pre>
+  </li>
+  <li>
+    <p>调用相应的处理类（方法）完成业务逻辑对处理类（方法）</p>
+
+    <pre><code> ActionConfig actionConfig = actionConfigs.get(actionName);
+	
+ String handlerAdapterClassName = handlerBeanConfigs.
+	
+ get(Constants.HANDLER_ADAPTER).getClazz();
+	
+ String result = ((HandlerAdapter)ReflectUtil.
+	
+ getInstance(handlerAdapterClassName))
+	
+ .handlerAdapter(req, actionConfig, actionName);
+</code></pre>
+  </li>
+  <li>
+    <p>根据处理类（方法）的调用结果，进行Http响应处理</p>
+
+    <pre><code> String handlerViewClassName = handlerBeanConfigs.
+	
+ get(Constants.HANDLER_VIEW).getClazz();
+	
+ ((HandlerView) ReflectUtil.getInstance(handlerViewClassName)).
+	
+ handlerView(req, resp, actionConfig, result);
+</code></pre>
+  </li>
+</ol>
+
+<p>以上是整个框架处理的核心流程,核心流程的控制在DispatcherServlet类中完成。同时整个流程又分为以上的几个步骤，对于每个步骤的具体实现,采用开放接口的方式提供给框架使用者。可以实现其中的对应接口,并在配置文件中注册具体实现类。即可实现修改框架默认定制属于自己实现。</p>
+
+<p>具体提供以下三个接口分别对应上面2，3，4步的处理逻辑，分别为：</p>
+
+<p>HandlerMapping</p>
+
+<p>HandlerAdapter</p>
+
+<p>HandlerView</p>
+
+<p>扩展举例：实现定制Http请求进行初步处理，查找与之对应的处理类（方法）</p>
+
+<pre><code>publicclass HandlerURLMapping implements HandlerMapping {
+
+@Override
+
+public String handlerMapping(HttpServletRequest request) throws Exception {
+
+String contextPath = request.getContextPath();
+
+String uri = request.getRequestURI();
+
+String actionName = uri.substring(contextPath.length() + 1, uri.length());
+
+return actionName;
+
+}
+
+}
+</code></pre>
+
+<p>框架request请求执行逻辑图如下：</p>
+
+<p><img src="/image/my-mvc.png" alt="" /></p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/MVC.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Linux-SSH-.html">Linux SSH 登录</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>服务器IP地址为192.168.1.1，机器名：will_s
+客户端IP地址为172.16.16.1，机器名：will_c
+客户端用户will需要使用ssh无密码登录服务器的will帐户</p>
+
+<p>实现原理
+使用”公私钥”认证的方式来进行ssh登录.
+在客户端上创建一对公私钥 （公钥文件：~/.ssh/id_rsa.pub； 私钥文件：~/.ssh/id_rsa）
+然后把公钥放到服务器上（~/.ssh/authorized_keys）, 自己保留好私钥
+当ssh登录时,ssh程序会发送私钥去和服务器上的公钥做匹配.如果匹配成功就可以登录了</p>
+
+<p>设置如下：</p>
+
+<ol>
+  <li>
+    <p>以will用户登录客户机器并在客户端机器上执行”ssh-keygen -t rsa”
+(注：每次执行”ssh-keygen -t rsa”产生的私钥文件都会不同)</p>
+
+    <p>a）如果文件”~/.ssh/id_rsa”存在，会提示是否覆盖该文件，此时可选择”n”不覆盖该文件而使用已有的id_rsa文件；
+ 如果选择”y”则会重新生成”~/.ssh/id_rsa”文件，接下来会提示输入passphrase，
+ 回车确定使用空的passphrase，再次回车确认（这里也可以输出passphrase，相当于ssh时登录的密码）。
+ 然后会重新生成”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件。</p>
+
+    <p>b）如果”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件不存在则会自动创建新的”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件，
+ passphrase设置同上。</p>
+  </li>
+  <li>
+    <p>使用ssh will@192.168.1.1登录到服务器，编辑服务器上”~/.ssh/authorized_keys”文件，
+将客户端机器上的”~/.ssh/id_rsa.pub”文件内容追加到”~/.ssh/authorized_keys”文件中。
+（注：可以在客户端机器上使用以下命令来实现：</p>
+
+    <pre><code> cat ~/.ssh/id_rsa.pub | ssh will@192.168.1.1 "cat - &gt;&gt; ~/.ssh/authorized_keys" 此时会要求输入will用户在服务器上的登录密码，输入后即会将客户端机器上的"~/.ssh/id_rsa.pub"文件内容追加到服务器上的 "~/.ssh/authorized_keys"文件中） 如果是首次连接服务器会出现以下的提示，确认连接并输入密码后其他直接回车确定。
+</code></pre>
+  </li>
+  <li>
+    <p>如果在第1步中使用了空的passphrase，则可以跳过第4步，此时在客户端即可以使用”ssh zhaoy@192.168.1.1”即可无密码登录到服务器；
+如果第一步中设置了passphrase，则继续执行以下步骤。</p>
+  </li>
+  <li>
+    <p>如果第1步中设置了passphrase，则此时需要输入该passphrase登录服务器。
+此时前面我们把输入密码变成了输入passphrase，这没有带来任何方便。
+但是我们可以通过ssh-agent来帮助我们自动输入passphrase(只是看起来像是自动输入而已)，
+我们只要在第一次登录时输入一次passphrase, 以后的工作就可以交给ssh-agent。在客户端机器上执行命令ssh-add，
+这里会提示输入一次passphrase。输入第一步中设置的passphrase之后会修改”~/.ssh/id_rsa”文件。
+再在客户端执行”ssh will@192.168.1.1”即可无密码登录到服务器端。</p>
+  </li>
+</ol>
+
+      <div class="readall"><a href="/blog/2014/09/27/Linux-SSH-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Java-class-loader.html">Java class loader</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p><strong>java classloader 结构：</strong></p>
+
+<ol>
+  <li>Bootstrap classloader(启动类加载器)
+主要负责jdk_home/lib目录下的核心API或-Xbootclasspath选项指定的jar包的装入工作</li>
+  <li>Extension Classloader(扩展类加载器)
+负责jdk_home/lib/ext目录下的jar包或者-Djava.ext.dirs指定目录下的jar包装入工作
+3.System classloader(系统类加载器)
+负责Java -classpath/-Djava.class.path所指定的类与jar包的装入</li>
+  <li>User Custom classloader（用户自定义类加载器（java.lang.ClassLoader的子类））
+以上每一个classloader都会维护一份自己的名称空间，同一个名称空间不能出现两个同名的类。
+为了实现Java安全沙箱模型顶层的类加载器安全机制，Java默认采用 双亲委派的加载链 结构</li>
+</ol>
+
+<p>在jvm启动时就会构建bootstrap classloader 负责Java平台核心库</p>
+
+<p><strong>每个ClassLoader加载Class的过程是：</strong></p>
+
+<ol>
+  <li>检测此Class是否载入过（即在cache中是否有此Class），如果有到8,如果没有到2</li>
+  <li>如果parent classloader不存在（没有parent，那parent一定是bootstrap classloader了），到4</li>
+  <li>请求parent classloader载入，如果成功到8，不成功到5</li>
+  <li>请求jvm从bootstrap classloader中载入，如果成功到8</li>
+  <li>寻找Class文件（从与此classloader相关的类路径中寻找）。如果找不到则到7.</li>
+  <li>从文件中载入Class，到8.</li>
+  <li>抛出ClassNotFoundException.</li>
+  <li>返回Class.</li>
+</ol>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/Java-class-loader.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Java-Serialization.html">Java Serialization</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>目的：</p>
+
+<p>保存对象的状态，并且可以把保存的对象状态再读取出来进行恢复。</p>
+
+<p>场景：</p>
+
+<ol>
+  <li>需要把内存中对象状态保存到一个文件中或者数据库中时</li>
+  <li>需要用套接字在网络上传送对象时</li>
+  <li>需要通过RMI传输对象时
+特点：</li>
+  <li>序列化时 只对对象的状态进行保存 而不管对象的方法</li>
+  <li>当一个父类实现序列化，子类自动实现序列化 无须显式实现Serializable借口</li>
+  <li>当一个对象的实例变量引用其他对象，序列化该对象时也会把引用对象进行序列化</li>
+  <li>并非所有对象都可以序列化：
+socket/thread</li>
+</ol>
+
+<p>Serialization 是一种将对象以一连串的字节描述的过程，deserialization 将这些字节重构成一个对象的过程。Java序列化API提供一种处理对象序列化的标准机制。</p>
+
+<h2 id="section">进阶问题：</h2>
+
+<p><strong>序列化ID的问题</strong></p>
+
+<p>serialVersionID即 序列化的版本号，是为了保证不同版本之间的兼容性。向前兼容以及向后兼容。
+两种生成方式：</p>
+
+<ol>
+  <li>使用默认的1L</li>
+  <li>根据类名 接口名 成员方法以及属性来生成</li>
+</ol>
+
+<p>如果一个类实现了序列化 但没有显示的申明序列化版本号  在程序编译的时候会自动生成一个版本号。存储在文件中，如果类有改动版本号也会随之改变。 在反序列化的时候JVM会将文件中的ID与本地相应实体类的ID比较  两者一致才能够序列化成功。否则会抛InvalidClassException异常。</p>
+
+<p>静态化变量的序列化</p>
+
+<pre><code>                    //初始时staticVar为5
+                    ObjectOutputStream out = new ObjectOutputStream(
+                                    new FileOutputStream("result.obj"));
+                    out.writeObject(new Test());
+                    out.close();
+
+                    //序列化后修改为10
+                    Test.staticVar = 10;
+
+                    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
+                                    "result.obj"));
+                    Test t = (Test) oin.readObject();
+                    oin.close();
+                    //再读取，通过t.staticVar打印新的值
+                    System.out.println(t.staticVar); 以上代码的输出结果为10.。。因为序列化并不保存静态化变量。
+</code></pre>
+
+<p><strong>父类的序列化</strong></p>
+
+<p>一个子类实现了Serializable接口  它的父类没有实现Serializable接口   序列化该子类对象然后反序列化输出父类定义的某变量的数值  该数值与序列化时的数值不同</p>
+
+<p>在父类没有实现Serializable接口时  JVM将不会序列化父类对象  而一个Java对象的构造必须有父类对象 所以在反序列化时 只能调用父类的无参构造器作为默认的父对象  所以这是可以在父类的无参构造器中对变量进行初始化 否则父类变量都是默认的值</p>
+
+<p><strong>Transient关键字</strong></p>
+
+<p>Transient关键字的作用是控制变量的序列化，在变量申明前加上次关键字可以阻止该变量被序列化</p>
+
+<p><strong>序列化存储规则</strong></p>
+
+<pre><code> ObjectOutputStream out = new ObjectOutputStream(
+                                    new FileOutputStream("result.obj"));
+    Test test = new Test();
+    //试图将对象两次写入文件
+    out.writeObject(test);
+    out.flush();
+    System.out.println(new File("result.obj").length());
+    out.writeObject(test);
+    out.close();
+    System.out.println(new File("result.obj").length());
+
+    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
+                    "result.obj"));
+    //从文件依次读出两个文件
+    Test t1 = (Test) oin.readObject();
+    Test t2 = (Test) oin.readObject();
+    oin.close();
+    //判断两个引用是否指向同一个对象
+    System.out.println(t1 == t2);
+</code></pre>
+
+<p>同一对象两次写入文件，打印出写入一次对象后的存储大小和写入两次后的存储大小，然后从文件中反序列化出两个对象，比较这两个对象是否为同一对象。一般的思维是，两次写入对象，文件大小会变为两倍的大小，反序列化时，由于从文件读取，生成了两个对象，判断相等时应该是输入 false 才对，最后却为TRUE。</p>
+
+<p>因为：Java 序列化机制为了节省磁盘空间，具有特定的存储规则，当写入文件的为同一对象时，并不会再将对象的内容进行存储，而只是再次存储一份引用，上面增加的 5 字节的存储空间就是新增引用和一些控制信息的空间。反序列化时，恢复引用关系，使得清单 3 中的 t1 和 t2 指向唯一的对象，二者相等，输出 true。该存储规则极大的节省了存储空间。</p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/Java-Serialization.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="pagination">
+  
+  
+  <a class="pagination-item newer" href="/page/8"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;上一页</a>
+  
+    
+  
+  <a class="pagination-item older" href="/page/10">下一页&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+  
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

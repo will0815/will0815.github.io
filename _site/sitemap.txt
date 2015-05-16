@@ -1,4 +1,7 @@
 
+index.html/page/11/index.html
+index.html/page/10/index.html
+index.html/page/9/index.html
 index.html/page/8/index.html
 index.html/page/7/index.html
 index.html/page/6/index.html
@@ -18,12 +21,33 @@ index.html/life/i-want-go.html
 index.html/page/feed.xml
 index.html/life/erweima.html
 index.html/life/daqi.html
+index.html/life/daozhehuoyihui.html
 index.html/page/category.html
 index.html/life/book.html
+index.html/life/body-soul.html
 index.html/life/best-me.html
 index.html/page/about.html
 index.html/404.html
 
+index.html/blog/2015/05/16/HBase-config-optimize.html
+index.html/blog/2015/05/16/DB-yanjin.html
+index.html/blog/2015/05/16/CDH-install-question.html
+index.html/blog/2015/02/01/Linux-point9.html
+index.html/blog/2015/02/01/Linux-point8.html
+index.html/blog/2015/02/01/Linux-point7.html
+index.html/blog/2015/02/01/Linux-point6.html
+index.html/blog/2015/02/01/Linux-point10.html
+index.html/blog/2015/02/01/Hive-structure.html
+index.html/blog/2015/02/01/Hive-partition.html
+index.html/blog/2015/02/01/HBase-desgin-optimal.html
+index.html/blog/2015/02/01/HBase-config-optimal.html
+index.html/blog/2015/01/23/Linux-point5.html
+index.html/blog/2015/01/23/Linux-point4.html
+index.html/blog/2015/01/23/Linux-point3.html
+index.html/blog/2015/01/23/Linux-point2.html
+index.html/blog/2015/01/23/Linux-point1.html
+index.html/blog/2014/11/30/collaborative-filtering-algorithm.html
+index.html/blog/2014/11/30/clustering-algorithm.html
 index.html/blog/2014/11/04/mahout-xiangjie.html
 index.html/blog/2014/10/12/nosqlhbase.html
 index.html/blog/2014/10/09/zookeeper-install.html

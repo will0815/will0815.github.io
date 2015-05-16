@@ -64,79 +64,48 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/MapReduce.html">Map/Reduce第一次开发记录</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/mashup.html">mashup</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+        <a class="post-category" href="/page/category.html#不懂">不懂</a>
       </p>
     </header>
     <div class="post-main">
-      <p>1.main()
-作用：配置job, 提交job
-main()运行于JobTracker</p>
+      <p>mashup是糅合，是当今网络上新出现的一种网络现象，
+将两种以上使用公共或者私有数据库的web应用，加在一起，形成一个整合应用。</p>
 
-<ol>
-  <li>
-    <p>map/reduce运行流程：</p>
+<p>现在，我们将Windows，操作系统替换成网络。那么同样的，就会有许多公司来提供哪些APIs。
+比如yahoo,google.例如一个叫EVDB的公司，它是一个事件日历的数据库，
+可以提醒你什么时间到哪里做什么事情。
+也包括像 Amazon 和 eBay，又比如Technorati ，
+所有这些不同的公司把APIs放到网上使开发者可以访问。
+现在假如你是一个Web开发者，你通过一个API 找到你附近哪些地方会有犯罪。然后你访问Google 地图API，把这两个内容整合在一起，那么你就得到了一个标有犯罪纪录的地图。
+这个新的地图就叫Mashup。因为开发者通过来自多个网站的APIs，
+把他们合并在一起，成为了一个新的很cool的应用程序。
+典型应用</p>
 
-    <pre><code> map(k1, v1)--&gt;(k2, v2)--&gt;combiner(k2, v2)--&gt;(k3, v3)--&gt;reduce(k3, v3)--&gt;(k4, v4)
- InputFormat  程序逻辑          map的输出               combiner的输出  最终输出
-</code></pre>
-  </li>
-  <li>
-    <p>不要在map类中自己实现combiner或reduce的功能。可能导致内存不足。
-context.write();方法在当写入量超过一定值后，会写入文件。</p>
-  </li>
-  <li>
-    <p>setNumReduce() 设置reduce的个数，默认为1. 另外当map/reduce运行在本地时此方法的设置无效。
-对于reduce的个数一般由metadata来决定。</p>
-  </li>
-  <li>
-    <p>map/reduce 程序的运行方式：</p>
+<p>地图 Mashup</p>
 
-    <p>a: 将写好的程序，打成jar包，将其和其依赖的jar包放置于 hadoop安装环境上 然后在hadoop上以 hadoop -jar /path/***.jar
- b：在eclipse中run
- c: 编写servlet, 在servlet 中调用a方法中的命令 运行程序。</p>
-  </li>
-  <li>
-    <p>Combiner</p>
+<p>在这个阶段的信息技术中，人们搜集大量有关事物和行为的数据，二者都常常具有位置注释信息。所有这些包含位置数据的不同数据集均可利用地图通过令人惊奇的图形化方式呈现出来。mashup 蓬勃发展的一种主要动力就是 Google 公开了自己的 Google Maps API。这仿佛打开了一道大门，让 Web 开发人员(包括爱好者、修补程序开发人员和其他一些人)可以在地图中包含所有类型的数据(从原子弹灾难到波士顿的 CowParade 奶牛都可以)。为了不落于人后，Microsoft(Virtual Earth)、Yahoo(Yahoo Maps)和 AOL(MapQuest)也很快相继公开了自己的 API。</p>
 
-    <p>在map端实现对key的聚合，然后再有reduce从聚合以后的数据中获取，从而减少map于reduce之间的数据传输，提高程序效率。
- 另外使用Combiner,应考虑使用combiner对数据的聚合程度。如果聚合量太少，是没有必要的。</p>
-  </li>
-  <li>
-    <p>Partitioner  (shuffle)
- Partitioner 实现将map或是combiner的输出发送到对应的reduce的功能.
- 可以自定义实现。默认为HashPartitioner</p>
-  </li>
-  <li>
-    <p>configuration：作用：实现对job的配置
- 可以作为jobtracker,map,reduce之间的参数传递，configuration对象在设置后，在程序的任何地方都能获取。</p>
-  </li>
-  <li>
-    <p>在本地run map/redcue 程序时 需要修改源码中FileUtil类如下：</p>
+<p>视频和图象 Mashup</p>
 
-    <pre><code> private static void checkReturnValue(boolean rv, File p,
- FsPermission permission
- ) throws IOException {
- // if (!rv) {
- // throw new IOException("Failed to set permissions of path: " + p +
- // " to " +
- // String.format("%04o", permission.toShort()));
- // }
- }
-</code></pre>
-  </li>
-</ol>
+<p>图像主机和社交网络站点(例如 Flickr 使用自己的 API 来共享图像)的兴起导致出现了很多有趣的 mashup。由于内容提供者拥有与其保存的图像相关的元数据(例如谁拍的照片，照片的内容是什么，在何时何地拍摄的等等)，mashup 的设计者可以将这些照片和其他与元数据相关的信息放到一起。例如，mashup 可以对图片进行分析，从而将相关照片拼接在一起，或者基于相同的照片元数据(标题、时间戳或其他元数据)显示社交网络图。另外一个例子可能以一个 Web 站点(例如 CNN 之类的新闻站点)作为输入，并在新闻中通过照片匹配而将照片中的内容以文字的形式呈现出来。</p>
 
-<p>可以把这个类copy到你eclipse工程中的源程序中，包名和类名都不变。
-在eclipse中运行时将优先使用你copy过来修改的那个类。
-没有必要重新编译整个hadoop的类。</p>
+<p>搜索和购物 Mashup</p>
 
-      <div class="readall"><a href="/blog/2014/09/27/MapReduce.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<p>搜索和购物 mashup 在 mashup 这个术语出现之前就已经存在很长时间了。在 Web API 出现之前，有相当多的购物工具，例如 BizRate、PriceGrabber、MySimon 和 Google 的 Froogle，都使用了 B2B 技术或屏幕抓取的方式来累计相关的价格数据。为了促进 mashup 和其他有趣的 Web 应用程序的发展，诸如 eBay 和 Amazon 之类的消费网站已经为通过编程访问自己的内容而发布了自己的 API。
+新闻 Mashup
+新闻源(例如纽约时报、BBC 或路透社)已从 2002 年起使用 RSS 和 Atom 之类的联合技术来发布各个主题的新闻提要。以联合技术为基础的 mashup 可以聚集一名用户的提要，并将其通过 Web 呈现出来，创建个性化的报纸，从而满足读者独特的兴趣。</p>
+
+<p>微博 Mashup</p>
+
+<p>将多个微博在一个平台上进行聚合显示， 在一个平台上可以同时绑定多个微博(腾讯微博、新浪微博、搜狐微博、网易微博、人人网、豆瓣、饭否、嘀咕、Follow5、天涯微博、人间网、做啥、9911、同学网、开心网等)，从而满足用户同步多个平台的要求，提供了微博信息汇总表，让用户方便查看自己所有平台的粉丝，关注和微博数，轻松实现在不同微博间自由切换。并且提供多微博评论列表读取，跨平台分享，聚合收藏等功能。使用户可在同一屏幕中同步收发信息，实现了真正意义上的社交网站双向聚合。类似网站功能的有玛撒网，微博通等。</p>
+
+      <div class="readall"><a href="/blog/2014/09/27/mashup.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -144,223 +113,99 @@ context.write();方法在当写入量超过一定值后，会写入文件。</p>
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/MVC.html">MVC框架简单实现</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/log4j.html">log4j配置解释</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#f2e">f2e</a>
+        <a class="post-category" href="/page/category.html#java">java</a>
       </p>
     </header>
     <div class="post-main">
-      <p>MVC框架实现</p>
-
-<p>1.MVC（Model—View—Controler)介绍</p>
-
-<p>MVC模式最早由Trygve Reenskaug在1978年提出，是施乐帕罗奥多研究中心（Xerox PARC）在20世纪80年代为程序语言Smalltalk发明的一种软件设计模式。当前备受推崇的一种设计模式，更是web项目的标配。</p>
-
-<p>MVC强制将程序的input、process和output分割独立分别由对应的mvc组建负责。控制器接受用户的请求，调用相应的模型来进行业务处理，并返回数据给控制器。控制器调用相应的视图来显示处理的结果。并通过视图呈现给用户。</p>
-
-<p>优点：</p>
-
-<pre><code>MVC模式的目的是实现动态的程序设计开发，使得开发或维护过程中对程序的修改和扩展变得更加简单，
-程序的复用性变得更好。
-提高了程序的灵活性和可配置性。
-程序结构更加直观。
-各个组建对应功能明确，开发人员能够更好的发挥所长分工作业。
-</code></pre>
-
-<p>缺陷：</p>
-
-<pre><code>技术论坛里，时不时会有MVC已死的声音。现在如日中天的MVC是否真的廉颇老矣？这里摘取《Object Design: Roles, Responsibilities, and Collaborations》一书中对MVC集中式控制器总结了一下四大缺点：
-
-Control logic can get overly complex.
-
-控制器会变得复杂，很多人在Struts的Action控制器中写业务代码已经变得很常见。
-
-Controllers can become dependent on information holders' contents.
-
-控制器变得依赖信息数据中心或数据库了，控制器做很多事情。
-
-Objects can become coupled indirectly through the actions of their controller.
-
-对象将间接地通过控制器的action耦合在一起，一个对象在控制器中查询获得，然后复制给另外一个对象，这两个对象就耦合在一起。
-
-The only interesting work is done in the controller.
-
-唯一有趣的工作是做控制器，Responsibilities职责被吸进控制器对象，只将一些行为留给角色模型完成，重要的事情都集中在控制器中了。
-
-传说中的替代架构：DCI(Data Context Interactions)
-</code></pre>
+      <p>Log4j说明</p>
 
 <ol>
   <li>
-    <p>流行实现框架分析</p>
+    <p>log4j.rootCategory=INFO, stdout , R</p>
 
-    <p>闲话休多，好与坏都需要自己亲身去实践，需要透彻的了解这种设计。本篇文章旨在通过参考现今主流MVC框架的设计思路自己实现一个简单的mvc框架，从而更加深入透彻的理解与掌握MVC。</p>
-
-    <p>首先简单分析一下流行的MVC框架 如struts2 和 springmvc</p>
+    <p>此句为将等级为INFO的日志信息输出到stdout和R这两个目的地，
+stdout和R的定义在下面的代码，可以任意起名。
+等级可分为OFF、 FATAL、ERROR、WARN、INFO、DEBUG、ALL，
+如果配置OFF则不打出任何信息，如果配置为INFO这样只显示INFO, WARN, ERROR的log信息，
+而DEBUG信息不会被显示。</p>
   </li>
-</ol>
-
-<p>Struts2
-请求流程：</p>
-
-<p><img src="/image/strus-workflow.png" alt="" /></p>
-
-<p>struts request 流程图
-上面这张图是官方给出的struts2.0请求处理流程图，struts2.0对一个请求的处理可以分为以下几个步骤：</p>
-
-<pre><code>客户端发送请求。
-
-请求先通过ActionContextCleanUp--&gt;FilterDispatcher。
-
-FilterDispatcher通过ActionMapper来决定这个Request需要调用哪个Action。
-
-如果ActionMapper决定调用某个Action，FilterDispatcher把请求的处理交给ActionProxy，这儿已经转到它的Delegate—Dispatcher来执行。
-
-ActionProxy根据ActionMapping和ConfigurationManager找到需要调用的Action类
-
-ActionProxy创建一个ActionInvocation的实例。
-
-ActionInvocation调用真正的Action，当然这涉及到相关拦截器的调用。
-
-Action执行完毕，ActionInvocation创建Result并返回，当然，如果要在返回之前做些什么，可以实现PreResultListener。添加PreResultListener可以在Interceptor中实现。
-</code></pre>
-
-<p>springmvc
-请求流程：
-<img src="../image/Spring1.jpg" alt="" /></p>
-
-<p>具体流程步骤如下：</p>
-
-<pre><code>1. 首先用户发送请求=&gt;DispatcherServlet，前端控制器收到请求后自己不进行处理，而是委托给其他的解析器进行处理，作为统一访问点，进行全局的流程控制。
-
-2. DispatcherServlet=&gt;HandlerMapping， HandlerMapping将会把请求映射为HandlerExecutionChain对象（包含一个Handler处理器（页面控制器）对象、多个HandlerInterceptor拦截器）对象，通过这种策略模式，很容易添加新的映射策略。
-
-3. DispatcherServlet=&gt;HandlerAdapter，HandlerAdapter将会把处理器包装为适配器，从而支持多种类型的处理器。
-
-4. HandlerAdapter=&gt;处理器功能处理方法的调用，HandlerAdapter将会根据适配的结果调用真正的处理器的功能处理方法，完成功能处理；并返回一个ModelAndView对象（包含模型数据、逻辑视图名）。
-
-5. ModelAndView的逻辑视图名=&gt; ViewResolver， ViewResolver将把逻辑视图名解析为具体的View。
-
-6. View=&gt;渲染，View会根据传进来的Model模型数据进行渲染，此处的Model实际是一个Map数据结构，因此很容易支持其他视图技术；
-
-7. 返回控制权给DispatcherServlet，由DispatcherServlet返回响应给用户，流程结束。
-</code></pre>
-
-<ol>
-  <li>实现</li>
-</ol>
-
-<p>经过对struts2和springmvc的分析，可以看出要实现mvc这样的表现层框架，总体上来说需要实现以下三点：</p>
-
-<p>URL到框架的映射。</p>
-
-<p>Http请求参数绑定。</p>
-
-<p>Http响应的生成和输出。</p>
-
-<p>将其具体到实现可以分为：</p>
-
-<p>配置元素的对象化（解析配置文件，初始化环境）。</p>
-
-<pre><code>publicvoid init() throws ServletException {
-
-super.init();
-
-try {
-
-actionConfigs = XMLUtil.parseConfig();
-
-} catch (Exception e) {
-
-e.printStackTrace();
-
-}
-
-}
-</code></pre>
-
-<ol>
+  <li>log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+ 此句为定义名为stdout的输出端是哪种类型，可以是
+ org.apache.log4j.ConsoleAppender（控制台），
+ org.apache.log4j.FileAppender（文件），
+ org.apache.log4j.DailyRollingFileAppender（每天产生一个日志文件），
+ org.apache.log4j.RollingFileAppender（文件大小到达指定尺寸的时候产生一个新的文件）
+ org.apache.log4j.WriterAppender（将日志信息以流格式发送到任意指定的地方）</li>
+  <li>log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+ 此句为定义名为stdout的输出端的layout是哪种类型，可以是
+ org.apache.log4j.HTMLLayout（以HTML表格形式布局），
+ org.apache.log4j.PatternLayout（可以灵活地指定布局模式），
+ org.apache.log4j.SimpleLayout（包含日志信息的级别和信息字符串），
+ org.apache.log4j.TTCCLayout（包含日志产生的时间、线程、类别等等信息）</li>
   <li>
-    <p>对Http请求进行初步处理，查找与之对应的处理类（方法）</p>
+    <p>log4j.appender.stdout.layout.ConversionPattern= [QC] %p [%t] %C.%M(%L) | %m%n
+ 如果使用pattern布局就要指定的打印信息的具体格式ConversionPattern，
+ 打印参数如下：
+ %m 输出代码中指定的消息
+ %p 输出优先级，即DEBUG，INFO，WARN，ERROR，FATAL
+ %r 输出自应用启动到输出该log信息耗费的毫秒数
+ %c 输出所属的类目，通常就是所在类的全名
+ %t 输出产生该日志事件的线程名
+ %n 输出一个回车换行符，Windows平台为“rn”，Unix平台为“n”
+ %d 输出日志时间点的日期或时间，默认格式为ISO8601，也可以在其后指定格式，
+ 比如：%d{yyyy MMM dd HH:mm:ss,SSS}，输出类似：2002年10月18日 22：10：28，921
+ %l 输出日志事件的发生位置，包括类目名、发生的线程，以及在代码中的行数。</p>
 
-    <pre><code> String handlerMappingClassName = handlerBeanConfigs.get(Constants.HAND LER_MAPPING).getClazz();
-	
- String actionName = ((HandlerMapping)
-	
- ReflectUtil.getInstance(handlerMappingClassName)).handlerMapping(req);
-</code></pre>
+    <p>[QC]是log信息的开头，可以为任意字符，一般为项目简称。
+ 输出的信息
+ [TS] DEBUG [main] AbstractBeanFactory.getBean(189) | Returning cached instance of singleton bean ‘MyAutoProxy’</p>
   </li>
   <li>
-    <p>调用相应的处理类（方法）完成业务逻辑对处理类（方法）</p>
-
-    <pre><code> ActionConfig actionConfig = actionConfigs.get(actionName);
-	
- String handlerAdapterClassName = handlerBeanConfigs.
-	
- get(Constants.HANDLER_ADAPTER).getClazz();
-	
- String result = ((HandlerAdapter)ReflectUtil.
-	
- getInstance(handlerAdapterClassName))
-	
- .handlerAdapter(req, actionConfig, actionName);
-</code></pre>
+    <p>log4j.appender.R=org.apache.log4j.DailyRollingFileAppender
+ 此句与第3行一样。定义名为R的输出端的类型为每天产生一个日志文件。</p>
   </li>
   <li>
-    <p>根据处理类（方法）的调用结果，进行Http响应处理</p>
+    <p>log4j.appender.R.File=D:\Tomcat 5.5\logs\qc.log</p>
 
-    <pre><code> String handlerViewClassName = handlerBeanConfigs.
-	
- get(Constants.HANDLER_VIEW).getClazz();
-	
- ((HandlerView) ReflectUtil.getInstance(handlerViewClassName)).
-	
- handlerView(req, resp, actionConfig, result);
-</code></pre>
+    <p>此句为定义名为R的输出端的文件名为D:\Tomcat 5.5\logs\qc.log</p>
   </li>
+  <li>log4j.appender.R.layout=org.apache.log4j.PatternLayout
+ 与第4行相同。</li>
 </ol>
 
-<p>以上是整个框架处理的核心流程,核心流程的控制在DispatcherServlet类中完成。同时整个流程又分为以上的几个步骤，对于每个步骤的具体实现,采用开放接口的方式提供给框架使用者。可以实现其中的对应接口,并在配置文件中注册具体实现类。即可实现修改框架默认定制属于自己实现。</p>
+<p>10 log4j.appender.R.layout.ConversionPattern=%d-[TS] %p %t %c - %m%n
+与第5行相同。</p>
 
-<p>具体提供以下三个接口分别对应上面2，3，4步的处理逻辑，分别为：</p>
+<p>12 log4j.logger.com. neusoft =DEBUG
+指定com.neusoft包下的所有类的等级为DEBUG。
+可以把com.neusoft改为自己项目所用的包名。</p>
 
-<p>HandlerMapping</p>
+<p>13 log4j.logger.com.opensymphony.oscache=ERROR
+14 log4j.logger.net.sf.navigator=ERROR
+这两句是把这两个包下出现的错误的等级设为ERROR，如果项目中没有配置EHCache，则不需要这两句。</p>
 
-<p>HandlerAdapter</p>
+<p>15 log4j.logger.org.apache.commons=ERROR
+16 log4j.logger.org.apache.struts=WARN
+这两句是struts的包。</p>
 
-<p>HandlerView</p>
+<p>17 log4j.logger.org.displaytag=ERROR
+这句是displaytag的包。（QC问题列表页面所用）</p>
 
-<p>扩展举例：实现定制Http请求进行初步处理，查找与之对应的处理类（方法）</p>
+<p>18 log4j.logger.org.springframework=DEBUG
+此句为Spring的包。</p>
 
-<pre><code>publicclass HandlerURLMapping implements HandlerMapping {
-
-@Override
-
-public String handlerMapping(HttpServletRequest request) throws Exception {
-
-String contextPath = request.getContextPath();
-
-String uri = request.getRequestURI();
-
-String actionName = uri.substring(contextPath.length() + 1, uri.length());
-
-return actionName;
-
-}
-
-}
-</code></pre>
-
-<p>框架request请求执行逻辑图如下：</p>
-
-<p><img src="/image/my-mvc.png" alt="" /></p>
+<p>24 log4j.logger.org.hibernate.ps.PreparedStatementCache=WARN
+25 log4j.logger.org.hibernate=DEBUG
+此两句是hibernate的包。</p>
 
 
-      <div class="readall"><a href="/blog/2014/09/27/MVC.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/log4j.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -368,7 +213,7 @@ return actionName;
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Linux-SSH-.html">Linux SSH 登录</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/linux-command.html">linux command下解压命令大全</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
@@ -378,54 +223,123 @@ return actionName;
       </p>
     </header>
     <div class="post-main">
-      <p>服务器IP地址为192.168.1.1，机器名：will_s
-客户端IP地址为172.16.16.1，机器名：will_c
-客户端用户will需要使用ssh无密码登录服务器的will帐户</p>
+      <p>From: http://www.cnblogs.com/eoiioe/archive/2008/09/20/1294681.html</p>
 
-<p>实现原理
-使用”公私钥”认证的方式来进行ssh登录.
-在客户端上创建一对公私钥 （公钥文件：~/.ssh/id_rsa.pub； 私钥文件：~/.ssh/id_rsa）
-然后把公钥放到服务器上（~/.ssh/authorized_keys）, 自己保留好私钥
-当ssh登录时,ssh程序会发送私钥去和服务器上的公钥做匹配.如果匹配成功就可以登录了</p>
+<p>.tar</p>
 
-<p>设置如下：</p>
-
-<ol>
-  <li>
-    <p>以will用户登录客户机器并在客户端机器上执行”ssh-keygen -t rsa”
-(注：每次执行”ssh-keygen -t rsa”产生的私钥文件都会不同)</p>
-
-    <p>a）如果文件”~/.ssh/id_rsa”存在，会提示是否覆盖该文件，此时可选择”n”不覆盖该文件而使用已有的id_rsa文件；
- 如果选择”y”则会重新生成”~/.ssh/id_rsa”文件，接下来会提示输入passphrase，
- 回车确定使用空的passphrase，再次回车确认（这里也可以输出passphrase，相当于ssh时登录的密码）。
- 然后会重新生成”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件。</p>
-
-    <p>b）如果”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件不存在则会自动创建新的”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件，
- passphrase设置同上。</p>
-  </li>
-  <li>
-    <p>使用ssh will@192.168.1.1登录到服务器，编辑服务器上”~/.ssh/authorized_keys”文件，
-将客户端机器上的”~/.ssh/id_rsa.pub”文件内容追加到”~/.ssh/authorized_keys”文件中。
-（注：可以在客户端机器上使用以下命令来实现：</p>
-
-    <pre><code> cat ~/.ssh/id_rsa.pub | ssh will@192.168.1.1 "cat - &gt;&gt; ~/.ssh/authorized_keys" 此时会要求输入will用户在服务器上的登录密码，输入后即会将客户端机器上的"~/.ssh/id_rsa.pub"文件内容追加到服务器上的 "~/.ssh/authorized_keys"文件中） 如果是首次连接服务器会出现以下的提示，确认连接并输入密码后其他直接回车确定。
+<pre><code>解包：tar xvf FileName.tar
+打包：tar cvf FileName.tar DirName
+（注：tar是打包，不是压缩！）
 </code></pre>
-  </li>
-  <li>
-    <p>如果在第1步中使用了空的passphrase，则可以跳过第4步，此时在客户端即可以使用”ssh zhaoy@192.168.1.1”即可无密码登录到服务器；
-如果第一步中设置了passphrase，则继续执行以下步骤。</p>
-  </li>
-  <li>
-    <p>如果第1步中设置了passphrase，则此时需要输入该passphrase登录服务器。
-此时前面我们把输入密码变成了输入passphrase，这没有带来任何方便。
-但是我们可以通过ssh-agent来帮助我们自动输入passphrase(只是看起来像是自动输入而已)，
-我们只要在第一次登录时输入一次passphrase, 以后的工作就可以交给ssh-agent。在客户端机器上执行命令ssh-add，
-这里会提示输入一次passphrase。输入第一步中设置的passphrase之后会修改”~/.ssh/id_rsa”文件。
-再在客户端执行”ssh will@192.168.1.1”即可无密码登录到服务器端。</p>
-  </li>
-</ol>
 
-      <div class="readall"><a href="/blog/2014/09/27/Linux-SSH-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<p>.gz</p>
+
+<pre><code>解压1：gunzip FileName.gz
+解压2：gzip -d FileName.gz
+压缩：gzip FileName
+</code></pre>
+
+<p>.tar.gz 和 .tgz</p>
+
+<pre><code>解压：tar zxvf FileName.tar.gz
+压缩：tar zcvf FileName.tar.gz DirName
+</code></pre>
+
+<p>.bz2</p>
+
+<pre><code>解压1：bzip2 -d FileName.bz2
+解压2：bunzip2 FileName.bz2
+压缩： bzip2 -z FileName
+</code></pre>
+
+<p>.tar.bz2</p>
+
+<pre><code>解压：tar jxvf FileName.tar.bz2
+压缩：tar jcvf FileName.tar.bz2 DirName
+</code></pre>
+
+<p>.bz</p>
+
+<pre><code>解压1：bzip2 -d FileName.bz
+解压2：bunzip2 FileName.bz 压缩：未知
+</code></pre>
+
+<p>.tar.bz</p>
+
+<pre><code>解压：tar jxvf FileName.tar.bz ———————————————
+</code></pre>
+
+<p>.Z</p>
+
+<pre><code>解压：uncompress FileName.Z
+压缩：compress FileName
+</code></pre>
+
+<p>.tar.Z</p>
+
+<pre><code>解压：tar Zxvf FileName.tar.Z
+压缩：tar Zcvf FileName.tar.Z DirName ———————————————
+</code></pre>
+
+<p>.zip</p>
+
+<pre><code>解压：unzip FileName.zip
+压缩：zip FileName.zip DirName ———————————————
+</code></pre>
+
+<p>.rar</p>
+
+<pre><code>解压：rar x FileName.rar
+压缩：rar a FileName.rar DirName ———————————————
+</code></pre>
+
+<p>.lha</p>
+
+<pre><code>解压：lha -e FileName.lha
+压缩：lha -a FileName.lha FileName ———————————————
+</code></pre>
+
+<p>.rpm</p>
+
+<pre><code>解包：rpm2cpio FileName.rpm | cpio -div ———————————————
+</code></pre>
+
+<p>.deb</p>
+
+<pre><code>解包：ar p FileName.deb data.tar.gz | tar zxf - ———————————————
+</code></pre>
+
+<p>.tar .tgz .tar.gz .tar.Z .tar.bz .tar.bz2 .zip .cpio .rpm .deb .slp .arj .rar .ace .lha .lzh .lzx .lzs .arc .sda .sfx .lnx .zoo .cab .kar .cpt .pit .sit .sea</p>
+
+<pre><code>解压：sEx x FileName.*
+压缩：sEx a FileName.* FileName
+</code></pre>
+
+<p>sEx只是调用相关程序，本身并无压缩、解压功能，请注意！</p>
+
+<p>gzip 命令</p>
+
+<p>减少文件大小有两个明显的好处，一是可以减少存储空间，二是通过网络传输文件时，可以减少传输的时间。gzip 是在 Linux 系统中经常使用的一个对文件进行压缩和解压缩的命令，既方便又好用。</p>
+
+<p>语法：gzip [选项] 压缩（解压缩）的文件名该命令的各选项含义如下：</p>
+
+<p>-c 将输出写到标准输出上，并保留原有文件。</p>
+
+<p>-d 将压缩文件解压。</p>
+
+<p>-l 对每个压缩文件，显示下列字段：     压缩文件的大小；未压缩文件的大小；压缩比；未压缩文件的名字</p>
+
+<p>-r 递归式地查找指定目录并压缩其中的所有文件或者是解压缩。</p>
+
+<p>-t 测试，检查压缩文件是否完整。</p>
+
+<p>-v 对每一个压缩和解压的文件，显示文件名和压缩比。</p>
+
+<p>-num 用指定的数字 num 调整压缩的速度，-1 或 –fast 表示最快压缩方法（低压缩比），-9 或–best表示最慢压缩方法（高压缩比）。系统缺省值为 6。指令实例：</p>
+
+<p>gzip *% 把当前目录下的每个文件压缩成 .gz 文件。gzip -dv *% 把当前目录下每个压缩的文件解压，并列出详细的信息。gzip -l *% 详细显示例1中每个压缩的文件的信息，并不解压。gzip usr.tar% 压缩 tar 备份文件 usr.tar，此时压缩文件的扩展名为.tar.gz。</p>
+
+      <div class="readall"><a href="/blog/2014/09/27/linux-command.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -433,7 +347,171 @@ return actionName;
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Java-class-loader.html">Java class loader</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/js-session.html">js 基础session</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#f2e">f2e</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <ol>
+  <li>html java javascript 都应遵循codingstyle</li>
+  <li>事件不写在html中， 应按照mvc的模式 各个层之间应实现低耦合
+m: 功能模块
+v: html
+c: 事件</li>
+  <li>Javascript 中字符串的拼接 应向Java中一样 使用buffer</li>
+  <li>++ 和 +1 是有区别的 ++ 为原子操作， 推荐使用</li>
+  <li>Modle层的命名与表示层不应该有关联
+应该只与功能有关。如delete/add之类</li>
+  <li>常量字面量在比较时应该放在左边</li>
+  <li>var a = function(){};
+funtion a(){};
+之间的区别：
+第一种是变量式声明，
+第二种是定义式声明。
+js在解析的时候，先解析定义式方法，在解析其他的
+变量式和普通变量定义一样，</li>
+  <li>js的方法没有重载，只会覆盖</li>
+  <li>arguments 指向实参数组
+方法对象的length指向型参长度</li>
+  <li>方法在没有return时 返回undefind</li>
+  <li>
+    <p>对象的创建方式：
+a: new Object();
+Object 的类型为Function
+是由Function对象产生对象
+b: jeson
+var o = {};
+o 对象类型为object
+c: 构造函数
+构造方法必须采用定义式， 首字母大写</p>
+  </li>
+  <li>this 执行当前的执行环境</li>
+  <li>
+    <p>构造方法会有一个prototype对象。
+而由构造方法产生的对象没有prototype对象</p>
+  </li>
+  <li>继承的两种实现：
+a:对象冒充
+缺点： 冒充对象只能接受原对象里的东西，不能接收到其原型对象中的东西
+b:原型链</li>
+  <li>
+    <p>闭包</p>
+  </li>
+  <li>
+    <p>function
+全局方法: this—&gt;window对象
+对象内方法： this—&gt;当前对象
+构造方法： 初始化构造方法需要new关键字， 否则就会当成全局方法定义
+构造方法首字母大写</p>
+  </li>
+  <li>apply和call方法
+apply（指定调用方法中的this, 方法的参数数组）;
+call(指定调用方法中的this, 方法的参数列表);
+foo.call(this, arg1,arg2,arg3) == foo.apply(this, arguments)==this.foo(arg1, arg2, arg3)</li>
+</ol>
+
+<p>在JavaScript中,代码总是有一个上下文对象,代码处理该对象之内. 上下文对象是通过this变量来体现的, 这个this变量永远指向当前代码所处的对象中.</p>
+
+<p>此类方法的应用场景：
+A, B类都有一个message属性(面向对象中所说的成员),A有获取消息的getMessage方法,B有设置消息的setMessage方法
+//创建一个B类实例对象
+var b = new B();
+//给对象a动态指派b的setMessage方法,注意,a本身是没有这方法的!
+b.setMessage.call(a, “a的消息”);
+//下面将显示”a的消息”
+alert(a.getMessage());</p>
+
+<ol>
+  <li>argments
+方法的参数数组，一般在实现不定长参数的方法时会用到这个属性
+可以通过它获得参数长度，参数值。
+一般情况不通过它修改参数值。</li>
+</ol>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/js-session.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/javascript-session-.html">javascript session 记录</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#f2e">f2e</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <ol>
+  <li>
+    <p>function
+全局方法:    this—&gt;window对象
+对象内方法： this—&gt;当前对象
+构造方法：   初始化构造方法需要new关键字， 否则就会当成全局方法定义
+构造方法首字母大写</p>
+  </li>
+  <li>
+    <p>apply和call方法
+apply（指定调用方法中的this, 方法的参数数组）;
+call(指定调用方法中的this, 方法的参数列表);
+foo.call(this, arg1,arg2,arg3) == foo.apply(this, arguments)==this.foo(arg1, arg2, arg3)
+在JavaScript中,代码总是有一个上下文对象,代码处理该对象之内. 上下文对象是通过this变量来体现的, 这个this变量永远指向当前代码所处的对象中.</p>
+  </li>
+</ol>
+
+<p>此类方法的应用场景：
+A, B类都有一个message属性(面向对象中所说的成员),A有获取消息的getMessage方法,B有设置消息的setMessage方法
+//创建一个B类实例对象
+var b = new B();
+//给对象a动态指派b的setMessage方法,注意,a本身是没有这方法的!
+b.setMessage.call(a, “a的消息”);
+//下面将显示”a的消息”
+alert(a.getMessage());</p>
+
+<ol>
+  <li>
+    <p>argments
+方法的参数数组，一般在实现不定长参数的方法时会用到这个属性
+可以通过它获得参数长度，参数值。
+一般情况不通过它修改参数值。</p>
+  </li>
+  <li>
+    <p>闭包问题</p>
+  </li>
+  <li>
+    <p>module</p>
+  </li>
+  <li>
+    <p>继承，
+javascript的继承发生在对象与对象之间，
+可以通过以下方法实现：
+objectCreate(o) {
+var F = function() {};
+F.prototype = o;
+return new F();
+}</p>
+  </li>
+</ol>
+
+      <div class="readall"><a href="/blog/2014/09/27/javascript-session-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/java-SSH-.html">java SSH 远程操作</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
@@ -443,430 +521,73 @@ return actionName;
       </p>
     </header>
     <div class="post-main">
-      <p><strong>java classloader 结构：</strong></p>
+      <pre><code>public class RmtShellExecutor {
+private static Logger logger = Logger.getLogger(RmtShellExecutor.class);
+private static Connection conn;
+private static String ip;
+private static String usr;
 
-<ol>
-  <li>Bootstrap classloader(启动类加载器)
-主要负责jdk_home/lib目录下的核心API或-Xbootclasspath选项指定的jar包的装入工作</li>
-  <li>Extension Classloader(扩展类加载器)
-负责jdk_home/lib/ext目录下的jar包或者-Djava.ext.dirs指定目录下的jar包装入工作
-3.System classloader(系统类加载器)
-负责Java -classpath/-Djava.class.path所指定的类与jar包的装入</li>
-  <li>User Custom classloader（用户自定义类加载器（java.lang.ClassLoader的子类））
-以上每一个classloader都会维护一份自己的名称空间，同一个名称空间不能出现两个同名的类。
-为了实现Java安全沙箱模型顶层的类加载器安全机制，Java默认采用 双亲委派的加载链 结构</li>
-</ol>
+private static boolean connection() throws IOException, URISyntaxException {
+try {
+conn = new Connection(ip);
+conn.connect();
+} catch (IOException e) {
+logger.error("Login remote machine failed" + ip, e);
+throw new IOException("Login remote machine failed" + ip, e);
+}
+return conn.authenticateWithPublicKey(usr, new File(RmtShellExecutor.class.getClassLoader().getResource("id_rsa").toURI())
+, null);
+}
 
-<p>在jvm启动时就会构建bootstrap classloader 负责Java平台核心库</p>
+public static Map&lt;String, Object&gt; exec(String ipStr, String userNameStr, String cmds) throws Exception {
+ip = ipStr;
+usr = userNameStr;
+Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+InputStream stdOut = null;
+InputStream stdErr = null;
+String outStr = "";
+String outErr = "";
+try {
+if (connection()) {
+Session session = conn.openSession();
+session.execCommand(cmds);
+stdOut = new StreamGobbler(session.getStdout());
+outStr = processStream(stdOut, charset);
+stdErr = new StreamGobbler(session.getStderr());
+outErr = processStream(stdErr, charset);
+map.put(Constants.STATUS, Constants.PROCESSING);
+System.out.println("outStr=" + outStr);
+System.out.println("outErr=" + outErr);
+ret = session.getExitStatus();
+} else {
+logger.error("Login remote machine failed" + ip);
+throw new Exception("Login remote machine failed" + ip);
+}
+} catch(Exception e){
+logger.error("Login remote machine failed" + ip, e);
+throw new Exception("Login remote machine failed" + ip, e);
+} finally {
+if (conn != null) {
+conn.close();
+}
+IOUtils.closeQuietly(stdOut);
+IOUtils.closeQuietly(stdErr);
+}
+return map;
+}
 
-<p><strong>每个ClassLoader加载Class的过程是：</strong></p>
-
-<ol>
-  <li>检测此Class是否载入过（即在cache中是否有此Class），如果有到8,如果没有到2</li>
-  <li>如果parent classloader不存在（没有parent，那parent一定是bootstrap classloader了），到4</li>
-  <li>请求parent classloader载入，如果成功到8，不成功到5</li>
-  <li>请求jvm从bootstrap classloader中载入，如果成功到8</li>
-  <li>寻找Class文件（从与此classloader相关的类路径中寻找）。如果找不到则到7.</li>
-  <li>从文件中载入Class，到8.</li>
-  <li>抛出ClassNotFoundException.</li>
-  <li>返回Class.</li>
-</ol>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/Java-class-loader.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Java-Serialization.html">Java Serialization</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#java">java</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>目的：</p>
-
-<p>保存对象的状态，并且可以把保存的对象状态再读取出来进行恢复。</p>
-
-<p>场景：</p>
-
-<ol>
-  <li>需要把内存中对象状态保存到一个文件中或者数据库中时</li>
-  <li>需要用套接字在网络上传送对象时</li>
-  <li>需要通过RMI传输对象时
-特点：</li>
-  <li>序列化时 只对对象的状态进行保存 而不管对象的方法</li>
-  <li>当一个父类实现序列化，子类自动实现序列化 无须显式实现Serializable借口</li>
-  <li>当一个对象的实例变量引用其他对象，序列化该对象时也会把引用对象进行序列化</li>
-  <li>并非所有对象都可以序列化：
-socket/thread</li>
-</ol>
-
-<p>Serialization 是一种将对象以一连串的字节描述的过程，deserialization 将这些字节重构成一个对象的过程。Java序列化API提供一种处理对象序列化的标准机制。</p>
-
-<h2 id="section">进阶问题：</h2>
-
-<p><strong>序列化ID的问题</strong></p>
-
-<p>serialVersionID即 序列化的版本号，是为了保证不同版本之间的兼容性。向前兼容以及向后兼容。
-两种生成方式：</p>
-
-<ol>
-  <li>使用默认的1L</li>
-  <li>根据类名 接口名 成员方法以及属性来生成</li>
-</ol>
-
-<p>如果一个类实现了序列化 但没有显示的申明序列化版本号  在程序编译的时候会自动生成一个版本号。存储在文件中，如果类有改动版本号也会随之改变。 在反序列化的时候JVM会将文件中的ID与本地相应实体类的ID比较  两者一致才能够序列化成功。否则会抛InvalidClassException异常。</p>
-
-<p>静态化变量的序列化</p>
-
-<pre><code>                    //初始时staticVar为5
-                    ObjectOutputStream out = new ObjectOutputStream(
-                                    new FileOutputStream("result.obj"));
-                    out.writeObject(new Test());
-                    out.close();
-
-                    //序列化后修改为10
-                    Test.staticVar = 10;
-
-                    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
-                                    "result.obj"));
-                    Test t = (Test) oin.readObject();
-                    oin.close();
-                    //再读取，通过t.staticVar打印新的值
-                    System.out.println(t.staticVar); 以上代码的输出结果为10.。。因为序列化并不保存静态化变量。
+public static String processStream(InputStream in, String charset) throws Exception {
+byte[] buf = new byte[1024];
+StringBuilder sb = new StringBuilder();
+while (in.read(buf) != -1) {
+sb.append(new String(buf, charset));
+}
+return sb.toString();
+}
+}
 </code></pre>
 
-<p><strong>父类的序列化</strong></p>
-
-<p>一个子类实现了Serializable接口  它的父类没有实现Serializable接口   序列化该子类对象然后反序列化输出父类定义的某变量的数值  该数值与序列化时的数值不同</p>
-
-<p>在父类没有实现Serializable接口时  JVM将不会序列化父类对象  而一个Java对象的构造必须有父类对象 所以在反序列化时 只能调用父类的无参构造器作为默认的父对象  所以这是可以在父类的无参构造器中对变量进行初始化 否则父类变量都是默认的值</p>
-
-<p><strong>Transient关键字</strong></p>
-
-<p>Transient关键字的作用是控制变量的序列化，在变量申明前加上次关键字可以阻止该变量被序列化</p>
-
-<p><strong>序列化存储规则</strong></p>
-
-<pre><code> ObjectOutputStream out = new ObjectOutputStream(
-                                    new FileOutputStream("result.obj"));
-    Test test = new Test();
-    //试图将对象两次写入文件
-    out.writeObject(test);
-    out.flush();
-    System.out.println(new File("result.obj").length());
-    out.writeObject(test);
-    out.close();
-    System.out.println(new File("result.obj").length());
-
-    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
-                    "result.obj"));
-    //从文件依次读出两个文件
-    Test t1 = (Test) oin.readObject();
-    Test t2 = (Test) oin.readObject();
-    oin.close();
-    //判断两个引用是否指向同一个对象
-    System.out.println(t1 == t2);
-</code></pre>
-
-<p>同一对象两次写入文件，打印出写入一次对象后的存储大小和写入两次后的存储大小，然后从文件中反序列化出两个对象，比较这两个对象是否为同一对象。一般的思维是，两次写入对象，文件大小会变为两倍的大小，反序列化时，由于从文件读取，生成了两个对象，判断相等时应该是输入 false 才对，最后却为TRUE。</p>
-
-<p>因为：Java 序列化机制为了节省磁盘空间，具有特定的存储规则，当写入文件的为同一对象时，并不会再将对象的内容进行存储，而只是再次存储一份引用，上面增加的 5 字节的存储空间就是新增引用和一些控制信息的空间。反序列化时，恢复引用关系，使得清单 3 中的 t1 和 t2 指向唯一的对象，二者相等，输出 true。该存储规则极大的节省了存储空间。</p>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/Java-Serialization.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Java-File.html">Java File</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#java">java</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>/**
- * @author Toby 通用工具类
- */
-public class Utils {</p>
-
-<pre><code>/**
- * @param args
- * @throws Exception
- * @throws IOException
- */
-public static void main(String[] args) throws IOException, Exception {
-    // TODO Auto-generated method stub
-    // File file = new File("D:/user/mms.xml");
-    // System.out.println(file.renameTo(new File("D:/user/mms5.xml")));
-
-    // 1
-    // compress("D:/user/test", "D:/user/test.zip");
-
-    /*
-     * String fileName = "D:/user/88.zip"; try {
-     * System.out.println(encryptBASE64(readFileToBytes(fileName))); } catch
-     * (Exception e) { // TODO Auto-generated catch block
-     * e.printStackTrace(); }
-     */
-
-    /*
-     * String mi
-     * ="UEsDBBQACAA";
-     * RandomAccessFile inOut = new RandomAccessFile(
-     * "D:/user/sample.","rw"); inOut.write(decryptBASE64(mi));
-     * inOut.close();
-     */
-
-    // System.out.println(new String(decryptBASE64("5rWL6K+V"),"utf-8"));
-    // 2
-    // String xml =
-    // createXML("1828","qww","123456","10658103619033","15918542546",encryptBASE64("两款茶饮润肺护肤防过敏".getBytes()),encryptBASE64(readFileToBytes("D:/user/test.zip")));
-    // System.out.println(xml);
-    /*
-     * String xml = "&lt;?xml version=\"1.0\" encoding=\"UTF-8\"
-     * standalone=\"yes\"?&gt;&lt;TaskDataTransfer4ERsp
-     * xmlns=\"http://www.aspirehld.com/iecp/TaskDataTransfer4ERsp\"&gt;&lt;ResultCode&gt;2000&lt;/ResultCode&gt;&lt;TaskId&gt;&lt;/TaskId&gt;&lt;ResultMSG&gt;没有获得IP鉴权!&lt;/ResultMSG&gt;&lt;/TaskDataTransfer4ERsp&gt;";
-     * 
-     * Document doc = DocumentHelper.parseText(xml); // 将字符串转为XML Element
-     * rootElt = doc.getRootElement(); // 获取根节点
-     * 
-     * String resultCode = rootElt.element("ResultCode").getTextTrim();
-     * String TaskId = rootElt.element("TaskId").getTextTrim(); String
-     * ResultMSG = rootElt.element("ResultMSG").getTextTrim();
-     * System.out.println(" "+resultCode+" "+TaskId+" "+ResultMSG);
-     */
-
-}
-
-/**
- * BASE64解密
- * 
- * @param key
- * @return
- * @throws Exception
- */
-public static byte[] decryptBASE64(String key) throws Exception {
-    return (new BASE64Decoder()).decodeBuffer(key);
-}
-
-/**
- * BASE64加密
- * 
- * @param key
- * @return
- * @throws Exception
- */
-public static String encryptBASE64(byte[] key) throws Exception {
-    return (new BASE64Encoder()).encodeBuffer(key);
-}
-
-/**
- * 获取路径下所有文件名
- * 
- * @param path
- * @return
- */
-public static String[] getFile(String path) {
-    File file = new File(path);
-    String[] name = file.list();
-    return name;
-}
-
-/**
- * 
- * @param sourceDirPath
- * @param targetDirPath
- * @throws IOException
- */
-public static void copyDir(String sourceDirPath, String targetDirPath) throws IOException {
-    // 创建目标文件夹
-    (new File(targetDirPath)).mkdirs();
-    // 获取源文件夹当前下的文件或目录
-    File[] file = (new File(sourceDirPath)).listFiles();
-    for (int i = 0; i &lt; file.length; i++) {
-        if (file[i].isFile()) {
-            // 复制文件
-            String type = file[i].getName().substring(file[i].getName().lastIndexOf(".") + 1);
-
-            if (type.equalsIgnoreCase("txt"))
-                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()), MTOServerConstants.CODE_UTF_8,
-                        MTOServerConstants.CODE_GBK);
-            else
-                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()));
-        }
-        if (file[i].isDirectory()) {
-            // 复制目录
-            String sourceDir = sourceDirPath + File.separator + file[i].getName();
-            String targetDir = targetDirPath + File.separator + file[i].getName();
-            FileUtil.copyDirectiory(sourceDir, targetDir);
-        }
-    }
-}
-
-/**
- * 读取文件中内容
- * 
- * @param path
- * @return
- * @throws IOException
- */
-public static String readFileToString(String path) throws IOException {
-    String resultStr = null;
-    FileInputStream fis = null;
-    try {
-        fis = new FileInputStream(path);
-        byte[] inBuf = new byte[2000];
-        int len = inBuf.length;
-        int off = 0;
-        int ret = 0;
-        while ((ret = fis.read(inBuf, off, len)) &gt; 0) {
-            off += ret;
-            len -= ret;
-        }
-        resultStr = new String(new String(inBuf, 0, off, MTOServerConstants.CODE_GBK).getBytes());
-    } finally {
-        if (fis != null)
-            fis.close();
-    }
-    return resultStr;
-}
-
-/**
- * 文件转成字节数组
- * 
- * @param path
- * @return
- * @throws IOException
- */
-public static byte[] readFileToBytes(String path) throws IOException {
-    byte[] b = null;
-    InputStream is = null;
-    File f = new File(path);
-    try {
-        is = new FileInputStream(f);
-        b = new byte[(int) f.length()];
-        is.read(b);
-    } finally {
-        if (is != null)
-            is.close();
-    }
-    return b;
-}
-
-/**
- * 将byte写入文件中
- * 
- * @param fileByte
- * @param filePath
- * @throws IOException
- */
-public static void byteToFile(byte[] fileByte, String filePath) throws IOException {
-    OutputStream os = null;
-    try {
-        os = new FileOutputStream(new File(filePath));
-        os.write(fileByte);
-        os.flush();
-    } finally {
-        if (os != null)
-            os.close();
-    }
-}
-
-/**
- * 将目录文件打包成zip
- * 
- * @param srcPathName
- * @param zipFilePath
- * @return 成功打包true 失败false
- */
-public static boolean compress(String srcPathName, String zipFilePath) {
-    if (strIsNull(srcPathName) || strIsNull(zipFilePath))
-        return false;
-
-    File zipFile = new File(zipFilePath);
-    File srcdir = new File(srcPathName);
-    if (!srcdir.exists())
-        return false;
-    Project prj = new Project();
-    Zip zip = new Zip();
-    zip.setProject(prj);
-    zip.setDestFile(zipFile);
-    FileSet fileSet = new FileSet();
-    fileSet.setProject(prj);
-    fileSet.setDir(srcdir);
-    zip.addFileset(fileSet);
-    zip.execute();
-    return zipFile.exists();
-}
-
-/**
- * 判空字串
- * 
- * @param str
- * @return 为空true
- */
-public static boolean strIsNull(String str) {
-    return str == null || str.equals("");
-}
-
-/**
- * 折分数组
- * 
- * @param ary
- * @param subSize
- * @return
- */
-public static List&lt;List&lt;Object&gt;&gt; splitAry(Object[] ary, int subSize) {
-    int count = ary.length % subSize == 0 ? ary.length / subSize : ary.length / subSize + 1;
-
-    List&lt;List&lt;Object&gt;&gt; subAryList = new ArrayList&lt;List&lt;Object&gt;&gt;();
-
-    for (int i = 0; i &lt; count; i++) {
-        int index = i * subSize;
-
-        List&lt;Object&gt; list = new ArrayList&lt;Object&gt;();
-        int j = 0;
-        while (j &lt; subSize &amp;&amp; index &lt; ary.length) {
-            list.add(ary[index++]);
-            j++;
-        }
-
-        subAryList.add(list);
-    }
-
-    return subAryList;
-}
-
-/**
- * @param mobile
- * @return
- */
-public static String ArrayToString(Object[] mobile) {
-    String destId = "";
-    for (Object phone : mobile) {
-        destId += " " + (String) phone;
-    }
-    return destId.trim();
-} }
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/09/27/Java-File.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/java-SSH-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -881,7 +602,10 @@ public static String ArrayToString(Object[] mobile) {
   <a class="pagination-item older" href="/page/7">下一页&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
   
 </div>
-    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
     </div>
   </div>    
   <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>

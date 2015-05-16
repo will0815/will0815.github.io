@@ -1,0 +1,242 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="DB演进理解, willgo, Will.Quan">
+  <title>DB演进理解 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2015/05/16/DB-yanjin.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+
+    <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2015/05/16/DB-yanjin.html">DB演进理解</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2015年05月16日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#db">db</a>	
+  </p>
+</header>
+<div class="post-main">
+<h2 id="db">DB演进理解</h2>
+
+<ol>
+  <li>
+    <p>RDBMS<br />
+这是最熟悉的数据存储方式，一般情况下数据存储在一台机器上，这种形式方便提供完善ACID特性和丰富查询模型。这就是传统的关系型数据库的基础模式，但是面对现如今越来越大的数据量，这种模式的扩展变得难以满足。实践证明通过增加节点这种简单廉价的扩展方式是可行的。RDBMS的横向扩展主要有主从复制（Master-slave）、分表、分区等。 <br />
+横向扩展RDBMS – Master/Slave <br />
+利用数据库的复制或镜像功能，同时在多台数据库上保存相同的数据，从而将读操作和写操作分开，写操作集中在一台主数据库上，读操作集中在多台从数据库上。<br />
+问题：<br />
+读写同步需要一定的时间，导致关键的读取有出错风险；<br />
+主节点将数据复制到从节点，数据量很大是可能造成问题，  </p>
+
+    <p>横向扩展RDBMS - Sharding <br />
+ 在满足ACID特性的数据库中进行扩展是非常难的。基于这个原因，对数据进行扩展，这个数据库本身就必须拥有简单的模型，将数据分割为N片，然后在单独的片中执行查询。数据分割的单元被称为“shard”。将N片数据分配个M个DBMS进行操作。DBMS并不会去管理数据片，程序开发负责数据片的处理。
+ 不同的分片方法有：<br />
+ - 垂直分区（Vertical Partitioning）：将不需要进行联合查询的数据表分散到不同的数据库服务器上。<br />
+ - 水平分区(sharding) 将同一个表的记录拆分到不同的表甚至是服务器上，这往往需要一个稳定的算法来保证读取时能正确从不同的服务器上取得数据。如Range-Based Partitioning, Key or Hash-Based partitioning等。<br />
+ 优点与不足<br />
+ - 对读取和写入都有很好的扩展<br />
+ - 不透明，程序需要识别分区 <br />
+ - 不再有跨分区的关系/joins <br />
+ - 参照完整性损失  </p>
+
+    <p>其他RDBMS扩展方法 <br />
+ Multi-Master replication：所有成员都响应客户端数据查询。多主复制系统负责将任意成员做出的数据更新传播给组内其他成员，并解决不同成员间并发修改可能带来的冲突。<br />
+ INSERT only, not UPDATES/DELETES：数据进行版本化处理。<br />
+ No JOINs, thereby reducing query time：Join的开销很大,而且频繁访问会使开销随着时间逐渐增加。<br />
+ 非规范化（Denormalization）可以降低数据仓库的复杂性，以提高效率和改善性能。<br />
+ In-memory databases：磁盘数据库解决的是大容量存储和数据分析问题，内存数据库解决的是实时处理和高并发问题。主流常规的RDBMS更多的是磁盘密集型，而不是内存密集型。  </p>
+
+    <p>ACID Transactions<br />
+ 一个完善的数据库系统都是希望支持“ACID transactions,”其包括:<br />
+ Atomic : Either the whole process is done or none is.（原子性）<br />
+ Consistent : Database constraints are preserved.（一致性）<br />
+ Isolated : It appears to the user as if only one process executes at a time.（隔离性）<br />
+ Durable : Effects of a process do not get lost if the system crashes.（持久性）  </p>
+  </li>
+  <li>
+    <p>NoSQL  </p>
+  </li>
+</ol>
+
+<p>NoSQL现在被理解为 Not Only SQL 的缩写，是对非关系型的数据库管理系统的统称
+NoSQL 与 RDBMS 不同点，<br />
+-不使用SQL作为查询语言。<br />
+-不需要固定的表模式(table schema)。<br />
+- 放宽一个或多个 ACID 属性（CAP定理）  </p>
+
+<p>补充：CAP理论<br />
+CAP理论是数据系统设计的基本理论，目前几乎所有的数据系统的设计都遵循了这个理论。CAP理论指出，分布式系统只能满足以下三项中的两项而不可能满足全部三项，<br />
+一致性（Consistency)（所有节点在同一时间具有相同的数据）<br />
+可用性（Availability）（保证每个请求不管成功或者失败都有响应）<br />
+分区容忍性（Partition tolerance）（系统中任意信息的丢失或失败不会影响系统的继续运作） </p>
+
+<p>一致性有两种类型：<br />
+- strong consistency – ACID(Atomicity Consistency Isolation Durability)：对于关系型数据库，要求更新过的数据能被后续所有的访问都看到，这是强一致性。<br />
+- weak consistency – BASE(Basically Available Soft-state Eventual consistency )
+– Basically Available - system seems to work all the time (基本可用)<br />
+– Soft State - it doesn’t have to be consistent all the time （不要求所有时间都一致）<br />
+– Eventually Consistent - becomes consistent at some later time （最终一致性）  </p>
+
+<p>对于分布式数据系统(scale out)，分区容忍性是基本要求，否则就失去了价值。因此只能在一致性和可用性上做取舍，如何处理这种取舍正是目前NoSQL数据库的核心焦点。牺牲一致性而换取高可用性。当然，牺牲一致性，只是不再要求关系数据库中的强一致性，而是只要系统能达到最终一致性即可。通常是通过数据的多份异步复制来实现系统的高可用和数据的最终一致性的。  </p>
+
+<p>NoSQL 的两种主要实现方式<br />
+1.Key/Value<br />
+Amazon S3 (Dynamo)<br />
+Voldemort <br />
+Scalaris <br />
+Memcached (in-memory key/value store)<br />
+Redis <br />
+2. 弱模式型（column-based, document-based or graph-based.）<br />
+Cassandra (column-based)<br />
+CouchDB (document-based)<br />
+MongoDB(document-based) <br />
+Neo4J (graph-based)<br />
+HBase (column-based)   </p>
+
+<p>K/V模式<br />
+优点:<br />
+very fast<br />
+very scalable<br />
+simple model<br />
+able to distribute horizontally<br />
+劣势: <br />
+ many data structures (objects) can’t be easily modeled as key value pairs （需要多余转换）<br />
+Schema-Less 模式<br />
+优点<br />
+Schema-less data model is richer than key/value pairs
+eventual consistency<br />
+many are distributed<br />
+still provide excellent performance and scalability<br />
+劣势<br />
+typically no ACID transactions or joins  </p>
+
+<ol>
+  <li>HBase  </li>
+</ol>
+
+<p>HBase is an open-source, distributed, column-oriented database built on top of HDFS (or KFS) based on BigTable! <br />
+按照CAP理论，HBase属于C+P类型的系统。HBase是强一致性的（仅支持单行事务）。每一行由单个区域服务器（region server）host，行锁（row locks）和多版本并发控制(multiversion concurrency control)的组合被用来保证行的一致性。<br />
+查找:<br />
+快速定位使用row key + column family + column + timestamp.<br />
+按范围查找：start row key – end row key.<br />
+全表扫描<br />
+交互方式<br />
+- Java, REST, or Thrift APIs.<br />
+- Scripting via JRuby.  </p>
+
+<p>HBase 一些特性  </p>
+
+<pre><code>- No real indexes（row key 即数据的索引）  
+- Automatic partitioning（region自动split）  
+- Scale linearly and automatically with new nodes（扩展容易 节点添加方便）  
+- Commodity hardware（廉价硬件）  
+- Fault tolerance(较强的容错性)  
+- Batch processing(批处理能力优秀)  
+</code></pre>
+
+<ol>
+  <li>
+    <p>Hive    </p>
+
+    <ul>
+      <li>Provide higher-level language (HQL, like SQL) to facilitate large-data processing</li>
+      <li>Higher-level language “compiles down” to Hadoop Map/Reduce jobs</li>
+    </ul>
+  </li>
+  <li>
+    <p>Hive + HBase  </p>
+
+    <p>Reasons to use Hive on HBase:<br />
+ A lot of data sitting in HBase due to its usage in a real-time environment, but never used for analysis<br />
+ Give access to data in HBase usually only queried through MapReduce to people that don’t code (business analysts)<br />
+ When needing a more flexible storage solution, so that rows can be updated live by either a Hive job or an application and can be seen immediately to the other</p>
+  </li>
+</ol>
+
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2015/05/16/CDH-install-question.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;CDH 安装问题</a>
+
+
+<a class="pagination-item older" href="/blog/2015/05/16/HBase-config-optimize.html">HBase config optimize&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="DB演进理解" data-thread-key="/blog/2015/05/16/DB-yanjin" data-url="index.html/blog/2015/05/16/DB-yanjin.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

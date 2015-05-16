@@ -64,253 +64,43 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Redis-Java.html">Redis Java简单操作</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/ubuntueclipse.html">ubuntu下eclipse菜单栏无法展开</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#nosql">nosql</a>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
       </p>
     </header>
     <div class="post-main">
-      <pre><code>import java.util.ArrayList;
-import java.util.List;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisShardInfo;
-import redis.clients.jedis.ShardedJedis;
-import redis.clients.jedis.ShardedJedisPool;
+      <p>因为ubuntu13下菜单栏被代理到状态栏下，下载安装eclipse3.8，打开后菜单栏点击无法打开，网上认为可能是unity的bug</p>
 
-/**
-* redis的Java客户端Jedis测试验证
-*
-* @author
-*/
-public class Redis {
-// 非切片客户端链接
-private Jedis jedis;
-// 非切片链接池
-private JedisPool jedisPool;
-// 切片客户端链接
-private ShardedJedis shardedJedis;
-// 切片链接池
-private ShardedJedisPool shardedJedisPool;
-// 构造函数
-public Redis() {
-initialPool();
-initialShardedPool();
-shardedJedis = shardedJedisPool.getResource();
-jedis = jedisPool.getResource();
-}
+<p>解决办法去掉eclipse的菜单代理：</p>
 
-private void initialPool() {
-// 池基本配置
-JedisPoolConfig config = new JedisPoolConfig();
-config.setMaxActive(20);
-config.setMaxIdle(5);
-config.setMaxWait(1000l);
-config.setTestOnBorrow(false);
-jedisPool = new JedisPool(config, "localhost", 6379);
-}
+<p>1.在终端中进入快捷方式的目录，然后运行</p>
 
-// 初始化切片池
-private void initialShardedPool() {
-// 池基本配置
-JedisPoolConfig config = new JedisPoolConfig();
-config.setMaxActive(20);
-config.setMaxIdle(5);
-config.setMaxWait(1000l);
-config.setTestOnBorrow(false);
-// slave链接
-List&lt;JedisShardInfo&gt; shards = new ArrayList&lt;JedisShardInfo&gt;();
-shards.add(new JedisShardInfo("localhost", 6379, "master"));
-// 构造池
-shardedJedisPool = new ShardedJedisPool(config, shards);
-}
+<p>sudo gedit eclipse.desktop</p>
 
-public void show() {
-// key检测
-testKey();
-// string检测
-testString();
-// list检测
-testList();
-// set检测
-testSet();
-// sortedSet检测
-testSortedSet();
-// hash检测
-testHash();
-shardedJedisPool.returnResource(shardedJedis);
-}
+<p>2.修改Exec的值，将原有的Exec=eclipse修改为：</p>
 
-private void testKey() {
-System.out.println("=============key==========================");
-// 清空数据
-System.out.println(jedis.flushDB());
-System.out.println(jedis.echo("foo"));
-// 判断key否存在
-System.out.println(shardedJedis.exists("foo"));
-shardedJedis.set("key", "values");
-System.out.println(shardedJedis.exists("key"));
-}
+<p>Exec=env UBUNTU_MENUPROXY=0  eclipse</p>
 
-private void testString() {
-System.out.println("=============String========================");
-// 清空数据
-System.out.println(jedis.flushDB());
-// 存储数据
-shardedJedis.set("foo", "bar");
-System.out.println(shardedJedis.get("foo"));
-// 若key不存在，则存储
-shardedJedis.setnx("foo", "foo not exits");
-System.out.println(shardedJedis.get("foo"));
-// 覆盖数据
-shardedJedis.set("foo", "foo update");
-System.out.println(shardedJedis.get("foo"));
-// 追加数据
-shardedJedis.append("foo", " hello, world");
-System.out.println(shardedJedis.get("foo"));
-// 设置key的有效期，并存储数据
-shardedJedis.setex("foo", 2, "foo not exits");
-System.out.println(shardedJedis.get("foo"));
-try {
-Thread.sleep(3000);
-} catch (InterruptedException e) {
-}
-System.out.println(shardedJedis.get("foo"));
-// 获取并更改数据
-shardedJedis.set("foo", "foo update");
-System.out.println(shardedJedis.getSet("foo", "foo modify"));
-// 截取value的值
-System.out.println(shardedJedis.getrange("foo", 1, 3));
-System.out.println(jedis.mset("mset1", "mvalue1", "mset2", "mvalue2", "mset3", "mvalue3", "mset4", "mvalue4"));
-System.out.println(jedis.mget("mset1", "mset2", "mset3", "mset4"));
-System.out.println(jedis.del(new String[] {
-"foo", "foo1", "foo3"
-}));
-}
+<p>——问题解决</p>
 
-private void testList() {
-System.out.println("=============list==========================");
-// 清空数据
-System.out.println(jedis.flushDB());
-// 添加数据
-shardedJedis.lpush("lists", "vector");
-shardedJedis.lpush("lists", "ArrayList");
-shardedJedis.lpush("lists", "LinkedList");
-// 数组长度
-System.out.println(shardedJedis.llen("lists"));
-// 排序
-System.out.println(shardedJedis.sort("lists"));
-// 字串
-System.out.println(shardedJedis.lrange("lists", 0, 3));
-// 修改列表中单个值
-shardedJedis.lset("lists", 0, "hello list!");
-// 获取列表指定下标的值
-System.out.println(shardedJedis.lindex("lists", 1));
-// 删除列表指定下标的值
-System.out.println(shardedJedis.lrem("lists", 1, "vector"));
-// 删除区间以外的数据
-System.out.println(shardedJedis.ltrim("lists", 0, 1));
-// 列表出栈
-System.out.println(shardedJedis.lpop("lists"));
-// 整个列表值
-System.out.println(shardedJedis.lrange("lists", 0, -1));
+<p>顺带学习ubuntu 程序快捷方式</p>
 
-}
+<p>进入 /usr/share/applications 目录下，这里有所有程序的图形化的快捷方式，
+你可以直接复制到桌面，即可</p>
 
-private void testSet() {
-System.out.println("=============set==========================");
-// 清空数据
-System.out.println(jedis.flushDB());
-// 添加数据
-shardedJedis.sadd("sets", "HashSet");
-shardedJedis.sadd("sets", "SortedSet");
-shardedJedis.sadd("sets", "TreeSet");
-// 判断value是否在列表中
-System.out.println(shardedJedis.sismember("sets", "TreeSet"));;
-// 整个列表值
-System.out.println(shardedJedis.smembers("sets"));
-// 删除指定元素
-System.out.println(shardedJedis.srem("sets", "SortedSet"));
-// 出栈
-System.out.println(shardedJedis.spop("sets"));
-System.out.println(shardedJedis.smembers("sets"));
-//
-shardedJedis.sadd("sets1", "HashSet1");
-shardedJedis.sadd("sets1", "SortedSet1");
-shardedJedis.sadd("sets1", "TreeSet");
-shardedJedis.sadd("sets2", "HashSet2");
-shardedJedis.sadd("sets2", "SortedSet1");
-shardedJedis.sadd("sets2", "TreeSet1");
-// 交集
-System.out.println(jedis.sinter("sets1", "sets2"));
-// 并集
-System.out.println(jedis.sunion("sets1", "sets2"));
-// 差集
-System.out.println(jedis.sdiff("sets1", "sets2"));
-}
+<p>搜索ls <em>程序名</em></p>
 
-private void testSortedSet() {
-System.out.println("=============zset==========================");
-// 清空数据
-System.out.println(jedis.flushDB());
-// 添加数据
-shardedJedis.zadd("zset", 10.1, "hello");
-shardedJedis.zadd("zset", 10.0, ":");
-shardedJedis.zadd("zset", 9.0, "zset");
-shardedJedis.zadd("zset", 11.0, "zset!");
-// 元素个数
-System.out.println(shardedJedis.zcard("zset"));
-// 元素下标
-System.out.println(shardedJedis.zscore("zset", "zset"));
-// 集合子集
-System.out.println(shardedJedis.zrange("zset", 0, -1));
-// 删除元素
-System.out.println(shardedJedis.zrem("zset", "zset!"));
-System.out.println(shardedJedis.zcount("zset", 9.5, 10.5));
-// 整个集合值
-System.out.println(shardedJedis.zrange("zset", 0, -1));
-}
+<p>方法一：进入 /usr/share/applications 目录下，这里有所有程序的图形化的快捷方式，你可以直接复制到桌面，即可</p>
 
-private void testHash() {
-System.out.println("=============hash==========================");
-// 清空数据
-System.out.println(jedis.flushDB());
-//添加数据
-shardedJedis.hset("hashs", "entryKey", "entryValue");
-shardedJedis.hset("hashs", "entryKey1", "entryValue1");
-shardedJedis.hset("hashs", "entryKey2", "entryValue2");
-// 判断某个值是否存在
-System.out.println(shardedJedis.hexists("hashs", "entryKey"));
-// 获取指定的值
-System.out.println(shardedJedis.hget("hashs", "entryKey"));
-// 批量获取指定的值
-System.out.println(shardedJedis.hmget("hashs", "entryKey", "entryKey1"));
-// 删除指定的值
-System.out.println(shardedJedis.hdel("hashs", "entryKey"));
-// 为key中的域 field 的值加上增量 increment
-System.out.println(shardedJedis.hincrBy("hashs", "entryKey", 123l));
-// 获取所有的keys
-System.out.println(shardedJedis.hkeys("hashs"));
-// 获取所有的values
-System.out.println(shardedJedis.hvals("hashs"));
-}
+<p>方法二：使用命令的方式： gnome-desktop-item-edit</p>
 
-/**
-* @param args
-*/
-public static void main(String[] args){
-new Redis().show();
-}
 
-}
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/09/27/Redis-Java.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/ubuntueclipse.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -318,587 +108,7 @@ new Redis().show();
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Page-Block.html">Page Block</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#f2e">f2e</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>页面block划分</p>
-
-<ol>
-  <li>场景分析
-一个网站整体布局以及风格一般会保持一致，整个网站各个页面有很多共同的地方，例如整站导航，友情链接等等。我们会看到很多类似下面的页面：</li>
-</ol>
-
-<p><img src="/image/page-block.png" alt="" /></p>
-
-<p>如上图我们会发现整个网站中绝大多数页面都会有上面的Header，Left 和footer 这几个部分。这些相同部分无论是前端展示还是后台数据支持都几乎是一致的。如果按照传统开发方式我们开发可能会这样：</p>
-
-<p>（现在有a,b,c三个页面，这三个页面都有上图中left这一部分）首先前端我们可以选择直接code复制或是独立left部分的code在各个要用的地方引用。后台根据request获取数据返回这样的操作同样也是和前端类似的处理方式。</p>
-
-<pre><code>a页面前端：
-
-&lt;div&gt;header page&lt;/div&gt;
-
-。。。。。。
-
-。。。。。。
-
-&lt;div&gt;left page&lt;/div&gt;
-
-。。。。。。
-
-。。。。。。
-
-&lt;div&gt;footer page&lt;/div&gt;
-
-a页面后台：
-
-Aaction{
-
-getDataForHeader(...);
-
-。。。。。。
-
-。。。。。。
-
-getDataForLeft(...);
-
-。。。。。。
-
-。。。。。。
-
-getDataForFooter(...);
-
-。。。。。。
-
-。。。。。。
-
-getDataForASelf(...);
-
-}
-</code></pre>
-
-<p>b,c页面的开发与上面雷同，&lt;div&gt;left page&lt;/div&gt;，getDataForLeft(…)这样的代码会在每个页面前后台都会出现。这样我们就会发现left这个区块，其实它是一个内聚型的独立部分（展现+数据），它不需要依赖于所在页面的其它部分，这里我称之为block。</p>
-
-<p>对于这样的场景我们为了提高开发效率提高代码复用性，block我们应该将其与其他部分独立，如将这个页面分为Header，Left，Footer，Main这么几个block，每个block负责自己的展示以及数据的获取最后输出最终的展示html代码，这样他们就完全独立于所在页面，在其他有用到header，left，footer的页面直接在调用对应的block。另外页面分为很多块，其中有些是很少发生变化有些是经常更新的，其实在每次页面request的中，其实是有很多没有必要的后台处理。当这个页面PV量达到一定量时，这样的开销会变得很可观。这时我们可以将这样很少发生变化的block最后输出的html存放在缓存中（如memcache）,从而减少后台处理开销提高网站性能。</p>
-
-<p>实现技术选择：springMVC + freemarker.</p>
-
-<ol>
-  <li>技术介绍</li>
-</ol>
-
-<p>FreeMarker
-What:
-<img src="/image/FreeMarker.jpg" alt="" /></p>
-
-<p>Template engine：一个基于Java的模板引擎。
-可应用于任何文本类型输出(更多的是用于web应用)
-开源项目</p>
-
-<p>Why：</p>
-
-<p>使用template engine来代替JSP, 设计将变得简单，语法更简单，出错信息更易读，工具也更用户化。
-template优势（也即jsp的不足）</p>
-
-<ol>
-  <li>使前台脱离Java代码</li>
-  <li>减少工作量，template更加简洁</li>
-  <li>出错信息更加精准
- JSP常有一些让人头疼的出错信息。因为页面首先被转换成为一个servlet然后才进行编译。即使有好的 JSP 工具可以相对增加找到出错位置的可能性，那也是不是一件容易的事儿。
- 由于template engine可以在template文件中直接产生而没有任何戏剧性的向代码转化，所以可以非常容易地给出适当的出错报告。</li>
-  <li>不依赖编译器
-JSP需要一个置放在webserver中的编译器。但这样的编译器并不能在所有平台上顺利工作(用 C++写成的) 也不利于建立纯Java 的web服务器。</li>
-  <li>减少空间的浪费
-JSP消耗了额外的内存和硬盘空间。对服务器上每30K的JSP文件，必须要有相应的大于30K的类文件产生。实际上使得硬盘空间加倍。考虑到JSP文件随时可以很容易地通过 ＜%@ include＞包含一个大的数据文件。同时，每一个JSP的类文件数据必须加载到服务器的内存中，这意味着服务器的内存必须永远地将整个JSP文档树保存下去。对template engines由于没有产生第二个文件，所以节省了空间。Template engines还为程序员提供对templates</li>
-</ol>
-
-<p>在内存中进行缓存的完全控制。</p>
-
-<ol>
-  <li>利于实现页面block划分，实现页面的静态化。</li>
-</ol>
-
-<p>spring MVC
-what：</p>
-
-<p>Spring MVC框架是有一个MVC框架，通过实现Model-View-Controller模式来很好地将数据、业务与展现进行分离。Spring MVC的设计是围绕DispatcherServlet展开的，DispatcherServlet负责将请求派发到特定的handler。通过可配置的handler mappings、view resolution、locale以及theme resolution来处理请求并且转到对应的视图。</p>
-
-<p>Why：</p>
-
-<p>学习难度小于, 小于Struts2.
-易于开发性能优秀的程序。
-灵活性强，强大扩展性。</p>
-
-<ol>
-  <li>实例</li>
-</ol>
-
-<p>requirement</p>
-
-<pre><code>功能：实现用户登录显示用户信息
-要求：使用freemarker替代jsp,作为view层组件
-页面划分为Header，Left，Footer，Main三个block，block间相互独立
-模板文件存放在数据库
-具备较高的扩展性
-易维护
-实现技术：springMVC，freemarker, mybatis
-</code></pre>
-
-<p>impletement</p>
-
-<p>程序结构图：
- <img src="/image/page-block-impl.png" alt="" /></p>
-
-<p>建立如下工程目录：</p>
-
-<p><img src="/image/page-block-project.png" alt="" /></p>
-
-<p>web.xml：(配置springMVC)</p>
-
-<pre><code>&lt;context-param&gt;
-
-&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
-
-&lt;param-value&gt;classpath:*Context.xml&lt;/param-value&gt;
-
-&lt;/context-param&gt;
-
-&lt;listener&gt;
-
-&lt;display-name&gt;contextLoaderListener&lt;/display-name&gt;
-
-&lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener
-
-&lt;/listener-class&gt;
-
-&lt;/listener&gt;
-
-&lt;listener&gt;
-
-&lt;listener-class&gt;org.springframework.web.context.request.
-
-RequestContextListener
-
-&lt;/listener-class&gt;
-
-&lt;/listener&gt;
-
-&lt;servlet&gt;
-
-&lt;servlet-name&gt;springmvc&lt;/servlet-name&gt;
-
-&lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet
-
-&lt;/servlet-class&gt;
-
-&lt;init-param&gt;
-
-&lt;description&gt;mvc.xml&lt;/description&gt;
-
-&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
-
-&lt;param-value&gt;classpath:test-mvc.xml&lt;/param-value&gt;
-
-&lt;/init-param&gt;
-
-&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
-
-&lt;/servlet&gt;
-
-&lt;servlet-mapping&gt;
-
-&lt;servlet-name&gt;springmvc&lt;/servlet-name&gt;
-
-&lt;url-pattern&gt;/&lt;/url-pattern&gt;
-
-&lt;/servlet-mapping&gt;
-
-test-mvc.xml：
-&lt;mvc:annotation-driven/&gt;
-
-&lt;!-- 静态的资源文件不要spring的过滤 --&gt;
-
-&lt;mvc:resources mapping="/img/**" location="/img/" /&gt;
-
-&lt;context:component-scan base-package="com.**.controller" /&gt;
-
-&lt;bean id="viewResolver"
-
-class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewRes olver"&gt;
-
-&lt;property name="cache" value="true" /&gt;
-
-&lt;property name="prefix" value="" /&gt;
-
-&lt;property name="suffix" value=".ftl" /&gt;
-
-&lt;property name="contentType" value="text/html;charset=UTF-8" /&gt;
-
-&lt;property name="requestContextAttribute" value="request" /&gt;
-
-&lt;!-- 使用这些宏，必须设置FreeMarkerViewResolver的exposeMacroHelpers属性为true：
-
-在所有需要使用&lt;@spring.bind&gt;和&lt;@spring.bindEscaped&gt;的FreeMarker模板的
-
-顶部增加以下一行：&lt;#import "/spring.ftl" as spring /&gt;
-
-这一行会在模板中导入Spring的FreeMarker宏。
-
---&gt;
-
-&lt;property name="exposeSpringMacroHelpers" value="true" /&gt;
-
-&lt;!-- 将请求和会话属性作为变量暴露给FreeMarker模板使用 --&gt;
-
-&lt;property name="exposeRequestAttributes" value="true" /&gt;
-
-&lt;property name="exposeSessionAttributes" value="true" /&gt;
-
-&lt;/bean&gt;
-
-在resource中的applicationContext.xml
-中配置freemarker和页面所需要的各个block，具体配置如下：
-&lt;!-- freemarker 配置 --&gt;
-
-&lt;bean id="freemarkerConfig"
-
-class="org.springframework.web.servlet.view.freemarker.
-
-FreeMarkerConfigurer"&gt;
-
-&lt;property name="templateLoaderPath" value="/WEB-INF/" /&gt;
-
-&lt;property name="freemarkerSettings"&gt;
-
-&lt;props&gt;
-
-&lt;prop key="template_update_delay"&gt;0&lt;/prop&gt;
-
-&lt;prop key="default_encoding"&gt;UTF-8&lt;/prop&gt;
-
-&lt;prop key="number_format"&gt;0.##########&lt;/prop&gt;
-
-&lt;prop key="datetime_format"&gt;yyyy-MM-dd HH:mm:ss&lt;/prop&gt;
-
-&lt;prop key="classic_compatible"&gt;true&lt;/prop&gt;
-
-&lt;prop key="template_exception_handler"&gt;ignore&lt;/prop&gt;
-
-&lt;/props&gt;
-
-&lt;/property&gt;
-
-&lt;/bean&gt;
-
-&lt;!-- 配置各个block,每个block包含对应的ftl模板文件在数据库对应的名字
-
-和freemarkerConfig对象以及其他所需属性 --&gt;
-
-&lt;beanid="baseBlack"abstract="true"&gt;
-
-&lt;property name="freemarkerConfig" ref="freemarkerConfig"/&gt;
-
-&lt;/bean&gt;
-
-&lt;bean id="blockManager" class="com.au.common.BlockManager"
-
-factory-method="getInstance" /&gt;
-
-&lt;bean id="headBlock" class="com.au.cms.block.HeadBlock" parent="baseBlack"&gt;
-
-&lt;property name="template" value="headBlock"&gt;&lt;/property&gt;
-
-&lt;/bean&gt;
-
-&lt;bean id="middleBlock" class="com.au.cms.block.MiddleBlock" parent="baseBlack"&gt;
-
-&lt;property name="template" value="middleBlock"&gt;&lt;/property&gt;
-
-&lt;property name="userDao" ref="userDao"/&gt;
-
-&lt;/bean&gt;
-
-&lt;bean id="footBlock" class="com.au.cms.block.FootBlock" parent="baseBlack"&gt;
-
-&lt;property name="template" value="footBlock"&gt;&lt;/property&gt;
-
-&lt;/bean&gt;
-</code></pre>
-
-<p>主要类实现</p>
-
-<p>Controller类：</p>
-
-<pre><code>	@Autowired
-	
-	private BlockManager blockManager;
-	
-	@RequestMapping(value = "welcome", method=RequestMethod.GET)
-	
-	public ModelAndView getFirstPage(HttpServletRequest request) {
-	
-	ModelAndView mvc = new ModelAndView("layout/welcome");
-	
-	return mvc;
-	
-	}
-</code></pre>
-
-<p>BlockManager实现一个自定函数用于调用对应的Block并包含show方法如下：</p>
-
-<pre><code>publicclass BlockManager implements TemplateMethodModel {
-
-@SuppressWarnings("rawtypes")
-
-@Override
-
-public Object exec(List args) throws TemplateModelException {
-
-String blockId = args.get(0).toString();
-
-ApplicationContext context = ApplicationContextUtil.getApplicationContext();
-
-HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-
-.getRequest();
-
-if (context.containsBean(blockId)) {
-
-Block block = (Block) context.getBean(blockId);
-
-return block.execute(request);
-
-}
-
-return"";
-
-}
-
-}
-
-AbstractBlock（impletement Block 接口）：
-
-protected String template;
-
-protected FreeMarkerConfigurationFactory freemarkerConfig;
-
-publicvoid setTemplate(String template) {
-
-this.template = template;
-
-}
-
-publicvoid setFreemarkerConfig(FreeMarkerConfigurationFactory freemarkerConfig) {
-
-this.freemarkerConfig = freemarkerConfig;
-
-}
-
-abstractprotected Map&lt;String, Object&gt; preExecute(HttpServletRequest request);
-
-@Override
-
-public String execute(HttpServletRequest request) {
-
-Map&lt;String, Object&gt; map = preExecute(request);
-
-String templateByUser = (String)map.get("BLOCK_TEMPLATE_FILE");
-
-String content = "";
-
-if (templateByUser != null &amp;&amp; !templateByUser.trim().equals("")) {
-
-content = TemplateUtil.process(map, freemarkerConfig, templateByUser);
-
-}
-
-if (templateByUser != null &amp;&amp; templateByUser.trim().equals("")) {
-
-return"";
-
-}
-
-if (templateByUser == null) {
-
-content = TemplateUtil.process(map, freemarkerConfig, template);
-
-}
-
-return postExecute(content);
-
-}
-
-protected String postExecute(String content) {
-
-return content;
-
-}
-
-MiddleBlock（继承AbstractBlock，实现preExcute方法，获取数据）：
-
-@Override
-
-protected Map&lt;String, Object&gt; preExecute(HttpServletRequest request) {
-
-String name = request.getParameter("name");
-
-User user = userDao.getUserByName(name);
-
-Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
-
-map.put("user", user);
-
-return map;
-
-}
-
-TemplateDataMerge（从数据库取出模板文件merge数据）
-
-Configuration conf = ((FreeMarkerConfigurer) freemarkerConfig).getConfiguration();
-
-FtlSourceDao ftlSourceDao = (FtlSourceDao) ApplicationContextUtil.getApplicationContext().getBean("ftlSourceDao");
-
-FtlSource ftl = ftlSourceDao.getFtlSourceByName(ftlName);
-
-Reader reader = new StringReader(ftl.getFtlSource());
-
-Template template = new Template(ftlName, reader, conf, "UTF-8");
-
-writer = new StringWriter();
-
-template.process(map, writer);
-
-String rs = writer.toString();
-</code></pre>
-
-<p>至此程序的主要逻辑已经清楚，其他代码如model,service,dao等就不一一附上。如需要可联系我们</p>
-
-<p>4.测试
-访问项目结果如下</p>
-
-<p><img src="/image/page-block-res.png" alt="" /></p>
-
-<p>完。。。</p>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/Page-Block.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Nginx.html">初始Nginx</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#ws">ws</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>Nginx 是一个轻量级，以占用系统资源少，运行效率而成为web服务器的后起之秀，国内现在很多大型网站都以使用nginx。
-直接php+mysql这是Linux web服务器的黄金组合。今天我们一来学如何在ubuntu 12.04 中架设lnmp。</p>
-
-<pre><code>1. 使用官方PPA安装 Nginx 最新版本，使用以下命令：
-sudo add-apt-repository ppa:nginx/stable
-sudo apt-get update
-sudo apt-get install nginx
-</code></pre>
-
-<p>Nginx相关控制命令：
-启动 Nginx：</p>
-
-<pre><code>sudo /etc/init.d/nginx start
-</code></pre>
-
-<p>浏览器浏览运行情况输入：http://localhost ;如果现实”Welcome to nginx!”，表明你的 Nginx 服务器安装成功！</p>
-
-<pre><code>关闭 Nginx：sudo /etc/init.d/nginx stop;
-重启 nginx：sudo /etc/init.d/nginx restart;
-</code></pre>
-
-<ol>
-  <li>
-    <p>安装 PHP，输入以下命令：</p>
-
-    <pre><code> sudo apt-get install php5-cli php5-cgi php5-fpm php5-mcrypt php5-mysql
-</code></pre>
-  </li>
-</ol>
-
-<p>以用户rob在本机localhost的9100端口下运行一个PHP FastCGI进程，输入以下命令</p>
-
-<pre><code>/usr/bin/spawn-fcgi -a 127.0.0.1 -p 9100 -u rob -g rob -f /usr/bin/php5-cgi -P /var/run/fastcgi-php.pid 加入开机运行，以免每次开机运行此命令。
-
-vi /etc/rc.local 在最后一行加入下面语句（在exit前面）。
-
-[...]
-/usr/bin/spawn-fcgi -a 127.0.0.1 -p 9100 -u rob -g rob -f /usr/bin/php5-cgi -P /var/run/fastcgi-php.pid
-[...]
-</code></pre>
-
-<p>配置Nginx站点，设置：</p>
-
-<pre><code>sudo vi /etc/nginx/sites-available/default
-</code></pre>
-
-<p>修改 “index” 为：“index index.html index.htm index.php;”
-删除以下内容：</p>
-
-<pre><code>location ~ \.php$ {
-fastcgi_pass 127.0.0.1:9000;
-fastcgi_index index.php;
-include fastcgi_params;
-} 测试，创建网站目录
-
-sudo mkdir /var/www/
-</code></pre>
-
-<p>建立一个虚拟站点：</p>
-
-<pre><code>sudo vi /etc/nginx/sites-available/default
-</code></pre>
-
-<p>修改root目录: “root /var/www;”
-建立一个测试页面：</p>
-
-<pre><code>sudo vi /var/www/test.php
-</code></pre>
-
-<p>在测试页面test.php中加入以下代码:</p>
-
-<pre><code>&lt;?php phpinfo();?&gt; 重启nginx
-
-sudo /etc/init.d/nginx restart
-</code></pre>
-
-<p>浏览器输入以下地址，看看有没有安装成功！</p>
-
-<p>http://localhost/test.php
-3.安装 MySQL 数据库：</p>
-
-<pre><code>sudo apt-get install mysql-server
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/09/27/Nginx.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Mysql-outputformat.html">Mysql outputformat简单实现</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/sqoop.html">sqoop安装</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
@@ -908,226 +118,674 @@ sudo /etc/init.d/nginx restart
       </p>
     </header>
     <div class="post-main">
-      <p>================================OutputFormat=========</p>
+      <p>1、下载sqoop压缩包，并解压</p>
 
-<pre><code>import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.util.List;
+<p>压缩包分别是：sqoop-1.2.0-CDH3B4.tar.gz，hadoop-0.20.2-CDH3B4.tar.gz， Mysql JDBC驱动包mysql-connector-java-5.1.10-bin.jar</p>
 
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.OutputCommitter;
-import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.TaskInputOutputContext;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-
-import com.augmentum.rob.input.Person;
-
-public class MySqlOutputFormat extends OutputFormat&lt;NullWritable, Person&gt; {
-
-@Override
-public RecordWriter&lt;NullWritable, Person&gt; getRecordWriter(
-TaskAttemptContext context) throws IOException,
-InterruptedException {
-MysqlRecordWriter mysqlRecordWriter = null;
-try {
-String connString = "jdbc:mysql://172.20.29.29:3306/MapReduceInputTest";
-Class.forName("com.mysql.jdbc.Driver");
-Connection connection = java.sql.DriverManager.getConnection(
-connString + "?useUnicode=true&amp;characterEncoding=utf8",
-"admin", "admin");
-Statement statement = connection.createStatement();
-mysqlRecordWriter = new MysqlRecordWriter(connection, statement);
-
-} catch (Exception ex) {
-throw new IOException(ex.getMessage());
-}
-
-return mysqlRecordWriter;
-}
-
-@Override
-public void checkOutputSpecs(JobContext context) throws IOException,
-InterruptedException {
-// TODO Auto-generated method stub
-// 判断输出表是否设置
-
-// 判断输出表是否存在
-
-}
-
-@Override
-public OutputCommitter getOutputCommitter(TaskAttemptContext context)
-throws IOException, InterruptedException {
-return new FileOutputCommitter(
-FileOutputFormat.getOutputPath(context),
-context);
-}
-
-}
+<pre><code>[root@node1 ~]# ll
+drwxr-xr-x 15 root  root      4096 Feb 22  2011 hadoop-0.20.2-CDH3B4
+-rw-r--r--  1 root  root    724225 Sep 15 06:46 mysql-connector-java-5.1.10-bin.jar
+drwxr-xr-x 11 root  root      4096 Feb 22  2011 sqoop-1.2.0-CDH3B4
 </code></pre>
 
-<p>==========================RecordWriter=====================</p>
+<p>2、将sqoop-1.2.0-CDH3B4拷贝到/home/hadoop目录下，并将Mysql JDBC驱动包和hadoop-0.20.2-CDH3B4下的hadoop-core-0.20.2-CDH3B4.jar至sqoop-1.2.0-CDH3B4/lib下，最后修改一下属主。</p>
 
-<pre><code>import java.io.IOException;
+<pre><code>[root@node1 ~]# cp mysql-connector-java-5.1.10-bin.jar sqoop-1.2.0-CDH3B4/lib
+[root@node1 ~]# cp hadoop-0.20.2-CDH3B4/hadoop-core-0.20.2-CDH3B4.jar sqoop-1.2.0-CDH3B4/lib
+[root@node1 ~]# chown -R hadoop:hadoop sqoop-1.2.0-CDH3B4
+[root@node1 ~]# mv sqoop-1.2.0-CDH3B4 /home/hadoop
+[root@node1 ~]# ll /home/hadoop
+total 35748
+-rw-rw-r--  1 hadoop hadoop      343 Sep 15 05:13 derby.log
+drwxr-xr-x 13 hadoop hadoop     4096 Sep 14 16:16 hadoop-0.20.2
+drwxr-xr-x  9 hadoop hadoop     4096 Sep 14 20:21 hive-0.10.0
+-rw-r--r--  1 hadoop hadoop 36524032 Sep 14 20:20 hive-0.10.0.tar.gz
+drwxr-xr-x  8 hadoop hadoop     4096 Sep 25  2012 jdk1.7
+drwxr-xr-x 12 hadoop hadoop     4096 Sep 15 00:25 mahout-distribution-0.7
+drwxrwxr-x  5 hadoop hadoop     4096 Sep 15 05:13 metastore_db
+-rw-rw-r--  1 hadoop hadoop      406 Sep 14 16:02 scp.sh
+drwxr-xr-x 11 hadoop hadoop     4096 Feb 22  2011 sqoop-1.2.0-CDH3B4
+drwxrwxr-x  3 hadoop hadoop     4096 Sep 14 16:17 temp
+drwxrwxr-x  3 hadoop hadoop     4096 Sep 14 15:59 user
+</code></pre>
+
+<p>3、配置configure-sqoop，注释掉对于HBase和ZooKeeper的检查</p>
+
+<pre><code>[root@node1 bin]# pwd
+/home/hadoop/sqoop-1.2.0-CDH3B4/bin
+[root@node1 bin]# vi configure-sqoop 
+
+#!/bin/bash
+#
+# Licensed to Cloudera, Inc. under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+.
+.
+.
+# Check: If we can't find our dependencies, give up here.
+if [ ! -d "${HADOOP_HOME}" ]; then
+  	echo "Error: $HADOOP_HOME does not exist!"
+  	echo 'Please set $HADOOP_HOME to the root of your Hadoop installation.'
+  	exit 1
+fi
+#if [ ! -d "${HBASE_HOME}" ]; then
+#  echo "Error: $HBASE_HOME does not exist!"
+#  echo 'Please set $HBASE_HOME to the root of your HBase installation.'
+#  exit 1
+#fi
+#if [ ! -d "${ZOOKEEPER_HOME}" ]; then
+#  echo "Error: $ZOOKEEPER_HOME does not exist!"
+#  echo 'Please set $ZOOKEEPER_HOME to the root of your ZooKeeper installation.'
+#  exit 1
+#fi
+</code></pre>
+
+<p>4、修改/etc/profile和.bash_profile文件，添加Hadoop_Home,调整PATH
+	[hadoop@node1 ~]$ vi .bash_profile </p>
+
+<pre><code># .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+
+# User specific environment and startup programs
+
+HADOOP_HOME=/home/hadoop/hadoop-0.20.2
+PATH=$HADOOP_HOME/bin:$PATH:$HOME/bin
+export HIVE_HOME=/home/hadoop/hive-0.10.0
+export MAHOUT_HOME=/home/hadoop/mahout-distribution-0.7
+export PATH HADOOP_HOME
+</code></pre>
+
+<p>三、测试Sqoop</p>
+
+<ol>
+  <li>
+    <p>查看mysql中的数据库：</p>
+
+    <pre><code> [hadoop@node1 bin]$ ./sqoop list-databases --connect jdbc:mysql://192.168.1.152:3306/ --username sqoop --password sqoop
+</code></pre>
+  </li>
+  <li>
+    <p>将mysql的表导入到hive中：</p>
+
+    <pre><code> [hadoop@node1 bin]$ ./sqoop import --connect jdbc:mysql://192.168.1.152:3306/sqoop --username sqoop --password sqoop --table test --hive-import -m 1
+</code></pre>
+  </li>
+</ol>
+
+      <div class="readall"><a href="/blog/2014/09/27/sqoop.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/sql-frist-day.html">sql frist day</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#db">db</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>计算周月的第一天， 以星期天为一周的开始</p>
+
+<pre><code>	SELECT LAST_DAY('2013-2-1');
+	SELECT concat(date_format(LAST_DAY('2013-02-01'),'%Y-%m-'),'01');
+	select DATE_SUB('2014-03-08',INTERVAL (WEEKDAY('2014-03-08')+1)%7 DAY);
+	select DATE_SUB('2014-03-08',INTERVAL ((WEEKDAY('2014-03-08')+1)%7)-6 DAY);
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/sql-frist-day.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/mysql-session.html">mysql 性能session</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#db">db</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>mysql</p>
+
+<p>主从：</p>
+
+<p>外围app只能从主数据库中写入数据，从从数据库中读取数据，从而减小数据压力</p>
+
+<ol>
+  <li>
+    <p>要实现主从数据库之间的同步复制，需要用户授权，使得从数据库可以登录主数据库并拷贝数据
+grant all “.” to rob@172.20.29.29 identified by “123”</p>
+  </li>
+  <li>
+    <p>bin_log 日志(保存数据库的增删改数据操作，用作数据恢复)</p>
+
+    <p>A:binlog日志打开方法</p>
+
+    <pre><code> 在my.cnf这个文件中加一行（Windows为my.ini）。
+
+     #vi /etc/my.cnf
+ [mysqld]
+ log-bin=mysqlbin-log #添加这一行就ok了=号后面的名字自己定义吧
+ 然后我们可以对数据库做简单的操作后到mysql数据文件所在的目录来看binlog文件。
+</code></pre>
+
+    <p>B:关于bin-log日志的相关命令：</p>
+
+    <pre><code> 查看当前bin_log情况 show BINARY logs
+ 查看当前bin_log情况 show master logs
+ 查看log_bin相关配置 show variables like ‘%log_bin%’
+ 切换bin_log日志（生成一个新的日志文件） flush logs
+ 删除mysqlbin.000002之前的bin_log，并修改index中相关数据 PURGE BINARY LOGS TO ‘mysqlbin.000002′
+ 删除2011-07-09 12:40:26之前的bin_log，并修改index中相关数据 PURGE BINARY LOGS BEFORE ’2011-07-09 12:40:26′
+ 删除2011-07-09之前的bin_log，并修改index中相关数据 PURGE BINARY LOGS BEFORE ’2011-07-09′
+ 设置bin_log过期日期 set global expire_logs_days=5;
+ 重设bin_log日志，以前的所有日志将被删除并且重设index中的数据 reset master;
+</code></pre>
+
+    <p>C:利用bin-log日志恢复数据：</p>
+
+    <pre><code> mysqlbinlog --no-defaults --start-position="102" --stop-position="201" mysql_bin.000001 |mysql -uroot -p123456
+ 亦可导出为sql文件，再导入至数据库中：
+ mysqlbinlog --no-defaults --start-date="2012-10-15 16:30:00" --stop-date="2012-10-15 17:00:00" mysql_bin.000001 &gt;d:\1.sql
+</code></pre>
+  </li>
+  <li>
+    <p>mysql 数据备份
+ mysqldump -uroot -p123456 test -l -F &gt; “/tmp/test.sql”
+ 备份数据库两个主要方法是用 mysqldump 程序或直接拷贝数据库文件（如用 cp、cpio 或 tar 等）。每种方法都有其优缺点：</p>
+  </li>
+</ol>
+
+<p>mysqldump 与 MySQL 服务器协同操作。直接拷贝方法在服务器外部进行，并且你必须采取措施保证没有客户正在修改你将拷贝的表。</p>
+
+<p>如果你想用文件系统备份来备份数据库，也会发生同样的问题：如果数据库表在文件系统备份过程中被修改，
+进入备份的表文件主语不一致的状态，而对以后的恢复表将失去意义。文件系统备份与直接拷贝文件的区别是对后者你完全控制了
+备份过程，这样你能采取措施确保服务器让表不受干扰。
+mysqldump 比直接拷贝要慢些。
+mysqldump 生成能够移植到其它机器的文本文件，甚至那些有不同硬件结构的机器上。直接拷贝文件不能移植到其它机器上，
+除非你正在拷贝的表使用 MyISAM 存储格式。ISAM 表只能在相似的硬件结构的机器上拷贝。在 MySQL 3.23 中引入的 MyISAM 表
+存储格式解决了该问题，因为该格式是机器无关的，所以直接拷贝文件可以移植到具有不同硬件结构的机器上。只要满足两个条件
+：另一台机器必须也运行 MySQL 3.23 或以后版本，而且文件必须以 MyISAM 格式表示，而不是 ISAM 格式。</p>
+
+<p>1 使用 mysqldump 备份和拷贝数据库</p>
+
+<pre><code>当你使用 mysqldumo 程序产生数据库备份文件时，缺省地，文件内容包含创建正在倾倒的表的
+CREATE 语句和包含表中行数据的 INSERT 语句。换句话说，mysqldump 产生的输出可在以后用
+作 mysql 的输入来重建数据库。
+你可以将整个数据库倾倒进一个单独的文本文件中，如下：
+%mysqldump samp_db &gt;/usr/archives/mysql/samp_db.1999-10-02
+</code></pre>
+
+<ol>
+  <li>
+    <p>主从复制的配置</p>
+
+    <pre><code> A:保证所有主从的server id 唯一
+ B:主服务器只需要保证开启bin-log，并且配置server id
+ C:从服务器需要配置：bin-log,server id, master-host,master-user,master-password,master-port
+</code></pre>
+  </li>
+  <li>
+    <p>分表， 分区</p>
+
+    <pre><code> RANGE 分区：基于属于一个给定连续区间的列值，把多行分配给分区。
+ LIST 分 区：类似于按RANGE分区，区别在于LIST分区是基于列值匹配一个离散值集合中的某个值来进行选择。
+ HASH分区：基于用户定义的表达式的返 回值来进行选择的分区，该表达式使用将要插入到表中的这些行的列值进行计算。这个函数可以包含MySQL 中 有效的、产生非负整数值的任何表达式。
+ KEY 分 区：类似于按HASH分区，区别在于KEY分区只支持计算一列或多列，且MySQL 服务器 提供其自身的哈希函数。必须有一列或多列包含整数值。
+ CREATE TABLE employees (
+ id INT NOT NULL,
+ fname VARCHAR(30),
+ lname VARCHAR(30),
+ hired DATE NOT NULL DEFAULT '1970-01-01',
+ separated DATE NOT NULL DEFAULT '9999-12-31',
+ job_code INT NOT NULL,
+ store_id INT NOT NULL
+ )
+ PARTITION BY RANGE (store_id) (
+ PARTITION p0 VALUES LESS THAN (6),
+ PARTITION p1 VALUES LESS THAN (11),
+ PARTITION p2 VALUES LESS THAN (16),
+ PARTITION p3 VALUES LESS THAN (21)
+ )；
+ CREATE TABLE employees (
+ id INT NOT NULL,
+ fname VARCHAR(30),
+ lname VARCHAR(30),
+ hired DATE NOT NULL DEFAULT '1970-01-01',
+ separated DATE NOT NULL DEFAULT '9999-12-31',
+ job_code INT,
+ store_id INT
+ )
+ PARTITION BY LIST(store_id)
+ PARTITION pNorth VALUES IN (3,5,6,9,17),
+ PARTITION pEast VALUES IN (1,2,10,11,19,20),
+ PARTITION pWest VALUES IN (4,12,13,14,18),
+ PARTITION pCentral VALUES IN (7,8,15,16)
+ )；
+ CREATE TABLE employees (
+ id INT NOT NULL,
+ fname VARCHAR(30),
+ lname VARCHAR(30),
+ hired DATE NOT NULL DEFAULT '1970-01-01',
+ separated DATE NOT NULL DEFAULT '9999-12-31',
+ job_code INT,
+ store_id INT
+ )
+ PARTITION BY HASH(store_id)
+ PARTITIONS 4；
+</code></pre>
+  </li>
+  <li>
+    <p>sql 优化</p>
+
+    <pre><code> A：查看slow log
+ B: 判断是否需要index
+	
+ 优化目标
+ 减少 IO 次数
+ IO永远是数据库最容易瓶颈的地方，这是由数据库的职责所决定的，大部分数据库操作中超过90%的时间都是 IO 操作所占用的，
+ 减少 IO 次数是 SQL 优化中需要第一优先考虑，当然，也是收效最明显的优化手段。
+ 降低 CPU 计算
+ 除了 IO 瓶颈之外，SQL优化中需要考虑的就是 CPU 运算量的优化了。order by, group by,distinct …
+ 都是消耗 CPU 的大户（这些操作基本上都是 CPU 处理内存中的数据比较运算）。当我们的 IO 优化做到一定阶段之后，
+ 降低 CPU 计算也就成为了我们 SQL 优化的重要目标
+	
+ 优化方法
+ 改变 SQL 执行计划
+ 明确了优化目标之后，我们需要确定达到我们目标的方法。对于 SQL 语句来说，达到上述2个目标的方法其实只有一个，
+ 那就是改变 SQL 的执行计划，让他尽量“少走弯路”，尽量通过各种“捷径”来找到我们需要的数据，
+ 以达到 “减少 IO 次数” 和 “降低 CPU 计算” 的目标
+</code></pre>
+  </li>
+</ol>
+
+<p>常见误区</p>
+
+<pre><code>count(1)和count(primary_key) 优于 count(*)
+很多人为了统计记录条数，就使用 count(1) 和 count
+(primary_key) 而不是 count(*) ，他们认为这样性能更好，
+其实这是一个误区。对于有些场景，这样做可能性能会更差，应为数据库对 count(*) 计数操作做了一些特别的优化。
+count(column) 和 count(*) 是一样的
+这个误区甚至在很多的资深工程师或者是 DBA 中都普遍存在，很多人都会认为这是理所当然的。
+实际上，count(column) 和 count(*) 是一个完全不一样的操作，所代表的意义也完全不一样。
+count(column) 是表示结果集中有多少个column字段不为空的记录
+count(*) 是表示整个结果集有多少条记录
+select a,b from … 比 select a,b,c from … 可以让数据库访问更少的数据量
+这个误区主要存在于大量的开发人员中，主要原因是对数据库的存储原理不是太了解。
+实际上，大多数关系型数据库都是按照行（row）的方式存储，而数据存取操作都是以一个固定大小的IO单元
+（被称作 block 或者 page）为单位，一般为4KB，8KB… 大多数时候，每个IO单元中存储了多行，
+每行都是存储了该行的所有字段（lob等特殊类型字段除外）。
+所以，我们是取一个字段还是多个字段，实际上数据库在表中需要访问的数据量其实是一样的。
+当然，也有例外情况，那就是我们的这个查询在索引中就可以完成，也就是说当只取 a,b两个字段的时候，
+不需要回表，而c这个字段不在使用的索引中，需要回表取得其数据。在这样的情况下，二者的IO量会有较大差异。
+order by 一定需要排序操作
+我们知道索引数据实际上是有序的，如果我们的需要的数据和某个索引的顺序一致，而且我们的查询又通过这个索引来执行，
+那么数据库一般会省略排序操作，而直接将数据返回，因为数据库知道数据已经满足我们的排序需求了。
+实际上，利用索引来优化有排序需求的 SQL，是一个非常重要的优化手段
+延伸阅读：MySQL ORDER BY 的实现分析 ，MySQL 中 GROUP BY 基本实现原理 以及 MySQL DISTINCT 的基本实现原理
+执行计划中有 filesort 就会进行磁盘文件排序
+有这个误区其实并不能怪我们，而是因为 MySQL 开发者在用词方面的问题。
+filesort 是我们在使用 explain 命令查看一条 SQL 的执行计划的时候可能会看到在 “Extra” 一列显示的信息。
+实际上，只要一条 SQL 语句需要进行排序操作，都会显示“Using filesort”，这并不表示就会有文件排序操作。
+延伸阅读：理解 MySQL Explain 命令输出中的filesort，我在这里有更为详细的介绍
+</code></pre>
+
+<p>基本原则</p>
+
+<p>尽量少 join</p>
+
+<p>MySQL 的优势在于简单，但这在某些方面其实也是其劣势。MySQL 优化器效率高，但是由于其统计信息的量有限，
+优化器工作过程出现偏差的可能性也就更多。对于复杂的多表 Join，一方面由于其优化器受限，
+再者在 Join 这方面所下的功夫还不够，所以性能表现离 Oracle 等关系型数据库前辈还是有一定距离。
+但如果是简单的单表查询，这一差距就会极小甚至在有些场景下要优于这些数据库前辈。</p>
+
+<p>尽量少排序</p>
+
+<p>排序操作会消耗较多的 CPU 资源，所以减少排序可以在缓存命中率高等 IO 能力足够的场景下会较大影响 SQL 的响应时间。
+对于MySQL来说，减少排序有多种办法，比如：
+上面误区中提到的通过利用索引来排序的方式进行优化
+减少参与排序的记录条数
+非必要不对数据进行排序
+…</p>
+
+<p>尽量避免 select *</p>
+
+<p>很多人看到这一点后觉得比较难理解，上面不是在误区中刚刚说 select 子句中字段的多少并不会影响到读取的数据吗？
+是的，大多数时候并不会影响到 IO 量，但是当我们还存在 order by 操作的时候，
+select 子句中的字段多少会在很大程度上影响到我们的排序效率，这一点可以通过我之前一篇介绍 MySQL ORDER BY
+的实现分析 的文章中有较为详细的介绍。
+此外，上面误区中不是也说了，只是大多数时候是不会影响到 IO 量，当我们的查询结果仅仅只需要在索引中就能找到的时候，
+还是会极大减少 IO 量的。</p>
+
+<p>尽量用 join 代替子查询</p>
+
+<p>虽然 Join 性能并不佳，但是和 MySQL 的子查询比起来还是有非常大的性能优势。
+MySQL 的子查询执行计划一直存在较大的问题，虽然这个问题已经存在多年，
+但是到目前已经发布的所有稳定版本中都普遍存在，一直没有太大改善。虽然官方也在很早就承认这一问题，
+并且承诺尽快解决，但是至少到目前为止我们还没有看到哪一个版本较好的解决了这一问题。</p>
+
+<p>尽量少 or</p>
+
+<p>当 where 子句中存在多个条件以“或”并存的时候，MySQL 的优化器并没有很好的解决其执行计划优化问题，
+再加上 MySQL 特有的 SQL 与 Storage 分层架构方式，造成了其性能比较低下，很多时候使用 union all
+或者是union（必要的时候）的方式来代替“or”会得到更好的效果。
+尽量用 union all 代替 union
+union 和 union all 的差异主要是前者需要将两个（或者多个）结果集合并后再进行唯一性过滤操作，
+这就会涉及到排序，增加大量的 CPU 运算，加大资源消耗及延迟。所以当我们可以确认不可能出现重复结果集或者
+不在乎重复结果集的时候，尽量使用 union all 而不是 union。</p>
+
+<p>尽量早过滤</p>
+
+<p>这一优化策略其实最常见于索引的优化设计中（将过滤性更好的字段放得更靠前）。
+在 SQL 编写中同样可以使用这一原则来优化一些 Join 的 SQL。比如我们在多个表进行分页数据查询的时候，
+我们最好是能够在一个表上先过滤好数据分好页，然后再用分好页的结果集与另外的表 Join，
+这样可以尽可能多的减少不必要的 IO 操作，大大节省 IO 操作所消耗的时间。</p>
+
+<p>避免类型转换</p>
+
+<p>这里所说的“类型转换”是指 where 子句中出现 column 字段的类型和传入的参数类型不一致的时候发生的类型转换：</p>
+
+<p>人为在column_name 上通过转换函数进行转换
+直接导致 MySQL（实际上其他数据库也会有同样的问题）无法使用索引，如果非要转换，应该在传入的参数上进行转换
+由数据库自己进行转换
+如果我们传入的数据类型和字段类型不一致，同时我们又没有做任何类型转换处理，MySQL
+可能会自己对我们的数据进行类型转换操作，也可能不进行处理而交由存储引擎去处理，这样一来，
+就会出现索引无法使用的情况而造成执行计划问题。
+优先优化高并发的 SQL，而不是执行频率低某些“大”SQL
+对于破坏性来说，高并发的 SQL 总是会比低频率的来得大，因为高并发的 SQL 一旦出现问题，
+甚至不会给我们任何喘息的机会就会将系统压跨。而对于一些虽然需要消耗大量 IO 而且响应很慢的 SQL，
+由于频率低，即使遇到，最多就是让整个系统响应慢一点，但至少可能撑一会儿，让我们有缓冲的机会。
+从全局出发优化，而不是片面调整
+SQL 优化不能是单独针对某一个进行，而应充分考虑系统中所有的 SQL，尤其是在通过调整索引优化 SQL
+的执行计划的时候，千万不能顾此失彼，因小失大。
+尽可能对每一条运行在数据库中的SQL进行 explain</p>
+
+<p>优化 SQL，需要做到心中有数，知道 SQL 的执行计划才能判断是否有优化余地，才能判断是否存在执行计划问题。
+在对数据库中运行的 SQL 进行了一段时间的优化之后，很明显的问题 SQL 可能已经很少了，大多都需要去发掘，
+这时候就需要进行大量的 explain 操作收集执行计划，并判断是否需要进行优化。</p>
+
+      <div class="readall"><a href="/blog/2014/09/27/mysql-session.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/mysql-inputformat.html">mysql inputformat简单实现</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <pre><code>import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.util.StringUtils;
 
-import com.augmentum.rob.input.Person;
-public class MysqlRecordWriter extends RecordWriter&lt;NullWritable, Person&gt;{
-
-private Connection connection;
-private Statement statement;
-private static final Log LOG = LogFactory.getLog(MysqlRecordWriter.class);
-
-public MysqlRecordWriter() throws SQLException {}
-
-public MysqlRecordWriter(Connection connection, Statement statement) throws SQLException {
-this.connection = connection;
-this.statement = statement;
-this.connection.setAutoCommit(false);
-}
-
-public Connection getConnection() {
-return connection;
-}
-
-public Statement getStatement() {
-return statement;
-}
+public class MySqlInputFormat extends InputFormat&lt;LongWritable, Person&gt; {
 
 @Override
-public void write(NullWritable key, Person person) throws IOException, InterruptedException {
-String sql = "INSERT person2(name, age) VALUES('"+person.getName()+"', "+person.getAge()+")";
-//可以根据key和value情况写多条INSERT SQL
-// List&lt;String&gt; sqlList = buildInsertSql();
+public List&lt;InputSplit&gt; getSplits(JobContext context) throws IOException,
+InterruptedException {
+String connString = "jdbc:mysql://172.20.29.29:3306/MapReduceInputTest";
+String sql = "select count(*) as num from person";
 try {
-// if (sqlList != null &amp;&amp; sqlList.size() &gt; 0) {
-// for (String sql : sqlList) {
-// statement.addBatch(sql);
-// }
-// }
-statement.addBatch(sql);
+Class.forName("com.mysql.jdbc.Driver");
+} catch (ClassNotFoundException e) {
+e.printStackTrace();
+}
+
+Connection conn = null;
+Statement stmt = null;
+ResultSet rs = null;
+try {
+conn = java.sql.DriverManager.getConnection(connString
++ "?useUnicode=true&amp;characterEncoding=utf8", "admin",
+"admin");
+stmt = conn.createStatement();
+rs = stmt.executeQuery(sql);
+long count = 0;
+if (rs.next()) {
+count = rs.getLong("num");
+}
+System.out.println(count);
+List&lt;InputSplit&gt; splits = new ArrayList&lt;InputSplit&gt;();
+
+long mapNum = count % 3 == 0 ? (count) / 3 : (count / 3 + 1);
+
+for (long i = 0; i &lt; mapNum; i++) {
+long start = i * 3;
+long end = (i + 1) * 3;
+MysqlInputSplit mysqlInputSplit = new MysqlInputSplit(start,
+end);
+splits.add(mysqlInputSplit);
+}
+return splits;
+} catch (Exception ex) {
+ex.printStackTrace();
+try {
+rs.close();
+stmt.close();
+conn.close();
 } catch (SQLException e) {
 e.printStackTrace();
 }
 }
 
-// //更具逻辑具体实现插入sql。
-// public abstract List&lt;String&gt; buildInsertSql();
+return null;
+}
 
 @Override
-public void close(TaskAttemptContext context) throws IOException, InterruptedException {
-try {
-statement.executeBatch();
-connection.commit();
-} catch (SQLException e) {
-try {
-connection.rollback();
-}
-catch (SQLException ex) {
-LOG.warn(StringUtils.stringifyException(ex));
-}
-throw new IOException(e.getMessage());
-} finally {
-try {
-statement.close();
-connection.close();
-}
-catch (SQLException ex) {
-throw new IOException(ex.getMessage());
-}
-}
-
+public RecordReader&lt;LongWritable, Person&gt; createRecordReader(
+InputSplit split, TaskAttemptContext context) throws IOException,
+InterruptedException {
+return new MySqlRecordReader((MysqlInputSplit) split);
 }
 
 }
 </code></pre>
 
-<p>======================================================================================================</p>
+<p>=====================================================================================================</p>
+
+<pre><code>import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapreduce.InputSplit;
+
+public class MysqlInputSplit extends InputSplit implements Writable {
+private long end = 0;
+private long start = 0;
+
+public MysqlInputSplit(long start, long end) {
+this.start = start;
+this.end = end;
+}
+
+public MysqlInputSplit() {
+}
+
+public void readFields(DataInput dataInput) throws IOException {
+this.start = dataInput.readLong();
+this.end = dataInput.readLong();
+}
+
+public void write(DataOutput dataOutput) throws IOException {
+dataOutput.writeLong(start);
+dataOutput.writeLong(end);
+}
+
+@Override
+public long getLength() throws IOException {
+return end - start;
+}
+
+@Override
+public String[] getLocations() throws IOException {
+return new String[] {};
+}
+
+public long getStart() {
+return start;
+}
+
+public long getEnd() {
+return end;
+}
+
+}
+</code></pre>
+
+<p>=====================================================================================================</p>
 
 <pre><code>import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.TaskInputOutputContext;
-import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
-import org.apache.hadoop.mapreduce.lib.db.DBOutputFormat;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-public class RobOut&lt;K extends DBWritable, V&gt; extends DBOutputFormat&lt;K, V&gt;{
+public class MySqlRecordReader extends RecordReader&lt;LongWritable, Person&gt; {
 
-/** {@inheritDoc} */
-public RecordWriter&lt;K, V&gt; getRecordWriter(TaskAttemptContext context)
-throws IOException {
-DBConfiguration dbConf = new DBConfiguration(context.getConfiguration());
+private ResultSet results = null;
 
-String tableName = dbConf.getOutputTableName();
-String[] fieldNames = dbConf.getOutputFieldNames();
+@Override
+public void initialize(InputSplit split, TaskAttemptContext context)
+throws IOException, InterruptedException {
+// do nothing
 
-if(fieldNames == null) {
-fieldNames = new String[dbConf.getOutputFieldCount()];
 }
 
+private final MysqlInputSplit split;
+private long pos = 0;
+
+private LongWritable key = null;
+
+private Person value = null;
+
+private Connection conn;
+
+protected PreparedStatement statement;
+
+public MySqlRecordReader(InputSplit split) {
+this.split = (MysqlInputSplit) split;
+}
+
+@Override
+public boolean nextKeyValue() throws IOException, InterruptedException {
+//System.out.println("ddd");
 try {
-Connection connection = dbConf.getConnection();
-PreparedStatement statement = null;
-
-statement = connection.prepareStatement(
-constructQuery(tableName, fieldNames));
-return new DBRecordWriter(connection, statement);
-} catch (Exception ex) {
-throw new IOException(ex.getMessage());
+if (key == null) {
+key = new LongWritable();
 }
+if (value == null) {
+value = new Person();
 }
-
-/**
-* Set the {@link Path} of the output directory for the map-reduce job.
-*
-* @param job The job to modify
-* @param outputDir the {@link Path} of the output directory for
-* the map-reduce job.
-*/
-public static void setOutputTable(Job job, String tableName) {
-job.getConfiguration().set("output.mysql.table" + tableName, tableName);
+if (null == this.results) {
+String connString = "jdbc:mysql://172.20.29.29:3306/MapReduceInputTest";
+String sql = "select * from person LIMIT " + split.getLength()
++ " OFFSET " + split.getStart();
+Class.forName("com.mysql.jdbc.Driver");
+conn = java.sql.DriverManager.getConnection(connString
++ "?useUnicode=true&amp;characterEncoding=utf8", "admin",
+"admin");
+statement = conn.prepareStatement(sql);
+this.results = statement.executeQuery();
 }
 
-/**
-* Get the {@link Path} to the output directory for the map-reduce job.
-*
-* @return the {@link Path} to the output directory for the map-reduce job.
-* @see FileOutputFormat#getWorkOutputPath(TaskInputOutputContext)
-*/
-public static Path getOutputTable(JobContext job) {
-String name = job.getConfiguration().get("mapred.output.table");
-return name == null ? null: new Path(name);
+if (!results.next()) {
+return false;
+}
+
+// Set the key field value as the output key value
+
+key.set(pos + split.getStart());
+value.setAge(results.getInt("age"));
+value.setName(results.getString("name"));
+pos++;
+} catch (Exception e) {
+e.printStackTrace();
+throw new IOException("SQLException in nextKeyValue", e);
+}
+return true;
+}
+
+@Override
+public LongWritable getCurrentKey() throws IOException,
+InterruptedException {
+return key;
+}
+
+@Override
+public Person getCurrentValue() throws IOException, InterruptedException {
+return value;
+}
+
+@Override
+public float getProgress() throws IOException, InterruptedException {
+// TODO Auto-generated method stub
+return 0;
+}
+
+@Override
+public void close() throws IOException {
+try {
+if (null != results) {
+results.close();
+}
+if (null != statement) {
+statement.close();
+}
+if (null != conn) {
+conn.close();
+}
+} catch (SQLException e) {
+throw new IOException(e.getMessage());
+}
+
 }
 
 }
 </code></pre>
 
-      <div class="readall"><a href="/blog/2014/09/27/Mysql-outputformat.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+
+      <div class="readall"><a href="/blog/2014/09/27/mysql-inputformat.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -1135,292 +793,45 @@ return name == null ? null: new Path(name);
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Mongodb-java.html">Mongodb java简单操作</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/mysql.html">mysql远程连接配置</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#nosql">nosql</a>
+        <a class="post-category" href="/page/category.html#db">db</a>
       </p>
     </header>
     <div class="post-main">
-      <pre><code>import java.net.UnknownHostException;
-import java.util.Set;
+      <ol>
+  <li>将my.cnf中与127.0.0.1的绑定 删除或是注释</li>
+  <li>
+    <p>将mysql数据库中user表</p>
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
+    <pre><code> GRANT ALL ON *.* TO admin@'%' IDENTIFIED BY 'admin' WITH GRANT OPTION;
+</code></pre>
+  </li>
+</ol>
 
-public class Mongodb {
+<p>这句话的意思 ，允许任何IP地址（上面的 % 就是这个意思）的电脑 用admin帐户  和密码（admin）来访问这个MySQL Server
+在没有第一步的情况下必须加类似这样的帐户，才可以远程登陆。root帐户是无法远程登陆的，只可以本地登陆</p>
 
-/**
-* @author gaogao
-* @param args
-* @throws MongoException
-* @throws UnknownHostException
-*/
-public static void main(String[] args) throws UnknownHostException,
-MongoException {
-// 连接本地数据库
-Mongo m = new Mongo();
-// 创建名为new_test_db的数据库
-DB db = m.getDB("new_test_db");
-// 获取new_test_db中的集合（类似于获取关系数据库中的表）
-Set&lt;String&gt; cols = db.getCollectionNames();
-// 打印出new_test_db中的集合，这里应当为null
-for (String s : cols) {
-System.out.println(s);
-}
-// 创建一个叫做"new_test_col"的集合
-DBCollection collection = db.getCollection("new_test_col");
-// 初始化一个基本DB对象，最终插入数据库的就是这个DB对象
-BasicDBObject obj = new BasicDBObject();
-// 放入几个键值对
-obj.put("from", "搞搞");
-obj.put("to", "宝宝");
-obj.put("subject", "狗子爱宝子");
-// 插入对象
-collection.insert(obj);
-// 查看一条记录，findOne()=find().limit(1);
-DBObject dbobj = collection.findOne();
-// 打印出刚才插入的数据
-System.out.println(dbobj);
-System.out.println("==================================================");
-// 现在我们来插入9条{ranking:i}的数据
-for (int i = 0; i &lt; 9; i++) {
-collection.insert(new BasicDBObject().append("ranking", i));
-}
-// 打印集合中的数据总数，这里应当输出10
-System.out.println(collection.getCount());
-// 下面我们来遍历集合，find()方法返回的是一个游标(cursor)，这里的概念和关系数据库很相似
-DBCursor cursor = collection.find();
-// 然后我们使用这个游标来遍历集合
-while (cursor.hasNext()) {
-System.out.println(cursor.next());
-}
-// 下面来看一些略复杂一点的查询技巧，第一个，简单的条件查询，查询ranking为1的记录
-BasicDBObject query = new BasicDBObject();
-query.put("ranking", 1);
-cursor = collection.find(query);
-while (cursor.hasNext()) {
-System.out.println(cursor.next());
-}
-// 下面是更复杂的条件查询，查询ranking大于5小于9的记录
-query = new BasicDBObject();
-query.put("ranking", new BasicDBObject("$gt", 5).append("$lt", 9));
-cursor = collection.find(query);
-while (cursor.hasNext()) {
-System.out.println(cursor.next());
-}
-// 最后删除我们的测试数据库
-m.dropDatabase("new_test_db");
-}
-}
+<pre><code>测试：mysql -h172.21.5.29 -uadmin -padmin
 </code></pre>
 
-      <div class="readall"><a href="/blog/2014/09/27/Mongodb-java.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
+<p>有人遇到问题：</p>
 
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Module.html">Module</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#f2e">f2e</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>Module模式是JavaScript编程中一个非常通用的模式，一般情况下，大家都知道基本用法，本文尝试着给大家更多该模式的高级使用方式。</p>
-
-<p>首先我们来看看Module模式的基本特征：</p>
-
-<p>模块化，可重用
-封装了变量和function，和全局的namaspace不接触，松耦合
-只暴露可用public的方法，其它私有方法全部隐藏
-关于Module模式，最早是由YUI的成员EricMiraglia在4年前提出了这个概念，
-我们将从一个简单的例子来解释一下基本的用法。</p>
-
-<p>基本用法
-先看一下最简单的一个实现，代码如下：</p>
-
-<pre><code>var Calculator = function (eq) {
-//这里可以声明私有成员
-var eqCtl = document.getElementById(eq);
-return {
-// 暴露公开的成员
-add: function (x, y) {
-var val = x + y;
-eqCtl.innerHTML = val;
-}
-};
-}; 我们可以通过如下的方式来调用：
-
-var calculator = new Calculator('eq');
-calculator.add(2, 2); 大家可能看到了，每次用的时候都要new一下，也就是说每个实例在内存里都是一份copy， 如果你不需要传参数或者没有一些特殊苛刻的要求的话，我们可以在最后一个}后面加上一个括号，来达到自执行的目的， 这样该实例在内存中只会存在一份copy，不过在展示他的优点之前，我们还是先来看看这个模式的基本使用方法吧。
+<pre><code>mysql&gt; use mysql;
+mysql&gt; GRANT ALL ON *.* TO admin@'%' IDENTIFIED BY 'admin' WITH GRANT OPTION;
+#这句话的意思 ，允许任何IP地址（上面的 % 就是这个意思）的电脑 用admin帐户  和密码（admin）来访问这个MySQL Server
+#必须加类似这样的帐户，才可以远程登陆。 root帐户是无法远程登陆的，只可以本地登陆
+我发现一个问题， 如果上面的命令你执行完毕， 你在 本地就是localhost ， 执行 :
+Sql代码
+mysql -hlocalhost -uadmin -padmin
+mysql -hlocalhost -uadmin -padmin 结果是失败的。 原来 上面的 % 竟然不包括localhost
 </code></pre>
 
-<p>匿名闭包</p>
-
-<p>匿名闭包是让一切成为可能的基础，而这也是JavaScript最好的特性，
-我们来创建一个最简单的闭包函数，函数内部的代码一直存在于闭包内，在整个运行周期内，
-该闭包都保证了内部的代码处于私有状态。</p>
-
-<p>(function () {
-// … 所有的变量和function都在这里声明，并且作用域也只能在这个匿名闭包里
-// … 但是这里的代码依然可以访问外部全局的对象
-}());
-注意，匿名函数后面的括号，这是JavaScript语言所要求的，因为如果你不声明的话，
-JavaScript解释器默认是声明一个function函数，有括号，就是创建一个函数表达式，也就是自执行，
-用的时候不用和上面那样在new了，当然你也可以这样来声明：
-(function () {/* 内部代码 */})();
-不过我们推荐使用第一种方式，关于函数自执行，我后面会有专门一篇文章进行详解，这里就不多说了。</p>
-
-<p>引用全局变量
-JavaScript有一个特性叫做隐式全局变量，不管一个变量有没有用过，
-JavaScript解释器反向遍历作用域链来查找整个变量的var声明，如果没有找到var，解释器则假定该变量是全局变量，
-如果该变量用于了赋值操作的话，之前如果不存在的话，解释器则会自动创建它，
-这就是说在匿名闭包里使用或创建全局变量非常容易，
-不过比较困难的是，代码比较难管理，尤其是阅读代码的人看着很多区分哪些变量是全局的，哪些是局部的。</p>
-
-<p>不过，好在在匿名函数里我们可以提供一个比较简单的替代方案，
-我们可以将全局变量当成一个参数传入到匿名函数然后使用，相比隐式全局变量，它又清晰又快，我们来看一个例子：</p>
-
-<p>(function ($, YAHOO) {
-// 这里，我们的代码就可以使用全局的jQuery对象了，YAHOO也是一样
-} (jQuery, YAHOO));</p>
-
-<p>现在很多类库里都有这种使用方式，比如jQuery源码。
-不过，有时候可能不仅仅要使用全局变量，而是也想声明全局变量，如何做呢？
-我们可以通过匿名函数的返回值来返回这个全局变量，这也就是一个基本的Module模式，来看一个完整的代码：</p>
-
-<pre><code>var blogModule = (function () {
-var my = {},privateName = "博客园";
-function privateAddTopic(data) {
-// 这里是内部处理代码
-}
-my.Name = privateName;
-my.AddTopic = function (data) {
-privateAddTopic(data);
-};
-
-    return my;
-} ()); 上面的代码声明了一个全局变量blogModule，并且带有2个可访问的属性：blogModule.AddTopic和blogModule.Name， 除此之外，其它代码都在匿名函数的闭包里保持着私有状态。同时根据上面传入全局变量的例子， 我们也可以很方便地传入其它的全局变量。
-</code></pre>
-
-<p>高级用法
-上面的内容对大多数用户已经很足够了，但我们还可以基于此模式延伸出更强大，易于扩展的结构，
-让我们一个一个来看。</p>
-
-<p>扩展</p>
-
-<p>Module模式的一个限制就是所有的代码都要写在一个文件，但是在一些大型项目里，
-将一个功能分离成多个文件是非常重要的，因为可以多人合作易于开发。再回头看看上面的全局参数导入例子，
-我们能否把blogModule自身传进去呢？答案是肯定的，我们先将blogModule传进去，添加一个函数属性，
-然后再返回就达到了我们所说的目的，上代码：</p>
-
-<pre><code>var blogModule = (function (my) {
-my.AddPhoto = function () {
-//添加内部代码
-};
-return my;
-} (blogModule)); 这段代码，看起来是不是有C#里扩展方法的感觉？有点类似，但本质不一样哦。同时尽管var不是必须的， 但为了确保一致，我们再次使用了它，代码执行以后，blogModule下的AddPhoto就可以使用了， 同时匿名函数内部的代码也依然保证了私密性和内部状态。
-</code></pre>
-
-<p>松耦合扩展</p>
-
-<p>上面的代码尽管可以执行，但是必须先声明blogModule，然后再执行上面的扩展代码，也就是说步骤不能乱，
-怎么解决这个问题呢？我们来回想一下，我们平时声明变量的都是都是这样的：</p>
-
-<pre><code>var cnblogs = cnblogs || {} ; 这是确保cnblogs对象，在存在的时候直接用，不存在的时候直接赋值为{}， 我们来看看如何利用这个特性来实现Module模式的任意加载顺序：
-
-var blogModule = (function (my) {
-// 添加一些功能
-return my;
-} (blogModule || {})); 通过这样的代码，每个单独分离的文件都保证这个结构，那么我们就可以实现任意顺序的加载， 所以，这个时候的var就是必须要声明的，因为不声明，其它文件读取不到哦。
-</code></pre>
-
-<p>紧耦合扩展</p>
-
-<p>虽然松耦合扩展很牛叉了，但是可能也会存在一些限制，比如你没办法重写你的一些属性或者函数，
-也不能在初始化的时候就是用Module的属性。
-紧耦合扩展限制了加载顺序，但是提供了我们重载的机会，看如下例子：</p>
-
-<pre><code>var blogModule = (function (my) {
-var oldAddPhotoMethod = my.AddPhoto;
-my.AddPhoto = function () {
-// 重载方法，依然可通过oldAddPhotoMethod调用旧的方法
-};
-return my;
-} (blogModule)); 通过这种方式，我们达到了重载的目的，当然如果你想在继续在内部使用原有的属性， 你可以调用oldAddPhotoMethod来用。
-</code></pre>
-
-<p>克隆与继承</p>
-
-<pre><code>var blogModule = (function (old) {
-var my = {}, key;
-for (key in old) {
-if (old.hasOwnProperty(key)) {
-my[key] = old[key];
-}
-}
-var oldAddPhotoMethod = old.AddPhoto;
-my.AddPhoto = function () {
-// 克隆以后，进行了重写，当然也可以继续调用oldAddPhotoMethod
-};
-return my;
-} (blogModule)); 这种方式灵活是灵活，但是也需要花费灵活的代价， 其实该对象的属性对象或function根本没有被复制，只是对同一个对象多了一种引用而已， 所以如果老对象去改变它，那克隆以后的对象所拥有的属性或function函数也会被改变， 解决这个问题，我们就得是用递归，但递归对function函数的赋值也不好用， 所以我们在递归的时候eval相应的function。不管怎么样，我还是把这一个方式放在这个帖子里了， 大家使用的时候注意一下就行了。
-</code></pre>
-
-<p>跨文件共享私有对象</p>
-
-<p>通过上面的例子，我们知道，如果一个module分割到多个文件的话，每个文件需要保证一样的结构，
-也就是说每个文件匿名函数里的私有对象都不能交叉访问，那如果我们非要使用，那怎么办呢？ 我们先看一段代码：</p>
-
-<pre><code>var blogModule = (function (my) {
-var _private = my._private = my._private || {},
-_seal = my._seal = my._seal || function () {
-delete my._private;
-delete my._seal;
-delete my._unseal;
-},_unseal = my._unseal = my._unseal || function () {
-my._private = _private;
-my._seal = _seal;
-my._unseal = _unseal;
-};
-return my;
-} (blogModule || {})); 任何文件都可以对他们的局部变量_private设属性， 并且设置对其他的文件也立即生效。一旦这个模块加载结束， 应用会调用 blogModule._seal()"上锁"，这会阻止外部接入内部的_private。 如果这个模块需要再次增生，应用的生命周期内，任何文件都可以调用_unseal() ”开锁”， 然后再加载新文件。加载后再次调用 _seal()”上锁”。
-</code></pre>
-
-<p>子模块</p>
-
-<p>最后一个也是最简单的使用方式，那就是创建子模块</p>
-
-<pre><code>blogModule.CommentSubModule = (function () {
-var my = {};
-// ...
-return my;
-} ()); 尽管非常简单，我还是把它放进来了，因为我想说明的是子模块也具有一般模块所有的高级使用方式， 也就是说你可以对任意子模块再次使用上面的一些应用方法。
-</code></pre>
-
-<p>总结</p>
-
-<p>上面的大部分方式都可以互相组合使用的，一般来说如果要设计系统，可能会用到松耦合扩展，
-私有状态和子模块这样的方式。另外，我这里没有提到性能问题，
-但我认为Module模式效率高，代码少，加载速度快。使用松耦合扩展允许并行加载，
-这更可以提升下载速度。不过初始化时间可能要慢一些，但是为了使用好的模式，这是值得的。</p>
-
-      <div class="readall"><a href="/blog/2014/09/27/Module.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/mysql.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -1435,7 +846,10 @@ return my;
   <a class="pagination-item older" href="/page/6">下一页&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
   
 </div>
-    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
     </div>
   </div>    
   <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>

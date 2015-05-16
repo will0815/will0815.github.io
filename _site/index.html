@@ -64,171 +64,19 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/11/04/mahout-xiangjie.html">mahout--初学</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/05/16/HBase-config-optimize.html">HBase config optimize</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年11月04日
+        2015年05月16日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <h2 id="mahout">Mahout</h2>
-<p><strong>What is Mahout</strong></p>
+      
 
-<p>官方解释：<br />
-The Apache Mahout project’s goal is to build a scalable machine learning library.<br />
-—-即一个可扩展的机器学习程序库<br />
-Mahout是Hadoop家族中与众不同的一个成员，他是基于一个Hadoop的机器学习和数据挖掘的分布式计算框架。是一个跨学科产品，是现在Hadoop生态环境中，对于普通开发者来说最具竞争力，最难掌握，也是最值得学习的一个项目之一。它为数据分析人员，降低了大数据分析的门槛；为算法工程师，提供基础的算法库；为Hadoop开发人员，提供了数据建模的标准。 <br />
-**Mahout 0.9 Applicable Models:  **</p>
-
-<pre><code>	• User and Item based recommenders （基于用户/物品推荐）
-	• Matrix factorization based recommenders （基于矩阵因数分解推荐）
-	• K-Means, Fuzzy K-Means clustering（K-Means 聚类）
-	• Latent Dirichlet Allocation （三层贝叶斯概率模型）
-	• Singular Value Decomposition （奇异值分解）
-	• Logistic regression classifier （逻辑回归 LR分类器）
-	• (Complementary) Naive Bayes classifier（朴素贝叶斯分类器）
-	• Random forest classifier （随机森林基于决策树的分类器）
-	• High performance java collections （高性能java集合(以前的colt集合)）
-	• A vibrant community （社区）
-</code></pre>
-
-<p><strong>Mahout运行/开发环境</strong><br />
-运行：<br />
-Mahout运行可以指定运行在hadoop上或是直接本地运行。 默认是在hadoop环境上运行，Mahout运行时会读取profile文件中我们配置的HADOOP_HOME和HADOOP_CONF_DIR项读取hadoop环境，从而在得以运行于hadoop上。 
-但是如果少量的数据分析可能不需要hadoop的介入，单机就能分析完成而且效率会更好，这时只需要在运行Mahout时加上参数 MAHOUT_LOCAL：设置是否本地运行，如果设置这个参数就不会运行hadoop了，一旦设置这个参数，那HADOOP_CONF_DIR 和HADOOP_HOME 这两个参数的设置就自动失效了。
-开发：<br />
-Mahout以maven构建，在开发Mahout相关程序时只需要在maven工程中引入Mahout相关依赖即可。如：  </p>
-
-<pre><code>&lt;dependencies&gt;
-		&lt;dependency&gt;
-			&lt;groupId&gt;org.apache.mahout&lt;/groupId&gt;
-			&lt;artifactId&gt;mahout-core&lt;/artifactId&gt;
-			&lt;version&gt;${mahout.version}&lt;/version&gt;
-		&lt;/dependency&gt;
-		&lt;dependency&gt;
-			&lt;groupId&gt;org.apache.mahout&lt;/groupId&gt;
-			&lt;artifactId&gt;mahout-integration&lt;/artifactId&gt;
-			&lt;version&gt;${mahout.version}&lt;/version&gt;
-			&lt;exclusions&gt;
-				&lt;exclusion&gt;
-					&lt;groupId&gt;org.mortbay.jetty&lt;/groupId&gt;
-					&lt;artifactId&gt;jetty&lt;/artifactId&gt;
-				&lt;/exclusion&gt;
-				&lt;exclusion&gt;
-					&lt;groupId&gt;org.apache.cassandra&lt;/groupId&gt;
-					&lt;artifactId&gt;cassandra-all&lt;/artifactId&gt;
-				&lt;/exclusion&gt;
-				&lt;exclusion&gt;
-					&lt;groupId&gt;me.prettyprint&lt;/groupId&gt;
-					&lt;artifactId&gt;hector-core&lt;/artifactId&gt;
-				&lt;/exclusion&gt;
-			&lt;/exclusions&gt;
-		&lt;/dependency&gt;
-	&lt;/dependencies&gt;
-</code></pre>
-
-<p>坑：在实际开发中如果只是像上面引用Mahout依赖，然后maven打包放到hadoop环境中去运行会出现各种问题，如jar包不兼容丢失等等。
-解决办法：参考Mahout-examples中的pom.xml配置加入 job.xml文件</p>
-
-<p><strong>Mahout学习路线图：</strong> 
-<img src="/image/mahout1.png" alt="" />  </p>
-
-<p><strong>聚类算法(clustering algorithm)</strong> 
-<strong><em>What is clustering</em></strong> <br />
-   Clustering–聚类,即将数据对象分组成为多个类或者簇 (Cluster)，它的目标：在同一个簇中的对象之间具有较高的相似度，而不同簇中的对象差别较大。即一个簇中的数据对象应当可以被作为一个整体来对待，从而减少计算量或者提高计算质量。 <br />
-聚类分析广泛的应用在许多应用中，包括模式识别，数据分析，图像处理以及市场研究。通过聚类，人们能意识到密集和稀疏的区域，发现全局的分布模式，以及数据属性之间的相互关系。<br />
-最被广泛使用的既是对 Web 上的文档进行分类，组织信息的发布，给用户一个有效分类的内容浏览系统（门户网站），同时可以加入时间因素，进而发现各个类内容的信息发展，最近被大家关注的主题和话题，或者分析一段时间内人们对什么样的内容比较感兴趣，这些有趣的应用都得建立在聚类的基础之上。作为一个数据挖掘的功能，聚类分析能作为独立的工具来获得数据分布的情况，观察每个簇的特点，集中对特定的某些簇做进一步的分析，此外，聚类分析还可以作为其他算法的预处理步骤，简化计算量，提高分析效率。它是数据挖掘及机器学习领域内的重点问题之一<br />
-   聚类是在给定的数据集合中寻找同类的数据子集合，每一个子集合形成一个类簇，同类簇中的数据具有更大的相似性。聚类算法大体上可分为基于划分的方法、基于层次的方法、基于密度的方法、基于网格的方法以及基于模型的方法。选择聚类算法是需要考虑如下几个方面：   </p>
-
-<pre><code>1.聚类结果是排他的还是可重叠的
-  一个元素，他是否可以属于聚类结果中的多个簇中，如果是，则是一个可重叠的聚类问题，如果否，那么是一个排他的聚类问题。
-2. 基于层次还是基于划分.
-  基于划分：一组对象，按照一定的原则将它们分成不同的组，这是典型的划分聚类问题
-  基于层次：顶层将对象进行大致的分组，随后每一组再被进一步的细分，也许所有路径最终都要到达一个单独实例（或者自底向上）
-3. 簇数目固定的还是无限制的聚类
-   聚类问题是在执行聚类算法前已经确定聚类的结果应该得到多少簇，还是根据数据本身的特征，由聚类算法选择合适的簇的数目。
-4. 基于距离还是基于概率分布模型
-   基于距离的聚类问题很好理解，即距离近的相似的对象聚在一起
-   基于概率分布模型的聚类问题，就是在一组对象中，找到能符合特定分布模型的点的集合，他们不一定是距离最近的或者最相似的，而是能完美的呈现出概率分布模型所描述的模型。
-</code></pre>
-
-<p><strong>Mahout clustering</strong> <br />
-数据模型<br />
-Mahout 的聚类算法将对象表示成一种简单的数据模型：向量 (Vector)。在向量数据描述的基础上，可以轻松的计算两个对象的相似性.Mahout 中的向量 Vector 是一个每个域是浮点数 (double) 的复合对象，最容易想到的实现就是一个浮点数的数组。但在具体应用由于向量本身数据内容的不同，比如有些向量的值很密集，每个域都有值；有些则是很稀疏，可能只有少量域有值，所以 Mahout 提供了多个实现：  </p>
-
-<pre><code>1. DenseVector，它的实现就是一个浮点数数组，对向量里所有域都进行存储，适合用于存储密集向量。
-2. RandomAccessSparseVector 基于浮点数的 HashMap 实现的，key 是整形 (int) 类型，value 是浮点数 (double) 类型，它只存储向量中不为空的值，并提供随机访问。
-3. SequentialAccessVector 实现为整形 (int) 类型和浮点数 (double) 类型的并行数组，它也只存储向量中不为空的值，但只提供顺序访问。
-</code></pre>
-
-<p><strong>K-Maens:</strong><br />
-K-Means算法是一种得到最广泛使用的基于划分的聚类算法，把n个对象分为k个簇，以使簇内具有较高的相似度。相似度的计算根据一个簇中对象的平均值来进行。算法首先随机地选择k个对象，每个对象初始地代表了一个簇的平均值或中心。对剩余的每个对象根据其与各个簇中心的距离，将它赋给最近的簇，然后重新计算每个簇的平均值。这个过程不断重复，直到准则函数收敛。
-K-Means是典型的基于距离的排他的划分方法：给定一个 n 个对象的数据集，它可以构建数据的 k 个划分，每个划分就是一个聚类，并且 k&lt;=n，同时还需要满足两个要求：  </p>
-
-<ol>
-  <li>每个组至少包含一个对象</li>
-  <li>每个对象必须属于且仅属于一个组。</li>
-</ol>
-
-<p>基本原理:  </p>
-
-<ol>
-  <li>首先创建一个初始划分，随机地选择 k 个对象，每个对象初始地代表了一个簇中心。对于其他的对象，根据其与各个簇中心的距离，将它们赋给最近的簇。</li>
-  <li>然后采用一种迭代的重定位技术，尝试通过对象在划分间移动来改进划分。所谓重定位技术，就是当有新的对象加入簇或者已有对象离开簇的时候，重新计算簇的平均值，然后对对象进行重新分配。这个过程不断重复，直到没有簇中对象的变化。</li>
-</ol>
-
-<p>优缺点：<br />
-首先原理简单，实现起来也相对简单，同时执行效率和对于大数据量的可伸缩性还是较强的。当结果簇是密集的，而且簇和簇之间的区别比较明显时，K-Means的效果比较好。<br />
-K-Means的最大问题是要求用户必须事先给出 k 的个数，k 的选择一般都基于一些经验值和多次实验结果，对于不同的数据集，k 的取值没有可借鉴性。另外，K 均值对“噪音”和孤立点数据是敏感的，少量这类的数据就能对平均值造成极大的影响。</p>
-
-<p>基于 Hadoop 的 Mahout K-Means聚类算法实现（主要步骤代码）</p>
-
-<pre><code>  //将原始数据randomData.csv，指定向量类型，转成Mahout sequence files of VectorWritable。
-    InputDriver.runJob(new Path(inPath), new Path(seqFile), "org.apache.mahout.math.RandomAccessSparseVector");
-    //指定聚类的簇数
-    //通过随机的方法，选中kmeans的3个中心，做为初始集群
-    int k = 3;
-    Path seqFilePath = new Path(seqFile);
-    Path clustersSeeds = new Path(seeds);
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
-    clustersSeeds = RandomSeedGenerator.buildRandom(conf, seqFilePath, clustersSeeds, k, measure);
-    //利用K-means算法实现聚类分析
-    //根据迭代次数的设置，执行MapReduce，进行 10次迭代计算
-    KMeansDriver.run(conf, seqFilePath, clustersSeeds, new Path(outPath), measure, 0.01, 10, true, 0.01, false);
-    Path outGlobPath = new Path(outPath, "clusters-*-final");
-    Path clusteredPointsPath = new Path(clusteredPoints);
-    System.out.printf("Dumping out clusters from clusters: %s and clusteredPoints: %s\n", outGlobPath, clusteredPointsPath);
-    //结果输出
-    ClusterDumper clusterDumper = new ClusterDumper(outGlobPath, clusteredPointsPath);
-    clusterDumper.printClusters(null);
-</code></pre>
-
-<p>对于K-Means不足的补救办法：<br />
-对于K-Means 需要事先指定簇数的不足，我们可以结合另一个聚类算法:canopy,从而解决这个不足。<br />
-<strong>Canopy 聚类算法：</strong><br />
-Canopy 聚类算法的基本原则是：首先应用成本低的近似的距离计算方法高效的将数据分为多个组，这里称为一个 Canopy，Canopy 之间可以有重叠的部分；然后采用严格的距离计算方式准确的计算在同一 Canopy 中的点，将他们分配与最合适的簇中。Canopy 聚类算法经常用于 K 均值聚类算法的预处理，用来找合适的 k 值和簇中心。  </p>
-
-<p>在Mahout的examples中的kmeans算法实现就是这种解决思维：</p>
-
-<pre><code>public static void run(Configuration conf, Path input, Path output, DistanceMeasure measure, double t1, 	double t2, double convergenceDelta, int maxIterations)throws Exception{
-	Path directoryContainingConvertedInput = new Path(output,DIRECTORY_CONTAINING_CONVERTED_INPUT);
-	log.info("Preparing Input");
-	InputDriver.runJob(input, directoryContainingConvertedInput,"org.apache.mahout.math.RandomAccessSparseVector");
-	log.info("Running Canopy to get initial clusters");
-	CanopyDriver.run(conf, directoryContainingConvertedInput, output, measure,t1, t2, false, false);
-	log.info("Running KMeans");
-	KMeansDriver.run(conf, directoryContainingConvertedInput, new Path(output,Cluster.INITIAL_CLUSTERS_DIR), output, measure,convergenceDelta,maxIterations, true, false);
-	// run ClusterDumper
-	ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-	output, maxIterations), new Path(output, "clusteredPoints"));
-	clusterDumper.printClusters(null);
-} CanopyDriver.run( ) ： 即用Canopy算法确定初始簇的个数和簇的中心。 KMeansDriver.run( ) ： K-means算法进行聚类。
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/11/04/mahout-xiangjie.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/05/16/HBase-config-optimize.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -236,179 +84,155 @@ Canopy 聚类算法的基本原则是：首先应用成本低的近似的距离�
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/10/12/nosqlhbase.html">nosql&hbase</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/05/16/DB-yanjin.html">DB演进理解</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年10月12日
+        2015年05月16日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+        <a class="post-category" href="/page/category.html#db">db</a>
       </p>
     </header>
     <div class="post-main">
-      <h2 id="nosqlhbase">NoSQL/Hbase</h2>
+      <h2 id="db">DB演进理解</h2>
 
-<p><strong>NoSQL (Not Only SQL )</strong></p>
+<ol>
+  <li>
+    <p>RDBMS<br />
+这是最熟悉的数据存储方式，一般情况下数据存储在一台机器上，这种形式方便提供完善ACID特性和丰富查询模型。这就是传统的关系型数据库的基础模式，但是面对现如今越来越大的数据量，这种模式的扩展变得难以满足。实践证明通过增加节点这种简单廉价的扩展方式是可行的。RDBMS的横向扩展主要有主从复制（Master-slave）、分表、分区等。 <br />
+横向扩展RDBMS – Master/Slave <br />
+利用数据库的复制或镜像功能，同时在多台数据库上保存相同的数据，从而将读操作和写操作分开，写操作集中在一台主数据库上，读操作集中在多台从数据库上。<br />
+问题：<br />
+读写同步需要一定的时间，导致关键的读取有出错风险；<br />
+主节点将数据复制到从节点，数据量很大是可能造成问题，  </p>
 
-<p>一项全新的数据库革命性运动，早期就有人提出，发展至2009年趋势越发高涨。NoSQL的拥护者们提倡运用非关系型的数据存储，相对于铺天盖地的关系型数据库运用，这一概念无疑是一种全新的思维的注入。任何技术的流行都有着现实的强烈需求，NoSQL也是如此，随着互联网的移动化、大数据化，超大规模和高并发的现实需求 传统的关系型数据暴露出越来越多难以满足的缺陷。如：</p>
+    <p>横向扩展RDBMS - Sharding <br />
+ 在满足ACID特性的数据库中进行扩展是非常难的。基于这个原因，对数据进行扩展，这个数据库本身就必须拥有简单的模型，将数据分割为N片，然后在单独的片中执行查询。数据分割的单元被称为“shard”。将N片数据分配个M个DBMS进行操作。DBMS并不会去管理数据片，程序开发负责数据片的处理。
+ 不同的分片方法有：<br />
+ - 垂直分区（Vertical Partitioning）：将不需要进行联合查询的数据表分散到不同的数据库服务器上。<br />
+ - 水平分区(sharding) 将同一个表的记录拆分到不同的表甚至是服务器上，这往往需要一个稳定的算法来保证读取时能正确从不同的服务器上取得数据。如Range-Based Partitioning, Key or Hash-Based partitioning等。<br />
+ 优点与不足<br />
+ - 对读取和写入都有很好的扩展<br />
+ - 不透明，程序需要识别分区 <br />
+ - 不再有跨分区的关系/joins <br />
+ - 参照完整性损失  </p>
 
-<pre><code>1、High performance - 对数据库高并发读写的需求
-2、Huge Storage - 对海量数据的高效率存储和访问的需求
-3、High Scalability &amp;&amp; High Availability- 对数据库的高可扩展性和高可用性的需求
+    <p>其他RDBMS扩展方法 <br />
+ Multi-Master replication：所有成员都响应客户端数据查询。多主复制系统负责将任意成员做出的数据更新传播给组内其他成员，并解决不同成员间并发修改可能带来的冲突。<br />
+ INSERT only, not UPDATES/DELETES：数据进行版本化处理。<br />
+ No JOINs, thereby reducing query time：Join的开销很大,而且频繁访问会使开销随着时间逐渐增加。<br />
+ 非规范化（Denormalization）可以降低数据仓库的复杂性，以提高效率和改善性能。<br />
+ In-memory databases：磁盘数据库解决的是大容量存储和数据分析问题，内存数据库解决的是实时处理和高并发问题。主流常规的RDBMS更多的是磁盘密集型，而不是内存密集型。  </p>
+
+    <p>ACID Transactions<br />
+ 一个完善的数据库系统都是希望支持“ACID transactions,”其包括:<br />
+ Atomic : Either the whole process is done or none is.（原子性）<br />
+ Consistent : Database constraints are preserved.（一致性）<br />
+ Isolated : It appears to the user as if only one process executes at a time.（隔离性）<br />
+ Durable : Effects of a process do not get lost if the system crashes.（持久性）  </p>
+  </li>
+  <li>
+    <p>NoSQL  </p>
+  </li>
+</ol>
+
+<p>NoSQL现在被理解为 Not Only SQL 的缩写，是对非关系型的数据库管理系统的统称
+NoSQL 与 RDBMS 不同点，<br />
+-不使用SQL作为查询语言。<br />
+-不需要固定的表模式(table schema)。<br />
+- 放宽一个或多个 ACID 属性（CAP定理）  </p>
+
+<p>补充：CAP理论<br />
+CAP理论是数据系统设计的基本理论，目前几乎所有的数据系统的设计都遵循了这个理论。CAP理论指出，分布式系统只能满足以下三项中的两项而不可能满足全部三项，<br />
+一致性（Consistency)（所有节点在同一时间具有相同的数据）<br />
+可用性（Availability）（保证每个请求不管成功或者失败都有响应）<br />
+分区容忍性（Partition tolerance）（系统中任意信息的丢失或失败不会影响系统的继续运作） </p>
+
+<p>一致性有两种类型：<br />
+- strong consistency – ACID(Atomicity Consistency Isolation Durability)：对于关系型数据库，要求更新过的数据能被后续所有的访问都看到，这是强一致性。<br />
+- weak consistency – BASE(Basically Available Soft-state Eventual consistency )
+– Basically Available - system seems to work all the time (基本可用)<br />
+– Soft State - it doesn’t have to be consistent all the time （不要求所有时间都一致）<br />
+– Eventually Consistent - becomes consistent at some later time （最终一致性）  </p>
+
+<p>对于分布式数据系统(scale out)，分区容忍性是基本要求，否则就失去了价值。因此只能在一致性和可用性上做取舍，如何处理这种取舍正是目前NoSQL数据库的核心焦点。牺牲一致性而换取高可用性。当然，牺牲一致性，只是不再要求关系数据库中的强一致性，而是只要系统能达到最终一致性即可。通常是通过数据的多份异步复制来实现系统的高可用和数据的最终一致性的。  </p>
+
+<p>NoSQL 的两种主要实现方式<br />
+1.Key/Value<br />
+Amazon S3 (Dynamo)<br />
+Voldemort <br />
+Scalaris <br />
+Memcached (in-memory key/value store)<br />
+Redis <br />
+2. 弱模式型（column-based, document-based or graph-based.）<br />
+Cassandra (column-based)<br />
+CouchDB (document-based)<br />
+MongoDB(document-based) <br />
+Neo4J (graph-based)<br />
+HBase (column-based)   </p>
+
+<p>K/V模式<br />
+优点:<br />
+very fast<br />
+very scalable<br />
+simple model<br />
+able to distribute horizontally<br />
+劣势: <br />
+ many data structures (objects) can’t be easily modeled as key value pairs （需要多余转换）<br />
+Schema-Less 模式<br />
+优点<br />
+Schema-less data model is richer than key/value pairs
+eventual consistency<br />
+many are distributed<br />
+still provide excellent performance and scalability<br />
+劣势<br />
+typically no ACID transactions or joins  </p>
+
+<ol>
+  <li>HBase  </li>
+</ol>
+
+<p>HBase is an open-source, distributed, column-oriented database built on top of HDFS (or KFS) based on BigTable! <br />
+按照CAP理论，HBase属于C+P类型的系统。HBase是强一致性的（仅支持单行事务）。每一行由单个区域服务器（region server）host，行锁（row locks）和多版本并发控制(multiversion concurrency control)的组合被用来保证行的一致性。<br />
+查找:<br />
+快速定位使用row key + column family + column + timestamp.<br />
+按范围查找：start row key – end row key.<br />
+全表扫描<br />
+交互方式<br />
+- Java, REST, or Thrift APIs.<br />
+- Scripting via JRuby.  </p>
+
+<p>HBase 一些特性  </p>
+
+<pre><code>- No real indexes（row key 即数据的索引）  
+- Automatic partitioning（region自动split）  
+- Scale linearly and automatically with new nodes（扩展容易 节点添加方便）  
+- Commodity hardware（廉价硬件）  
+- Fault tolerance(较强的容错性)  
+- Batch processing(批处理能力优秀)  
 </code></pre>
 
-<p>什么是NoSQL：</p>
+<ol>
+  <li>
+    <p>Hive    </p>
 
-<p>wiki上的定义是“NoSQL is a movement promoting a loosely defined class of non-relational data stores that break with a long history of relational databases”。其实并不存在一个叫NoSQL的产品，它是一类non-relational data stores的集合。NoSQL的重点是non-relational，而传统的数据库是relational。传统关系型数据库的最大缺陷是扩展性，虽然各个数据库厂家都有cluster的解决方案，但是不管是share storage还是share nothing的解决方案，扩展性都十分有限。目前解决数据库扩展性的思路主要有两个：第一是数据分片(sharding)或者功能分区，虽然说可以很好的解决数据库扩展性的问题，但是在实际使用过程中，一旦采用数据分片或者功能分区，必然会导致牺牲“关系型”数据库的最大优势-join，对业务局限性非常大，而数据库也退化成为一个简单的存储系统。另外一个思路是通过maser-slave复制的方式，通过读写分离技术在某种程度上解决扩展性的问题，但这种方案中，由于每个数据库节点必须保存所有的数据，这样每个存储的IO subsystem必然成为扩展的瓶颈，而且masert节点也是一个瓶颈。总的来说，传统关系型数据库的扩展能力十分有限。</p>
+    <ul>
+      <li>Provide higher-level language (HQL, like SQL) to facilitate large-data processing</li>
+      <li>Higher-level language “compiles down” to Hadoop Map/Reduce jobs</li>
+    </ul>
+  </li>
+  <li>
+    <p>Hive + HBase  </p>
 
-<p>NoSQL与关系型数据库在概念上的不同：</p>
+    <p>Reasons to use Hive on HBase:<br />
+ A lot of data sitting in HBase due to its usage in a real-time environment, but never used for analysis<br />
+ Give access to data in HBase usually only queried through MapReduce to people that don’t code (business analysts)<br />
+ When needing a more flexible storage solution, so that rows can be updated live by either a Hive job or an application and can be seen immediately to the other</p>
+  </li>
+</ol>
 
-<p>CAP：</p>
 
-<pre><code>Consistency(一致性)，数据一致更新，所有数据变动都是同步的
-Availability(可用性)，好的响应性能
-Partition tolerance(分区容错性) 可靠性 CAP原理告诉我们，这三个因素最多只能满足两个，不可能三者兼顾。对于分布式系统来说，分区容错是基本要求，所以必然要放弃一致性。对于大型网站来说，分区容错和可用性的要求更高，所以一般都会选择适当放弃一致性。对应CAP理论，NoSQL追求的是AP，而传统数据库追求的是CA，这也可以解释为什么传统数据库的扩展能力有限的原因。
-</code></pre>
-
-<p>BASE：</p>
-
-<pre><code>Basically Availble：基本可用
-Soft-state： 软状态/柔性事务
-Eventual Consistency：最终一致性 BASE模型是传统ACID模型的反面，不同与ACID，BASE强调牺牲高一致性，从而获得可用性，数据允许在一段时间内的不一致，只要保证最终一致就可以了。最终一致性是整个NoSQL中的一个核心理念。
-</code></pre>
-
-<p>现如今NoSQL产品分类：</p>
-
-<pre><code>Key-Value模型：Key-Value模型是最简单，也是使用最方便的数据模型，它支持简单的key对value的键值存储和提取；Key-Value模型的一个大问题是它通常是由HashTable实现的，所以无法进行范围查询，所以有序Key-Value模型就出现了，有序Key-Value支持范围查询；
-
-Ordered Key-Value：虽然有序Key-Value模型能够解决范围查询和问题，但是其Value值依然是无结构的二进制码或纯字符串，通常我们只能在应用层去解析相应的结构。
-
-BigTable的数据模型，能够支持结构化的数据，包括列、列簇、时间戳以及版本控制等元数据的存储；
-文档型存储相对到类BigTable存储又有两个大的提升，一是其Value值支持复杂的结构定义，二是支持数据库索引的定义；全文索引模型与文档型存储的主要区别在于文档型存储的索引主要是按照字段名来组织的，而全文索引模型是按字段的具体值来组织的；
-
-图数据库模型也可以看作是从Key-Value模型发展出来的一个分支，不同的是它的数据之间有着广泛的关联，并且这种模型支持一些图结构的算法。
-他们之间的关系幽默的表示如下： ![](/image/nosql.jpg)
-</code></pre>
-
-<p>目前NoSQL几个分类的代表产品： </p>
-
-<pre><code>Key-Value 存储：Oracle Coherence、Redis、Kyoto Cabinet
-类BigTable存储：Apache HBase、Apache Cassandra
-文档数据库：MongoDB、CouchDB
-全文索引：Apache Lucene、Apache Solr
-图数据库：neo4j、FlockDB
-</code></pre>
-
-<p><strong>NoSQL 之Hbase</strong></p>
-
-<p>Hbase是从hadoop中分离出来的apache顶级开源项目。用java实现了Google的Bigtable系统大部分特性，是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，利用HBase技术可在廉价PC Server上搭建起大规模结构化存储集群。类似Google Bigtable利用GFS作为其文件存储系统，HBase利用Hadoop HDFS作为其文件存储系统；Google Bigtable利用 Chubby作为协同服务，HBase利用Zookeeper作为对应。</p>
-
-<p>Hbase在Hadoop 生态环境中的位置：
-<img src="/image/hbase-local-in-hadooop.jpg" alt="" /></p>
-
-<p>如上图HBase位于Hadoop ecosystem结构化存储层，Hadoop HDFS为HBase提供了高可靠性的底层存储支持，Hadoop MapReduce为HBase提供了高性能的计算能力，Zookeeper为HBase提供了稳定服务和failover机制。此外，Pig和Hive还为HBase提供了高层语言支持，使得在HBase上进行数据统计处理变的非常简单。 Sqoop则为HBase提供了方便的RDBMS数据导入功能，使得传统数据库数据向HBase中迁移变的非常方便。与hadoop一样，Hbase目标主要依靠横向扩展，通过不断增加廉价的商用服务器，来增加计算和存储能力。</p>
-
-<p>HBase中的表一般有这样的特点：</p>
-
-<pre><code>1 大：一个表可以有上亿行，上百万列
-2 面向列:面向列(族)的存储和权限控制，列(族)独立检索。
-3 稀疏:对于为空(null)的列，并不占用存储空间，因此，表可以设计的非常稀疏。
-</code></pre>
-
-<p><strong>HBase数据模型</strong></p>
-
-<p>Table:</p>
-
-<pre><code>table
-  |-column family
-  	|-column
-  		|-cell
-			|-rowkey
-			|-timestamp
-  			|-value HBase没有database的概念。rowkey是数据的一部分，其必须人工指定。 column family 在定义表时需指明。数据存储逻辑视图如下：
-
-Row Key	Timestamp	Column Family
-		URI	Parser
-r1	T3	url=http://www.xxxx.com	title=xxxx
-	T2	host=xxxx.com	 
-	T1	 	 
-r2	T2	url=http://www.xxxx.com	content=xxxx…
-	T1	host=xxxx.com	 
-
-Ø Row Key: 行键，Table的主键，Table中的记录按照Row Key排序
-Ø Timestamp: 时间戳，每次数据操作对应的时间戳，可以看作是数据的version number
-Ø Column Family：列簇，Table在水平方向有一个或者多个Column Family组成，
-一个Column Family中可以由任意多个Column组成，即Column Family支持动态扩展，
-无需预先定义Column的数量以及类型，所有Column均以二进制格式存储，用户需要自行进行类型转换。
-</code></pre>
-
-<p>Region:</p>
-
-<pre><code>当Table随着记录数不断增加而变大后，会逐渐分裂成多份splits，成为regions，一个region由
-[startkey,endkey)表示，不同的region会被Master分配给相应的RegionServer进行管理：
-</code></pre>
-
-<p>-ROOT- &amp;&amp; .META. Table</p>
-
-<pre><code>HBase中有两张特殊的Table，-ROOT-和.META.
-Ø .META.：记录了用户表的Region信息，.META.可以有多个regoin
-Ø -ROOT-：记录了.META.表的Region信息，-ROOT-只有一个region
-Ø Zookeeper中记录了-ROOT-表的location
-</code></pre>
-
-<p>Hbase整体寻址结构如下：</p>
-
-<pre><code> ![](/image/hbase-addre.jpg)
-</code></pre>
-
-<p>Client访问用户数据之前需要首先访问zookeeper，然后访问-ROOT-表，接着访问.META.表，最后才能找到用户数据的位置去访问，中间需要多次网络操作，不过client端会做cache缓存。
-HBase系统架构</p>
-
-<p><img src="/image/hbase-structure.jpg" alt="" /></p>
-
-<p>Client</p>
-
-<pre><code>HBase Client使用HBase的RPC机制与HMaster和HRegionServer进行通信，对于管理类操作，
-Client与HMaster进行RPC；对于数据读写类操作，Client与HRegionServer进行RPC Zookeeper
-
-Zookeeper Quorum中除了存储了-ROOT-表的地址和HMaster的地址，HRegionServer也会把自己以
-Ephemeral方式注册到 Zookeeper中，使得HMaster可以随时感知到各个HRegionServer的健康状态
-。此外，Zookeeper也避免了HMaster的 单点问题。 HMaster
-
-HMaster没有单点问题，HBase中可以启动多个HMaster，通过Zookeeper的Master Election机
-制保证总有一个Master运行，HMaster在功能上主要负责Table和Region的管理工作：
-1.       管理用户对Table的增、删、改、查操作
-2.       管理HRegionServer的负载均衡，调整Region分布
-3.       在Region Split后，负责新Region的分配
-4.       在HRegionServer停机后，负责失效HRegionServer 上的Regions迁移 HRegionServer
-</code></pre>
-
-<p><img src="/image/region-server.jpg" alt="" /></p>
-
-<p>HRegionServer主要负责响应用户I/O请求，向HDFS文件系统中读写数据，是HBase中最核心的模块。
-HRegionServer内部管理了一系列HRegion对象，每个HRegion对应了Table中的一个Region，HRegion中由多 个HStore组成。每个HStore对应了Table中的一个Column Family的存储，可以看出每个Column Family其实就是一个集中的存储单元，因此最好将具备共同IO特性的column放在一个Column Family中，这样最高效。</p>
-
-<p>HStore存储是HBase存储的核心了，其中由两部分组成，一部分是MemStore，一部分是StoreFiles。MemStore是 Sorted Memory Buffer，用户写入的数据首先会放入MemStore，当MemStore满了以后会Flush成一个StoreFile（底层实现是HFile）， 当StoreFile文件数量增长到一定阈值，会触发Compact合并操作，将多个StoreFiles合并成一个StoreFile，合并过程中会进 行版本合并和数据删除，因此可以看出HBase其实只有增加数据，所有的更新和删除操作都是在后续的compact过程中进行的，这使得用户的写操作只要 进入内存中就可以立即返回，保证了HBase I/O的高性能。当StoreFiles Compact后，会逐步形成越来越大的StoreFile，当单个StoreFile大小超过一定阈值后，会触发Split操作，同时把当前 Region Split成2个Region，父Region会下线，新Split出的2个孩子Region会被HMaster分配到相应的HRegionServer 上，使得原先1个Region的压力得以分流到2个Region上。下图描述了Compaction和Split的过程：</p>
-
-<p><img src="/image/region-compacte.png" alt="" /></p>
-
-<p>在理解了上述HStore的基本原理后，还必须了解一下HLog的功能，因为上述的HStore在系统正常工作的前提下是没有问题的，但是在分布式 系统环境中，无法避免系统出错或者宕机，因此一旦HRegionServer意外退出，MemStore中的内存数据将会丢失，这就需要引入HLog了。 每个HRegionServer中都有一个HLog对象，HLog是一个实现Write Ahead Log的类，在每次用户操作写入MemStore的同时，也会写一份数据到HLog文件中，HLog文件定期会滚动出新的，合并删除旧的文件（已持久化到StoreFile中的数据）。当HRegionServer意外终止后，HMaster会通过Zookeeper感知到，HMaster首先会处理遗留的 HLog文件，将其中不同Region的Log数据进行拆分，分别放到相应region的目录下，然后再将失效的region重新分配，领取 到这些region的HRegionServer在Load Region的过程中，会发现有历史HLog需要处理，因此会Replay HLog中的数据到MemStore中，然后flush到StoreFiles，完成数据恢复。</p>
-
-<pre><code>HBase实践总结：
-column family 不应超过两个，因为一个column family 对应一个store，flush和compaction的触发的基本单位都是Region级别，所以当一个column family有大量的数据的时候会触发整个region里面的其他column family的memstore（其实这些memstore可能仅有少量的数据，还不需要flush的）也发生flush动作；另外compaction触发的条件是当store file的个数（不是总的store file的大小）达到一定数量的时候会发生，而flush产生的大量store file通常会导致compaction，flush/compaction会发生很多IO相关的负载，这对Hbase的整体性能有很大影响。
-
-一个table对应一个或多个region，在map/reduce 中对应一个map 一个column family 对应一个store。 store 中含一个menstore 和多个fileStore 当menstore 存储到达一定阀值就生成一个filestore， fileStore存放在hdfs上， 当fileStore 数量到达一定阀值就将其合并成一个大的file。
-
-在插入rowkey时，不考虑region的大小及状态，只是根据它的access 编码排序，找到对应的startkey，endkey,确定插入的位置。
-HBase两张管理表：+ .META.:管理用户region，它可以有多个region。 ROOT: 管理.META.的region，它只有一个region。 所以读写数据的流程为： client–&gt;ROOT–&gt;META–&gt;regionserver 在数据的读写过程中client不会与master产生关系 master只是负责管理表结构。
-
-利用backup-master机制，解决master单点的问题。
-region在存储的数据到达一定阀值后将split，split的同时更形.META.和ROOT表的相关数据。 split region的过程不需要master的参与，master只负责将split后新的region分配到对应的regionserver。
-
-HBase的数据安全机制之一：在插入数据时先写Hlog然后在写到内存。 一个regionserver中只有一个Hlog， Hlog中只记录内存中存放的数据。 当机器挂掉后，master会根据Hlog中region将其分割，然后分配到不同的机器加载，做数据恢复。
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/10/12/nosqlhbase.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/05/16/DB-yanjin.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -416,123 +240,137 @@ HBase的数据安全机制之一：在插入数据时先写Hlog然后在写到�
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/10/09/zookeeper-install.html">zookeeper install</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/05/16/CDH-install-question.html">CDH 安装问题</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年10月09日
+        2015年05月16日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <p><strong>Zookeeper集群安装配置</strong></p>
+      <p><em>CDH5安装参照：http://www.tuicool.com/articles/ENjmeaY</em><br />
+Q1:安装过程中提示找不到MySQL 驱动jar包<br />
+	：在/usr/shar/java 中添加mysql-connector-java-5.1.30-bin.jar<br />
+Q2：安装hive提示找不到MySQL驱动jar包<br />
+：在/opt/cloudera/parcels/CDH-5.1.3-1.cdh5.1.3.p0.12/lib/hive/lib/ 中添加 mysql-connector-java-5.1.30-bin.jar<br />
+Q3: cloudera-server 或cloudera-agent  status 提示服务已经停止，pid仍然存在<br />
+	：查看对应的log 可能是端口占用或是数据库连接问题<br />
+Q4:MR2和HDFS安装好后 web ui无法访问，查看对应端口已经处于listen状态，<br />
+	：分别在对应的配置中的端口和地址选项中将“将 ResourceManager 绑定到通配符地址”项， 勾选上<br />
+没有这个选项的可以在高级设置中在XML文件中添加<br />
+Q5：jdk版本不对应<br />
+	： CDH默认获取的jdk 位于：/usr/java   可将需要的jdk 拷贝到这个目录中。  </p>
+
+<p>Q6  sqoop导入数据时：User does not belong to hive<br />
+	I had same issue with permissions -&gt; chgrp: changing ownership of ‘/user/hive/warehouse/test/_log24310.txt’: User does not belong to hive.
+1.Added the existing user named cloudera to existing group named hive with command: usermod -a -G hive cloudera 
+2.Restarted the system 
+3.Used Load Command and after that did a select * from table_name -&gt; No data was getting displayed. 
+4.Executed select count(*) from table_name and a MapReduce job got started. 
+5.Executed select * from table and now results was returned correctly. 
+6.Opened a impala shell using impala-shell command. 
+7.Executed a select * from table_name and no results was getting returned. 
+8.Executed command invalidate metadata in the impala-shell 
+9.Executed command refresh table_name 
+10.Executed command show tables 
+11.Executed command select * from table_name and now results are getting displayed both in the impala-shell and hive shell. 
+  可以不必理会</p>
+
+<p>Q6：spark 安装不上<br />
+	未解决，网上有对应bug</p>
+
+<p>整个安装过程中遇到各种问题，主要解决得途径还是查看对应的log文件对应解决：<br />
+/var/log/hadoop*<br />
+/var/log/cloudera*<br />
+/opt/cm-5.1.3/log  </p>
+
+<h6 id="about">===========================about==================================================================================================================================</h6>
+<p>问题导读  </p>
+
+<pre><code>1.CM的安装目录在什么位置？  
+2.hadoop配置文件在什么位置？  
+3.Cloudera manager运行所需要的信息存在什么位置？  
+4.CM结构和功能是什么？  
+1. 相关目录  
+/var/log/cloudera-scm-installer : 安装日志目录。  
+/var/log/* : 相关日志文件（相关服务的及CM的）。  
+/usr/share/cmf/ : 程序安装目录。  
+/usr/lib64/cmf/ : Agent程序代码。  
+/var/lib/cloudera-scm-server-db/data : 内嵌数据库目录。  
+/usr/bin/postgres : 内嵌数据库程序。  
+/etc/cloudera-scm-agent/ : agent的配置目录。  
+/etc/cloudera-scm-server/ : server的配置目录。  
+/opt/cloudera/parcels/ : Hadoop相关服务安装目录。  
+/opt/cloudera/parcel-repo/ : 下载的服务软件包数据，数据格式为parcels。  
+/opt/cloudera/parcel-cache/ : 下载的服务软件包缓存数据。  
+/etc/hadoop/* : 客户端配置文件目录。  
+</code></pre>
+
+<ol>
+  <li>配置    </li>
+</ol>
+
+<p>Hadoop配置文件<br />
+配置文件放置于/var/run/cloudera-scm-agent/process/目录下。如：/var/run/cloudera-scm-agent/process/193-hdfs-NAMENODE/core-site.xml。这些配置文件是通过Cloudera Manager启动相应服务（如HDFS）时生成的，内容从数据库中获得（即通过界面配置的参数）。<br />
+在CM界面上更改配置是不会立即反映到配置文件中，这些信息会存储于数据库中，等下次重启服务时才会生成配置文件。且每次启动时都会产生新的配置文件。<br />
+CM Server主要数据库为scm基中放置配置的数据表为configs。里面包含了服务的配置信息，每一次配置的更改会把当前页面的所有配置内容添加到数据库中，以此保存配置修改历史。<br />
+scm数据库被配置成只能从localhost访问，如果需要从外部连接此数据库，修改vim /var/lib/cloudera-scm-server-db/data/pg_hba.conf文件,之后重启数据库。运行数据库的用户为cloudera-scm。  </p>
+
+<p>查看配置内容<br />
+1.直接查询scm数据库的configs数据表的内容。  <br />
+2.访问REST API： http://hostname:7180/api/v4/cm/deployment，返回JSON格式部署配置信息。  </p>
+
+<p>配置生成方式<br />
+CM为每个服务进程生成独立的配置目录（文件）。所有配置统一在服务端查询数据库生成（因为scm数据库只能在localhost下访问）生成配置文件，再由agent通过网络下载包含配置文件的zip包到本地解压到指定的目录。  </p>
+
+<p>配置修改<br />
+CM对于需要修改的配置预先定义，对于没有预先定义的配置,则通过在高级配置项中使用xml配置片段的方式进行配置。而对于/etc/hadoop/下的配置文件是客户端的配置，可以在CM通过部署客户端生成客户端配置。  </p>
+
+<ol>
+  <li>数据库<br />
+Cloudera manager主要的数据库为scm,存储Cloudera manager运行所需要的信息：配置，主机，用户等。  </li>
+  <li>CM结构 </li>
+</ol>
+
+<p>CM分为Server与Agent两部分及数据库（自带更改过的嵌入Postgresql）。它主要做三件事件：</p>
+
+<pre><code>1.管理监控集群主机。
+2.统一管理配置。
+3.管理维护Hadoop平台系统。
+实现采用C/S结构，Agent为客户端负责执行服务端发来的命令，执行方式一般为使用python调用相应的服务shell脚本。Server端为Java REST服务，提供REST API，Web管理端通过REST API调用Server端功能，Web界面使用富客户端技术（Knockout）。
+1.Server端主体使用Java实现。
+2.Agent端主体使用Python, 服务的启动通过调用相应的shell脚本进行启动，如果启动失败会重复4次调用启动脚本。
+3.Agent与Server保持心跳，使用Thrift RPC框架。
+</code></pre>
+
+<ol>
+  <li>升级  </li>
+</ol>
+
+<p>在CM中可以通过界面向导升级相关服务。升级过程为三步：</p>
+
+<pre><code>1.下载服务软件包。
+2.把所下载的服务软件包分发到集群中受管的机器上。
+3.安装服务软件包，使用软链接的方式把服务程序目录链接到新安装的软件包目录上。
+</code></pre>
+
+<ol>
+  <li>卸载  </li>
+</ol>
+
+<p>sudo /usr/share/cmf/uninstall-scm-express.sh, 然后删除/var/lib/cloudera-scm-server-db/目录，不然下次安装可能不成功。</p>
 
 <ol>
   <li>
-    <p>修改zookeeper配置文件zoo.cfg</p>
+    <p>开启postgresql远程访问  </p>
 
-    <p>在Linux系统下解压zookeeper安装包zookeeper-3.4.3.tar.gz ，进入到conf目录，将zoo_sample.cfg拷贝一份命名为zoo.cfg（Zookeeper 在启动时会找这个文件作为默认配置文件），打开该文件进行修改为以下格式</p>
-
-    <pre><code> dataDir=/home/hadoop/temp/zookeeper/data
- server.23=192.168.6.23:2888:3888
- server.24=192.168.6.24:2888:3888
- server.25=192.168.6.25:2888:3888
-</code></pre>
-  </li>
-  <li>
-    <p>新建目录、新建并编辑myid文件
-（本次配置myid文件放在/home/hadoop/temp/zookeeper/data目录下）</p>
-
-    <pre><code> mkdir /home/hadoop/will/zookeeper/data	//dataDir目录
- vi /home/hadoop/temp/zookeeper/data/myid  注意myid文件中的内容为：Master中为0，Slave1中为1，Slave2中为2，分别与zoo.cfg中对应起来。
-</code></pre>
-  </li>
-  <li>
-    <p>同步安装包</p>
-
-    <p>将解压修改后的zookeeper-3.4.3文件夹分别拷贝到Master、Slave1、Slave2的相同zookeeper安装路径下。注意：myid文件的内容不是一样的，各服务器中分别是对应zoo.cfg中的设置。</p>
-  </li>
-  <li>
-    <p>启动zookeeper
- Zookeeper的启动与hadoop不一样，需要每个节点都执行，分别进入3个节点的zookeeper-3.4.3目录，启动zookeeper：</p>
-
-    <pre><code> bin/zkServer.sh start  注意：此时如果报错先不理会，需要继续在另两台服务器中执行相同操作。 
-</code></pre>
-  </li>
-  <li>
-    <p>检查zookeeper是否配置成功
- 待3台服务器均启动后，如果过程正确的话zookeeper应该已经自动选好leader，进入每台服务器的zookeeper-3.4.3目录，执行以下操作查看zookeeper启动状态：</p>
-
-    <pre><code> bin/zkServer.sh status  如果出现以下代码表示安装成功了。
-
- [java] view plaincopy
- JMX enabled by default  
- Using config: /home/hadoop/zookeeper-3.4.3/bin/../conf/zoo.cfg  
- Mode: follower	//或者有且只有一个leader
-</code></pre>
+    <p>CM内嵌数据库被配置成只能从localhost访问，如果需要从外部查看数据，数据修改vim /var/lib/cloudera-scm-server-db/data/pg_hba.conf文件,之后重启数据库。运行数据库的用户为cloudera-scm。</p>
   </li>
 </ol>
 
-<h2 id="zookeeper">2 - 解读zookeeper的配置项</h2>
-<p>zookeeper的默认配置文件为zookeeper/conf/zoo_sample.cfg，需要将其修改为zoo.cfg。其中各配置项的含义，解释如下：</p>
-
-<ol>
-  <li>
-    <p>tickTime：CS通信心跳数</p>
-
-    <p>Zookeeper 服务器之间或客户端与服务器之间维持心跳的时间间隔，也就是每个 tickTime 时间就会发送一个心跳。tickTime以毫秒为单位。
- 1.tickTime=2000  </p>
-  </li>
-  <li>
-    <p>initLimit：LF初始通信时限</p>
-
-    <p>集群中的follower服务器(F)与leader服务器(L)之间初始连接时能容忍的最多心跳数（tickTime的数量）。
- 1.initLimit=5  </p>
-  </li>
-  <li>
-    <p>syncLimit：LF同步通信时限</p>
-
-    <p>集群中的follower服务器与leader服务器之间请求和应答之间能容忍的最多心跳数（tickTime的数量）。
- 1.syncLimit=2  
- </p>
-  </li>
-  <li>
-    <p>dataDir：数据文件目录</p>
-
-    <p>Zookeeper保存数据的目录，默认情况下，Zookeeper将写数据的日志文件也保存在这个目录里。
- 1.dataDir=/home/michael/opt/zookeeper/data  </p>
-  </li>
-  <li>
-    <p>dataLogDir：日志文件目录</p>
-
-    <p>Zookeeper保存日志文件的目录。
- 1.dataLogDir=/home/michael/opt/zookeeper/log  </p>
-  </li>
-  <li>
-    <p>clientPort：客户端连接端口</p>
-
-    <p>客户端连接 Zookeeper 服务器的端口，Zookeeper 会监听这个端口，接受客户端的访问请求。
- 1.clientPort=2333  </p>
-  </li>
-  <li>
-    <p>服务器名称与地址：集群信息（服务器编号，服务器地址，LF通信端口，选举端口）</p>
-
-    <p>这个配置项的书写格式比较特殊，规则如下：
- 1.server.N=YYY:A:B  </p>
-
-    <p>其中N表示服务器编号，YYY表示服务器的IP地址，A为LF通信端口，表示该服务器与集群中的leader交换的信息的端口。B为选举端口，表示选举新leader时服务器间相互通信的端口（当leader挂掉时，其余服务器会相互通信，选择出新的leader）。一般来说，集群中每个服务器的A端口都是一样，每个服务器的B端口也是一样。但是当所采用的为伪集群时，IP地址都一样，只能时A端口和B端口不一样。
- 如：</p>
-
-    <pre><code> 1.server.0=192.168.6.23:2008:6008  
- 2.server.1=192.168.6.24:2008:6008  
- 3.server.2=192.168.6.25:2008:6008  
- 4.server.3=192.168.6.26:2008:6008  
-</code></pre>
-  </li>
-</ol>
-
-      <div class="readall"><a href="/blog/2014/10/09/zookeeper-install.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/05/16/CDH-install-question.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -540,248 +378,166 @@ HBase的数据安全机制之一：在插入数据时先写Hlog然后在写到�
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/10/09/Tuning-Hadoop.html">Tuning Hadoop</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point9.html">Linux学习笔记9-AWK</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年10月09日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h2 id="hadoop">Hadoop集群性能调优</h2>
-
-<p><strong>mapred-site.xml</strong></p>
-
-<ol>
-  <li>
-    <p>mapred.child.java.opts</p>
-
-    <p>配置每个map或reduce使用的内存数量。默认的是200M。网友推荐：如果内存是8G，CPU有8个核，那么就设置成1G就可以了。实际上，在map和reduce的过程中对内存的消耗并不大，但是如果配置的太小，则有可能出现”无可分配内存”的错误。对于Hadoop环境独占的机器可以考虑：总内存 / (Map/Reduce 并发数) * 80%</p>
-  </li>
-  <li>
-    <p>dfs.block.size </p>
-
-    <p>生的map来综合考量的。一般来说，文件大，集群数量少，还是建议将block size设置大一些的好。</p>
-  </li>
-  <li>
-    <p>mapred.compress.map.output </p>
-
-    <p>几乎所有会产生大量map output的hadoop作业，都能够通过将中间文件用Lzo进行压缩来提升性能。尽管lzo会使得cpu的load有所增高，但是reduce在shuffle阶段的disk IO通常都能节省不少时间，对job的性能有好处。
- 当采用map中间结果压缩的情况下，用户还可以选择压缩时采用另外几种压缩格式进行压缩，现在hadoop支持的压缩格式 有：GzipCodec，LzoCodec，BZip2Codec，LzmaCodec等压缩格式。通常来说，想要达到比较平衡的cpu和磁盘压缩 比，LzoCodec比较适合。但也要取决于job的具体情况。</p>
-
-    <pre><code> &lt;property&gt;
-     &lt;name&gt;mapred.compress.map.output&lt;/name&gt;
-     &lt;value&gt;true&lt;/value&gt;
-   &lt;/property&gt;
- &lt;property&gt; 
-     &lt;name&gt;mapred.map.output.compression.codec&lt;/name&gt; 
-     &lt;value&gt;com.hadoop.compression.lzo.LzoCodec&lt;/value&gt; 
- &lt;/property&gt;  
-</code></pre>
-  </li>
-  <li>
-    <p>mapred.tasktracker.map.tasks.maximum</p>
-
-    <p>The maximum number of map tasks that will be run simultaneously by a task tracker.</p>
-
-    <p>一个tasktracker最多可以同时运行的map任务数量
- 默认值：2
- mapred.tasktracker.map.tasks.maximum = cpu数量
- Sanders: 应该设置成为等于或略小于CPU总核数
- cpu数量 = 服务器CPU总核数 / 每个CPU的核数
- 服务器CPU总核数 = more  /proc/cpuinfo | grep ‘processor’ | wc -l
- 每个CPU的核数 = more  /proc/cpuinfo | grep ‘cpu cores’</p>
-  </li>
-  <li>
-    <p>mapred.map.tasks</p>
-
-    <p>The default number of map tasks per job
- 一个Job会使用task tracker的map任务槽数量，这个值 ≤ mapred.tasktracker.map.tasks.maximum
- 默认值：2
- 优化值：
- CPU数量 （我们目前的实践值）
- (CPU数量 &gt; 2) ? (CPU数量 * 0.75) : 1  （mapr的官方建议）</p>
-  </li>
-  <li>
-    <p>io.sort.mb    </p>
-
-    <p>每一个map都会对应存在一个内存 buffer， map会将已经产生的部分结果先写入到该buffer中，这个buffer默认是100MB大小. 当map的产生数据非常大时，并且把io.sort.mb调 大，那么map在整个计算过程中spill的次数就势必会降低，map task对磁盘的操作就会变少，如果map tasks的瓶颈在磁盘上，这样调整就会大大提高map的计算性能。</p>
-  </li>
-  <li>io.sort.spill.percent  <br />
- 这个值就是上述buffer的阈值，默认是0.8，既80%，当buffer中的数据达到这个阈值，后台线程会起来对buffer中已有的数据进行排序，然后写入磁盘，此时map输出的数据继续往剩余的20% buffer写数据，如果buffer的剩余20%写满，排序还没结束，map task被block等待。</li>
-  <li>
-    <p>io.sort.factor   <br />
- 当一个map task执行完之后，本地磁盘上(mapred.local.dir)有若干个spill文件，map task最后做的一件事就是执行merge sort，把这些spill文件合成一个文件（partition），有时候我们会自定义partition函数，就是在这个时候被调用。</p>
-
-    <p>当map的中间结果非常大，调大io.sort.factor，有利于减少merge次数，进而减少 map对磁盘的读写频率，有可能达到优化作业的目的。</p>
-
-    <p>默认是10</p>
-  </li>
-</ol>
-
-<p><strong>Reducer</strong></p>
-
-<ol>
-  <li>
-    <p>mapred.tasktracker.reduce.tasks.maximum</p>
-
-    <p>The maximum number of reduce tasks that will be run simultaneously by a task tracker.
- 一个task tracker最多可以同时运行的reduce任务数量
- 默认值：2
- 优化值： (CPU数量 &gt; 2) ? (CPU数量 * 0.50): 1 （mapr的官方建议）</p>
-
-    <p>如果使用fair的调度模式，设置成相同，应该是可以的，但是如果是FIFO模式，我个人认为在map或是reduce阶段，CPU的核数没有得到充分的利用，有些可惜，所以，FIFO模式下，还是尽量配置的map并发数量多于redcue并发数量</p>
-  </li>
-  <li>
-    <p>mapred.reduce.tasks
- The default number of reduce tasks per job. Typically set to 99% of the cluster’s reduce capacity, so that if a node fails the reduces can  still be executed in a single wave.</p>
-
-    <pre><code> 一个Job会使用task tracker的reduce任务槽数量
- 默认值：1
- 优化值：
- 1.0.95 * mapred.tasktracker.tasks.maximum
- 理由：启用95%的reduce任务槽运行task, recude task运行一轮就可以完成。剩余5%的任务槽永远失败任务，重新执行
- 2.1.75 * mapred.tasktracker.tasks.maximum
- 理由：因为reduce task数量超过reduce槽数，所以需要两轮才能完成所有reduce task。具体快的原理还没有完全理解.  io.sort.mb/io.sort.factor/ io.sort.spill.percent  和Map类似
-</code></pre>
-  </li>
-  <li>
-    <p>mapred.reduce.parallel.copies    </p>
-
-    <p>Reduce copy数据的线程数量，默认值是5</p>
-
-    <p>Reduce task在做shuffle时，实际上就是从不同的已经完成的map上去下载属于自己这个reduce的部分数据，由于map通常有许多个，所以对一个reduce来说，下载也可以是并行的从多个map下载
- Reduce到每个完成的Map Task copy数据（通过RPC调用），默认同时启动5个线程到map节点取数据。这个配置还是很关键的，如果你的map输出数据很大，有时候会发现map早就100%了，reduce一直在1% 2%。。。。。。缓慢的变化，那就是copy数据太慢了，5个线程copy 10G的数据，确实会很慢，这时就要调整这个参数了，但是调整的太大，又会事倍功半，容易造成集群拥堵，所以 Job tuning的同时，也是个权衡的过程，你要熟悉你的数据</p>
-  </li>
-  <li>
-    <p>mapred.job.shuffle.input.buffer.percent</p>
-
-    <p>Reduce在shuffle阶段对下载来的map数据，并不是立刻就写入磁盘的，而是会先缓存在内存中，然后当使用内存达到一定量的时候才刷入磁盘。当指定了JVM的堆内存最大值以后，上面这个配置项就是Reduce用来存放从Map节点取过来的数据所用的内存占堆内存的比例，默认是70%</p>
-  </li>
-  <li>
-    <p>mapred.job.shuffle.merge.percent </p>
-
-    <p>同Map的io.sort.spill.percent 一样，当shuffle时不是等到buffer满后再在flush到磁盘，而是达到一定阈值后写入磁盘，其默认值是0.66</p>
-  </li>
-  <li>
-    <p>mapred.job.reduce.input.buffer.percent </p>
-
-    <p>当reduce task真正进入reduce函数的计算阶段的时候，在读取reduce需要的数据时需要多 少的内存百分比来作为reduce读已经sort好的数据的buffer百分比。默认情况下为0，也就是说，默认情况下，reduce是全部从磁盘开始读 处理数据。如果这个参数大于0，那么就会有一定量的数据被缓存在内存并输送给reduce，当reduce计算逻辑消耗内存很小时，可以分一部分内存用来 缓存数据</p>
-  </li>
-  <li>
-    <p>mapred.inmem.merge.threshold</p>
-
-    <p>从map节点取过来的文件个数，当达到这个个数之后，也进行merger sort，然后写到reduce节点的本地磁盘；mapred.job.shuffle.merge.percent优先判断.默认值1000，完全取决于map输出数据的大小
- 默认值1000</p>
-  </li>
-</ol>
-
-      <div class="readall"><a href="/blog/2014/10/09/Tuning-Hadoop.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/10/09/Holographic-user-portrait.html">Holographic user portrait</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年10月09日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p><strong>用户洞察的定义和目的</strong></p>
-
-<p>  标准的用户洞察包含三个步骤：用户的数据管理、用户的需求分析、分析以后建立用户洞察力的应用。</p>
-
-<p>  用户的数据包括：历史销售数据、用户评价数据、用户注册数据、用户保修数据、用户维修数据、用户社交数据。</p>
-
-<p>用户的需求分析即对用户信息的理解，并进行适应性的建模，通过动态的行为和价值分析，识别用户的行为、价值和需求。在用户数据管理与用户需求分析的基础上，策划、开发和提供蕴含用户实质需求的差异化产品、业务或营销方案，开展有针对性的营销和拓展市场。</p>
-
-<p>   因此用户洞察的目的就是通过已有的需求或者已经产生的交易行为记录，对这些用户进行分析，然后做精准营销或者挖掘潜在需求。</p>
-
-<p><img src="/image/user-holograph.png" alt="" /></p>
-
-<p><strong>用户画像模型分析</strong></p>
-
-<p>   用户画像是用户洞察中最为关键的环节，比如说他是谁，他的消费能力如何，他过往的消费历史是什么，他的购物习惯和社交偏好是什么。通过简单的方式或者是非常有限的数据，就能够找到这些内容。建立起丰富的画像标签体系，这个体系需要涵盖我们希望描绘用户的各个方面，原始数据可以动态获取，也可以基于原始数据集。 可以过曾经的行为推测出来他的标签或者是他的特征。举例来说：如果她叫翠花，那么她是女生；如果他是给丈母娘买的，那么猜测他是男生；如果她在2012年10月份买了一段奶粉，2013年2月买了二段奶粉，那么可以推测她有孩子，并且孩子已经两岁半了；如果他买了高端的A.O史密斯热水器，那么他的消费能力相对比较强；如果一位用户关注科技，比如说可穿戴设备，那么他一定是科技达人；如果他买了净水器，他可能对空气净化器有要求。通过这些历史数据、SNS数据或者行为数据，探究同一个客户有没有二次购买的可能、以及关联购买能力。</p>
-
-<p><strong>基于交易数据的用户洞察</strong></p>
-
-<p>  根据电商的交易数据对个人消费者用户进行分析，从消费内容的数据中洞悉该消费者的消费习惯和其他信息：根据用户消费能力级别数据可以了解消费者的消费能力；根据用户的购买次数分析其购物习惯，判定他是否是网购达人；根据用户的上网时间分布数据，分析消费者的职业、作息等信息；根据用户单次消费金额数据分析消费者的购买能力和收入状况等。例如，一名消费者在2013年12月份到2014年4月份有五次消费，从他这五次交易的数据里面可以看到：他买了两次手机，还买了豆浆机、电视机；第一次购买手机的时候花了四千块，但第二次购买手机的时候只花了1950元。可以看出他热爱生活，是一个十足的数码控，消费能力很强，网购习惯很明显。当然这些数据不一定很准，但是也不需要它很准。只要能够做出画像就足够了。</p>
-
-<p>   通过分析，认识了他，知道他叫什么，也知道他在哪里，然后进行的就是用户洞察力的行为应用：
-电话他、短信他、邮件他、私信他，用打折、促销、返券、送积分、给链接、门店地址等方式吸引他、勾引他，全方位地缠绕他。这种全方位的营销到底能不能产生消费不敢肯定，但是这样的促销行为对一部分人一定会产生影响。</p>
-
-<p> 基于论坛数据的用户洞察在对论坛的研究方面，提取了某消费者论坛的监测数据，样本量是24万的用
-户，其中签到的人达到了80万，购买信息数达到200万。对论坛用户年龄的分析，可以发现绝大部分都是85后和90后，这两部分用户占到70%以上，因此可以认定这是一个新型的消费领域。从学历方面来分析这些用户，80%以上的用户为专科以上学历，这些人渴望成功，渴望归属和友情，他们勇敢、时尚，但是消费能力不够。</p>
-
-<p>   在这个论坛用户结构中，普通人占到50%多，而骨灰级的粉丝占到40.3%，粉丝如何运营就是目前面临的最大问题。现在很多企业在做社会化的营销，在做粉丝运营，但是坦率来讲，做的都不是特别理想。目前家电行业都在向互联网思维转变，在产品和技术方面，企业并没有多大的问题，如果说企业还有哪些欠缺的话，应该就是思维上的转变、专业人才的培育与经验的积累。</p>
-
-<p>   在粉丝运营中，找准时间可以让营销事半功倍。之前所有电商网站购销行为，基本上都是在晚上11点到12点。但是论坛则不一样，如果企业有官网或者是官微，那么可以发现粉丝活跃时间是在午休时间，如果要做活动宣传、广告或者品牌推广，午休时间是个好选择。如果是做抢购、秒杀、团购、促销的活动，最好放在晚上。</p>
-
-<p><strong>基于社会化用户的深度挖掘成为企业关注重点</strong></p>
-
-<p>   如果只是基于在现有数据的条件下，进行深入挖掘以及用户分析，可能还远远不够，这时需要建立一个目标交互引流的分析模型，这个模型通过对线上用户精确的界定抓取，用于企业的用户运营、品牌分析。随着互联网和社会化的发展，企业需要对线上用户进行精确的分析和洞察。</p>
-
-<p>   具体如何操作？首先要分析在互联网的行为下，用户对产品和品牌究竟有什么样的看法和观点，即满意度如何；还有产品是否迭代，原因是什么，企业的痛点又在哪里，有没有可能推送新的迭代创意或者是颠覆性的想法。通过这些方面，进行社会化的数据抓取，得到标准化的期望值，进行简单的画像，然后再进行分析，抽取相关的报表报告，提供给企业进行产品的设计和创意的输出。</p>
-
-<p><strong>构建基于社会化大数据的用户洞察和交互体系</strong></p>
-
-<p>   总结前面的分析，可以看出基于大数据的用户洞察和交互体系可以归纳为：基于营销为目的：分析用户的历史销售记录，基于用户群体，获取SNS的数据，处理清洗SNS数据，挖掘用户潜在需求，针对潜在客户进行精准的个性化、差异化营销和推荐，形成销售业绩。
-   基于洞察为目的：通过社会化媒体和电商平台找到关键的用户意见领袖和SNS用户，对他们细分得到相关的群体，通过社会化运营，可以对他进行调研，广告推送，或者搭建新一代用户调研系统，未来这将是能够解决产品跟进、快速升级的好平台。</p>
-
-      <div class="readall"><a href="/blog/2014/10/09/Holographic-user-portrait.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/ubuntueclipse.html">ubuntu下eclipse菜单栏无法展开</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
+        2015年02月01日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#linux">linux</a>
       </p>
     </header>
     <div class="post-main">
-      <p>因为ubuntu13下菜单栏被代理到状态栏下，下载安装eclipse3.8，打开后菜单栏点击无法打开，网上认为可能是unity的bug</p>
+      <h2 id="linux9-awk">Linux学习笔记9-AWK</h2>
+<p>AWK是所有shell过滤工具中最难掌握的，不知道为什么，也许是其复杂的语法或含义不明确的错误提示信息。在学习awk语言过程中，就会慢慢掌握诸如Bailing out 和awk:cmd.Line:等错误信息。可以说awk是一种自解释的编程语言，之所以要在shell中使用awk是因为awk本身是学习的好例子，但结合awk与其他工具诸如grep和sed，将会使shell编程更加
+容易。<br />
+调用：<br />
+有三种方式调用awk，第一种是命令行方式，如：<br />
+awk [-F field-separator] ‘awk命令’ input-file(s)<br />
+[-F域分隔符]是可选的，因为awk使用空格作为缺省的域分隔符，因此如果
+要浏览域间有空格的文本，不必指定这个选项，但如果要浏览诸如passwd文件，此文件各域以冒号作为分隔符，则必须指明- F选项<br />
+awk -F:’awk命令’ input-file<br />
+第二种方法是将所有awk命令插入一个文件，并使awk程序可执行，然后用awk命令解释器作为脚本的首行，以便通过键入脚本名称来调用它<br />
+awk -f awk-script-file input-files<br />
+第三种方式是将所有的awk命令插入一个单独文件. -f选项指明在文件awk_scriptfile中的awk脚本，inputfile(s)是使用awk进行浏览的文件
+名。  </p>
 
-<p>解决办法去掉eclipse的菜单代理：</p>
-
-<p>1.在终端中进入快捷方式的目录，然后运行</p>
-
-<p>sudo gedit eclipse.desktop</p>
-
-<p>2.修改Exec的值，将原有的Exec=eclipse修改为：</p>
-
-<p>Exec=env UBUNTU_MENUPROXY=0  eclipse</p>
-
-<p>——问题解决</p>
-
-<p>顺带学习ubuntu 程序快捷方式</p>
-
-<p>进入 /usr/share/applications 目录下，这里有所有程序的图形化的快捷方式，
-你可以直接复制到桌面，即可</p>
-
-<p>搜索ls <em>程序名</em></p>
-
-<p>方法一：进入 /usr/share/applications 目录下，这里有所有程序的图形化的快捷方式，你可以直接复制到桌面，即可</p>
-
-<p>方法二：使用命令的方式： gnome-desktop-item-edit</p>
+<p>awk脚本<br />
+在命令中调用awk时，awk脚本由各种操作和模式组成。<br />
+如果设置了-F选项，则awk每次读一条记录或一行，并使用指定的分隔符分隔指定域，但如果未设置-F选项，awk假定空格为域分隔符，并保持这个设置直到发现一新行。当新行出现时，awk命令获悉已读完整条记录，然后在下一个记录启动读命令，这个读进程将持续到文件尾或文件不再存在。</p>
 
 
-      <div class="readall"><a href="/blog/2014/09/27/ubuntueclipse.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/02/01/Linux-point9.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point8.html">Linux学习笔记8-grep 家族</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="linux8-grep-">Linux学习笔记8-grep 家族</h2>
+<p>grep（全局正则表达式版本）允许对文本文件进行模式查找。如果找到匹配模式，grep打印包含模式的所有行。grep支持基本正则表达式，也支持其扩展集   <br />
+grep一般格式为：<br />
+grep [选项]基本正则表达式[文件]<br />
+这里基本正则表达式可为字符串。  </p>
+
+<p>在grep命令中输入字符串参数时，最好将其用双引号括起来。例如：“mystring”。这样做有两个原因，
+一是以防被误解为shell命令，<br />
+二是可以用来查找多个单词组成的字符串，例如：  <br />
+“jet plane”，如果不用双引号将其括起来，那么单词plane将被误认为是一个文件，查询结果将返回“文件不存在”的错误信息。<br />
+在调用变量时，也应该使用双引号，诸如： grep “MYVAR”文件名，如果不这样，将没有返回结果。<br />
+在调用模式匹配时，应使用单引号。  </p>
+
+<p>常用的grep选项有：<br />
+-c 只输出匹配行的计数。<br />
+-i 不区分大小写（只适用于单字符）。<br />
+-h 查询多文件时不显示文件名。<br />
+-l 查询多文件时只输出包含匹配字符的文件名。<br />
+-n 显示匹配行及行号。<br />
+-s 不显示不存在或无匹配文本的错误信息。<br />
+-v 显示不包含匹配文本的所有行。  </p>
+
+<p>grep “will”*.doc 在当前目录下所有.doc文件中查找”will”字符串。  </p>
+
+<p>精确匹配：<br />
+grep “will<tab>"*.doc 在当前目录下所有.doc文件精确匹配"will"   还可以写为：grep "will\&gt;"*.doc  
+大小写敏感：  
+缺省情况下， grep是大小写敏感的，如要查询大小写不敏感字符串，必须使用- i开关。  </tab></p>
+
+
+      <div class="readall"><a href="/blog/2015/02/01/Linux-point8.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point7.html">Linux学习笔记7-正则表达式介绍</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="linux7-">Linux学习笔记7-正则表达式介绍</h2>
+<p>当从一个文件或命令输出中抽取或过滤文本时，可以使用正则表达式(RE)，正则表达式是一些特殊或不很特殊的字符串模式的集合。<br />
+为了抽取或获得信息，我们给出抽取操作应遵守的一些规则。这些规则由一些特殊字符或进行模式匹配操作时使用的元字符组成。也可以使用规则字符作为模式中的一部分进行搜寻。<br />
+例如，A将查询A，x将查找字母x  <br />
+基本元字符<br />
+^ 只只匹配行首<br />
+$ 只只匹配行尾<br />
+* 只一个单字符后紧跟*，匹配0个或多个此单字符<br />
+[ ] 只匹配[ ]内字符。可以是一个单字符，也可以是字符序列。可以使用-表示[ ]内字符序列范围，如用[1-5]代替[12345]<br />
+\ 只用来屏蔽一个元字符的特殊含义。因为有时在shell中一些元字符有
+特殊含义。\可以使其失去应有意义<br />
+. 只匹配任意单字符<br />
+pattern{n} 只用来匹配前面pattern出现次数。n为次数<br />
+pattern{n,} m 只含义同上，但次数最少为n<br />
+pattern{n,m} 只含义同上，但pattern出现次数在n与m之间  </p>
+
+<p>1.使用句点匹配单字符<br />
+句点”.”可以匹配任意单字符。例如，如果要匹配一个字符串，以beg开头，中间夹一个任意字符，那么可以表示为beg.n，”.”可以匹配字符串头，也可以是中间任意字符。<br />
+在ls -l命令中，可以匹配一定权限：<br />
+…x..x ..x  : 匹配用户本身，用户组及其他组成员的执行权限。<br />
+“.”允许匹配ASCII集中任意字符，或为字母，或为数字。<br />
+2.在行首以^匹配字符串或字符序列<br />
+^只允许在一行的开始匹配字符或单词。例如，使用ls -l命令，并匹配目录。之所以可以这样做是因为ls -l命令结果每行第一个字符是d，即代表一个目录。  <br />
+^…4XC….  <br />
+以上模式表示，在每行开始，匹配任意3个字符，后跟4XC，最后为任意4个字符。^在正则表达式中使用频繁，因为大量的抽取操作通常在行首.<br />
+3.在行尾以$匹配字符串或字符  <br />
+$与^正相反，它在行尾匹配字符串或字符， $符号放在匹配单词后。假定要匹配以单词test结尾的所有行，操作为：<br />
+test$<br />
+^$<br />
+具体分析为匹配行首，又匹配行尾，中间没有任何模式，因此为空行。<br />
+如果只返回包含一个字符的行，操作如下：<br />
+^.$<br />
+4.使用<em>匹配字符串中的单字符或其重复序列  <br />
+使用此特殊字符匹配任意字符或字符串的重复多次表达式。例如：<br />
+compu</em>t<br />
+将匹配字符u一次或多次：<br />
+compuut 
+compuuut<br />
+compuuuuut<br />
+5.使用\屏蔽一个特殊字符的含义  <br />
+有时需要查找一些字符或字符串，而它们包含了系统指定为特殊字符的一个字符。什么是特殊字符？一般意义上讲，下列字符可以认为是特殊字符：<br />
+$ . ‘ “ * || ^ [] 0 \ + ?<br />
+假定要匹配包含字符“ .”的各行而“，”代表匹配任意单字符的特殊字符，因此需要屏蔽其含义。操作如下：<br />
+.
+6.使用[]匹配一个范围或集合  <br />
+使用[ ]匹配特定字符串或字符串集，可以用逗号将括弧内要匹配的不同字符串分开，但并不强制要求这样做（一些系统提倡在复杂的表达式中使用逗号），这样做可以增加模式的可读性。<br />
+使用”-“表示一个字符串范围，表明字符串范围从”-“左边字符开始，到”-“右边字符结束。<br />
+如果熟知一个字符串匹配操作，应经常使用[]模式。<br />
+假定要匹配任意一个数字，可以使用：<br />
+[0123456789]<br />
+然而，通过使用“-”符号可以简化操作：<br />
+[0-9]<br />
+7.使用{}匹配模式结果出现的次数<br />
+使用*可匹配所有匹配结果任意次，但如果只要指定次数，就应使用\ { \ }，此模式有三种形式，即：<br />
+pattern{n} 匹配模式出现n次。<br />
+pattern{n,} 匹配模式出现最少n次。<br />
+pattern{n,m} 匹配模式出现n到m次之间，n , m为0 -255中任意整数。
+请看第一个例子，匹配字母A出现两次，并以B结尾，操作如下：<br />
+A{2}B<br />
+匹配值为AAB<br />
+匹配A至少4次，使用：<br />
+A{4,} B<br />
+可以得结果AAAAB或AAAAAAAB，但不能为AAAB。  </p>
+
+      <div class="readall"><a href="/blog/2015/02/01/Linux-point7.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -794,7 +550,10 @@ HBase的数据安全机制之一：在插入数据时先写Hlog然后在写到�
   <a class="pagination-item older" href="/page/2">下一页&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
   
 </div>
-    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
     </div>
   </div>    
   <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>

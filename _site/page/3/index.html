@@ -64,233 +64,37 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/log4j.html">log4j配置解释</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point5.html">Linux 学习笔记5 shell输入输出</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#java">java</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>Log4j说明</p>
-
-<ol>
-  <li>
-    <p>log4j.rootCategory=INFO, stdout , R</p>
-
-    <p>此句为将等级为INFO的日志信息输出到stdout和R这两个目的地，
-stdout和R的定义在下面的代码，可以任意起名。
-等级可分为OFF、 FATAL、ERROR、WARN、INFO、DEBUG、ALL，
-如果配置OFF则不打出任何信息，如果配置为INFO这样只显示INFO, WARN, ERROR的log信息，
-而DEBUG信息不会被显示。</p>
-  </li>
-  <li>log4j.appender.stdout=org.apache.log4j.ConsoleAppender
- 此句为定义名为stdout的输出端是哪种类型，可以是
- org.apache.log4j.ConsoleAppender（控制台），
- org.apache.log4j.FileAppender（文件），
- org.apache.log4j.DailyRollingFileAppender（每天产生一个日志文件），
- org.apache.log4j.RollingFileAppender（文件大小到达指定尺寸的时候产生一个新的文件）
- org.apache.log4j.WriterAppender（将日志信息以流格式发送到任意指定的地方）</li>
-  <li>log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
- 此句为定义名为stdout的输出端的layout是哪种类型，可以是
- org.apache.log4j.HTMLLayout（以HTML表格形式布局），
- org.apache.log4j.PatternLayout（可以灵活地指定布局模式），
- org.apache.log4j.SimpleLayout（包含日志信息的级别和信息字符串），
- org.apache.log4j.TTCCLayout（包含日志产生的时间、线程、类别等等信息）</li>
-  <li>
-    <p>log4j.appender.stdout.layout.ConversionPattern= [QC] %p [%t] %C.%M(%L) | %m%n
- 如果使用pattern布局就要指定的打印信息的具体格式ConversionPattern，
- 打印参数如下：
- %m 输出代码中指定的消息
- %p 输出优先级，即DEBUG，INFO，WARN，ERROR，FATAL
- %r 输出自应用启动到输出该log信息耗费的毫秒数
- %c 输出所属的类目，通常就是所在类的全名
- %t 输出产生该日志事件的线程名
- %n 输出一个回车换行符，Windows平台为“rn”，Unix平台为“n”
- %d 输出日志时间点的日期或时间，默认格式为ISO8601，也可以在其后指定格式，
- 比如：%d{yyyy MMM dd HH:mm:ss,SSS}，输出类似：2002年10月18日 22：10：28，921
- %l 输出日志事件的发生位置，包括类目名、发生的线程，以及在代码中的行数。</p>
-
-    <p>[QC]是log信息的开头，可以为任意字符，一般为项目简称。
- 输出的信息
- [TS] DEBUG [main] AbstractBeanFactory.getBean(189) | Returning cached instance of singleton bean ‘MyAutoProxy’</p>
-  </li>
-  <li>
-    <p>log4j.appender.R=org.apache.log4j.DailyRollingFileAppender
- 此句与第3行一样。定义名为R的输出端的类型为每天产生一个日志文件。</p>
-  </li>
-  <li>
-    <p>log4j.appender.R.File=D:\Tomcat 5.5\logs\qc.log</p>
-
-    <p>此句为定义名为R的输出端的文件名为D:\Tomcat 5.5\logs\qc.log</p>
-  </li>
-  <li>log4j.appender.R.layout=org.apache.log4j.PatternLayout
- 与第4行相同。</li>
-</ol>
-
-<p>10 log4j.appender.R.layout.ConversionPattern=%d-[TS] %p %t %c - %m%n
-与第5行相同。</p>
-
-<p>12 log4j.logger.com. neusoft =DEBUG
-指定com.neusoft包下的所有类的等级为DEBUG。
-可以把com.neusoft改为自己项目所用的包名。</p>
-
-<p>13 log4j.logger.com.opensymphony.oscache=ERROR
-14 log4j.logger.net.sf.navigator=ERROR
-这两句是把这两个包下出现的错误的等级设为ERROR，如果项目中没有配置EHCache，则不需要这两句。</p>
-
-<p>15 log4j.logger.org.apache.commons=ERROR
-16 log4j.logger.org.apache.struts=WARN
-这两句是struts的包。</p>
-
-<p>17 log4j.logger.org.displaytag=ERROR
-这句是displaytag的包。（QC问题列表页面所用）</p>
-
-<p>18 log4j.logger.org.springframework=DEBUG
-此句为Spring的包。</p>
-
-<p>24 log4j.logger.org.hibernate.ps.PreparedStatementCache=WARN
-25 log4j.logger.org.hibernate=DEBUG
-此两句是hibernate的包。</p>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/log4j.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/linux-command.html">linux command下解压命令大全</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
+        2015年01月23日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#linux">linux</a>
       </p>
     </header>
     <div class="post-main">
-      <p>From: http://www.cnblogs.com/eoiioe/archive/2008/09/20/1294681.html</p>
+      <p>Linux 学习笔记5 shell输入输出<br />
+shell脚本中几种读入数据方式：标准输入(缺省为键盘)，指定一个文件作为输入<br />
+输出：标准输出(终端屏幕)，指定输出到一个文件  </p>
 
-<p>.tar</p>
+<p>echo<br />
+echo命令可以显示文本行或是变量 或者把字符串输入到文件 一般形式为：
+echo string<br />
+常见功能：<br />
+\c 不换行 <br />
+\t 跳格<br />
+\n 换行<br />
+初涉shell的用户常常会遇到的一个问题就是如何把双引号包含到echo命令的字符串中。<br />
+引号是一个特殊字符，所以必须要使用反斜杠\来使shell忽略它的特殊含义。假设你希望使用echo命令输出这样的字符串：”/dev/rmt0”，那么我们只要在引号前面加上反斜杠\即可   </p>
 
-<pre><code>解包：tar xvf FileName.tar
-打包：tar cvf FileName.tar DirName
-（注：tar是打包，不是压缩！）
-</code></pre>
+<p>read <br />
+可以使用read语句从键盘或文件的某一行文本中读入信息，并将其赋给一个变量。如果只指定了一个变量，那么read将会把所有的输入赋给该变量，直至遇到第一个文件结束符或回车。<br />
+它的一般形式为：<br />
+read varible1 varible2 …  </p>
 
-<p>.gz</p>
 
-<pre><code>解压1：gunzip FileName.gz
-解压2：gzip -d FileName.gz
-压缩：gzip FileName
-</code></pre>
-
-<p>.tar.gz 和 .tgz</p>
-
-<pre><code>解压：tar zxvf FileName.tar.gz
-压缩：tar zcvf FileName.tar.gz DirName
-</code></pre>
-
-<p>.bz2</p>
-
-<pre><code>解压1：bzip2 -d FileName.bz2
-解压2：bunzip2 FileName.bz2
-压缩： bzip2 -z FileName
-</code></pre>
-
-<p>.tar.bz2</p>
-
-<pre><code>解压：tar jxvf FileName.tar.bz2
-压缩：tar jcvf FileName.tar.bz2 DirName
-</code></pre>
-
-<p>.bz</p>
-
-<pre><code>解压1：bzip2 -d FileName.bz
-解压2：bunzip2 FileName.bz 压缩：未知
-</code></pre>
-
-<p>.tar.bz</p>
-
-<pre><code>解压：tar jxvf FileName.tar.bz ———————————————
-</code></pre>
-
-<p>.Z</p>
-
-<pre><code>解压：uncompress FileName.Z
-压缩：compress FileName
-</code></pre>
-
-<p>.tar.Z</p>
-
-<pre><code>解压：tar Zxvf FileName.tar.Z
-压缩：tar Zcvf FileName.tar.Z DirName ———————————————
-</code></pre>
-
-<p>.zip</p>
-
-<pre><code>解压：unzip FileName.zip
-压缩：zip FileName.zip DirName ———————————————
-</code></pre>
-
-<p>.rar</p>
-
-<pre><code>解压：rar x FileName.rar
-压缩：rar a FileName.rar DirName ———————————————
-</code></pre>
-
-<p>.lha</p>
-
-<pre><code>解压：lha -e FileName.lha
-压缩：lha -a FileName.lha FileName ———————————————
-</code></pre>
-
-<p>.rpm</p>
-
-<pre><code>解包：rpm2cpio FileName.rpm | cpio -div ———————————————
-</code></pre>
-
-<p>.deb</p>
-
-<pre><code>解包：ar p FileName.deb data.tar.gz | tar zxf - ———————————————
-</code></pre>
-
-<p>.tar .tgz .tar.gz .tar.Z .tar.bz .tar.bz2 .zip .cpio .rpm .deb .slp .arj .rar .ace .lha .lzh .lzx .lzs .arc .sda .sfx .lnx .zoo .cab .kar .cpt .pit .sit .sea</p>
-
-<pre><code>解压：sEx x FileName.*
-压缩：sEx a FileName.* FileName
-</code></pre>
-
-<p>sEx只是调用相关程序，本身并无压缩、解压功能，请注意！</p>
-
-<p>gzip 命令</p>
-
-<p>减少文件大小有两个明显的好处，一是可以减少存储空间，二是通过网络传输文件时，可以减少传输的时间。gzip 是在 Linux 系统中经常使用的一个对文件进行压缩和解压缩的命令，既方便又好用。</p>
-
-<p>语法：gzip [选项] 压缩（解压缩）的文件名该命令的各选项含义如下：</p>
-
-<p>-c 将输出写到标准输出上，并保留原有文件。</p>
-
-<p>-d 将压缩文件解压。</p>
-
-<p>-l 对每个压缩文件，显示下列字段：     压缩文件的大小；未压缩文件的大小；压缩比；未压缩文件的名字</p>
-
-<p>-r 递归式地查找指定目录并压缩其中的所有文件或者是解压缩。</p>
-
-<p>-t 测试，检查压缩文件是否完整。</p>
-
-<p>-v 对每一个压缩和解压的文件，显示文件名和压缩比。</p>
-
-<p>-num 用指定的数字 num 调整压缩的速度，-1 或 –fast 表示最快压缩方法（低压缩比），-9 或–best表示最慢压缩方法（高压缩比）。系统缺省值为 6。指令实例：</p>
-
-<p>gzip *% 把当前目录下的每个文件压缩成 .gz 文件。gzip -dv *% 把当前目录下每个压缩的文件解压，并列出详细的信息。gzip -l *% 详细显示例1中每个压缩的文件的信息，并不解压。gzip usr.tar% 压缩 tar 备份文件 usr.tar，此时压缩文件的扩展名为.tar.gz。</p>
-
-      <div class="readall"><a href="/blog/2014/09/27/linux-command.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/01/23/Linux-point5.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -298,94 +102,41 @@ stdout和R的定义在下面的代码，可以任意起名。
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/js-session.html">js 基础session</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point4.html">Linux 学习笔记4 特殊字符</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年09月27日
+        2015年01月23日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#f2e">f2e</a>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
       </p>
     </header>
     <div class="post-main">
-      <ol>
-  <li>html java javascript 都应遵循codingstyle</li>
-  <li>事件不写在html中， 应按照mvc的模式 各个层之间应实现低耦合
-m: 功能模块
-v: html
-c: 事件</li>
-  <li>Javascript 中字符串的拼接 应向Java中一样 使用buffer</li>
-  <li>++ 和 +1 是有区别的 ++ 为原子操作， 推荐使用</li>
-  <li>Modle层的命名与表示层不应该有关联
-应该只与功能有关。如delete/add之类</li>
-  <li>常量字面量在比较时应该放在左边</li>
-  <li>var a = function(){};
-funtion a(){};
-之间的区别：
-第一种是变量式声明，
-第二种是定义式声明。
-js在解析的时候，先解析定义式方法，在解析其他的
-变量式和普通变量定义一样，</li>
-  <li>js的方法没有重载，只会覆盖</li>
-  <li>arguments 指向实参数组
-方法对象的length指向型参长度</li>
-  <li>方法在没有return时 返回undefind</li>
+      <h1 id="linux-4-">Linux 学习笔记4 特殊字符</h1>
+<ul>
   <li>
-    <p>对象的创建方式：
-a: new Object();
-Object 的类型为Function
-是由Function对象产生对象
-b: jeson
-var o = {};
-o 对象类型为object
-c: 构造函数
-构造方法必须采用定义式， 首字母大写</p>
-  </li>
-  <li>this 执行当前的执行环境</li>
-  <li>
-    <p>构造方法会有一个prototype对象。
-而由构造方法产生的对象没有prototype对象</p>
-  </li>
-  <li>继承的两种实现：
-a:对象冒充
-缺点： 冒充对象只能接受原对象里的东西，不能接收到其原型对象中的东西
-b:原型链</li>
-  <li>
-    <p>闭包</p>
+    <p>匹配文件名中任何字符包括空字符<br />
+? 匹配任何单字符<br />
+[…]匹配[]中包含的任何字符<br />
+[!…] 匹配[]中非感叹号!只好的字符  </p>
   </li>
   <li>
-    <p>function
-全局方法: this—&gt;window对象
-对象内方法： this—&gt;当前对象
-构造方法： 初始化构造方法需要new关键字， 否则就会当成全局方法定义
-构造方法首字母大写</p>
+    <p>使用 * 可以匹配文件名中任何字符串 如 ls ./<em>.txt 列出当前文件夹中txt文件  ls ./will</em>.txt 列出当前文件夹中以will开头的txt文件  </p>
   </li>
-  <li>apply和call方法
-apply（指定调用方法中的this, 方法的参数数组）;
-call(指定调用方法中的this, 方法的参数列表);
-foo.call(this, arg1,arg2,arg3) == foo.apply(this, arguments)==this.foo(arg1, arg2, arg3)</li>
-</ol>
+</ul>
 
-<p>在JavaScript中,代码总是有一个上下文对象,代码处理该对象之内. 上下文对象是通过this变量来体现的, 这个this变量永远指向当前代码所处的对象中.</p>
+<p>?<br />
+ls ??R* : 列出文件名以任意两个字符开头，接着是R，后面跟任何字符的文件<br />
+ls conf.??.log :列出文件名以conf开头、中间是任意两个字符、最后以.log结尾的文件  </p>
 
-<p>此类方法的应用场景：
-A, B类都有一个message属性(面向对象中所说的成员),A有获取消息的getMessage方法,B有设置消息的setMessage方法
-//创建一个B类实例对象
-var b = new B();
-//给对象a动态指派b的setMessage方法,注意,a本身是没有这方法的!
-b.setMessage.call(a, “a的消息”);
-//下面将显示”a的消息”
-alert(a.getMessage());</p>
+<p>[…]和[!…]<br />
+使用[…]可以用来匹配方括号[ ]中的任何字符。在这一方法中，还可以使用一个横杠-来连接两个字母或数字，以此来表示一个范围。在下面的例子中，列出了以i或o开头的文件名<br />
+ls [io]*<br />
+ls log.[0-9]* :匹配所有以log.开头、后面跟随一个数字、然后可以是任意字符串的文件名<br />
+ls LPS??[!0-9]* :列出了所有以L P S开头、中间可以是任何两个字符，后面跟随一个非数字字符、然后是任意字符串的文件名：<br />
+ls [A-Z]* ：列出所有以大写字母开头的文件名  </p>
 
-<ol>
-  <li>argments
-方法的参数数组，一般在实现不定长参数的方法时会用到这个属性
-可以通过它获得参数长度，参数值。
-一般情况不通过它修改参数值。</li>
-</ol>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/js-session.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/01/23/Linux-point4.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -393,68 +144,94 @@ alert(a.getMessage());</p>
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/javascript-session-.html">javascript session 记录</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point3.html">Linux学习笔记3 后台执行命令</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年09月27日
+        2015年01月23日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#f2e">f2e</a>
+        <a class="post-category" href="/page/category.html#"></a>
       </p>
     </header>
     <div class="post-main">
-      <ol>
-  <li>
-    <p>function
-全局方法:    this—&gt;window对象
-对象内方法： this—&gt;当前对象
-构造方法：   初始化构造方法需要new关键字， 否则就会当成全局方法定义
-构造方法首字母大写</p>
-  </li>
-  <li>
-    <p>apply和call方法
-apply（指定调用方法中的this, 方法的参数数组）;
-call(指定调用方法中的this, 方法的参数列表);
-foo.call(this, arg1,arg2,arg3) == foo.apply(this, arguments)==this.foo(arg1, arg2, arg3)
-在JavaScript中,代码总是有一个上下文对象,代码处理该对象之内. 上下文对象是通过this变量来体现的, 这个this变量永远指向当前代码所处的对象中.</p>
-  </li>
-</ol>
+      <p>Linux学习笔记3 后台执行命令
+• 设置crontab文件，并用它来提交作业。<br />
+• 使用at命令来提交作业。<br />
+• 在后台提交作业。<br />
+• 使用nohup命令提交作业。  </p>
 
-<p>此类方法的应用场景：
-A, B类都有一个message属性(面向对象中所说的成员),A有获取消息的getMessage方法,B有设置消息的setMessage方法
-//创建一个B类实例对象
-var b = new B();
-//给对象a动态指派b的setMessage方法,注意,a本身是没有这方法的!
-b.setMessage.call(a, “a的消息”);
-//下面将显示”a的消息”
-alert(a.getMessage());</p>
+<p>cron： 系统组要的调度进程，无需人工干预的情况下执行作业，用户在crontab中提交编辑相应的作业。 每一个用户都可以保存一个crontab文件来保存调度信息系统管理员可以通过cron.deny和cron.allow来禁止或允许用户拥有自己的crontab文件  <br />
+crontab脚本格式为：<br />
+分 时 日 月 星期 要运行的命令<br />
+在每一个域中我们可以使用- ， * 这些标示符<br />
+-表示一个区间段，如希望周一到周五运行： 分 时 日 月 1-5 命令<br />
+，则是列举，如希望周一和周五运行： 分 时 日 月 1,5 命令<br />
+* 则是没有限制 如希望不限制是周几： 分 时 日 月 * 命令  </p>
 
-<ol>
-  <li>
-    <p>argments
-方法的参数数组，一般在实现不定长参数的方法时会用到这个属性
-可以通过它获得参数长度，参数值。
-一般情况不通过它修改参数值。</p>
-  </li>
-  <li>
-    <p>闭包问题</p>
-  </li>
-  <li>
-    <p>module</p>
-  </li>
-  <li>
-    <p>继承，
-javascript的继承发生在对象与对象之间，
-可以通过以下方法实现：
-objectCreate(o) {
-var F = function() {};
-F.prototype = o;
-return new F();
-}</p>
-  </li>
-</ol>
+<p>注： crontab运行时并不知道用户的运行环境， 所以用户在提交crontab任务时需要给出脚本的绝对路径以及相应的环境变量   </p>
 
-      <div class="readall"><a href="/blog/2014/09/27/javascript-session-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<p>crontab命令的形式：<br />
+crontab [-u user] -e -l -r <br />
+-u 用户名<br />
+-e 编辑<br />
+-l 列出<br />
+-r 删除<br />
+使用当前用户登录则不需要-u 选项   </p>
+
+<p>创建：<br />
+向cron进程提交一个crontab文件之前，首先要做的一件事情就是设置环境变量EDITOR。cron进程根据它来确定使用哪个编辑器编辑向cron进程提交一个crontab文件之前，首先要做的一件事情就是设置环境变量文件。9 9 %的UNIX和LINUX用户都使用vi，如果你也是这样，那么你就编辑$HOME目录下的.profile文件，在其中加入这样<br />
+一行： <br />
+EDITOR=vi; export EDITOR<br />
+然后保存并退出。<br />
+不妨创建一个名为<user>cron的文件，其中<user>是用户名，例如，davecron。在该文件中加入如下的内容。  
+0,15,45 16-08 * * * /bin/echo 'date' &gt; /dev/console
+保存并退出。确信前面5个域用空格分隔。  
+在上面的例子中，系统将每隔1 5分钟向控制台输出一次当前时间。如果系统崩溃或挂起，从最后所显示的时间就可以一眼看出系统是什么时间停止工作的。在有些系统中，用tty1来表示控制台，可以根据实际情况对上面的例子进行相应的修改。
+为了提交你刚刚创建的向cron进程提交一个crontab文件之前，首先要做的一件事情就是设置环境变量文件，可以把这个新创建的文件作为cron命令的参数：
+$ crontab davecron  
+现在该文件已经提交给cron进程，它将每隔15分钟运行一次。同时，新创建文件的一个副本已经被放在/var/spool/cron目录中，文件名就是用户名（即，dave)</user></user></p>
+
+<p>备份：crontab -l &gt; /$HOME/mycron
+at命令：
+at命令允许用户向cron守护进程提交作业，使其在稍后的时间运行。这里稍后的时间可能是指10 min以后，也可能是指几天以后。如果你希望在一个月或更长的时间以后运行，最好还是使用crontab文件。
+一旦一个作业被提交,at命令将会保留所有当前的环境变量，包括路径，不象crontab只提供缺省的环境。该作业的所有输出都将以电子邮件的形式发送给用户，除非你对其输出进行了重定向，绝大多数情况下是重定向到某个文件中。
+和crontab一样，根用户可以通过/etc目录下的at.allow和at.deny文件来控制哪些用户可以
+使用at命令，哪些用户不行。不过一般来说，对a t命令的使用不如对cron tab的使用限制那么严格。
+a t命令的基本形式为：
+at [-f script] [-m -l -r] [time] [date]
+其中，
+-f script 是所要提交的脚本或命令。
+-l 列出当前所有等待运行的作业。atq命令具有相同的作用。
+-r 清除作业。为了清除某个作业，还要提供相应的作业标识（ ID）；有些UNIX变体只
+接受atrm作为清除命令。
+-m 作业完成后给用户发邮件。
+time at命令的时间格式非常灵活；可以是H、HH . HHMM、HH:MM或H:M，其中H和M
+分别是小时和分钟。还可以使用a.m.或p.m.。
+date 日期格式可以是月份数或日期数，而且at命令还能够识别诸如today、tomorrow这样的词。</p>
+
+<p>&amp;命令
+当在前台运行某个作业时，终端被该作业占据；而在后台运行作业时，它不会占据终端。可以使用&amp;命令把作业放到后台执行。
+该命令的一般形式为：
+命令&amp;
+不过，作业在后台运行一样会将结果输出到屏幕上，干扰你的工作。如果放在后台运行的作业会产生大量的输出，最好使用下面的方法把它的输出重定向到某个文件中：
+command &gt;out.file 2&gt;&amp;1 &amp;
+在上面的例子中，所有的标准输出和错误输出都将被重定向到一个叫做out.file 的文件中。
+当你成功地提交进程以后，就会显示出一个进程号，可以用它来监控该进程，或杀死它。
+如：
+运行一个find命令，查找名为“srm.conf”的文件，并把所有标准输出和错误输
+出重定向到一个叫作find.dt的文件中：
+find /etc -name “srm.conf” -print &gt;find.dt 2&gt;&amp;1 &amp;</p>
+
+<p>nohup命令<br />
+如果你正在运行一个进程，而且你觉得在退出帐户时该进程还不会结束，那么可以使用nohup命令。该命令可以在你退出帐户之后继续运行相应的进程。Nohup就是不挂起的意思(no hang up)。 
+该命令的一般形式为：<br />
+nohup command &amp;<br />
+使用nohup命令提交作业，在缺省情况下该作业的所有输出都被重定向到一个名为nohup.out的文件中，除非另外指定了输出文件：<br />
+nohup command &gt; myout.file 2&gt;&amp;1<br />
+在上面的例子中，输出被重定向到myout.file文件中。   </p>
+
+
+      <div class="readall"><a href="/blog/2015/01/23/Linux-point3.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -462,83 +239,56 @@ return new F();
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/java-SSH-.html">java SSH 远程操作</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point2.html">Linux学习笔记2-find和xargs</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年09月27日
+        2015年01月23日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#java">java</a>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
       </p>
     </header>
     <div class="post-main">
-      <pre><code>public class RmtShellExecutor {
-private static Logger logger = Logger.getLogger(RmtShellExecutor.class);
-private static Connection conn;
-private static String ip;
-private static String usr;
+      <p>Linux学习笔记2-find和xargs<br />
+Find命令的一般形式为：<br />
+find pathname -options [-print -exec -ok]<br />
+pathname find命令所查找的目录路径。例如用.来表示当前目录，用/来表示系统根目录。<br />
+-print find命令将匹配的文件输出到标准输出。<br />
+-exec find命令对匹配的文件执行该参数所给出的shell命令。相应命令的形式为’comm -and’{} \;，注意{ }和\；之间的空格。<br />
+-ok 和-exec的作用相同，只不过以一种更为安全的模式来执行该参数所给出的shell命令,在执行每一个命令之前，都会给出提示，让用户来确定是否执行。   </p>
 
-private static boolean connection() throws IOException, URISyntaxException {
-try {
-conn = new Connection(ip);
-conn.connect();
-} catch (IOException e) {
-logger.error("Login remote machine failed" + ip, e);
-throw new IOException("Login remote machine failed" + ip, e);
-}
-return conn.authenticateWithPublicKey(usr, new File(RmtShellExecutor.class.getClassLoader().getResource("id_rsa").toURI())
-, null);
-}
+<p>find命令选项<br />
+find命令有很多选项或表达式，每一个选项前面跟随一个横杠-。让我们先来看一下该命令的主要选项，然后再给出一些例子。<br />
+-name 按照文件名查找文件。<br />
+-perm 按照文件权限来查找文件。 <br />
+-prune 使用这一选项可以使find命令不在当前指定的目录中查找，如果同时使用了
+- depth选项，那么- prune选项将被find命令忽略。<br />
+-user 按照文件属主来查找文件。<br />
+-group 按照文件所属的组来查找文件。<br />
+-mtime -n +n 按照文件的更改时间来查找文件， 
+- n表示文件更改时间距现在n天以内，+ n
+表示文件更改时间距现在n天以前。
+Find命令还有-atime和-ctime选项，但它们都和-mtime选项
+相似，所以我们在这里只介绍-mtime选项。
+-nogroup 查找无有效所属组的文件，即该文件所属的组在/etc/groups中不存在。<br />
+-nouser 查找无有效属主的文件，即该文件的属主在/etc/passwd中不存在。<br />
+-newer file1 !file2 查找更改时间比文件file1新但比文件file2旧的文件。<br />
+-type 查找某一类型的文件，诸如：<br />
+b - 块设备文件。<br />
+d - 目录。<br />
+c - 字符设备文件。<br />
+p - 管道文件。<br />
+l - 符号链接文件。<br />
+f - 普通文件。<br />
+-size n[c] 查找文件长度为n块的文件，带有c时表示文件长度以字节计。
+-depth 在查找文件时，首先查找当前目录中的文件，然后再在其子目录中查找。<br />
+-fstype 查找位于某一类型文件系统中的文件，这些文件系统类型通常可以在配置文件, /etc/fstab中找到，该配置文件中包含了本系统中有关文件系统的信息。
+-mount 在查找文件时不跨越文件系统mount点。<br />
+-follow 如果find命令遇到符号链接文件，就跟踪至链接所指向的文件。<br />
+-cpio 对匹配的文件使用cpio命令，将这些文件备份到磁带设备中。 </p>
 
-public static Map&lt;String, Object&gt; exec(String ipStr, String userNameStr, String cmds) throws Exception {
-ip = ipStr;
-usr = userNameStr;
-Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
-InputStream stdOut = null;
-InputStream stdErr = null;
-String outStr = "";
-String outErr = "";
-try {
-if (connection()) {
-Session session = conn.openSession();
-session.execCommand(cmds);
-stdOut = new StreamGobbler(session.getStdout());
-outStr = processStream(stdOut, charset);
-stdErr = new StreamGobbler(session.getStderr());
-outErr = processStream(stdErr, charset);
-map.put(Constants.STATUS, Constants.PROCESSING);
-System.out.println("outStr=" + outStr);
-System.out.println("outErr=" + outErr);
-ret = session.getExitStatus();
-} else {
-logger.error("Login remote machine failed" + ip);
-throw new Exception("Login remote machine failed" + ip);
-}
-} catch(Exception e){
-logger.error("Login remote machine failed" + ip, e);
-throw new Exception("Login remote machine failed" + ip, e);
-} finally {
-if (conn != null) {
-conn.close();
-}
-IOUtils.closeQuietly(stdOut);
-IOUtils.closeQuietly(stdErr);
-}
-return map;
-}
 
-public static String processStream(InputStream in, String charset) throws Exception {
-byte[] buf = new byte[1024];
-StringBuilder sb = new StringBuilder();
-while (in.read(buf) != -1) {
-sb.append(new String(buf, charset));
-}
-return sb.toString();
-}
-}
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/09/27/java-SSH-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/01/23/Linux-point2.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -546,108 +296,146 @@ return sb.toString();
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/hive-.html">hive 安装</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point1.html">Linux学习笔记1-文件安全与权限</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年09月27日
+        2015年01月23日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h1 id="section">文件安全与权限</h1>
+<p>包含内容：<br />
+• 文件和目录的权限。<br />
+• setuid。<br />
+• chown和chgrp。<br />
+• umask。<br />
+• 符号链接。  </p>
+
+<p>创建文件时系统保存文件的有关信息包括：<br />
+1、长度<br />
+2、类型<br />
+3、位置<br />
+4、所属用户以及哪些用户可以访问<br />
+5、i节点<br />
+6、修改时间 （-rwxr-xr-x：分别表示文件所有者、同组、以及其他用户对该文件的权限）  </p>
+
+<p>文件类型: 如上权限位-rwxr-xr-x 其中最前面的横杠即表示该文件的类型（这里为普通文件）<br />
+文件类型分为：<br />
+d 目录<br />
+l 符号链接。<br />
+s 套接字文件<br />
+b 块设备文件<br />
+c 字符设备文件<br />
+p 命名管道文件  </p>
+
+<p><strong>更改文件权限位命令：chmod</strong> 
+chmod [who] operator [permission] filename<br />
+who:<br />
+u 文件所有者<br />
+g 同组用户<br />
+o 其他用户<br />
+a 所有用户<br />
+operator：<br />
++ 增加权限<br />
+- 取消权限<br />
+= 设定权限<br />
+permission：<br />
+r 读<br />
+w 写<br />
+x 执行<br />
+s 文件所有者和组set-ID<br />
+t 粘性位*<br />
+l 给文件加锁 是其他用户无法访问<br />
+u  </p>
+
+<p>chmod命令的绝对模式<br />
+chmod [mode] file<br />
+如： chmod -R 755 myfile<br />
+755 分别对应文件所有者、同组、以及其他用户对该文件的权限<br />
+7：rwx(4+2+1)<br />
+5: rx(4+1)<br />
+-R 表示如果是目录及将对应操作应用于每一个子目录及文件  </p>
+
+<p>目录与文件<br />
+目录权限中<br />
+r：列出目录内容<br />
+w: 创建文件<br />
+x: 搜索和访问<br />
+如果一个目录只有执行（x）权限，但目录中有个可执行程序，只要用户知道它的路径仍然可以执行，此时用户不能进入目录但可以执行其中的程序
+目录的权限将会覆盖目录中文件的权限   </p>
+
+<p>chown和chgrp<br />
+当你创建一个文件时，你就是该文件的属主。一旦你拥有某个文件，就可以改变它的所<br />
+有权，把它的所有权交给另外一个/etc/passwd文件中存在的合法用户。可以使用用户名或用<br />
+户ID号来完成这一操作。在改变一个文件的所有权时，相应的suid也将被清除，这是出于安<br />
+全性的考虑。只有文件的属主和系统管理员可以改变文件的所有权。一旦将文件的所有权交<br />
+给另外一个用户，就无法再重新收回它的所有权。如果真的需要这样做，那么就只有求助于<br />
+系统管理员了。<br />
+chown命令的一般形式为：<br />
+chmod -R -h owner file<br />
+-R选项意味着对所有子目录下的文件也都进行同样的操作。-h选项意味着在改变符号链<br />
+接文件的属主时不影响该链接所指向的目标文件。<br />
+chgrp与chown类似  </p>
+
+<p>umask<br />
+umask命令确定创建文件的缺省模式。系统管理员必须要为你设置一个合理的umask值，以确保你创建的<br />
+文件具有所希望的缺省权限，防止其他非同组用户对你的文件具有写权限。
+在已经登录之后，可以按照个人的偏好使用umask命令来改变文件创建的缺省权限。相应<br />
+的改变直到退出该shell或使用另外的umask命令之前一直有效。
+一般来说,umask命令是在/etc/profile文件中设置的，每个用户在登录时都会引用这个文件，所以如果希望改变所有用户的umask，可以在该文件中加入相应的条目。如果希望永久性地设置自己的umask值，那么就把它放在自己$HOME目录下的.profile文件中。  </p>
+
+<p>符号链接<br />
+两种不同类型的链接：软链接（指向文件的指针)/硬链接<br />
+软链接可以理解为windows中的快捷方式 <br />
+该命令的一般形式为： <br />
+ln [-s] source_path target_path <br />
+其中的路径可以是目录也可以是文件。    </p>
+
+
+      <div class="readall"><a href="/blog/2015/01/23/Linux-point1.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/11/30/collaborative-filtering-algorithm.html">协同过滤简解</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年11月30日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <p>Hive安装</p>
+      <h2 id="section">协同过滤算法</h2>
+<p><strong>Collaborative Filtering</strong><br />
+基于一组兴趣相同的用户进行推荐。协同过滤基于这样的假设：为用户找到他真正感兴趣的内容的好方法是，首先找他与他兴趣相似的用户，然后将这些用户感兴趣的内容推荐给此用户</p>
 
-<ol>
-  <li>
-    <p>下载Hive</p>
-  </li>
-  <li>
-    <p>把Hive移动到/home/hadoop目录下并解压</p>
+<p>协同过滤技术可以分为三类：<br />
+基于用户（User-based）的协同过滤；<br />
+基于项目（Item-based）的协同过滤；<br />
+基于模型（Model-based）的协同过滤</p>
 
-    <pre><code> hadoop@ubuntu:~/下载$ mv hive-0.9.0.tar.gz /home/hadoop/
- hadoop@ubuntu:~$ cd /home/hadoop/
- hadoop@ubuntu:~$ tar -zxvf hive-0.9.0.tar.gz 
-</code></pre>
-  </li>
-  <li>
-    <p>用root用户给hive-0.9.0授权</p>
+<p>步骤一，收集可以代表用户兴趣的信息。<br />
+如传统的打分的方式，豆瓣上的“我来评价”之类也是这种方法。这种方式被称为“显式评分”方法。其缺点是，收集数据比较困难，用户通常并不愿意费力气为你贡献这种数据。这导致这种系统通常更多出现在实验室或者论文里面。在实际的商业系统中，即使使用了这种方法，也多会被包装为一种更加有好如游戏方式。<br />
+另外一种被认为更有效的方法是“隐式评分”方法。这种方法不需要用户直接输入评价数据，而是根据用户的行为特征由系统代替用户完成评价。一种研究得比较多的方法是 Web Mining 。电子商务网站在隐式评分的数据获取上有先天的优势，用户购买的商品记录是非常有用的数据。</p>
 
-    <pre><code> hadoop@ubuntu:~$ su -
- 密码：
- root@ubuntu:~# cd /home/hadoop/
- root@ubuntu:/home/hadoop# sudo chown -R hadoop:hadoop hive-0.9.0
-</code></pre>
-  </li>
-</ol>
+<p>步骤二，最近邻搜索。<br />
+协同过滤的出发点是与你兴趣相同的一组用户，术语叫做“最近邻”。最近邻搜索的核心是计算两个用户的相似度。例如用户A和用户B，首先需要获取用户A和用户B所有的评分项，然后选择一个合适的相似度计算方法，基于评分项数据，计算得到用户A和用户B的相似度数值。<br />
+目前使用比较多的相似度算法包括，皮尔森相关系数（Person Correlation Coefficient）、余弦相似性（Cosine-based Similarity）以及调整余弦相似性（Adjusted Consine Similarity）</p>
 
-<p>4.添加hive-0.9.0环境变量</p>
+<p>步骤三，生成推荐结果。<br />
+有了最近邻集合，就可以对目标用户的兴趣进行预测，生成推荐结果。通常根据推荐目的的不同，可以进行多种形式的推荐。最常见的推荐结果有两种，Top-N 推荐和关联推荐。<br />
+Top-N 推荐，这里的 Top-N 和一般网站（比如 digg）上见到的“最热门”列表是不同的。热门列表是基于全部数据集产生的，它对每个人都是一样的；Top-N 推荐是针对单个用户产生的，它对每个人是不一样的：通过对你的最近邻用户进行统计，选择出现频率最高且在你的评分项目中不存在的项目作为推荐结果。豆瓣上的“排行”栏目，应该是传统的“热门”列表，不是 Top-N 推荐。<br />
+关联推荐，也称为基于关联规则的推荐。与传统关联规则针对全部数据进行挖掘不同的是，此方法仅对最近邻用户的购买记录进行关联规则挖掘。如果你曾经购买过关联规则左边的商品，而没有购买过关联规则右边的商品，那么就把右边的这个商品推荐给你。它最突出的优点就是，可以帮助你发现你感兴趣的而以前却从来没有注意过的商品。在 Amazon 介绍书的详细信息的页面上，可以看到这种推荐的一个实际应用。例如在《The Search》的页面上，Amazon 给我的推荐是，</p>
 
-<pre><code>	/etc/profile
-	在以上 文件中添加如下内容：
-
-#set java environment
-HIVE_HOME=/home/hadoop/hive-0.9.0
-HADOOP_HOME=/home/hadoop/hadoop-1.1.1
-JAVA_HOME=/home/hadoop/jdk1.7.0
-PATH=$JAVA_HOME/bin:$HIVE_HOME/bin:$HADOOP_HOME/bin:$PATH
-CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$HIVE_HOME/lib:$JAVA_HOME/lib/tools.jar
-export HADOOP_HOME
-export JAVA_HOME
-export HIVE_HOME
-export PATH
-export CLASSPATH 
-</code></pre>
-
-<ol>
-  <li>配置 Hive 配置文件</li>
-</ol>
-
-<p>a.配置 hive-conf.sh</p>
-
-<p>在“/home/hadoop/hive-0.9.0/bin”目录下,“hive-conf.sh”,然后在里面添加下面内容。</p>
-
-<pre><code>#set java environment
-HIVE_HOME=/home/hadoop/hive-0.9.0
-HADOOP_HOME=/home/hadoop/hadoop-1.1.1
-JAVA_HOME=/home/hadoop/jdk1.7.0
-PATH=$JAVA_HOME/bin:$HIVE_HOME/bin:$HADOOP_HOME/bin:$PATH
-CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$HIVE_HOME/lib:$JAVA_HOME/lib/tools.jar
-export HADOOP_HOME
-export JAVA_HOME
-export HIVE_HOME
-export PATH
-export CLASSPATH 
-</code></pre>
-
-<p>b.配置 hive-default.xml 和 hive-site.xml</p>
-
-<p>在“/home/hadoop/hive-0.9.0/conf”目录下,没有这两个文件,只有一个“hive-default.xml.template”,所以我们要复制两个“hive-default.xml.template”,并分别命名为“hive-default.xml”和“hive-site.xml” 因为我们当前是 root 用户,。所以还要把两个的文件的授权给 hadoop 用户。</p>
-
-<pre><code>root@ubuntu:/home/hadoop/hive-0.9.0/conf# cp hive-default.xml.template hive-default.xml
-root@ubuntu:/home/hadoop/hive-0.9.0/conf# chown -R hadoop:hadoop hive-default.xml
-root@ubuntu:/home/hadoop/hive-0.9.0/conf# cp hive-default.xml.template hive-site.xml
-root@ubuntu:/home/hadoop/hive-0.9.0/conf# chown -R hadoop:hadoop hive-site.xml
-root@ubuntu:/home/hadoop/hive-0.9.0/conf# ls -l
-</code></pre>
-
-<p>备注: “hive-default.xml”用于保留默认配置,“hive-site.xml”用于个性化配置,可覆盖默认配置。</p>
-
-<ol>
-  <li>启动 Hive</li>
-</ol>
-
-<p>此时切换用户至 hadoop 用户,在命令行输入“hive”命令进行测试。</p>
-
-<pre><code>hadoop@ubuntu:~$ hive
-WARNING: org.apache.hadoop.metrics.jvm.EventCounter is deprecated. Please use org.apache.hadoop.log.metrics.EventCounter in all the log4j.properties files.
-Logging initialized using configuration in jar:file:/home/hadoop/hive-0.9.0/lib/hive-common-0.9.0.jar!/hive-log4j.properties
-Hive history file=/tmp/hadoop/hive_job_log_hadoop_201303041031_876597921.txt
-hive&gt;
-</code></pre>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/hive-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/11/30/collaborative-filtering-algorithm.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -662,7 +450,10 @@ hive&gt;
   <a class="pagination-item older" href="/page/4">下一页&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
   
 </div>
-    <footer>Copyright&nbsp;&copy;&nbsp;2014 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></footer>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
     </div>
   </div>    
   <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>

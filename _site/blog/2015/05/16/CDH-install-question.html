@@ -1,0 +1,224 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="CDH 安装问题, willgo, Will.Quan">
+  <title>CDH 安装问题 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2015/05/16/CDH-install-question.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+
+    <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2015/05/16/CDH-install-question.html">CDH 安装问题</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2015年05月16日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
+  </p>
+</header>
+<div class="post-main">
+<p><em>CDH5安装参照：http://www.tuicool.com/articles/ENjmeaY</em><br />
+Q1:安装过程中提示找不到MySQL 驱动jar包<br />
+	：在/usr/shar/java 中添加mysql-connector-java-5.1.30-bin.jar<br />
+Q2：安装hive提示找不到MySQL驱动jar包<br />
+：在/opt/cloudera/parcels/CDH-5.1.3-1.cdh5.1.3.p0.12/lib/hive/lib/ 中添加 mysql-connector-java-5.1.30-bin.jar<br />
+Q3: cloudera-server 或cloudera-agent  status 提示服务已经停止，pid仍然存在<br />
+	：查看对应的log 可能是端口占用或是数据库连接问题<br />
+Q4:MR2和HDFS安装好后 web ui无法访问，查看对应端口已经处于listen状态，<br />
+	：分别在对应的配置中的端口和地址选项中将“将 ResourceManager 绑定到通配符地址”项， 勾选上<br />
+没有这个选项的可以在高级设置中在XML文件中添加<br />
+Q5：jdk版本不对应<br />
+	： CDH默认获取的jdk 位于：/usr/java   可将需要的jdk 拷贝到这个目录中。  </p>
+
+<p>Q6  sqoop导入数据时：User does not belong to hive<br />
+	I had same issue with permissions -&gt; chgrp: changing ownership of ‘/user/hive/warehouse/test/_log24310.txt’: User does not belong to hive.
+1.Added the existing user named cloudera to existing group named hive with command: usermod -a -G hive cloudera 
+2.Restarted the system 
+3.Used Load Command and after that did a select * from table_name -&gt; No data was getting displayed. 
+4.Executed select count(*) from table_name and a MapReduce job got started. 
+5.Executed select * from table and now results was returned correctly. 
+6.Opened a impala shell using impala-shell command. 
+7.Executed a select * from table_name and no results was getting returned. 
+8.Executed command invalidate metadata in the impala-shell 
+9.Executed command refresh table_name 
+10.Executed command show tables 
+11.Executed command select * from table_name and now results are getting displayed both in the impala-shell and hive shell. 
+  可以不必理会</p>
+
+<p>Q6：spark 安装不上<br />
+	未解决，网上有对应bug</p>
+
+<p>整个安装过程中遇到各种问题，主要解决得途径还是查看对应的log文件对应解决：<br />
+/var/log/hadoop*<br />
+/var/log/cloudera*<br />
+/opt/cm-5.1.3/log  </p>
+
+<h6 id="about">===========================about==================================================================================================================================</h6>
+<p>问题导读  </p>
+
+<pre><code>1.CM的安装目录在什么位置？  
+2.hadoop配置文件在什么位置？  
+3.Cloudera manager运行所需要的信息存在什么位置？  
+4.CM结构和功能是什么？  
+1. 相关目录  
+/var/log/cloudera-scm-installer : 安装日志目录。  
+/var/log/* : 相关日志文件（相关服务的及CM的）。  
+/usr/share/cmf/ : 程序安装目录。  
+/usr/lib64/cmf/ : Agent程序代码。  
+/var/lib/cloudera-scm-server-db/data : 内嵌数据库目录。  
+/usr/bin/postgres : 内嵌数据库程序。  
+/etc/cloudera-scm-agent/ : agent的配置目录。  
+/etc/cloudera-scm-server/ : server的配置目录。  
+/opt/cloudera/parcels/ : Hadoop相关服务安装目录。  
+/opt/cloudera/parcel-repo/ : 下载的服务软件包数据，数据格式为parcels。  
+/opt/cloudera/parcel-cache/ : 下载的服务软件包缓存数据。  
+/etc/hadoop/* : 客户端配置文件目录。  
+</code></pre>
+
+<ol>
+  <li>配置    </li>
+</ol>
+
+<p>Hadoop配置文件<br />
+配置文件放置于/var/run/cloudera-scm-agent/process/目录下。如：/var/run/cloudera-scm-agent/process/193-hdfs-NAMENODE/core-site.xml。这些配置文件是通过Cloudera Manager启动相应服务（如HDFS）时生成的，内容从数据库中获得（即通过界面配置的参数）。<br />
+在CM界面上更改配置是不会立即反映到配置文件中，这些信息会存储于数据库中，等下次重启服务时才会生成配置文件。且每次启动时都会产生新的配置文件。<br />
+CM Server主要数据库为scm基中放置配置的数据表为configs。里面包含了服务的配置信息，每一次配置的更改会把当前页面的所有配置内容添加到数据库中，以此保存配置修改历史。<br />
+scm数据库被配置成只能从localhost访问，如果需要从外部连接此数据库，修改vim /var/lib/cloudera-scm-server-db/data/pg_hba.conf文件,之后重启数据库。运行数据库的用户为cloudera-scm。  </p>
+
+<p>查看配置内容<br />
+1.直接查询scm数据库的configs数据表的内容。  <br />
+2.访问REST API： http://hostname:7180/api/v4/cm/deployment，返回JSON格式部署配置信息。  </p>
+
+<p>配置生成方式<br />
+CM为每个服务进程生成独立的配置目录（文件）。所有配置统一在服务端查询数据库生成（因为scm数据库只能在localhost下访问）生成配置文件，再由agent通过网络下载包含配置文件的zip包到本地解压到指定的目录。  </p>
+
+<p>配置修改<br />
+CM对于需要修改的配置预先定义，对于没有预先定义的配置,则通过在高级配置项中使用xml配置片段的方式进行配置。而对于/etc/hadoop/下的配置文件是客户端的配置，可以在CM通过部署客户端生成客户端配置。  </p>
+
+<ol>
+  <li>数据库<br />
+Cloudera manager主要的数据库为scm,存储Cloudera manager运行所需要的信息：配置，主机，用户等。  </li>
+  <li>CM结构 </li>
+</ol>
+
+<p>CM分为Server与Agent两部分及数据库（自带更改过的嵌入Postgresql）。它主要做三件事件：</p>
+
+<pre><code>1.管理监控集群主机。
+2.统一管理配置。
+3.管理维护Hadoop平台系统。
+实现采用C/S结构，Agent为客户端负责执行服务端发来的命令，执行方式一般为使用python调用相应的服务shell脚本。Server端为Java REST服务，提供REST API，Web管理端通过REST API调用Server端功能，Web界面使用富客户端技术（Knockout）。
+1.Server端主体使用Java实现。
+2.Agent端主体使用Python, 服务的启动通过调用相应的shell脚本进行启动，如果启动失败会重复4次调用启动脚本。
+3.Agent与Server保持心跳，使用Thrift RPC框架。
+</code></pre>
+
+<ol>
+  <li>升级  </li>
+</ol>
+
+<p>在CM中可以通过界面向导升级相关服务。升级过程为三步：</p>
+
+<pre><code>1.下载服务软件包。
+2.把所下载的服务软件包分发到集群中受管的机器上。
+3.安装服务软件包，使用软链接的方式把服务程序目录链接到新安装的软件包目录上。
+</code></pre>
+
+<ol>
+  <li>卸载  </li>
+</ol>
+
+<p>sudo /usr/share/cmf/uninstall-scm-express.sh, 然后删除/var/lib/cloudera-scm-server-db/目录，不然下次安装可能不成功。</p>
+
+<ol>
+  <li>
+    <p>开启postgresql远程访问  </p>
+
+    <p>CM内嵌数据库被配置成只能从localhost访问，如果需要从外部查看数据，数据修改vim /var/lib/cloudera-scm-server-db/data/pg_hba.conf文件,之后重启数据库。运行数据库的用户为cloudera-scm。</p>
+  </li>
+</ol>
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2015/02/01/Linux-point9.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Linux学习笔记9-AWK</a>
+
+
+<a class="pagination-item older" href="/blog/2015/05/16/DB-yanjin.html">DB演进理解&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="CDH 安装问题" data-thread-key="/blog/2015/05/16/CDH-install-question" data-url="index.html/blog/2015/05/16/CDH-install-question.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

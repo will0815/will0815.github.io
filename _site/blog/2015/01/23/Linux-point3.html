@@ -1,0 +1,181 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="Linux学习笔记3 后台执行命令, willgo, Will.Quan">
+  <title>Linux学习笔记3 后台执行命令 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2015/01/23/Linux-point3.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+
+    <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point3.html">Linux学习笔记3 后台执行命令</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2015年01月23日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#"></a>	
+  </p>
+</header>
+<div class="post-main">
+<p>Linux学习笔记3 后台执行命令
+• 设置crontab文件，并用它来提交作业。<br />
+• 使用at命令来提交作业。<br />
+• 在后台提交作业。<br />
+• 使用nohup命令提交作业。  </p>
+
+<p>cron： 系统组要的调度进程，无需人工干预的情况下执行作业，用户在crontab中提交编辑相应的作业。 每一个用户都可以保存一个crontab文件来保存调度信息系统管理员可以通过cron.deny和cron.allow来禁止或允许用户拥有自己的crontab文件  <br />
+crontab脚本格式为：<br />
+分 时 日 月 星期 要运行的命令<br />
+在每一个域中我们可以使用- ， * 这些标示符<br />
+-表示一个区间段，如希望周一到周五运行： 分 时 日 月 1-5 命令<br />
+，则是列举，如希望周一和周五运行： 分 时 日 月 1,5 命令<br />
+* 则是没有限制 如希望不限制是周几： 分 时 日 月 * 命令  </p>
+
+<p>注： crontab运行时并不知道用户的运行环境， 所以用户在提交crontab任务时需要给出脚本的绝对路径以及相应的环境变量   </p>
+
+<p>crontab命令的形式：<br />
+crontab [-u user] -e -l -r <br />
+-u 用户名<br />
+-e 编辑<br />
+-l 列出<br />
+-r 删除<br />
+使用当前用户登录则不需要-u 选项   </p>
+
+<p>创建：<br />
+向cron进程提交一个crontab文件之前，首先要做的一件事情就是设置环境变量EDITOR。cron进程根据它来确定使用哪个编辑器编辑向cron进程提交一个crontab文件之前，首先要做的一件事情就是设置环境变量文件。9 9 %的UNIX和LINUX用户都使用vi，如果你也是这样，那么你就编辑$HOME目录下的.profile文件，在其中加入这样<br />
+一行： <br />
+EDITOR=vi; export EDITOR<br />
+然后保存并退出。<br />
+不妨创建一个名为<user>cron的文件，其中<user>是用户名，例如，davecron。在该文件中加入如下的内容。  
+0,15,45 16-08 * * * /bin/echo 'date' &gt; /dev/console
+保存并退出。确信前面5个域用空格分隔。  
+在上面的例子中，系统将每隔1 5分钟向控制台输出一次当前时间。如果系统崩溃或挂起，从最后所显示的时间就可以一眼看出系统是什么时间停止工作的。在有些系统中，用tty1来表示控制台，可以根据实际情况对上面的例子进行相应的修改。
+为了提交你刚刚创建的向cron进程提交一个crontab文件之前，首先要做的一件事情就是设置环境变量文件，可以把这个新创建的文件作为cron命令的参数：
+$ crontab davecron  
+现在该文件已经提交给cron进程，它将每隔15分钟运行一次。同时，新创建文件的一个副本已经被放在/var/spool/cron目录中，文件名就是用户名（即，dave)</user></user></p>
+
+<p>备份：crontab -l &gt; /$HOME/mycron
+at命令：
+at命令允许用户向cron守护进程提交作业，使其在稍后的时间运行。这里稍后的时间可能是指10 min以后，也可能是指几天以后。如果你希望在一个月或更长的时间以后运行，最好还是使用crontab文件。
+一旦一个作业被提交,at命令将会保留所有当前的环境变量，包括路径，不象crontab只提供缺省的环境。该作业的所有输出都将以电子邮件的形式发送给用户，除非你对其输出进行了重定向，绝大多数情况下是重定向到某个文件中。
+和crontab一样，根用户可以通过/etc目录下的at.allow和at.deny文件来控制哪些用户可以
+使用at命令，哪些用户不行。不过一般来说，对a t命令的使用不如对cron tab的使用限制那么严格。
+a t命令的基本形式为：
+at [-f script] [-m -l -r] [time] [date]
+其中，
+-f script 是所要提交的脚本或命令。
+-l 列出当前所有等待运行的作业。atq命令具有相同的作用。
+-r 清除作业。为了清除某个作业，还要提供相应的作业标识（ ID）；有些UNIX变体只
+接受atrm作为清除命令。
+-m 作业完成后给用户发邮件。
+time at命令的时间格式非常灵活；可以是H、HH . HHMM、HH:MM或H:M，其中H和M
+分别是小时和分钟。还可以使用a.m.或p.m.。
+date 日期格式可以是月份数或日期数，而且at命令还能够识别诸如today、tomorrow这样的词。</p>
+
+<p>&amp;命令
+当在前台运行某个作业时，终端被该作业占据；而在后台运行作业时，它不会占据终端。可以使用&amp;命令把作业放到后台执行。
+该命令的一般形式为：
+命令&amp;
+不过，作业在后台运行一样会将结果输出到屏幕上，干扰你的工作。如果放在后台运行的作业会产生大量的输出，最好使用下面的方法把它的输出重定向到某个文件中：
+command &gt;out.file 2&gt;&amp;1 &amp;
+在上面的例子中，所有的标准输出和错误输出都将被重定向到一个叫做out.file 的文件中。
+当你成功地提交进程以后，就会显示出一个进程号，可以用它来监控该进程，或杀死它。
+如：
+运行一个find命令，查找名为“srm.conf”的文件，并把所有标准输出和错误输
+出重定向到一个叫作find.dt的文件中：
+find /etc -name “srm.conf” -print &gt;find.dt 2&gt;&amp;1 &amp;</p>
+
+<p>nohup命令<br />
+如果你正在运行一个进程，而且你觉得在退出帐户时该进程还不会结束，那么可以使用nohup命令。该命令可以在你退出帐户之后继续运行相应的进程。Nohup就是不挂起的意思(no hang up)。 
+该命令的一般形式为：<br />
+nohup command &amp;<br />
+使用nohup命令提交作业，在缺省情况下该作业的所有输出都被重定向到一个名为nohup.out的文件中，除非另外指定了输出文件：<br />
+nohup command &gt; myout.file 2&gt;&amp;1<br />
+在上面的例子中，输出被重定向到myout.file文件中。   </p>
+
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2015/01/23/Linux-point2.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Linux学习笔记2-find和xargs</a>
+
+
+<a class="pagination-item older" href="/blog/2015/01/23/Linux-point4.html">Linux 学习笔记4 特殊字符&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="Linux学习笔记3 后台执行命令" data-thread-key="/blog/2015/01/23/Linux-point3" data-url="index.html/blog/2015/01/23/Linux-point3.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

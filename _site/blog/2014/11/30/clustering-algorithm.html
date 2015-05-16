@@ -1,0 +1,150 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="聚类以及增量聚类的简单理解, willgo, Will.Quan">
+  <title>聚类以及增量聚类的简单理解 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2014/11/30/clustering-algorithm.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+
+    <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2014/11/30/clustering-algorithm.html">聚类以及增量聚类的简单理解</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2014年11月30日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
+  </p>
+</header>
+<div class="post-main">
+<h2 id="section">聚类以及增量聚类的简单理解</h2>
+<p>K-Means聚类基本步骤如下：   </p>
+
+<pre><code>Step1: 确定K值以及初始化聚类中心，选取K个初始凝聚点，做为欲形成的中心（最简单的方法就是K的值自己确定，但必须小于数据集个数，然后从数据集中选取K个数据做为初始聚类中心）；  
+Step2: 计算每个数据到K个初始凝聚点的距离，将每个数据和最近的凝聚点分到一组，形成K个初始分类；  
+Step3: 计算初始分类的重心（或均值），做为新的凝聚点，重新计算每个数据到分类重心（或均值）的距离，将每个数据和最近的凝聚点分为一组；
+Step4: 重复进行Step2和Step3，直到分类的重心或均值没有明显变化为止。
+</code></pre>
+
+<p>Canopy算法流程  </p>
+
+<pre><code>      （1）、将数据集向量化得到一个list后放入内存，选择两个距离阈值：T1和T2，其中T1 &gt; T2，对应上图，实线圈为T1，虚线圈为T2，T1和T2的值可以用交叉校验来确定；  
+      （2）、从list中任取一点P，用低计算成本方法快速计算点P与所有Canopy之间的距离（如果当前不存在Canopy，则把点P作为一个Canopy），如果点P与某个Canopy距离在T1以内，则将点P加入到这个Canopy；  
+      （3）、如果点P曾经与某个Canopy的距离在T2以内，则需要把点P从list中删除，这一步是认为点P此时与这个Canopy已经够近了，因此它不可以再做其它Canopy的中心了；  
+      （4）、重复步骤2、3，直到list为空结束。
+</code></pre>
+
+<p>单机版Canopy算法：  </p>
+
+<pre><code>      1、从PointList中取一个Point ，寻找已经建立好的Canopy 计算这个点于所有的Canopy的距离。如果和某一个Canopy的距离小于T1，则把这个点加到Canopy中，如果没有Canopy则选择这个点为一个Canopy的中心。  
+      2、如果这个店Point和某个Canopy的距离小于T2,则把这个点从PointList中删除（这个点以后做不了其他的Canopy的中心了）。  
+      3、循环直到所有的Point都被加入进来，然后计算各个Canopy的Center和Radius。
+</code></pre>
+
+<p>MapReduce：</p>
+
+<pre><code>  1、把数据整理成SequcnceFile格式（Mahout-InputMapper）作为初始化文件PointFile  
+  2、CanopyMapper阶段本机聚成小的Canopy 中间文件写成SequenceFile 这一步的T1、T2 和Reduce的T1、T2可以是不同的（ index、Canpy）  
+  3、所有的Mapper阶段的输出到1个Reducer中 然后Reduce把Map阶段中的Center点再次做聚类算法。聚出全局的Canopy。同时计算每个Canopy的CenterPoint点。写到临时文件CenterPoint中。  
+  4、针对全集合PointFile在CenterPoint上的findClosestCanopy操作（通过传入的距离算法）。然后输出一个SequenceFile。     
+</code></pre>
+
+<p>基于距离-增量聚类的实现方式</p>
+
+<pre><code>1.
+每增加一个数据，立即(或延迟)计算它与其他对象之间
+的相异度度量值，并将其插入到R2中；检查计算出相异度
+度量值，当d(id，j)&lt;δ时，如果id在R3中存在，则elements= 
+elements+1；否则在R3中插入一个新记录(id，1)。  
+
+2.
+数据的增加部分可以简单的加到原有聚类结果中,具体情况可以分两种: 
+(1)增加记录在原有聚类结果的某一类范围内(n维空间),这样这条记录的加入增加了这类的数据密度,因此可以直接把这条记录加入这一类当中. 
+(2)增加记录不在原来聚类结果的任何一类范围内,也就是相当于n维空间上的一个孤立的点,这种情况可暂把这条数据记录单独看成一类. 
+</code></pre>
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2014/11/04/mahout-xiangjie.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;mahout--初学</a>
+
+
+<a class="pagination-item older" href="/blog/2014/11/30/collaborative-filtering-algorithm.html">协同过滤简解&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="聚类以及增量聚类的简单理解" data-thread-key="/blog/2014/11/30/clustering-algorithm" data-url="index.html/blog/2014/11/30/clustering-algorithm.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>
