@@ -64,6 +64,339 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Mysql-outputformat.html">Mysql outputformat简单实现</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>================================OutputFormat=========</p>
+
+<pre><code>import java.io.IOException;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.List;
+
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.OutputCommitter;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+import com.augmentum.rob.input.Person;
+
+public class MySqlOutputFormat extends OutputFormat&lt;NullWritable, Person&gt; {
+
+@Override
+public RecordWriter&lt;NullWritable, Person&gt; getRecordWriter(
+TaskAttemptContext context) throws IOException,
+InterruptedException {
+MysqlRecordWriter mysqlRecordWriter = null;
+try {
+String connString = "jdbc:mysql://172.20.29.29:3306/MapReduceInputTest";
+Class.forName("com.mysql.jdbc.Driver");
+Connection connection = java.sql.DriverManager.getConnection(
+connString + "?useUnicode=true&amp;characterEncoding=utf8",
+"admin", "admin");
+Statement statement = connection.createStatement();
+mysqlRecordWriter = new MysqlRecordWriter(connection, statement);
+
+} catch (Exception ex) {
+throw new IOException(ex.getMessage());
+}
+
+return mysqlRecordWriter;
+}
+
+@Override
+public void checkOutputSpecs(JobContext context) throws IOException,
+InterruptedException {
+// TODO Auto-generated method stub
+// 判断输出表是否设置
+
+// 判断输出表是否存在
+
+}
+
+@Override
+public OutputCommitter getOutputCommitter(TaskAttemptContext context)
+throws IOException, InterruptedException {
+return new FileOutputCommitter(
+FileOutputFormat.getOutputPath(context),
+context);
+}
+
+}
+</code></pre>
+
+<p>==========================RecordWriter=====================</p>
+
+<pre><code>import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.util.StringUtils;
+
+import com.augmentum.rob.input.Person;
+public class MysqlRecordWriter extends RecordWriter&lt;NullWritable, Person&gt;{
+
+private Connection connection;
+private Statement statement;
+private static final Log LOG = LogFactory.getLog(MysqlRecordWriter.class);
+
+public MysqlRecordWriter() throws SQLException {}
+
+public MysqlRecordWriter(Connection connection, Statement statement) throws SQLException {
+this.connection = connection;
+this.statement = statement;
+this.connection.setAutoCommit(false);
+}
+
+public Connection getConnection() {
+return connection;
+}
+
+public Statement getStatement() {
+return statement;
+}
+
+@Override
+public void write(NullWritable key, Person person) throws IOException, InterruptedException {
+String sql = "INSERT person2(name, age) VALUES('"+person.getName()+"', "+person.getAge()+")";
+//可以根据key和value情况写多条INSERT SQL
+// List&lt;String&gt; sqlList = buildInsertSql();
+try {
+// if (sqlList != null &amp;&amp; sqlList.size() &gt; 0) {
+// for (String sql : sqlList) {
+// statement.addBatch(sql);
+// }
+// }
+statement.addBatch(sql);
+} catch (SQLException e) {
+e.printStackTrace();
+}
+}
+
+// //更具逻辑具体实现插入sql。
+// public abstract List&lt;String&gt; buildInsertSql();
+
+@Override
+public void close(TaskAttemptContext context) throws IOException, InterruptedException {
+try {
+statement.executeBatch();
+connection.commit();
+} catch (SQLException e) {
+try {
+connection.rollback();
+}
+catch (SQLException ex) {
+LOG.warn(StringUtils.stringifyException(ex));
+}
+throw new IOException(e.getMessage());
+} finally {
+try {
+statement.close();
+connection.close();
+}
+catch (SQLException ex) {
+throw new IOException(ex.getMessage());
+}
+}
+
+}
+
+}
+</code></pre>
+
+<p>======================================================================================================</p>
+
+<pre><code>import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
+import org.apache.hadoop.mapreduce.lib.db.DBOutputFormat;
+import org.apache.hadoop.mapreduce.lib.db.DBWritable;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class RobOut&lt;K extends DBWritable, V&gt; extends DBOutputFormat&lt;K, V&gt;{
+
+/** {@inheritDoc} */
+public RecordWriter&lt;K, V&gt; getRecordWriter(TaskAttemptContext context)
+throws IOException {
+DBConfiguration dbConf = new DBConfiguration(context.getConfiguration());
+
+String tableName = dbConf.getOutputTableName();
+String[] fieldNames = dbConf.getOutputFieldNames();
+
+if(fieldNames == null) {
+fieldNames = new String[dbConf.getOutputFieldCount()];
+}
+
+try {
+Connection connection = dbConf.getConnection();
+PreparedStatement statement = null;
+
+statement = connection.prepareStatement(
+constructQuery(tableName, fieldNames));
+return new DBRecordWriter(connection, statement);
+} catch (Exception ex) {
+throw new IOException(ex.getMessage());
+}
+}
+
+/**
+* Set the {@link Path} of the output directory for the map-reduce job.
+*
+* @param job The job to modify
+* @param outputDir the {@link Path} of the output directory for
+* the map-reduce job.
+*/
+public static void setOutputTable(Job job, String tableName) {
+job.getConfiguration().set("output.mysql.table" + tableName, tableName);
+}
+
+/**
+* Get the {@link Path} to the output directory for the map-reduce job.
+*
+* @return the {@link Path} to the output directory for the map-reduce job.
+* @see FileOutputFormat#getWorkOutputPath(TaskInputOutputContext)
+*/
+public static Path getOutputTable(JobContext job) {
+String name = job.getConfiguration().get("mapred.output.table");
+return name == null ? null: new Path(name);
+}
+
+}
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/Mysql-outputformat.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/Mongodb-java.html">Mongodb java简单操作</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#nosql">nosql</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <pre><code>import java.net.UnknownHostException;
+import java.util.Set;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
+
+public class Mongodb {
+
+/**
+* @author gaogao
+* @param args
+* @throws MongoException
+* @throws UnknownHostException
+*/
+public static void main(String[] args) throws UnknownHostException,
+MongoException {
+// 连接本地数据库
+Mongo m = new Mongo();
+// 创建名为new_test_db的数据库
+DB db = m.getDB("new_test_db");
+// 获取new_test_db中的集合（类似于获取关系数据库中的表）
+Set&lt;String&gt; cols = db.getCollectionNames();
+// 打印出new_test_db中的集合，这里应当为null
+for (String s : cols) {
+System.out.println(s);
+}
+// 创建一个叫做"new_test_col"的集合
+DBCollection collection = db.getCollection("new_test_col");
+// 初始化一个基本DB对象，最终插入数据库的就是这个DB对象
+BasicDBObject obj = new BasicDBObject();
+// 放入几个键值对
+obj.put("from", "搞搞");
+obj.put("to", "宝宝");
+obj.put("subject", "狗子爱宝子");
+// 插入对象
+collection.insert(obj);
+// 查看一条记录，findOne()=find().limit(1);
+DBObject dbobj = collection.findOne();
+// 打印出刚才插入的数据
+System.out.println(dbobj);
+System.out.println("==================================================");
+// 现在我们来插入9条{ranking:i}的数据
+for (int i = 0; i &lt; 9; i++) {
+collection.insert(new BasicDBObject().append("ranking", i));
+}
+// 打印集合中的数据总数，这里应当输出10
+System.out.println(collection.getCount());
+// 下面我们来遍历集合，find()方法返回的是一个游标(cursor)，这里的概念和关系数据库很相似
+DBCursor cursor = collection.find();
+// 然后我们使用这个游标来遍历集合
+while (cursor.hasNext()) {
+System.out.println(cursor.next());
+}
+// 下面来看一些略复杂一点的查询技巧，第一个，简单的条件查询，查询ranking为1的记录
+BasicDBObject query = new BasicDBObject();
+query.put("ranking", 1);
+cursor = collection.find(query);
+while (cursor.hasNext()) {
+System.out.println(cursor.next());
+}
+// 下面是更复杂的条件查询，查询ranking大于5小于9的记录
+query = new BasicDBObject();
+query.put("ranking", new BasicDBObject("$gt", 5).append("$lt", 9));
+cursor = collection.find(query);
+while (cursor.hasNext()) {
+System.out.println(cursor.next());
+}
+// 最后删除我们的测试数据库
+m.dropDatabase("new_test_db");
+}
+}
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/Mongodb-java.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
       <h1 class="post-title"><a href="/blog/2014/09/27/Module.html">Module</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
@@ -623,163 +956,6 @@ return actionName;
 </ol>
 
       <div class="readall"><a href="/blog/2014/09/27/Linux-SSH-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Java-class-loader.html">Java class loader</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#java">java</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p><strong>java classloader 结构：</strong></p>
-
-<ol>
-  <li>Bootstrap classloader(启动类加载器)
-主要负责jdk_home/lib目录下的核心API或-Xbootclasspath选项指定的jar包的装入工作</li>
-  <li>Extension Classloader(扩展类加载器)
-负责jdk_home/lib/ext目录下的jar包或者-Djava.ext.dirs指定目录下的jar包装入工作
-3.System classloader(系统类加载器)
-负责Java -classpath/-Djava.class.path所指定的类与jar包的装入</li>
-  <li>User Custom classloader（用户自定义类加载器（java.lang.ClassLoader的子类））
-以上每一个classloader都会维护一份自己的名称空间，同一个名称空间不能出现两个同名的类。
-为了实现Java安全沙箱模型顶层的类加载器安全机制，Java默认采用 双亲委派的加载链 结构</li>
-</ol>
-
-<p>在jvm启动时就会构建bootstrap classloader 负责Java平台核心库</p>
-
-<p><strong>每个ClassLoader加载Class的过程是：</strong></p>
-
-<ol>
-  <li>检测此Class是否载入过（即在cache中是否有此Class），如果有到8,如果没有到2</li>
-  <li>如果parent classloader不存在（没有parent，那parent一定是bootstrap classloader了），到4</li>
-  <li>请求parent classloader载入，如果成功到8，不成功到5</li>
-  <li>请求jvm从bootstrap classloader中载入，如果成功到8</li>
-  <li>寻找Class文件（从与此classloader相关的类路径中寻找）。如果找不到则到7.</li>
-  <li>从文件中载入Class，到8.</li>
-  <li>抛出ClassNotFoundException.</li>
-  <li>返回Class.</li>
-</ol>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/Java-class-loader.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Java-Serialization.html">Java Serialization</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#java">java</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>目的：</p>
-
-<p>保存对象的状态，并且可以把保存的对象状态再读取出来进行恢复。</p>
-
-<p>场景：</p>
-
-<ol>
-  <li>需要把内存中对象状态保存到一个文件中或者数据库中时</li>
-  <li>需要用套接字在网络上传送对象时</li>
-  <li>需要通过RMI传输对象时
-特点：</li>
-  <li>序列化时 只对对象的状态进行保存 而不管对象的方法</li>
-  <li>当一个父类实现序列化，子类自动实现序列化 无须显式实现Serializable借口</li>
-  <li>当一个对象的实例变量引用其他对象，序列化该对象时也会把引用对象进行序列化</li>
-  <li>并非所有对象都可以序列化：
-socket/thread</li>
-</ol>
-
-<p>Serialization 是一种将对象以一连串的字节描述的过程，deserialization 将这些字节重构成一个对象的过程。Java序列化API提供一种处理对象序列化的标准机制。</p>
-
-<h2 id="section">进阶问题：</h2>
-
-<p><strong>序列化ID的问题</strong></p>
-
-<p>serialVersionID即 序列化的版本号，是为了保证不同版本之间的兼容性。向前兼容以及向后兼容。
-两种生成方式：</p>
-
-<ol>
-  <li>使用默认的1L</li>
-  <li>根据类名 接口名 成员方法以及属性来生成</li>
-</ol>
-
-<p>如果一个类实现了序列化 但没有显示的申明序列化版本号  在程序编译的时候会自动生成一个版本号。存储在文件中，如果类有改动版本号也会随之改变。 在反序列化的时候JVM会将文件中的ID与本地相应实体类的ID比较  两者一致才能够序列化成功。否则会抛InvalidClassException异常。</p>
-
-<p>静态化变量的序列化</p>
-
-<pre><code>                    //初始时staticVar为5
-                    ObjectOutputStream out = new ObjectOutputStream(
-                                    new FileOutputStream("result.obj"));
-                    out.writeObject(new Test());
-                    out.close();
-
-                    //序列化后修改为10
-                    Test.staticVar = 10;
-
-                    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
-                                    "result.obj"));
-                    Test t = (Test) oin.readObject();
-                    oin.close();
-                    //再读取，通过t.staticVar打印新的值
-                    System.out.println(t.staticVar); 以上代码的输出结果为10.。。因为序列化并不保存静态化变量。
-</code></pre>
-
-<p><strong>父类的序列化</strong></p>
-
-<p>一个子类实现了Serializable接口  它的父类没有实现Serializable接口   序列化该子类对象然后反序列化输出父类定义的某变量的数值  该数值与序列化时的数值不同</p>
-
-<p>在父类没有实现Serializable接口时  JVM将不会序列化父类对象  而一个Java对象的构造必须有父类对象 所以在反序列化时 只能调用父类的无参构造器作为默认的父对象  所以这是可以在父类的无参构造器中对变量进行初始化 否则父类变量都是默认的值</p>
-
-<p><strong>Transient关键字</strong></p>
-
-<p>Transient关键字的作用是控制变量的序列化，在变量申明前加上次关键字可以阻止该变量被序列化</p>
-
-<p><strong>序列化存储规则</strong></p>
-
-<pre><code> ObjectOutputStream out = new ObjectOutputStream(
-                                    new FileOutputStream("result.obj"));
-    Test test = new Test();
-    //试图将对象两次写入文件
-    out.writeObject(test);
-    out.flush();
-    System.out.println(new File("result.obj").length());
-    out.writeObject(test);
-    out.close();
-    System.out.println(new File("result.obj").length());
-
-    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
-                    "result.obj"));
-    //从文件依次读出两个文件
-    Test t1 = (Test) oin.readObject();
-    Test t2 = (Test) oin.readObject();
-    oin.close();
-    //判断两个引用是否指向同一个对象
-    System.out.println(t1 == t2);
-</code></pre>
-
-<p>同一对象两次写入文件，打印出写入一次对象后的存储大小和写入两次后的存储大小，然后从文件中反序列化出两个对象，比较这两个对象是否为同一对象。一般的思维是，两次写入对象，文件大小会变为两倍的大小，反序列化时，由于从文件读取，生成了两个对象，判断相等时应该是输入 false 才对，最后却为TRUE。</p>
-
-<p>因为：Java 序列化机制为了节省磁盘空间，具有特定的存储规则，当写入文件的为同一对象时，并不会再将对象的内容进行存储，而只是再次存储一份引用，上面增加的 5 字节的存储空间就是新增引用和一些控制信息的空间。反序列化时，恢复引用关系，使得清单 3 中的 t1 和 t2 指向唯一的对象，二者相等，输出 true。该存储规则极大的节省了存储空间。</p>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/Java-Serialization.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

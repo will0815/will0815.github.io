@@ -1,4 +1,5 @@
 
+index.html/page/12/index.html
 index.html/page/11/index.html
 index.html/page/10/index.html
 index.html/page/9/index.html
@@ -29,7 +30,9 @@ index.html/life/best-me.html
 index.html/page/about.html
 index.html/404.html
 
-index.html/blog/2015/05/16/HBase-config-optimize.html
+index.html/blog/2015/05/16/sqoop-spacil-chart.html
+index.html/blog/2015/05/16/hive-datahouse.html
+index.html/blog/2015/05/16/MR-join.html
 index.html/blog/2015/05/16/DB-yanjin.html
 index.html/blog/2015/05/16/CDH-install-question.html
 index.html/blog/2015/02/01/Linux-point9.html

@@ -64,6 +64,204 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/eclipse-hadoop-job.html">eclipse hadoop job</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>使用EJob提交jar
+在run中添加：</p>
+
+<pre><code>     conf.set("fs.default.name", "hdfs://192.168.241.7:9000");
+      conf.set("mapred.job.tracker", "192.168.241.7:9001");
+      Job job = new Job(conf, "....... my  job ......");
+      try {
+        File jarFile = EJob.createTempJar("bin");
+        ((JobConf) job.getConfiguration()).setJar(jarFile.toString());
+    } catch (IOException e) {
+        throw new IOException(e);
+    }
+</code></pre>
+
+<p>修改hadoop的hdfs-site.xml 关闭权限校验</p>
+
+<pre><code> &lt;property&gt; 
+      &lt;name&gt;dfs.permissions&lt;/name&gt; 
+      &lt;value&gt;false&lt;/value&gt; 
+ &lt;/property&gt; 
+</code></pre>
+
+<p><strong>其他解决办法：</strong></p>
+
+<p>hdfs的权限判断十分简单，就是拿发出指令的user name和文件的user name 做比较</p>
+
+  	private void check(INode inode, FsAction access
+<pre><code>  ) throws AccessControlException {
+if (inode == null) {
+  return;
+}
+FsPermission mode = inode.getFsPermission();
+
+if (user.equals(inode.getUserName())) { //user class
+  if (mode.getUserAction().implies(access)) { return; }
+}
+else if (groups.contains(inode.getGroupName())) { //group class
+  if (mode.getGroupAction().implies(access)) { return; }
+}
+else { //other class
+  if (mode.getOtherAction().implies(access)) { return; }
+}
+throw new AccessControlException("Permission denied: user=" + user
+    + ", access=" + access + ", inode=" + inode);
+ 	 }
+}
+</code></pre>
+
+<p>在多用户提交任务时遇到Permission denied, 的原因和任务提交的过程有关。</p>
+
+<ol>
+  <li>首先提交任务的客户端会把任务相关文件打包放在hadoop.tmp.dir中，这是本地目录，需要通过本地系统权限验证。由于是临时目录直接设置成为777就行.</li>
+  <li>
+    <p>客户端会将任务文件打包写入hdfs的	</p>
+
+    <pre><code>mapreduce.jobtracker.staging.root.dir + "/" + user + "/.staging" 目录，需要经过hdfs权限验证。通常可以选择两种方法解决。
+
+1) 保持mapreduce.jobtracker.staging.root.dir为默认，将此目录chmod 777
+2) 在hdfs的/user目录下建立用户目录，并且chown为该用户，相当于在hdfs下创建一个用户。
+然后设置mapreduce.jobtracker.staging.root.dir为/user,  这是官方推荐的，可以看到这个属性的描述是这样写的：
+The root of the staging area for users' job files In practice, this should be the directory where users' home directories are located (usually /user)。
+3）有人说可以在启动任务时加入hadoop.job.ugi属性指定用户和群组。 我验证这样不行。看源码里也是直接获取
+ugi = UserGroupInformation.getCurrentUser();不过看hdfs权限策略这操行应该可以设置。
+</code></pre>
+  </li>
+</ol>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/eclipse-hadoop-job.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/arraylistarraylink.html">arraylist&arraylink</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p><strong>区别</strong>：</p>
+
+<ol>
+  <li>
+    <p>array 在定义的时候必须实例化(至少申明大小)，arraylist则可以只是申明</p>
+
+    <ul>
+      <li>int[] array = new array[3]</li>
+      <li>int[] array = {1,2,3}</li>
+      <li>ArrayList arrayList;</li>
+      <li>int[] array;则不合法</li>
+    </ul>
+  </li>
+  <li>
+    <p>Array只能存储同构对象，ArrayList则可以存储异构对象，当然object[]和使用泛型的arraylist不适用此条。</p>
+  </li>
+  <li>
+    <p>在CRL的托管方式不一样
+ Array是连续存储，Arraylist则不一定是连续存储</p>
+  </li>
+  <li>Array的大小是定义的时候指定的，Arraylist则可以动态扩容</li>
+  <li>Array不能随意添加或删除其中的项，ArrayList则可以随意添加删除</li>
+</ol>
+
+<p><strong>相似</strong>：</p>
+
+<ol>
+  <li>都具有索引，即可以通过索引来直接添加和修改任意项</li>
+  <li>所创建的对象都托管在堆中</li>
+  <li>都能够对自身进行枚举（因为实现了IEnumerable接口）</li>
+</ol>
+
+<p><strong>ArrayList 源码摘要：</strong></p>
+
+<pre><code>1. public class ArrayList&lt;E&gt; extends AbstractList&lt;E&gt;  
+2.         implements List&lt;E&gt;, RandomAccess, Cloneable, java.io.Serializable  
+3. {  
+4.     ......  
+5.   
+6.     /** 
+7.      * The array buffer into which the elements of the ArrayList are stored. 
+8.      * The capacity of the ArrayList is the length of this array buffer. 
+9.      */  
+10.     private transient E[] elementData;  
+11.   
+12.   
+13.     /** 
+14.      * The size of the ArrayList (the number of elements it contains). 
+15.      * 
+16.      * @serial 
+17.      */  
+18.     private int size;  
+19.    ......  
+20. }  
+21. 
+</code></pre>
+
+<p>底层两个属性一个object[] 一个size</p>
+
+<ol>
+  <li>ArrayList底层通过object[] 复制的方式（System.arraycopy()）来处理数组的增长</li>
+  <li>当ArrayList 的容量不足时，其扩充容量的方式：先将容量扩充至当前容量的1.5倍，若还不够，则将容量扩充至当前需要的数量。</li>
+</ol>
+
+<p><strong>ArrayList与Vector的区别</strong></p>
+
+<p>1） vector 是线程同步 的，所以它也是线程安全 的，而arraylist 是线程异步 的，是不安全的 。如果不考虑到线程的安全因素，一般用 arraylist效率比较高。</p>
+
+<p>2） 如果集合中的元素的数目大于目前集合数组的长度时，vector 增长率为目前数组长度的100%, 而arraylist 增长率为目前数组长度的50% .如果在集合中使用数据量比较大的数据，用vector有一定的优势。</p>
+
+<p>3） 如果查找一个指定位置的数据 ，vector和arraylist使用的时间是相同 的，都是O(1) ,这个时候使用vector和arraylist都可以。</p>
+
+<p>而如果移动一个指定位置的数据花费的时间为O(n-i)n为总长度 ，这个时候就应该考虑到使用linklist ,因为它移动一个指定位置的数据所花费的时间为0(1),而查询一个指定位置的数据时花费的时间为0(i)。</p>
+
+<p><strong>ArrayList和LinkedList的大致区别：</strong></p>
+
+<ol>
+  <li>ArrayList是实现了基于动态数组的数据结构，LinkedList基于链表的数据结构。</li>
+  <li>对于随机访问get和set，ArrayList觉得优于LinkedList，因为LinkedList要移动指针。</li>
+  <li>对于新增和删除操作add和remove，LinedList比较占优势，因为ArrayList要移动数据。 </li>
+</ol>
+
+<p><strong>ArrayList和LinkedList在性能上各有优缺点，都有各自所适用的地方，总的说来可以描述如下：</strong></p>
+
+<ol>
+  <li>对ArrayList和LinkedList而言，在列表末尾增加一个元素所花的开销都是固定的。对ArrayList而言，主要是在内部数组中增加一项，指向所添加的元素，偶尔可能会导致对数组重新进行分配；而对LinkedList而言，这个开销是统一的，分配一个内部Entry对象。</li>
+  <li>在ArrayList的中间插入或删除一个元素意味着这个列表中剩余的元素都会被移动；而在LinkedList的中间插入或删除一个元素的开销是固定的。</li>
+  <li>LinkedList不支持高效的随机元素访问。</li>
+  <li>ArrayList的空间浪费主要体现在在list列表的结尾预留一定的容量空间，而LinkedList的空间花费则体现在它的每一个元素都需要消耗相当的空间</li>
+</ol>
+
+<p>可以这样说：当操作是在一列数据的后面添加数据而不是在前面或中间,并且需要随机地访问其中的元素时,使用ArrayList会提供比较好的性能；当你的操作是在一列数据的前面或中间添加或删除数据,并且按照顺序访问其中的元素时,就应该使用LinkedList了。</p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/arraylistarraylink.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
       <h1 class="post-title"><a href="/blog/2014/09/27/RegEx.html">RegEx</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
@@ -1221,339 +1419,6 @@ sudo /etc/init.d/nginx restart
 </code></pre>
 
       <div class="readall"><a href="/blog/2014/09/27/Nginx.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Mysql-outputformat.html">Mysql outputformat简单实现</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>================================OutputFormat=========</p>
-
-<pre><code>import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.util.List;
-
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.OutputCommitter;
-import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.TaskInputOutputContext;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-
-import com.augmentum.rob.input.Person;
-
-public class MySqlOutputFormat extends OutputFormat&lt;NullWritable, Person&gt; {
-
-@Override
-public RecordWriter&lt;NullWritable, Person&gt; getRecordWriter(
-TaskAttemptContext context) throws IOException,
-InterruptedException {
-MysqlRecordWriter mysqlRecordWriter = null;
-try {
-String connString = "jdbc:mysql://172.20.29.29:3306/MapReduceInputTest";
-Class.forName("com.mysql.jdbc.Driver");
-Connection connection = java.sql.DriverManager.getConnection(
-connString + "?useUnicode=true&amp;characterEncoding=utf8",
-"admin", "admin");
-Statement statement = connection.createStatement();
-mysqlRecordWriter = new MysqlRecordWriter(connection, statement);
-
-} catch (Exception ex) {
-throw new IOException(ex.getMessage());
-}
-
-return mysqlRecordWriter;
-}
-
-@Override
-public void checkOutputSpecs(JobContext context) throws IOException,
-InterruptedException {
-// TODO Auto-generated method stub
-// 判断输出表是否设置
-
-// 判断输出表是否存在
-
-}
-
-@Override
-public OutputCommitter getOutputCommitter(TaskAttemptContext context)
-throws IOException, InterruptedException {
-return new FileOutputCommitter(
-FileOutputFormat.getOutputPath(context),
-context);
-}
-
-}
-</code></pre>
-
-<p>==========================RecordWriter=====================</p>
-
-<pre><code>import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.util.StringUtils;
-
-import com.augmentum.rob.input.Person;
-public class MysqlRecordWriter extends RecordWriter&lt;NullWritable, Person&gt;{
-
-private Connection connection;
-private Statement statement;
-private static final Log LOG = LogFactory.getLog(MysqlRecordWriter.class);
-
-public MysqlRecordWriter() throws SQLException {}
-
-public MysqlRecordWriter(Connection connection, Statement statement) throws SQLException {
-this.connection = connection;
-this.statement = statement;
-this.connection.setAutoCommit(false);
-}
-
-public Connection getConnection() {
-return connection;
-}
-
-public Statement getStatement() {
-return statement;
-}
-
-@Override
-public void write(NullWritable key, Person person) throws IOException, InterruptedException {
-String sql = "INSERT person2(name, age) VALUES('"+person.getName()+"', "+person.getAge()+")";
-//可以根据key和value情况写多条INSERT SQL
-// List&lt;String&gt; sqlList = buildInsertSql();
-try {
-// if (sqlList != null &amp;&amp; sqlList.size() &gt; 0) {
-// for (String sql : sqlList) {
-// statement.addBatch(sql);
-// }
-// }
-statement.addBatch(sql);
-} catch (SQLException e) {
-e.printStackTrace();
-}
-}
-
-// //更具逻辑具体实现插入sql。
-// public abstract List&lt;String&gt; buildInsertSql();
-
-@Override
-public void close(TaskAttemptContext context) throws IOException, InterruptedException {
-try {
-statement.executeBatch();
-connection.commit();
-} catch (SQLException e) {
-try {
-connection.rollback();
-}
-catch (SQLException ex) {
-LOG.warn(StringUtils.stringifyException(ex));
-}
-throw new IOException(e.getMessage());
-} finally {
-try {
-statement.close();
-connection.close();
-}
-catch (SQLException ex) {
-throw new IOException(ex.getMessage());
-}
-}
-
-}
-
-}
-</code></pre>
-
-<p>======================================================================================================</p>
-
-<pre><code>import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.TaskInputOutputContext;
-import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
-import org.apache.hadoop.mapreduce.lib.db.DBOutputFormat;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-
-public class RobOut&lt;K extends DBWritable, V&gt; extends DBOutputFormat&lt;K, V&gt;{
-
-/** {@inheritDoc} */
-public RecordWriter&lt;K, V&gt; getRecordWriter(TaskAttemptContext context)
-throws IOException {
-DBConfiguration dbConf = new DBConfiguration(context.getConfiguration());
-
-String tableName = dbConf.getOutputTableName();
-String[] fieldNames = dbConf.getOutputFieldNames();
-
-if(fieldNames == null) {
-fieldNames = new String[dbConf.getOutputFieldCount()];
-}
-
-try {
-Connection connection = dbConf.getConnection();
-PreparedStatement statement = null;
-
-statement = connection.prepareStatement(
-constructQuery(tableName, fieldNames));
-return new DBRecordWriter(connection, statement);
-} catch (Exception ex) {
-throw new IOException(ex.getMessage());
-}
-}
-
-/**
-* Set the {@link Path} of the output directory for the map-reduce job.
-*
-* @param job The job to modify
-* @param outputDir the {@link Path} of the output directory for
-* the map-reduce job.
-*/
-public static void setOutputTable(Job job, String tableName) {
-job.getConfiguration().set("output.mysql.table" + tableName, tableName);
-}
-
-/**
-* Get the {@link Path} to the output directory for the map-reduce job.
-*
-* @return the {@link Path} to the output directory for the map-reduce job.
-* @see FileOutputFormat#getWorkOutputPath(TaskInputOutputContext)
-*/
-public static Path getOutputTable(JobContext job) {
-String name = job.getConfiguration().get("mapred.output.table");
-return name == null ? null: new Path(name);
-}
-
-}
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/09/27/Mysql-outputformat.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Mongodb-java.html">Mongodb java简单操作</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#nosql">nosql</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <pre><code>import java.net.UnknownHostException;
-import java.util.Set;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
-
-public class Mongodb {
-
-/**
-* @author gaogao
-* @param args
-* @throws MongoException
-* @throws UnknownHostException
-*/
-public static void main(String[] args) throws UnknownHostException,
-MongoException {
-// 连接本地数据库
-Mongo m = new Mongo();
-// 创建名为new_test_db的数据库
-DB db = m.getDB("new_test_db");
-// 获取new_test_db中的集合（类似于获取关系数据库中的表）
-Set&lt;String&gt; cols = db.getCollectionNames();
-// 打印出new_test_db中的集合，这里应当为null
-for (String s : cols) {
-System.out.println(s);
-}
-// 创建一个叫做"new_test_col"的集合
-DBCollection collection = db.getCollection("new_test_col");
-// 初始化一个基本DB对象，最终插入数据库的就是这个DB对象
-BasicDBObject obj = new BasicDBObject();
-// 放入几个键值对
-obj.put("from", "搞搞");
-obj.put("to", "宝宝");
-obj.put("subject", "狗子爱宝子");
-// 插入对象
-collection.insert(obj);
-// 查看一条记录，findOne()=find().limit(1);
-DBObject dbobj = collection.findOne();
-// 打印出刚才插入的数据
-System.out.println(dbobj);
-System.out.println("==================================================");
-// 现在我们来插入9条{ranking:i}的数据
-for (int i = 0; i &lt; 9; i++) {
-collection.insert(new BasicDBObject().append("ranking", i));
-}
-// 打印集合中的数据总数，这里应当输出10
-System.out.println(collection.getCount());
-// 下面我们来遍历集合，find()方法返回的是一个游标(cursor)，这里的概念和关系数据库很相似
-DBCursor cursor = collection.find();
-// 然后我们使用这个游标来遍历集合
-while (cursor.hasNext()) {
-System.out.println(cursor.next());
-}
-// 下面来看一些略复杂一点的查询技巧，第一个，简单的条件查询，查询ranking为1的记录
-BasicDBObject query = new BasicDBObject();
-query.put("ranking", 1);
-cursor = collection.find(query);
-while (cursor.hasNext()) {
-System.out.println(cursor.next());
-}
-// 下面是更复杂的条件查询，查询ranking大于5小于9的记录
-query = new BasicDBObject();
-query.put("ranking", new BasicDBObject("$gt", 5).append("$lt", 9));
-cursor = collection.find(query);
-while (cursor.hasNext()) {
-System.out.println(cursor.next());
-}
-// 最后删除我们的测试数据库
-m.dropDatabase("new_test_db");
-}
-}
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/09/27/Mongodb-java.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

@@ -1,0 +1,134 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="MR中Join方案, willgo, Will.Quan">
+  <title>MR中Join方案 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2015/05/16/MR-join.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+
+    <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2015/05/16/MR-join.html">MR中Join方案</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2015年05月16日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
+  </p>
+</header>
+<div class="post-main">
+<h4 id="mrjoin">MR中Join方案</h4>
+<p>与传统数据一样在MR中的join操作也是一项耗时的操作，但是我们可以根据MR 的设计思想对其进行优化。<br />
+#######Reduce side join<br />
+这是最简单的一种形式，主要思想：<br />
+在map阶段，map函数同时读取两个文件File1和File2，为了区分两种来源的key/value数据对，对每条数据打一个标签（tag）,比如：tag=0表示来自文件File1，tag=2表示来自文件File2。即：map阶段的主要任务是对不同文件中的数据打标签。<br />
+在reduce阶段，reduce函数获取key相同的来自File1和File2文件的value list， 然后对于同一个key，对File1和File2中的数据进行join（笛卡尔乘积）。即：reduce阶段进行实际的连接操作。这种形式主要是利用hadoop mr 的框架机制。  </p>
+
+<h6 id="map-side-join">#Map side join</h6>
+<p>reduce side join，是因为在map阶段不能获取所有需要的join字段，即：同一个key对应的字段可能位于不同map中。Reduce side join是非常低效的，因为shuffle阶段要进行大量的数据传输。<br />
+Map side join是针对以下场景进行的优化：两个待连接表中，有一个表非常大，而另一个表非常小，以至于小表可以直接存放到内存中。这样，我们可以将小表复制多份，让每个map task内存中存在一份（比如存放到hash table中），然后只扫描大表：对于大表中的每一条记录key/value，在hash table中查找是否有相同的key的记录，如果有，则连接后输出即可。<br />
+为了支持文件的复制，<br />
+Hadoop提供了一个类DistributedCache，使用该类的方法如下：<br />
+（1）用户使用静态方法DistributedCache.addCacheFile(URI)指定要复制的文件。JobTracker在作业启动之前会获取这个URI列表，并将相应的文件拷贝到各个TaskTracker的本地磁盘上。<br />
+（2）用户使用DistributedCache.getLocalCacheFiles()方法获取文件目录，并使用标准的文件读写API读取相应的文件。<br />
+如果足够小 也可以 放在context里面（不推荐）<br />
+#######Semi Join<br />
+Semi Join，也叫半连接，是从分布式数据库中借鉴过来的方法。它的产生动机是：对于reduce side join，跨机器的数据传输量非常大，这成了join操作的一个瓶颈，如果能够在map端过滤掉不会参加join操作的数据，则可以大大节省网络IO。<br />
+实现方法很简单：选取一个小表，假设是File1，将其参与join的key抽取出来，保存到文件File3中，File3文件一般很小，可以放到内存中。在map阶段，使用DistributedCache将File3复制到各个TaskTracker上，然后将File2中不在File3中的key对应的记录过滤掉，剩下的reduce阶段的工作与reduce side join相同。<br />
+#######reduce side join + BloomFilter<br />
+在某些情况下，SemiJoin抽取出来的小表的key集合在内存中仍然存放不下，这时候可以使用BloomFiler以节省空间。<br />
+BloomFilter最常见的作用是：判断某个元素是否在一个集合里面。它最重要的两个方法是：add() 和contains()。最大的特点是不会存在 false negative，即：如果contains()返回false，则该元素一定不在集合中，但会存在一定的 false positive，即：如果contains()返回true，则该元素一定可能在集合中。因而可将小表中的key保存到BloomFilter中，在map阶段过滤大表，可能有一些不在小表中的记录没有过滤掉（但是在小表中的记录一定不会过滤掉），这没关系，只不过增加了少量的网络IO而已。<br />
+#######二次排序
+在Hadoop中，默认情况下是按照key进行排序，如果要按照value进行排序怎么办？即：对于同一个key，reduce函数接收到的value list是按照value排序的。这种应用需求在join操作中很常见，比如，希望相同的key中，小表对应的value排在前面。<br />
+有两种方法进行二次排序，分别为：buffer and in memory sort和 value-to-key conversion。
+对于buffer and in memory sort，主要思想是：在reduce()函数中，将某个key对应的所有value保存下来，然后进行排序。 这种方法最大的缺点是：可能会造成out of memory。<br />
+对于value-to-key conversion，主要思想是：将key和部分value拼接成一个组合key（实现WritableComparable接口或者调用setSortComparatorClass函数），这样reduce获取的结果便是先按key排序，后按value排序的结果，需要注意的是，用户需要自己实现Paritioner，以便只按照key进行数据划分。<br />
+Hadoop显式的支持二次排序，在Configuration类中有个setGroupingComparatorClass()方法，可用于设置排序group的key值
+实际工作多数情况下，会采用第一种，reduce side join 简单 安全  。。。。  </p>
+
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2015/05/16/DB-yanjin.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;DB演进理解</a>
+
+
+<a class="pagination-item older" href="/blog/2015/05/16/hive-datahouse.html">hive 数据仓库优劣学习&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="MR中Join方案" data-thread-key="/blog/2015/05/16/MR-join" data-url="index.html/blog/2015/05/16/MR-join.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

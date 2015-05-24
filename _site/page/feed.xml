@@ -5,17 +5,191 @@
     <description>willgo - 最好的从未错过</description>
     <link>index.html</link>
     <atom:link href="index.html/page/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sat, 16 May 2015 12:21:04 +0800</pubDate>
-    <lastBuildDate>Sat, 16 May 2015 12:21:04 +0800</lastBuildDate>
+    <pubDate>Sun, 24 May 2015 12:49:24 +0800</pubDate>
+    <lastBuildDate>Sun, 24 May 2015 12:49:24 +0800</lastBuildDate>
     <generator>Will.Quan</generator>
     
       <item>
-        <title>HBase config optimize</title>
-        <description>
+        <title>sqoop 特殊字符导入问题</title>
+        <description>&lt;p&gt;Sqoop从MySQL导入数据到hive，示例：&lt;br /&gt;
+sqoop import –connect  jdbc:mysql://10.255.2.89:3306/test?charset=utf-8 –  username selectuser –password select##select##  –table test_sqoop_import \&lt;br /&gt;
+–columns ‘id,content,updateTime’ \&lt;br /&gt;
+–split-by id \&lt;br /&gt;
+–hive-import –hive-table basic.test2;  &lt;/p&gt;
+
+&lt;p&gt;如果不加其他参数，导入的数据默认的列分隔符是’\001’，默认的行分隔符是’\n’。&lt;br /&gt;
+这样问题就来了，如果导入的数据中有’\n’，hive会认为一行已经结束，后面的数据被分割成下一行。这种情况下，导入之后hive中数据的行数就比原先数据库中的多，而且会出现数据不一致的情况。&lt;br /&gt;
+Sqoop也指定了参数 –fields-terminated-by和 –lines-terminated-by来自定义行分隔符和列分隔符。&lt;br /&gt;
+可是当你真的这么做时 坑爹呀&lt;br /&gt;
+INFO hive.HiveImport: FAILED: SemanticException 1:381 LINES TERMINATED BY only supports newline ’\n’ right now.    
+也就是说虽然你通过–lines-terminated-by指定了其他的字符作为行分隔符，但是hive只支持’\n’作为行分隔符。&lt;br /&gt;
+简单的解决办法就是加上参数–hive-drop-import-delims来把导入数据中包含的hive默认的分隔符去掉。  &lt;/p&gt;
+
+&lt;p&gt;附 sqoop 命令参考  &lt;/p&gt;
+
+&lt;p&gt;导入数据到 hdfs&lt;br /&gt;
+使用 sqoop-import 命令可以从关系数据库导入数据到 hdfs。&lt;br /&gt;
+$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –target-dir /user/hive/result
+注意：&lt;br /&gt;
+mysql jdbc url 请使用 ip 地址&lt;br /&gt;
+如果重复执行，会提示目录已经存在，可以手动删除&lt;br /&gt;
+如果不指定 –target-dir，导入到用户家目录下的 TBLS 目录&lt;br /&gt;
+你还可以指定其他的参数：  &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;--append	将数据追加到hdfs中已经存在的dataset中。使用该参数，sqoop将把数据先导入到一个临时目录中，然后重新给文件命名到一个正式的目录中，以避免和该目录中已存在的文件重名。  
+--as-avrodatafile	将数据导入到一个Avro数据文件中  
+--as-sequencefile	将数据导入到一个sequence文件中  
+--as-textfile	将数据导入到一个普通文本文件中，生成该文本文件后，可以在hive中通过sql语句查询出结果。  
+--boundary-query &amp;lt;statement&amp;gt;	边界查询，也就是在导入前先通过SQL查询得到一个结果集，然后导入的数据就是该结果集内的数据，格式如：--boundary-query &#39;select id,no from t where id = 3&#39;，表示导入的数据为id=3的记录，或者 select min(&amp;lt;split-by&amp;gt;), max(&amp;lt;split-by&amp;gt;) from &amp;lt;table name&amp;gt;，注意查询的字段中不能有数据类型为字符串的字段，否则会报错
+--columns&amp;lt;col,col&amp;gt;	指定要导入的字段值，格式如：--columns id,username
+--direct	直接导入模式，使用的是关系数据库自带的导入导出工具。官网上是说这样导入会更快
+--direct-split-size	在使用上面direct直接导入的基础上，对导入的流按字节数分块，特别是使用直连模式从PostgreSQL导入数据的时候，可以将一个到达设定大小的文件分为几个独立的文件。
+--inline-lob-limit	设定大对象数据类型的最大值
+-m,--num-mappers	启动N个map来并行导入数据，默认是4个，最好不要将数字设置为高于集群的节点数
+--query，-e &amp;lt;sql&amp;gt;	从查询结果中导入数据，该参数使用时必须指定–target-dir、–hive-table，在查询语句中一定要有where条件且在where条件中需要包含 \$CONDITIONS，示例：--query &#39;select * from t where \$CONDITIONS &#39; --target-dir /tmp/t –hive-table t
+--split-by &amp;lt;column&amp;gt;	表的列名，用来切分工作单元，一般后面跟主键ID
+--table &amp;lt;table-name&amp;gt;	关系数据库表名，数据从该表中获取
+--delete-target-dir	删除目标目录
+--target-dir &amp;lt;dir&amp;gt;	指定hdfs路径
+--warehouse-dir &amp;lt;dir&amp;gt;	与 --target-dir 不能同时使用，指定数据导入的存放目录，适用于hdfs导入，不适合导入hive目录
+--where	从关系数据库导入数据时的查询条件，示例：--where &quot;id = 2&quot;
+-z,--compress	压缩参数，默认情况下数据是没被压缩的，通过该参数可以使用gzip压缩算法对数据进行压缩，适用于SequenceFile, text文本文件, 和Avro文件
+--compression-codec	Hadoop压缩编码，默认是gzip
+--null-string &amp;lt;null-string&amp;gt;	可选参数，如果没有指定，则字符串null将被使用
+--null-non-string &amp;lt;null-string&amp;gt;	可选参数，如果没有指定，则字符串null将被使用
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;使用 sql 语句&lt;br /&gt;
+参照上表，使用 sql 语句查询时，需要指定 $CONDITIONS  &lt;/p&gt;
+
+&lt;p&gt;$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –query ‘SELECT * from TBLS where $CONDITIONS ‘ –split-by tbl_id -m 4 –target-dir /user/hive/result&lt;br /&gt;
+	上面命令通过 -m 1 控制并发的 map 数。&lt;/p&gt;
+
+&lt;p&gt;使用 direct 模式：&lt;br /&gt;
+$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –delete-target-dir –direct –default-character-set UTF-8 –target-dir /user/hive/result&lt;/p&gt;
+
+&lt;p&gt;指定文件输出格式：&lt;br /&gt;
+$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –fields-terminated-by “\t” –lines-terminated-by “\n” –delete-target-dir  –target-dir /user/hive/result&lt;/p&gt;
+
+&lt;p&gt;指定空字符串：&lt;br /&gt;
+$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –fields-terminated-by “\t” –lines-terminated-by “\n” –delete-target-dir –null-string ‘\N’ –null-non-string ‘\N’ –target-dir /user/hive/result&lt;/p&gt;
+
+&lt;p&gt;如果需要指定压缩：  &lt;br /&gt;
+$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –fields-terminated-by “\t” –lines-terminated-by “\n” –delete-target-dir –null-string ‘\N’ –null-non-string ‘\N’ –compression-codec “com.hadoop.compression.lzo.LzopCodec” –target-dir /user/hive/result  &lt;/p&gt;
+
+&lt;p&gt;附：可选的文件参数如下表。   &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;--enclosed-by &amp;lt;char&amp;gt;	给字段值前后加上指定的字符，比如双引号，示例：--enclosed-by &#39;\&quot;&#39;，显示例子：&quot;3&quot;,&quot;jimsss&quot;,&quot;dd@dd.com&quot;
+--escaped-by &amp;lt;char&amp;gt;	给双引号作转义处理，如字段值为&quot;测试&quot;，经过 --escaped-by &quot;\\&quot; 处理后，在hdfs中的显示值为：\&quot;测试\&quot;，对单引号无效
+--fields-terminated-by &amp;lt;char&amp;gt;	设定每个字段是以什么符号作为结束的，默认是逗号，也可以改为其它符号，如句号.，示例如：--fields-terminated-by
+--lines-terminated-by &amp;lt;char&amp;gt;	设定每条记录行之间的分隔符，默认是换行串，但也可以设定自己所需要的字符串，示例如：--lines-terminated-by &quot;#&quot; 以#号分隔
+--mysql-delimiters	Mysql默认的分隔符设置，字段之间以,隔开，行之间以换行\n隔开，默认转义符号是\，字段值以单引号&#39;包含起来。
+--optionally-enclosed-by &amp;lt;char&amp;gt;	enclosed-by是强制给每个字段值前后都加上指定的符号，而--optionally-enclosed-by只是给带有双引号或单引号的字段值加上指定的符号，故叫可选的
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;创建 hive 表&lt;br /&gt;
+生成与关系数据库表的表结构对应的HIVE表：  &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ sqoop create-hive-table --connect jdbc:mysql://192.168.56.121:3306/metastore --username hiveuser --password redhat --table TBLS 
+--hive-home &amp;lt;dir&amp;gt;	Hive的安装目录，可以通过该参数覆盖掉默认的hive目录
+--hive-overwrite	覆盖掉在hive表中已经存在的数据
+--create-hive-table	默认是false，如果目标表已经存在了，那么创建任务会失败
+--hive-table	后面接要创建的hive表
+--table	指定关系数据库表名  导入数据到 hive   执行下面的命令会将 mysql 中的数据导入到 hdfs 中，然后创建一个hive 表，最后再将 hdfs 上的文件移动到 hive 表的目录下面。   $ sqoop import --connect jdbc:mysql://192.168.56.121:3306/metastore --username hiveuser --password redhat --table TBLS --fields-terminated-by &quot;\t&quot; --lines-terminated-by &quot;\n&quot; --hive-import --hive-overwrite --create-hive-table --hive-table dw_srclog.TBLS --delete-target-dir   说明：   可以在 hive 的表名前面指定数据库名称   可以通过 --create-hive-table 创建表，如果表已经存在则会执行失败   从上面可见，数据导入到 hive 中之后分隔符为默认分隔符，参考上文你可以通过设置参数指定其他的分隔符。   另外，Sqoop 默认地导入空值（NULL）为 null 字符串，而 hive 使用 \N 去标识空值（NULL），故你在 import 或者 export 时候，需要做相应的处理。在 import 时，使用如下命令：   $ sqoop import  ... --null-string &#39;\\N&#39; --null-non-string &#39;\\N&#39;   在导出时，使用下面命令：   $ sqoop import  ... --input-null-string &#39;&#39; --input-null-non-string &#39;&#39;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;增量导入&lt;br /&gt;
+–check-column (col)	用来作为判断的列名，如id&lt;br /&gt;
+–incremental (mode)	append：追加，比如对大于last-value指定的值之后的记录进行追加导入。lastmodified：最后的修改时间，追加last-value指定的日期之后的记录&lt;br /&gt;
+–last-value (value)	指定自从上次导入后列的最大值（大于该指定的值），也可以自己设定某一值&lt;/p&gt;
+
+&lt;p&gt;合并 hdfs 文件&lt;br /&gt;
+将HDFS中不同目录下面的数据合在一起，并存放在指定的目录中，示例如：&lt;br /&gt;
+sqoop merge –new-data /test/p1/person –onto /test/p2/person –target-dir /test/merged –jar-file /opt/data/sqoop/person/Person.jar –class-name Person –merge-key id&lt;br /&gt;
+其中，–class-name 所指定的 class 名是对应于 Person.jar 中的 Person 类，而 Person.jar 是通过 Codegen 生成的&lt;br /&gt;
+–new-data &lt;path&gt;	Hdfs中存放数据的一个目录，该目录中的数据是希望在合并后能优先保留的，原则上一般是存放越新数据的目录就对应这个参数。  
+--onto &lt;path&gt;	Hdfs中存放数据的一个目录，该目录中的数据是希望在合并后能被更新数据替换掉的，原则上一般是存放越旧数据的目录就对应这个参数。  
+--merge-key &amp;lt;col&amp;gt;	合并键，一般是主键ID  
+--jar-file &lt;file&gt;	合并时引入的jar包，该jar包是通过Codegen工具生成的jar包  
+--class-name &lt;class&gt;	对应的表名或对象名，该class类是包含在jar包中的。  
+--target-dir &lt;path&gt;	合并后的数据在HDFS里的存放目录  &lt;/path&gt;&lt;/class&gt;&lt;/file&gt;&lt;/path&gt;&lt;/path&gt;&lt;/p&gt;
 </description>
         <pubDate>Sat, 16 May 2015 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2015/05/16/HBase-config-optimize.html</link>
-        <guid isPermaLink="true">index.html/blog/2015/05/16/HBase-config-optimize.html</guid>
+        <link>index.html/blog/2015/05/16/sqoop-spacil-chart.html</link>
+        <guid isPermaLink="true">index.html/blog/2015/05/16/sqoop-spacil-chart.html</guid>
+        
+        <category>hadoop</category>
+        
+      </item>
+    
+      <item>
+        <title>hive 数据仓库优劣学习</title>
+        <description>&lt;h5 id=&quot;hive&quot;&gt;Hive数据仓库优劣&lt;/h5&gt;
+&lt;p&gt;Hive是一个基于Hadoop的数据仓库平台，通过Hive，可以方便地进行数据提取转化加载（ETL）的工作。Hive定义了一个类似于SQL的查询语言HQL，能够将用户编写的SQL转化为相应的MapReduce程序。当然，用户也可以自定义Mapper和Reducer来完成复杂的分析工作。&lt;br /&gt;
+基于MapReduce的Hive具有良好的扩展性和容错性。不过由于MapReduce缺乏结构化数据分析中有价值的特性，以及Hive缺乏对执行计划的充分优化，导致Hive在很场景中执行效率不高。  &lt;/p&gt;
+
+&lt;p&gt;强大的数据仓库和数据分析平台至少需要具备以下几点特性。&lt;br /&gt;
+灵活的存储引擎&lt;br /&gt;
+高效的执行引擎&lt;br /&gt;
+良好的可扩展性&lt;br /&gt;
+强大的容错机制&lt;br /&gt;
+多样化的可视化  &lt;/p&gt;
+
+&lt;h6 id=&quot;section&quot;&gt;#存储引擎&lt;/h6&gt;
+&lt;p&gt;Hive数据存储没有特有的数据结构，（只是hdfs文件的映射）也没有为数据建立索引，可以自由地组织Hive中的表，只要在创建表时告诉Hive数据中的列分隔符和行分隔符，Hive就可以解析数据。Hive的元数据存储在RDBMS中，所有数据都基于HDFS存储。Hive包含Table、External Table、Partition和Bucket等数据模型。  &lt;/p&gt;
+
+&lt;h6 id=&quot;section-1&quot;&gt;#执行引擎&lt;/h6&gt;
+&lt;p&gt;Hive的编译器负责编译源代码并生成最终的执行计划，包括语法分析、语义分析、目标代码生成，所做的优化并不多。Hive基于MapReduce，Hive的Sort和GroupBy都依赖MapReduce。而MapReduce相当于固化了执行算子，Map的MergeSort必须执行，GroupBy算子也只有一种模式，Reduce的Merge-Sort也必须可选。另外Hive对Join算子的支持也较少。内存拷贝和数据预处理也会影响Hive的执行效率。&lt;br /&gt;
+#######扩展性
+Hive关注水平扩展性。简单来讲，水平扩展性指系统可以通过简单的增加资源来支持更大的数据量和负载。Hive处理的数据量是PB级的，而且每小时每天都在增长，这就使得水平扩展性成为一个非常重要的指标。Hadoop系统的水平扩展性是非常好的，而Hive基MapReduce框架，因此能够很自然地利用这点。
+#######容错性
+Hive有较好的容错性。Hive的执行计划在MapReduce框架上以作业的方式执行，每个作业的中间结果文件写到本地磁盘，最终输出文件写到HDFS文件系统，利用HDFS的多副本机制来保证数据的可靠性，从而达到作业的容错性。如果在作业执行过程中某节点出现故障，那么Hive执行计划基本不会受到影响。因此，基于Hive实现的数据仓库可以部署在由普通机器构建的分布式集群之上。
+#######可视化
+Hive的可视化界面基本属于字符终端，用户的技术水平一般比较高。面向不同的应用和用户，提供个性化的可视化展现，是Hive改进的一个重要方向。&lt;/p&gt;
+</description>
+        <pubDate>Sat, 16 May 2015 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2015/05/16/hive-datahouse.html</link>
+        <guid isPermaLink="true">index.html/blog/2015/05/16/hive-datahouse.html</guid>
+        
+        <category>hadoop</category>
+        
+      </item>
+    
+      <item>
+        <title>MR中Join方案</title>
+        <description>&lt;h4 id=&quot;mrjoin&quot;&gt;MR中Join方案&lt;/h4&gt;
+&lt;p&gt;与传统数据一样在MR中的join操作也是一项耗时的操作，但是我们可以根据MR 的设计思想对其进行优化。&lt;br /&gt;
+#######Reduce side join&lt;br /&gt;
+这是最简单的一种形式，主要思想：&lt;br /&gt;
+在map阶段，map函数同时读取两个文件File1和File2，为了区分两种来源的key/value数据对，对每条数据打一个标签（tag）,比如：tag=0表示来自文件File1，tag=2表示来自文件File2。即：map阶段的主要任务是对不同文件中的数据打标签。&lt;br /&gt;
+在reduce阶段，reduce函数获取key相同的来自File1和File2文件的value list， 然后对于同一个key，对File1和File2中的数据进行join（笛卡尔乘积）。即：reduce阶段进行实际的连接操作。这种形式主要是利用hadoop mr 的框架机制。  &lt;/p&gt;
+
+&lt;h6 id=&quot;map-side-join&quot;&gt;#Map side join&lt;/h6&gt;
+&lt;p&gt;reduce side join，是因为在map阶段不能获取所有需要的join字段，即：同一个key对应的字段可能位于不同map中。Reduce side join是非常低效的，因为shuffle阶段要进行大量的数据传输。&lt;br /&gt;
+Map side join是针对以下场景进行的优化：两个待连接表中，有一个表非常大，而另一个表非常小，以至于小表可以直接存放到内存中。这样，我们可以将小表复制多份，让每个map task内存中存在一份（比如存放到hash table中），然后只扫描大表：对于大表中的每一条记录key/value，在hash table中查找是否有相同的key的记录，如果有，则连接后输出即可。&lt;br /&gt;
+为了支持文件的复制，&lt;br /&gt;
+Hadoop提供了一个类DistributedCache，使用该类的方法如下：&lt;br /&gt;
+（1）用户使用静态方法DistributedCache.addCacheFile(URI)指定要复制的文件。JobTracker在作业启动之前会获取这个URI列表，并将相应的文件拷贝到各个TaskTracker的本地磁盘上。&lt;br /&gt;
+（2）用户使用DistributedCache.getLocalCacheFiles()方法获取文件目录，并使用标准的文件读写API读取相应的文件。&lt;br /&gt;
+如果足够小 也可以 放在context里面（不推荐）&lt;br /&gt;
+#######Semi Join&lt;br /&gt;
+Semi Join，也叫半连接，是从分布式数据库中借鉴过来的方法。它的产生动机是：对于reduce side join，跨机器的数据传输量非常大，这成了join操作的一个瓶颈，如果能够在map端过滤掉不会参加join操作的数据，则可以大大节省网络IO。&lt;br /&gt;
+实现方法很简单：选取一个小表，假设是File1，将其参与join的key抽取出来，保存到文件File3中，File3文件一般很小，可以放到内存中。在map阶段，使用DistributedCache将File3复制到各个TaskTracker上，然后将File2中不在File3中的key对应的记录过滤掉，剩下的reduce阶段的工作与reduce side join相同。&lt;br /&gt;
+#######reduce side join + BloomFilter&lt;br /&gt;
+在某些情况下，SemiJoin抽取出来的小表的key集合在内存中仍然存放不下，这时候可以使用BloomFiler以节省空间。&lt;br /&gt;
+BloomFilter最常见的作用是：判断某个元素是否在一个集合里面。它最重要的两个方法是：add() 和contains()。最大的特点是不会存在 false negative，即：如果contains()返回false，则该元素一定不在集合中，但会存在一定的 false positive，即：如果contains()返回true，则该元素一定可能在集合中。因而可将小表中的key保存到BloomFilter中，在map阶段过滤大表，可能有一些不在小表中的记录没有过滤掉（但是在小表中的记录一定不会过滤掉），这没关系，只不过增加了少量的网络IO而已。&lt;br /&gt;
+#######二次排序
+在Hadoop中，默认情况下是按照key进行排序，如果要按照value进行排序怎么办？即：对于同一个key，reduce函数接收到的value list是按照value排序的。这种应用需求在join操作中很常见，比如，希望相同的key中，小表对应的value排在前面。&lt;br /&gt;
+有两种方法进行二次排序，分别为：buffer and in memory sort和 value-to-key conversion。
+对于buffer and in memory sort，主要思想是：在reduce()函数中，将某个key对应的所有value保存下来，然后进行排序。 这种方法最大的缺点是：可能会造成out of memory。&lt;br /&gt;
+对于value-to-key conversion，主要思想是：将key和部分value拼接成一个组合key（实现WritableComparable接口或者调用setSortComparatorClass函数），这样reduce获取的结果便是先按key排序，后按value排序的结果，需要注意的是，用户需要自己实现Paritioner，以便只按照key进行数据划分。&lt;br /&gt;
+Hadoop显式的支持二次排序，在Configuration类中有个setGroupingComparatorClass()方法，可用于设置排序group的key值
+实际工作多数情况下，会采用第一种，reduce side join 简单 安全  。。。。  &lt;/p&gt;
+
+</description>
+        <pubDate>Sat, 16 May 2015 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2015/05/16/MR-join.html</link>
+        <guid isPermaLink="true">index.html/blog/2015/05/16/MR-join.html</guid>
         
         <category>hadoop</category>
         
@@ -541,151 +715,6 @@ n    延续到下一输入行；允许跨行的模式匹配语句&lt;/p&gt;
         <guid isPermaLink="true">index.html/blog/2015/02/01/Linux-point10.html</guid>
         
         <category>linux</category>
-        
-      </item>
-    
-      <item>
-        <title>Hive基础架构</title>
-        <description>&lt;p&gt;Hive基础架构&lt;br /&gt;
-Hive是基于Hadoop的一个数据仓库工具，可以将结构化的数据文件映射为一张数据库表，并提供完整的sql查询功能，可以将sql语句转换为MapReduce任务进行运行。其优点是学习成本低，可以通过类SQL语句快速实现简单的MapReduce统计，不必开发专门的MapReduce应用，十分适合数据仓库的统计分析,Hive是建立在 Hadoop 上的数据仓库基础构架。它提供了一系列的工具，可以用来进行数据提取转化加载（ETL），这是一种可以存储、查询和分析存储在 Hadoop 中的大规模数据的机制。Hive 定义了简单的类 SQL 查询语言，称为 HQL，它允许熟悉 SQL 的用户查询数据。同时，这个语言也允许熟悉 MapReduce 开发者的开发自定义的 mapper 和 reducer 来处理内建的 mapper 和 reducer 无法完成的复杂的分析工作。 &lt;br /&gt;
-Hive技术架构图：&lt;br /&gt;
-&lt;img src=&quot;/image/hive1.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
-服务端组件： &lt;br /&gt;
-Driver组件：该组件包括Complier、Optimizer和Executor，它的作用是将HiveQL（类SQL）语句进行解析、编译优化，生成执行计划，然后调用底层的mapreduce计算框架。 &lt;br /&gt;
-Metastore组件：元数据服务组件，这个组件存储hive的元数据，hive的元数据存储在关系数据库里，hive支持的关系数据库有derby、mysql。元数据对于hive十分重要，因此hive支持把metastore服务独立出来，安装到远程的服务器集群里，从而解耦hive服务和metastore服务，保证hive运行的健壮性。&lt;br /&gt;
-Thrift服务：thrift是facebook开发的一个软件框架，它用来进行可扩展且跨语言的服务的开发，hive集成了该服务，能让不同的编程语言调用hive的接口。 &lt;br /&gt;
-客户端组件： &lt;br /&gt;
-CLI：command line interface，命令行接口。 &lt;br /&gt;
-Thrift客户端：上面的架构图里没有写上Thrift客户端，但是hive架构的许多客户端接口是建立在thrift客户端之上，包括JDBC和ODBC接口。 &lt;br /&gt;
-WEBGUI：hive客户端提供了一种通过网页的方式访问hive所提供的服务。这个接口对应hive的hwi组件（hive web interface），使用前要启动hwi服务。 &lt;br /&gt;
-一个Hive hsql 执行流程&lt;br /&gt;
-&lt;img src=&quot;/image/hive2.png&quot; alt=&quot;&quot; /&gt;  &lt;/p&gt;
-</description>
-        <pubDate>Sun, 01 Feb 2015 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2015/02/01/Hive-structure.html</link>
-        <guid isPermaLink="true">index.html/blog/2015/02/01/Hive-structure.html</guid>
-        
-        <category>hadoop</category>
-        
-      </item>
-    
-      <item>
-        <title>Hive分区分桶</title>
-        <description>&lt;h2 id=&quot;hive&quot;&gt;Hive分区分桶&lt;/h2&gt;
-&lt;p&gt;Hive 分区表&lt;br /&gt;
-在Hive Select查询中一般会扫描整个表内容，会消耗很多时间做没必要的工作。有时候只需要扫描表中关心的一部分数据，因此建表时引入了partition概念。分区表指的是在创建表时指定的partition的分区空间。 &lt;br /&gt;
-Hive可以对数据按照某列或者某些列进行分区管理，所谓分区我们可以拿下面的例子进行解释。 存储日志，其中必然有个属性是日志产生的日期。在产生分区时，就可以按照日志产生的日期列进行划分。把每一天的日志当作一个分区。   
-将数据组织成分区，主要可以提高数据的查询速度。至于用户存储的每一条记录到底放到哪个分区，由用户决定。即用户在加载数据的时候必须显示的指定该部分数据放到哪个分区。 
-1、一个表可以拥有一个或者多个分区，每个分区以文件夹的形式单独存在表文件夹的目录下。 &lt;br /&gt;
-2、表和列名不区分大小写。 &lt;br /&gt;
-3、分区是以字段的形式在表结构中存在，通过describe table命令可以查看到字段存在， 但是该字段不存放实际的数据内容，仅仅是分区的表示（伪列） 。&lt;br /&gt;
-语法  &lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;1. 创建一个分区表，以 ds 为分区列： 
-create table invites (id int, name string) partitioned by (ds string) row format delimited fields terminated by &#39;t&#39; stored as textfile; 
-2. 将数据添加到时间为 2013-08-16 这个分区中： 
-load data local inpath &#39;/home/hadoop/Desktop/data.txt&#39; overwrite into table invites partition (ds=&#39;2013-08-16&#39;); 
-3. 将数据添加到时间为 2013-08-20 这个分区中： 
-load data local inpath &#39;/home/hadoop/Desktop/data.txt&#39; overwrite into table invites partition (ds=&#39;2013-08-20&#39;); 
-4. 从一个分区中查询数据： 
-select * from invites where ds =&#39;2013-08-12&#39;; 
-5.  往一个分区表的某一个分区中添加数据： 
-insert overwrite table invites partition (ds=&#39;2013-08-12&#39;) select id,max(name) from test group by id; 
-可以查看分区的具体情况，使用命令： 
-hadoop fs -ls /home/hadoop.hive/warehouse/invites 
-或者： 
-show partitions tablename; 静态/动态分区   （1）静态分区   
-
-create table if not exists sopdm.wyp2(id int,name string,tel string)
-partitioned by(age int)
-row format delimited
-fields terminated by &#39;,&#39;
-stored as textfile;
---overwrite是覆盖，into是追加
-insert into table sopdm.wyp2
-partition(age=&#39;25&#39;)
-select id,name,tel from sopdm.wyp; （2）动态分区  
-
---设置为true表示开启动态分区功能（默认为false）
-set hive.exec.dynamic.partition=true;
---设置为nonstrict,表示允许所有分区都是动态的（默认为strict）
-set hive.exec.dynamic.partition.mode=nonstrict;
---insert overwrite是覆盖，insert into是追加
-set hive.exec.dynamic.partition.mode=nonstrict;
-insert overwrite table sopdm.wyp2
-partition(age)
-select id,name,tel,age from sopdm.wyp;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;hive中创建分区表没有复杂的分区类型(范围分区、列表分区、hash分区、混合分区等)。分区列也不是表中的一个实际的字段，而是一个或者多个伪列。意思是说在表的数据文件中实际上并不保存分区列的信息与数据。&lt;br /&gt;
-下面的语句创建了一个简单的分区表：  &lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;create table partition_test
-(member_id string,
-name string
-)
-partitioned by (
-stat_date string,
-province string)
-ROW FORMAT DELIMITED FIELDS TERMINATED BY &#39;,&#39;; 这个例子中创建了stat_date和province两个字段作为分区列。通常情况下需要先预先创建好分区，然后才能使用该分区，例如： 
- 
-alter table partition_test add partition (stat_date=&#39;20110728&#39;,province=&#39;zhejiang&#39;);  这样就创建好了一个分区。这时我们会看到hive在HDFS存储中创建了一个相应的文件夹 每一个分区都会有一个独立的文件夹，下面是该分区所有的数据文件。在这个例子中stat_date是主层次，province是副层次，所有stat_date=&#39;20110728&#39;，而province不同的分区都会在/user/hive/warehouse/partition_test/stat_date=20110728 下面，而stat_date不同的分区都会在/user/hive/warehouse/partition_test/ 下面.    注意，因为分区列的值要转化为文件夹的存储路径，所以如果分区列的值中包含特殊值，如 &#39;%&#39;, &#39;:&#39;, &#39;/&#39;, &#39;#&#39;,它将会被使用%加上2字节的ASCII码进行转义，    特别要注意，在其他数据库中，一般向分区表中插入数据时系统会校验数据是否符合该分区，如果不符合会报错。而在hive中，向某个分区中插入什么样的数据完全是由人来控制的，因为分区键是伪列，不实际存储在文件中，   
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;动态分区，  &lt;br /&gt;
-因为按照上面的方法向分区表中插入数据，如果源数据量很大，那么针对一个分区就要写一个insert，非常麻烦。况且在之前的版本中，必须先手动创建好所有的分区后才能插入，这就更麻烦了，你必须先要知道源数据中都有什么样的数据才能创建分区。&lt;br /&gt;
-使用动态分区可以很好的解决上述问题。动态分区可以根据查询得到的数据自动匹配到相应的分区中去。 &lt;br /&gt;
-使用动态分区要先设置hive.exec.dynamic.partition参数值为true，默认值为false，即不允许使用：  &lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;hive&amp;gt; 	
-hive.exec.dynamic.partition=false
-hive&amp;gt; set hive.exec.dynamic.partition=true; 动态分区的使用方法很简单，假设我想向stat_date=&#39;20110728&#39;这个分区下面插入数据，至于province插入到哪个子分区下面让数据库自己来判断，那可以这样写：  
-
-hive&amp;gt; insert overwrite table partition_test partition(stat_date=&#39;20110728&#39;,province)
-&amp;gt; select member_id,name,province from partition_test_input where stat_date=&#39;20110728&#39;; stat_date叫做静态分区列，province叫做动态分区列。select子句中需要把动态分区列按照分区的顺序写出来，静态分区列不用写出来。这样stat_date=&#39;20110728&#39;的所有数据，会根据province的不同分别插入到/user/hive/warehouse/partition_test/stat_date=20110728/下面的不同的子文件夹下，如果源数据对应的province子分区不存在，则会自动创建，非常方便，而且避免了人工控制插入数据与分区的映射关系存在的潜在风险。   注意，动态分区不允许主分区采用动态列而副分区采用静态列，这样将导致所有的主分区都要创建副分区静态列所定义的分区   动态分区可以允许所有的分区列都是动态分区列，但是要首先设置一个参数  hive.exec.dynamic.partition.mode ：
-
-hive&amp;gt; set hive.exec.dynamic.partition.mode;
-hive.exec.dynamic.partition.mode=strict 它的默认值是strick，即不允许分区列全部是动态的，这是为了防止用户有可能原意是只在子分区内进行动态建分区，但是由于疏忽忘记为主分区列指定值了，这将导致一个dml语句在短时间内创建大量的新的分区（对应大量新的文件夹），对系统性能带来影响。   所以我们要设置：  
-
-hive&amp;gt; set hive.exec.dynamic.partition.mode=nostrick;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;再介绍3个参数：&lt;br /&gt;
-hive.exec.max.dynamic.partitions.pernode （缺省值100）：每一个mapreduce job允许创建的分区的最大数量，如果超过了这个数量就会报错&lt;br /&gt;
-hive.exec.max.dynamic.partitions （缺省值1000）：一个dml语句允许创建的所有分区的最大数量&lt;br /&gt;
-hive.exec.max.created.files （缺省值100000）：所有的mapreduce job允许创建的文件的最大数量  &lt;/p&gt;
-
-&lt;p&gt;Hive 桶&lt;br /&gt;
-对于每一个表（table）或者分区， Hive可以进一步组织成桶，也就是说桶是更为细粒度的数据范围划分。Hive也是 针对某一列进行桶的组织。Hive采用对列值哈希，然后除以桶的个数求余的方式决定该条记录存放在哪个桶当中。&lt;br /&gt;
-把表（或者分区）组织成桶（Bucket）有两个理由：&lt;br /&gt;
-（1）获得更高的查询处理效率。桶为表加上了额外的结构，Hive 在处理有些查询时能利用这个结构。具体而言，连接两个在（包含连接列的）相同列上划分了桶的表，可以使用 Map 端连接 （Map-side join）高效的实现。比如JOIN操作。对于JOIN操作两个表有一个相同的列，如果对这两个表都进行了桶操作。那么将保存相同列值的桶进行JOIN操作就可以，可以大大较少JOIN的数据量。&lt;br /&gt;
-（2）使取样（sampling）更高效。在处理大规模数据集时，在开发和修改查询的阶段，如果能在数据集的一小部分数据上试运行查询，会带来很多方便。  &lt;/p&gt;
-
-&lt;p&gt;创建带桶的 table:  &lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;create table bucketed_user(id int,name string) clustered by (id) sorted by(name) into 4 buckets row format delimited fields terminated by &#39;\t&#39; stored as textfile; 
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;首先，使用CLUSTERED BY 子句来指定划分桶所用的列和要划分的桶的个数： &lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;CREATE TABLE bucketed_user (id INT) name STRING)  CLUSTERED BY (id) INTO 4 BUCKETS;  在这里，我们使用用户ID来确定如何划分桶(Hive使用对值进行哈希并将结果除 以桶的个数取余数。 对于map端连接的情况，两个表以相同方式划分桶。处理左边表内某个桶的 mapper知道右边表内相匹配的行在对应的桶内。因此，mapper只需要获取那个桶 (这只是右边表内存储数据的一小部分)即可进行连接。这一优化方法并不一定要求 两个表必须桶的个数相同，两个表的桶个数是倍数关系也可以。 桶中的数据可以根据一个或多个列另外进行排序。由于这样对每个桶的连接变成了高效的归并排序(merge-sort), 因此可以进一步提升map端连接的效率。以下语法声明一个表使其使用排序桶：    
-CREATE TABLE bucketed_users (id INT, name STRING)  CLUSTERED BY (id) SORTED BY (id ASC) INTO 4 BUCKETS;  我们如何保证表中的数据都划分成桶了呢？把在Hive外生成的数据加载到划分成桶的表中，当然是可以的。其实让Hive来划分桶更容易。这一操作通常针对已有的表。    Hive并不检查数据文件中的桶是否和表定义中的桶一致(无论是对于桶 的数量或用于划分桶的列）。如果两者不匹配，在査询时可能会碰到错 误或未定义的结果。因此，建议让Hive来进行划分桶的操作。   
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;索引&lt;br /&gt;
-索引可以加快含有group by语句的查询的计算速度  &lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;create index employees_index on table employees(country)
-as  &#39;org.apache.hadoop.hive.ql.index.compact.CompactIndexHandler&#39;
-with deferred rebuild
-in table employees_index_table ;
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-        <pubDate>Sun, 01 Feb 2015 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2015/02/01/Hive-partition.html</link>
-        <guid isPermaLink="true">index.html/blog/2015/02/01/Hive-partition.html</guid>
-        
-        <category>hadoop</category>
         
       </item>
     

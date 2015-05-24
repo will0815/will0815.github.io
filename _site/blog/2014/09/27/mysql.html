@@ -84,6 +84,8 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <p>这句话的意思 ，允许任何IP地址（上面的 % 就是这个意思）的电脑 用admin帐户  和密码（admin）来访问这个MySQL Server
 在没有第一步的情况下必须加类似这样的帐户，才可以远程登陆。root帐户是无法远程登陆的，只可以本地登陆</p>
 
+<p>重启MySQL服务或者执行：mysql&gt; flush privileges; </p>
+
 <pre><code>测试：mysql -h172.21.5.29 -uadmin -padmin
 </code></pre>
 
