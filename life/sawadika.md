@@ -8,9 +8,9 @@ duoshuo: true
 
 ![](/image/sawa/1.jpg)
   
-![](/image/sawa/2.jpg)
+![](/image/sawa/2.JPG)
   
-![](/image/sawa/3.jpg)
+![](/image/sawa/3.JPG)
   
 ![](/image/sawa/4.jpg)
   
