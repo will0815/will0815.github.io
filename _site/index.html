@@ -64,120 +64,58 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/05/16/sqoop-spacil-chart.html">sqoop 特殊字符导入问题</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/09/20/sqoopmimashuruwenti.html">Sqoop密码和SA用户问题记录</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2015年05月16日
+        2015年09月20日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <p>Sqoop从MySQL导入数据到hive，示例：<br />
-sqoop import –connect  jdbc:mysql://10.255.2.89:3306/test?charset=utf-8 –  username selectuser –password select##select##  –table test_sqoop_import \<br />
-–columns ‘id,content,updateTime’ \<br />
-–split-by id \<br />
-–hive-import –hive-table basic.test2;  </p>
+      <p>sqoop 定时job 运行时需要输入密码问题
+1.可以使用except 脚本，实现交互输入密码<br />
+2. 配置sqoop，将密码保存至sqoop的metadata中 <br />
+sqoop-site.xml：  </p>
 
-<p>如果不加其他参数，导入的数据默认的列分隔符是’\001’，默认的行分隔符是’\n’。<br />
-这样问题就来了，如果导入的数据中有’\n’，hive会认为一行已经结束，后面的数据被分割成下一行。这种情况下，导入之后hive中数据的行数就比原先数据库中的多，而且会出现数据不一致的情况。<br />
-Sqoop也指定了参数 –fields-terminated-by和 –lines-terminated-by来自定义行分隔符和列分隔符。<br />
-可是当你真的这么做时 坑爹呀<br />
-INFO hive.HiveImport: FAILED: SemanticException 1:381 LINES TERMINATED BY only supports newline ’\n’ right now.    
-也就是说虽然你通过–lines-terminated-by指定了其他的字符作为行分隔符，但是hive只支持’\n’作为行分隔符。<br />
-简单的解决办法就是加上参数–hive-drop-import-delims来把导入数据中包含的hive默认的分隔符去掉。  </p>
-
-<p>附 sqoop 命令参考  </p>
-
-<p>导入数据到 hdfs<br />
-使用 sqoop-import 命令可以从关系数据库导入数据到 hdfs。<br />
-$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –target-dir /user/hive/result
-注意：<br />
-mysql jdbc url 请使用 ip 地址<br />
-如果重复执行，会提示目录已经存在，可以手动删除<br />
-如果不指定 –target-dir，导入到用户家目录下的 TBLS 目录<br />
-你还可以指定其他的参数：  </p>
-
-<pre><code>--append	将数据追加到hdfs中已经存在的dataset中。使用该参数，sqoop将把数据先导入到一个临时目录中，然后重新给文件命名到一个正式的目录中，以避免和该目录中已存在的文件重名。  
---as-avrodatafile	将数据导入到一个Avro数据文件中  
---as-sequencefile	将数据导入到一个sequence文件中  
---as-textfile	将数据导入到一个普通文本文件中，生成该文本文件后，可以在hive中通过sql语句查询出结果。  
---boundary-query &lt;statement&gt;	边界查询，也就是在导入前先通过SQL查询得到一个结果集，然后导入的数据就是该结果集内的数据，格式如：--boundary-query 'select id,no from t where id = 3'，表示导入的数据为id=3的记录，或者 select min(&lt;split-by&gt;), max(&lt;split-by&gt;) from &lt;table name&gt;，注意查询的字段中不能有数据类型为字符串的字段，否则会报错
---columns&lt;col,col&gt;	指定要导入的字段值，格式如：--columns id,username
---direct	直接导入模式，使用的是关系数据库自带的导入导出工具。官网上是说这样导入会更快
---direct-split-size	在使用上面direct直接导入的基础上，对导入的流按字节数分块，特别是使用直连模式从PostgreSQL导入数据的时候，可以将一个到达设定大小的文件分为几个独立的文件。
---inline-lob-limit	设定大对象数据类型的最大值
--m,--num-mappers	启动N个map来并行导入数据，默认是4个，最好不要将数字设置为高于集群的节点数
---query，-e &lt;sql&gt;	从查询结果中导入数据，该参数使用时必须指定–target-dir、–hive-table，在查询语句中一定要有where条件且在where条件中需要包含 \$CONDITIONS，示例：--query 'select * from t where \$CONDITIONS ' --target-dir /tmp/t –hive-table t
---split-by &lt;column&gt;	表的列名，用来切分工作单元，一般后面跟主键ID
---table &lt;table-name&gt;	关系数据库表名，数据从该表中获取
---delete-target-dir	删除目标目录
---target-dir &lt;dir&gt;	指定hdfs路径
---warehouse-dir &lt;dir&gt;	与 --target-dir 不能同时使用，指定数据导入的存放目录，适用于hdfs导入，不适合导入hive目录
---where	从关系数据库导入数据时的查询条件，示例：--where "id = 2"
--z,--compress	压缩参数，默认情况下数据是没被压缩的，通过该参数可以使用gzip压缩算法对数据进行压缩，适用于SequenceFile, text文本文件, 和Avro文件
---compression-codec	Hadoop压缩编码，默认是gzip
---null-string &lt;null-string&gt;	可选参数，如果没有指定，则字符串null将被使用
---null-non-string &lt;null-string&gt;	可选参数，如果没有指定，则字符串null将被使用
+<pre><code>&lt;property&gt;  
+     &lt;name&gt;sqoop.metastore.client.record.password&lt;/name&gt;  
+     &lt;value&gt;true&lt;/value&gt;  
+     &lt;description&gt;If true, allow saved passwords in the metastore. &lt;/description&gt;
+&lt;/property&gt;  
 </code></pre>
 
-<p>使用 sql 语句<br />
-参照上表，使用 sql 语句查询时，需要指定 $CONDITIONS  </p>
+<ol>
+  <li>sqoop 出现Caused by: java.sql.SQLException: User not found: SA  错误  </li>
+</ol>
 
-<p>$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –query ‘SELECT * from TBLS where $CONDITIONS ‘ –split-by tbl_id -m 4 –target-dir /user/hive/result<br />
-	上面命令通过 -m 1 控制并发的 map 数。</p>
+<p>未知问题，看起来像是并发执行sqoop引起的问题  导致无法连接sqoop的metadata库<br />
+不知如何解决， 可以采取的办法<br />
+1.换个用户执行 貌似可以（。。。。。）<br />
+2.更改metadata数据库  如修改成MySQL   如下：  </p>
 
-<p>使用 direct 模式：<br />
-$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –delete-target-dir –direct –default-character-set UTF-8 –target-dir /user/hive/result</p>
+<pre><code>&lt;property&gt;  
+    &lt;name&gt;sqoop.metastore.client.autoconnect.url&lt;/name&gt;  
+    &lt;value&gt;jdbc:mysql://192.168.117.7:3306/sqoop&lt;/value&gt;  
+&lt;/property&gt;  
+&lt;property&gt;  
+    &lt;name&gt;sqoop.metastore.client.autoconnect.username&lt;/name&gt;
+    &lt;value&gt;scm987&lt;/value&gt;  
+&lt;/property&gt;  
+&lt;property&gt;  
+    &lt;name&gt;sqoop.metastore.client.autoconnect.password&lt;/name&gt;
+    &lt;value&gt;scm258&lt;/value&gt;  
+&lt;/property&gt;  
 
-<p>指定文件输出格式：<br />
-$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –fields-terminated-by “\t” –lines-terminated-by “\n” –delete-target-dir  –target-dir /user/hive/result</p>
 
-<p>指定空字符串：<br />
-$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –fields-terminated-by “\t” –lines-terminated-by “\n” –delete-target-dir –null-string ‘\N’ –null-non-string ‘\N’ –target-dir /user/hive/result</p>
-
-<p>如果需要指定压缩：  <br />
-$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –fields-terminated-by “\t” –lines-terminated-by “\n” –delete-target-dir –null-string ‘\N’ –null-non-string ‘\N’ –compression-codec “com.hadoop.compression.lzo.LzopCodec” –target-dir /user/hive/result  </p>
-
-<p>附：可选的文件参数如下表。   </p>
-
-<pre><code>--enclosed-by &lt;char&gt;	给字段值前后加上指定的字符，比如双引号，示例：--enclosed-by '\"'，显示例子："3","jimsss","dd@dd.com"
---escaped-by &lt;char&gt;	给双引号作转义处理，如字段值为"测试"，经过 --escaped-by "\\" 处理后，在hdfs中的显示值为：\"测试\"，对单引号无效
---fields-terminated-by &lt;char&gt;	设定每个字段是以什么符号作为结束的，默认是逗号，也可以改为其它符号，如句号.，示例如：--fields-terminated-by
---lines-terminated-by &lt;char&gt;	设定每条记录行之间的分隔符，默认是换行串，但也可以设定自己所需要的字符串，示例如：--lines-terminated-by "#" 以#号分隔
---mysql-delimiters	Mysql默认的分隔符设置，字段之间以,隔开，行之间以换行\n隔开，默认转义符号是\，字段值以单引号'包含起来。
---optionally-enclosed-by &lt;char&gt;	enclosed-by是强制给每个字段值前后都加上指定的符号，而--optionally-enclosed-by只是给带有双引号或单引号的字段值加上指定的符号，故叫可选的
+&lt;property&gt;
+     &lt;name&gt;sqoop.metastore.client.enable.autoconnect&lt;/name&gt;
+     &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
 </code></pre>
 
-<p>创建 hive 表<br />
-生成与关系数据库表的表结构对应的HIVE表：  </p>
-
-<pre><code>$ sqoop create-hive-table --connect jdbc:mysql://192.168.56.121:3306/metastore --username hiveuser --password redhat --table TBLS 
---hive-home &lt;dir&gt;	Hive的安装目录，可以通过该参数覆盖掉默认的hive目录
---hive-overwrite	覆盖掉在hive表中已经存在的数据
---create-hive-table	默认是false，如果目标表已经存在了，那么创建任务会失败
---hive-table	后面接要创建的hive表
---table	指定关系数据库表名  导入数据到 hive   执行下面的命令会将 mysql 中的数据导入到 hdfs 中，然后创建一个hive 表，最后再将 hdfs 上的文件移动到 hive 表的目录下面。   $ sqoop import --connect jdbc:mysql://192.168.56.121:3306/metastore --username hiveuser --password redhat --table TBLS --fields-terminated-by "\t" --lines-terminated-by "\n" --hive-import --hive-overwrite --create-hive-table --hive-table dw_srclog.TBLS --delete-target-dir   说明：   可以在 hive 的表名前面指定数据库名称   可以通过 --create-hive-table 创建表，如果表已经存在则会执行失败   从上面可见，数据导入到 hive 中之后分隔符为默认分隔符，参考上文你可以通过设置参数指定其他的分隔符。   另外，Sqoop 默认地导入空值（NULL）为 null 字符串，而 hive 使用 \N 去标识空值（NULL），故你在 import 或者 export 时候，需要做相应的处理。在 import 时，使用如下命令：   $ sqoop import  ... --null-string '\\N' --null-non-string '\\N'   在导出时，使用下面命令：   $ sqoop import  ... --input-null-string '' --input-null-non-string ''
-</code></pre>
-
-<p>增量导入<br />
-–check-column (col)	用来作为判断的列名，如id<br />
-–incremental (mode)	append：追加，比如对大于last-value指定的值之后的记录进行追加导入。lastmodified：最后的修改时间，追加last-value指定的日期之后的记录<br />
-–last-value (value)	指定自从上次导入后列的最大值（大于该指定的值），也可以自己设定某一值</p>
-
-<p>合并 hdfs 文件<br />
-将HDFS中不同目录下面的数据合在一起，并存放在指定的目录中，示例如：<br />
-sqoop merge –new-data /test/p1/person –onto /test/p2/person –target-dir /test/merged –jar-file /opt/data/sqoop/person/Person.jar –class-name Person –merge-key id<br />
-其中，–class-name 所指定的 class 名是对应于 Person.jar 中的 Person 类，而 Person.jar 是通过 Codegen 生成的<br />
-–new-data <path>	Hdfs中存放数据的一个目录，该目录中的数据是希望在合并后能优先保留的，原则上一般是存放越新数据的目录就对应这个参数。  
---onto <path>	Hdfs中存放数据的一个目录，该目录中的数据是希望在合并后能被更新数据替换掉的，原则上一般是存放越旧数据的目录就对应这个参数。  
---merge-key &lt;col&gt;	合并键，一般是主键ID  
---jar-file <file>	合并时引入的jar包，该jar包是通过Codegen工具生成的jar包  
---class-name <class>	对应的表名或对象名，该class类是包含在jar包中的。  
---target-dir <path>	合并后的数据在HDFS里的存放目录  </path></class></file></path></path></p>
-
-      <div class="readall"><a href="/blog/2015/05/16/sqoop-spacil-chart.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/09/20/sqoopmimashuruwenti.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -185,40 +123,217 @@ sqoop merge –new-data /test/p1/person –onto /test/p2/person –target-dir /t
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/05/16/hive-datahouse.html">hive 数据仓库优劣学习</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/09/20/nosql-onhadoop.html">Sql on hadoop 选择笔记</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2015年05月16日
+        2015年09月20日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#nosql">nosql</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>Hive展现出他强大的批处理能力 但在实时交互式查询时方面却难以满足，现在已经出现的低延时交互式处理方案已经有很多  如：Hive on Tez, Hive on Spark, Spark SQL, Impala等   </p>
+
+<p>Hive/Tez/Stinger <br />
+目前的主要推动者是hortonworks和Yahoo!。2015 Hadoop Summit(San Jose)上，Yahoo分享了他们目前生产环境中Hive on Tez的一些情况。显示和Hive 0.10(RCFile)相比，目前的Hive on Tez在1TB的数据量查询的加速比平均为6.2倍。目前的Hive on Tez已经是production-ready。Tez这个执行引擎和Spark比较类似，原来的MR只能执行Map和Reduce两种操作，现在的Tez可以把Job解析成DAG来执行。除此之外还有一些进一步优化Hive执行效率的工作，例如Vectorized Execution和ORCFile等。Dropbox也透露他们的Hive集群下一步的升级目标就是Hive on Tez。  </p>
+
+<p>Hive on Spark <br />
+目前的主要推动者是Cloudera，可以认为是Hive社区这边搞的”Spark SQL”。刚刚release了第一个使用版本，目前不能用于生产环境。Hive on Spark既能利用到现在广泛使用的Hive的前端，又能利用到广泛使用的Spark作为后端执行引擎。对于现在既部署了Hive，又部署了Spark的公司来说，节省了运维成本。    </p>
+
+<p>对于上面提到的Hive on Tez和Hive on Spark两种系统都具备的优点是： <br />
+1，现存的Hive jobs可以透明、无缝迁移到Hive on ***平台，可以利用Hive现有的ODBC/JDBC，metastore, hiveserver2, UDF，auditing, authorization, monitoring系统，不需要做任何更改和测试，迁移成本低。 <br />
+2，无论后端执行引擎是MapReduce也好，Tez也好，Spark也好，整个Hive SQL解析、生成执行计划、执行计划优化的过程都是非常类似的。而且大部分公司都积累了一定的Hive运维和使用经验，那么对于bug调试、性能调优等环节会比较熟悉，降低了运维成本。   </p>
+
+<p>Spark SQL <br />
+主要的推动者是Databricks。提到Spark SQL不得不提的就是Shark。Shark可以理解为Spark社区这边搞的一个”Hive on Spark”，把Hive的物理执行计划使用Spark计算引擎去执行。这里面会有一些问题，Hive社区那边没有把物理执行计划到执行引擎这个步骤抽象出公共API，所以Spark社区这边要自己维护一个Hive的分支，而且Hive的设计和发展不太会考虑到如何优化Spark的Job。但是前面提到的Hive on Spark却是和Hive一起发布的，是由Hive社区控制的。 <br />
+所以后来Spark社区就停止了Shark的开发转向Spark SQL（“坑了”一部分当时信任Shark的人）。  Spark SQL是把SQL解析成RDD的transformation和action，而且通过catalyst可以自由、灵活的选择最优执行方案。对数据库有深入研究的人就会知道，SQL执行计划的优化是一个非常重要的环节，  Spark SQL在这方面的优势非常明显，提供了一个非常灵活、可扩展的架构。但是Spark SQL是基于内存的，元数据放在内存里面，不适合作为数据仓库的一部分来使用。所以有了Spark SQL的HiveContext，就是兼容Hive的Spark SQL。它支持HiveQL, Hive Metastore, Hive SerDes and Hive UDFs以及JDBC driver。这样看起来很完美，但是实际上也有一些缺点：Spark SQL依赖于Hive的一个snapshot，所以它总是比Hive的发布晚一个版本，很多Hive新的feature和bug fix它就无法包括。而且目前看Spark社区在Spark的thriftserver方面的投入不是很大，所以感觉它不是特别想朝着这个方向发展。还有一个重要的缺点就是Spark SQL目前还不能通过分析SQL来预测这个查询需要多少资源从而申请对应的资源，所以在共享集群上无法高效地分配资源和调度任务。 <br />
+特别是目前Spark社区把Spark SQL朝向DataFrame发展，目标是提供一个类似R或者Pandas的接口，把这个作为主要的发展方向。DataFrame这个功能使得Spark成为机器学习和数据科学领域不可或缺的一个组件，但是在数据仓库（ETL，交互式分析，BI查询）领域感觉已经不打算作为他们主要的发展目标了。  </p>
+
+<p>Impala <br />
+主要的推动者是Cloudera，自从推出以来一直不温不火。Impala是一种MPP架构的执行引擎，查询速度非常快，是交互式BI查询最好的选择，即使是在并发性非常高的情况下也能保证查询延迟，所以在multi-tenant, shared clusters上表现比较好。Impala的另外一个重要的优点就是支持的SQL是在以上这些系统中是最标准的，也就是跟SQL99是最像的，所以对于传统企业来说可能是个不错的选择。  Impala的主要缺点是社区不活跃，由C++开发，可维护性差，目前系统稳定性还有待提高。  </p>
+
+<p>Presto<br />
+是Facebook开发的，目前也得到了Teradata的支持。目前Presto的主要使用者还是互联网公司，像Facebook，Netflix等。Presto的代码用了Dependency Injection, 比较难理解和debug。另外还有一些系统，像Apache Drill，Apache Tajo等，都是非常小众的系统了。   </p>
+
+<p>总的来说，目前来看Hive依然是批处理/ETL 类应用的首选。Hive on Spark能够降低Hive的延迟，但是还是达不到交互式BI查询的需求。目前交互式BI查询最好的选择是Impala。Spark SQL/DataFrame是Spark用户使用SQL或者DataFrame API构建Spark pipeline的一种选择，并不是一个通用的支持交互式查询的引擎，更多的会用在基于Spark的机器学习任务的数据处理和准备的环节。     </p>
+
+      <div class="readall"><a href="/blog/2015/09/20/nosql-onhadoop.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/09/20/jvm-zaixuexi.html">JVM笔记</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年09月20日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>JVM根据实现不同结构有所不同，大多数将内存分为：<br />
+Method Area                        方法区<br />
+Heap			                     堆
+Program Counter register               程序计数器<br />
+Java method stack                     Java方法栈 <br />
+native method stack                   本地方法栈 （Hot Spot 中将Java method和native合称为方法区）<br />
+direct memory                       直接内存区（此区域并不归JVM管理）    </p>
+
+<p>指令 数据 方法 实例 属性。。。<br />
+方法是指令操作码的一部分保存在stack中<br />
+方法内部变量作为指令的操作数部分，跟在指令的操作码之后，保存在Stack中（实际上是简单类型保存在Stack中，对象类型在Stack中保存地址，在Heap 中保存值）；指令操作码和指令操作数构成了完整的Java 指令。对象实例包括其属性值作为数据，保存在数据区Heap 中<br />
+非静态的对象属性作为对象实例的一部分保存在Heap 中，而对象实例必须通过Stack中保存的地址指针才能访问到。因此能否访问到对象实例以及它的非静态属性值完全取决于能否获得对象实例在Stack中的地址指针。   </p>
+
+<p>静态/非静态方法 <br />
+非静态方法有一个隐含的传入参数，该参数是JVM给它的，和我们怎么写代码无关，这个隐含的参数就是对象实例在Stack中的地址指针。So我们在调用前都要new,获得Stack中的地址指针。 <br />
+静态方法无此隐含参数，因此也不需要new对象，只要class文件被ClassLoader load进入JVM的Stack，该静态方法即可被调用。当然此时静态方法是存取不到Heap 中的对象属性的。   </p>
+
+<p>静/动态属性 <br />
+实例以及动态属性都是保存在Heap 中的， Heap 必须通过Stack中的地址指针才能够被指令（类的方法）访问到。 <br />
+静态属性是保存在Stack中的，而不同于动态属性保存在Heap 中。正因为都是在Stack中，而Stack中指令和数据都是定长的，因此很容易算出偏移量，也因此不管什么指令，都可以访问到类的静态属性。也正因为静态属性被保存在Stack中，所以具有了全局属性。 <br />
+在JVM中，静态属性保存在Stack指令内存区，动态属性保存在Heap数据内存区。   </p>
+
+<p>栈<br />
+Stack（栈）是JVM的内存指令区。Stack的速度很快，管理很简单，并且每次操作的数据或者指令字节长度是已知的。所以Java 基本数据类型，Java 指令代码，常量都保存在Stack中。<br />
+是 Java 程序的运行区，是在线程创建时创建，它的生命期是跟随线程的生命期，线程结束栈内存也就释放，对于栈来说不存在垃圾回收问题。<br />
+栈中数据都是以栈帧（stack frame）的形式存在，栈帧是一个内存块一个有关方法和运行期数据的数据集，遵循 先进后出原则（方法 A 被调用时就产生了一个栈帧 F1，并被压入到栈中，A 方法又调用了 B 方法，于是产生栈帧 F2 也被压入栈，执行完毕后，先弹出 F2栈帧，再弹出 F1 栈帧）
+栈帧中主要保存三类数据：<br />
+local variable 本地变量（输入参数和输出参数以及方法内的变量）<br />
+operand stack栈操作  （出栈进栈记录）<br />
+frame data栈帧数据   （类文件 方法等）  </p>
+
+<p>Heap<br />
+JVM的内存数据区 管理复杂，用于保存对象的实例 <br />
+Heap 中分配一定的内存来保存对象实例，实际上也只是保存对象实例的属性值，属性的类型和对象本身的类型标记等，并不保存对象的方法（方法是指令，保存在Stack中）,在Heap 中分配一定的内存保存对象实例和对象的序列化比较类似。而对象实例在Heap 中分配好以后，需要在Stack中保存一个4字节的Heap 内存地址，用来定位该对象实例在Heap 中的位置，便于找到该对象实例。   </p>
+
+<p>Java中堆是由所有的线程共享的一块内存区域。 <br />
+Heap 中分配一定的内存来保存对象实例，实际上也只是保存对象实例的属性值，属性的类型和对象本身的类型标记等，并不保存对象的方法（方法是指令，保存在Stack中）,在Heap 中分配一定的内存保存对象实例和对象的序列化比较类似。而对象实例在Heap 中分配好以后，需要在Stack中保存一个4字节的Heap 内存地址，用来定位该对象实例在Heap 中的位置，便于找到该对象实例。<br />
+Java中堆是由所有的线程共享的一块内存区域。   </p>
+
+<p>Perm <br />
+Perm代主要保存class,method,filed对象，这部门的空间一般不会溢出，除非一次性加载了很多的类，不过在涉及到热部署的应用服务器的时候，有时候会遇到java.lang.OutOfMemoryError : PermGen space 的错误，造成这个错误的很大原因就有可能是每次都重新部署，但是重新部署后，类的class没有被卸载掉，这样就造成了大量的class对象保存在了perm中，这种情况下，一般重新启动应用服务器可以解决问题。    </p>
+
+<p>Tenured <br />
+Tenured区主要保存生命周期长的对象，一般是一些老的对象，当一些对象在Young复制转移一定的次数以后，对象就会被转移到Tenured区，一般如果系统中用了application级别的缓存，缓存中的对象往往会被转移到这一区间。  </p>
+
+<p>Young<br />
+Young区被划分为三部分，Eden区和两个大小严格相同的Survivor区，其中Survivor区间中，某一时刻只有其中一个是被使用的，另外一个留做垃圾收集时复制对象用，在Young区间变满的时候，minor GC就会将存活的对象移到空闲的Survivor区间中，根据JVM的策略，在经过几次垃圾收集后，任然存活于Survivor的对象将被移动到Tenured区间。  </p>
+
+<p>The pc Register 程序计数器寄存器 <br />
+JVM支持多个线程同时运行。每个JVM都有自己的程序计数器。在任何一个点，每个JVM线程执行单个方法的代码，这个方法是线程的当前方法。如果方法不是native的，程序计数器寄存器包含了当前执行的JVM指令的地址，如果方法是 native的，程序计数器寄存器的值不会被定义。 JVM的程序计数器寄存器的宽度足够保证可以持有一个返回地址或者native的指针。  </p>
+
+<p>Method Area 方法区<br />
+Object Class Data(类定义数据) 是存储在方法区的。除此之外，常量、静态变量、JIT 编译后的代码也都在方法区。正因为方法区所存储的数据与堆有一种类比关系，所以它还被称为 Non-Heap。方法区也可以是内存不连续的区域组成的，并且可设置为固定大小，也可以设置为可扩展的，这点与堆一样。
+方法区内部有一个非常重要的区域，叫做运行时常量池（Runtime Constant Pool，简称 RCP）。在字节码文件中有常量池（Constant Pool Table），用于存储编译器产生的字面量和符号引用。每个字节码文件中的常量池在类被加载后，都会存储到方法区中。值得注意的是，运行时产生的新常量也可以被放入常量池中，比如 String 类中的 intern() 方法产生的常量。    </p>
+
+<p>内存分配：<br />
+1、对象优先在EDEN分配<br />
+2、大对象直接进入老年代 <br />
+3、长期存活的对象将进入老年代 <br />
+4、适龄对象也可能进入老年代：动态对象年龄判断<br />
+动态对象年龄判断：<br />
+虚拟机并不总是要求对象的年龄必须达到MaxTenuringThreshold才能晋升到老年代，当Survivor空间的相同年龄的所有对象大小总和大于Survivor空间的一半，年龄大于或等于该年龄的对象就可以直接进入老年代，无需等到MaxTenuringThreshold中指定的年龄  </p>
+
+<p>1、对象优先在Eden分配，这里大部分对象具有朝生夕灭的特征，Minor GC主要清理该处<br />
+2、大对象（占内存大）、老对象（使用频繁）<br />
+3、Survivor无法容纳的对象，将进入老年代，Full GC的主要清理该处  </p>
+
+<p>JVM的GC机制<br />
+第一个线程负责回收Heap的Young区<br />
+第二个线程在Heap不足时，遍历Heap，将Young 区升级为Older区<br />
+Older区的大小等于-Xmx减去-Xmn，不能将-Xms的值设的过大，因为第二个线程被迫运行会降低JVM的性能。 <br />
+堆内存GC<br />
+       JVM(采用分代回收的策略)，用较高的频率对年轻的对象(young generation)进行YGC，而对老对象(tenured generation)较少(tenured generation 满了后才进行)进行Full GC。这样就不需要每次GC都将内存中所有对象都检查一遍。<br />
+非堆内存不GC<br />
+      GC不会在主程序运行期对PermGen Space进行清理，所以如果你的应用中有很多CLASS(特别是动态生成类，当然permgen space存放的内容不仅限于类)的话,就很可能出现PermGen Space错误。<br />
+内存申请过程 <br />
+1.JVM会试图为相关Java对象在Eden中初始化一块内存区域；<br />
+2.当Eden空间足够时，内存申请结束。否则到下一步；<br />
+3.JVM试图释放在Eden中所有不活跃的对象（minor collection），释放后若Eden空间仍然不足以放入新对象，则试图将部分Eden中活跃对象放入Survivor区；<br />
+4.Survivor区被用来作为Eden及old的中间交换区域，当OLD区空间足够时，Survivor区的对象会被移到Old区，否则会被保留在Survivor区；<br />
+5.当old区空间不够时，JVM会在old区进行major collection；<br />
+6.完全垃圾收集后，若Survivor及old区仍然无法存放从Eden复制过来的部分对象，导致JVM无法在Eden区为新对象创建内存区域，则出现”Out of memory错误”；  </p>
+
+<p>对象衰老过程 <br />
+1.新创建的对象的内存都分配自eden。Minor collection的过程就是将eden和在用survivor space中的活对象copy到空闲survivor space中。对象在young generation里经历了一定次数(可以通过参数配置)的minor collection后，就会被移到old generation中，称为tenuring。<br />
+<img src="/image/jvm-memery.png" alt="" /></p>
+
+<p>类的加载方式 <br />
+1）：本地编译好的class中直接加载<br />
+2）：网络加载：java.net.URLClassLoader可以加载url指定的类<br />
+3）：从jar、zip等等压缩文件加载类，自动解析jar文件找到class文件去加载util类<br />
+4）：从java源代码文件动态编译成为class文件  </p>
+
+<p>类加载的时机<br />
+1. 类加载的 生命周期 ：加载（Loading）–&gt;验证（Verification）–&gt;准备（Preparation）–&gt;解析（Resolution）–&gt;初始化（Initialization）–&gt;使用（Using）–&gt;卸载（Unloading）<br />
+2. 加载：这有虚拟机自行决定。<br />
+3. 初始化阶段：<br />
+a) 遇到new、getstatic、putstatic、invokestatic这4个字节码指令时，如果类没有进行过初始化，出发初始化操作。 <br />
+b) 使用java.lang.reflect包的方法对类进行反射调用时。<br />
+c) 当初始化一个类的时候，如果发现其父类还没有执行初始化则进行初始化。<br />
+d) 虚拟机启动时用户需要指定一个需要执行的主类，虚拟机首先初始化这个主类。<br />
+注意：接口与类的初始化规则在第三点不同，接口不要气所有的父接口都进行初始化。   </p>
+
+<p>双亲委派机制 <br />
+JVM在加载类时默认采用的是 双亲委派 机制。通俗的讲，就是某个特定的类加载器在接到加载类的请求时，首先将加载任务委托给父类加载器，依次递归，如果父类加载器可以完成类加载任务，就成功返回；只有父类加载器无法完成此加载任务时，才自己去加载。   </p>
+
+      <div class="readall"><a href="/blog/2015/09/20/jvm-zaixuexi.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/09/20/hdfs-fenceng.html">HDFS 分层存储</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年09月20日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <h5 id="hive">Hive数据仓库优劣</h5>
-<p>Hive是一个基于Hadoop的数据仓库平台，通过Hive，可以方便地进行数据提取转化加载（ETL）的工作。Hive定义了一个类似于SQL的查询语言HQL，能够将用户编写的SQL转化为相应的MapReduce程序。当然，用户也可以自定义Mapper和Reducer来完成复杂的分析工作。<br />
-基于MapReduce的Hive具有良好的扩展性和容错性。不过由于MapReduce缺乏结构化数据分析中有价值的特性，以及Hive缺乏对执行计划的充分优化，导致Hive在很场景中执行效率不高。  </p>
+      <p>Hadoop  <br />
+众所周知，商用硬件可以组装起来创建拥有大数据存储和计算能力的Hadoop集群。将数据拆分成多个部分，分别存储在每个单独的机器上，数据处理逻辑也在同样的机器上执行。   </p>
 
-<p>强大的数据仓库和数据分析平台至少需要具备以下几点特性。<br />
-灵活的存储引擎<br />
-高效的执行引擎<br />
-良好的可扩展性<br />
-强大的容错机制<br />
-多样化的可视化  </p>
+<p>例如：一个1000个节点组成的Hadoop集群，单节点容量有20TB，最多可以存储20PB的数据。因此，所有的这些机器拥有足够的计算能力来履行Hadoop的口号：“take compute to data”。 <br />
+数据的温度 <br />
+集群中通常存储着各种不同类型的数据集，不同的团队不同的业务通过该集群可以共享地处理他们不同类型的工作任务。通过数据管道，每个数据集每时每刻都会得到增长。 <br />
+数据集有一个共同特点就是初始的使用量会很大。在此期间，数据集被认为是“热(HOT)”的。我们通过分析发现，随着时间的推移，使用率会有一定程度的下降，存储的数据每周仅仅就被访问几次，逐渐就变为“温(WARM)”数据。在此后90天中，当数据使用率跌至一个月几次时，它就被定义为“冷(COLD)”数据。<br />
+因此数据在最初几天被认为是“热”的，此后第一个月仍然保持为“温”的。在这期间，任务或应用会使用几次该数据。随着数据的使用率下降得更多，它就变“冷”了，在此后90天内或许只被使用寥寥几次。最终，当数据一年只有一两次使用频率、极少用到时，它的“温度”就是“冰冻”的了。   </p>
 
-<h6 id="section">#存储引擎</h6>
-<p>Hive数据存储没有特有的数据结构，（只是hdfs文件的映射）也没有为数据建立索引，可以自由地组织Hive中的表，只要在创建表时告诉Hive数据中的列分隔符和行分隔符，Hive就可以解析数据。Hive的元数据存储在RDBMS中，所有数据都基于HDFS存储。Hive包含Table、External Table、Partition和Bucket等数据模型。  </p>
+<p>一般来讲，温度与每个数据集都紧密相关。在这个例子中，温度是与数据的年龄成反比的。一个特定数据集的温度也受其他因素影响的。你也可以通过算法决定数据集的温度。<br />
+HDFS的分层存储<br />
+HDFS从Hadoop2.3开始支持分层存储<br />
+它是如何工作的呢？ <br />
+正常情况下，一台机器添加到集群后，将会有指定的本地文件系统目录来存储这块副本。用来指定本地存储目录的参数是dfs.datanode.dir。另一层中，比如归档(ARCHIVE)层，可以使用名为StorageType的枚举来添加。为了表明这个本地目录属于归档层，该本地目录配置中会带有[ARCHIVE]的前缀。理论上，hadoop集群管理员可以定义多个层级。 <br />
+比如说：如果在一个已有1000个节点，其总存储容量为20PB的集群上，增加100个节点，其中每个节点有200TB的存储容量。相比已有的1000个节点，这些新增节点的计算能力就相对较差。接下来，我们在所有本地目录的配置中增加ARCHIVE的前缀。那么现在位于归档层的这100个节点将会有20PB的存储量。最后整个集群被划分为两层——磁盘(DISK)层和归档(ARCHIVE)层，每一层有20PB的容量，总容量为40PB。   </p>
 
-<h6 id="section-1">#执行引擎</h6>
-<p>Hive的编译器负责编译源代码并生成最终的执行计划，包括语法分析、语义分析、目标代码生成，所做的优化并不多。Hive基于MapReduce，Hive的Sort和GroupBy都依赖MapReduce。而MapReduce相当于固化了执行算子，Map的MergeSort必须执行，GroupBy算子也只有一种模式，Reduce的Merge-Sort也必须可选。另外Hive对Join算子的支持也较少。内存拷贝和数据预处理也会影响Hive的执行效率。<br />
-#######扩展性
-Hive关注水平扩展性。简单来讲，水平扩展性指系统可以通过简单的增加资源来支持更大的数据量和负载。Hive处理的数据量是PB级的，而且每小时每天都在增长，这就使得水平扩展性成为一个非常重要的指标。Hadoop系统的水平扩展性是非常好的，而Hive基MapReduce框架，因此能够很自然地利用这点。
-#######容错性
-Hive有较好的容错性。Hive的执行计划在MapReduce框架上以作业的方式执行，每个作业的中间结果文件写到本地磁盘，最终输出文件写到HDFS文件系统，利用HDFS的多副本机制来保证数据的可靠性，从而达到作业的容错性。如果在作业执行过程中某节点出现故障，那么Hive执行计划基本不会受到影响。因此，基于Hive实现的数据仓库可以部署在由普通机器构建的分布式集群之上。
-#######可视化
-Hive的可视化界面基本属于字符终端，用户的技术水平一般比较高。面向不同的应用和用户，提供个性化的可视化展现，是Hive改进的一个重要方向。</p>
+<p>基于温度将数据映射到存储层 <br />
+在这个例子中，我们将在拥有更强计算能力节点的DISK层存储高频率使用的“热(HOT)”数据。 <br />
+至于“温(WARM)”数据，我们将其大部分的副本存储在磁盘层。对于复制因子(replication factor)为3的数据，我们将在磁盘层存储其两个副本，在归档层存储一个副本。 <br />
+如果数据已经变“冷(COLD)”,那么我们至少将在磁盘层存储其每个块的一个副本。余下的副本都放入归档层。   </p>
 
-      <div class="readall"><a href="/blog/2015/05/16/hive-datahouse.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<p>当一个数据集为认为是“冰冻(FROZEN)”的,这就意味着它几乎已经不被使用，将其存储在具有大量CPU、能执行众多任务节点或容器的节点上是不明智的。我们会把它存储到一个具有最小计算能力的节点上。因此，所有处于“冰冻(FROZEN)”状态块的全部副本都可以被移动到归档层。 <br />
+跨层的数据流 <br />
+当数据第一次添加到集群中，它将被存储到默认的磁盘层。基于数据的温度，它的一个或多个副本将被移动到归档层。移动器就是用来把数据从一个层移动到另一层的。移动器的工作原理类似平衡器，除了它可以跨层地移动块的副本。移动器可接受一条HDFS路径，一个副本数目和目的地层信息。然后它将基于所述层的信息识别将要被移动的副本，并调度数据在源数据节点到目的数据节点的移动。<br />
+Hadoop 2.6中支持分层存储的变化 <br />
+Hadoop 2.6中有许多的改进使其能够进一步支持分层存储。你可以附加一个存储策略到某个目录来指明它是“热(HOT)”的,“温(WARM)”的,“冷(COLD)”的, 还是“冰冻(FROZEN)”的。存储策略定义了每一层可存储的副本数量。我可以改变目录的存储策略并启动该目录的移动器来使得策略生效。 <br />
+使用数据的应用 <br />
+基于数据的温度，数据的部分或者全部副本可能存储在任一层中。但对于通过HDFS来使用数据的应用而言，其位置是透明的。 <br />
+虽然“冰冻”数据的所有副本都在归档层，应用依然可以像访问HDFS的任何数据一样来访问它。由于归档层中的节点并没有计算能力，运行在磁盘层的映射(map)任务将从归档层的节点上读取数据，但这会导致增加应用的网络流量消耗。如果这种情况频繁地发生，你可以指定该数据为“温/冷”,并让移动器移回一个或多个副本到磁盘层。 <br />
+确定数据温度以及完成指定的副本移动至预先定义的分层存储可以全部自动化。 <br />
+总结 <br />
+无计算能力的存储比有计算能力的存储要便宜。我们可以依据数据的温度来确保具计算能力的存储能得到充分地使用。因为每一个分块的数据都会被复制多次（默认是3次），根据数据的温度，许多副本都会被移动到低成本的存储中。HDFS支持分层存储并提供必要的工具来进行跨层的数据移动。   </p>
+
+      <div class="readall"><a href="/blog/2015/09/20/hdfs-fenceng.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -226,47 +341,19 @@ Hive的可视化界面基本属于字符终端，用户的技术水平一般比�
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/05/16/MR-join.html">MR中Join方案</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/09/20/guanjianjiagouceng.html">大数据处理的关键架构层</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2015年05月16日
+        2015年09月20日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <h4 id="mrjoin">MR中Join方案</h4>
-<p>与传统数据一样在MR中的join操作也是一项耗时的操作，但是我们可以根据MR 的设计思想对其进行优化。<br />
-#######Reduce side join<br />
-这是最简单的一种形式，主要思想：<br />
-在map阶段，map函数同时读取两个文件File1和File2，为了区分两种来源的key/value数据对，对每条数据打一个标签（tag）,比如：tag=0表示来自文件File1，tag=2表示来自文件File2。即：map阶段的主要任务是对不同文件中的数据打标签。<br />
-在reduce阶段，reduce函数获取key相同的来自File1和File2文件的value list， 然后对于同一个key，对File1和File2中的数据进行join（笛卡尔乘积）。即：reduce阶段进行实际的连接操作。这种形式主要是利用hadoop mr 的框架机制。  </p>
+      <p><img src="/image/大数据处理的关键架构层.jpg" alt="" /></p>
 
-<h6 id="map-side-join">#Map side join</h6>
-<p>reduce side join，是因为在map阶段不能获取所有需要的join字段，即：同一个key对应的字段可能位于不同map中。Reduce side join是非常低效的，因为shuffle阶段要进行大量的数据传输。<br />
-Map side join是针对以下场景进行的优化：两个待连接表中，有一个表非常大，而另一个表非常小，以至于小表可以直接存放到内存中。这样，我们可以将小表复制多份，让每个map task内存中存在一份（比如存放到hash table中），然后只扫描大表：对于大表中的每一条记录key/value，在hash table中查找是否有相同的key的记录，如果有，则连接后输出即可。<br />
-为了支持文件的复制，<br />
-Hadoop提供了一个类DistributedCache，使用该类的方法如下：<br />
-（1）用户使用静态方法DistributedCache.addCacheFile(URI)指定要复制的文件。JobTracker在作业启动之前会获取这个URI列表，并将相应的文件拷贝到各个TaskTracker的本地磁盘上。<br />
-（2）用户使用DistributedCache.getLocalCacheFiles()方法获取文件目录，并使用标准的文件读写API读取相应的文件。<br />
-如果足够小 也可以 放在context里面（不推荐）<br />
-#######Semi Join<br />
-Semi Join，也叫半连接，是从分布式数据库中借鉴过来的方法。它的产生动机是：对于reduce side join，跨机器的数据传输量非常大，这成了join操作的一个瓶颈，如果能够在map端过滤掉不会参加join操作的数据，则可以大大节省网络IO。<br />
-实现方法很简单：选取一个小表，假设是File1，将其参与join的key抽取出来，保存到文件File3中，File3文件一般很小，可以放到内存中。在map阶段，使用DistributedCache将File3复制到各个TaskTracker上，然后将File2中不在File3中的key对应的记录过滤掉，剩下的reduce阶段的工作与reduce side join相同。<br />
-#######reduce side join + BloomFilter<br />
-在某些情况下，SemiJoin抽取出来的小表的key集合在内存中仍然存放不下，这时候可以使用BloomFiler以节省空间。<br />
-BloomFilter最常见的作用是：判断某个元素是否在一个集合里面。它最重要的两个方法是：add() 和contains()。最大的特点是不会存在 false negative，即：如果contains()返回false，则该元素一定不在集合中，但会存在一定的 false positive，即：如果contains()返回true，则该元素一定可能在集合中。因而可将小表中的key保存到BloomFilter中，在map阶段过滤大表，可能有一些不在小表中的记录没有过滤掉（但是在小表中的记录一定不会过滤掉），这没关系，只不过增加了少量的网络IO而已。<br />
-#######二次排序
-在Hadoop中，默认情况下是按照key进行排序，如果要按照value进行排序怎么办？即：对于同一个key，reduce函数接收到的value list是按照value排序的。这种应用需求在join操作中很常见，比如，希望相同的key中，小表对应的value排在前面。<br />
-有两种方法进行二次排序，分别为：buffer and in memory sort和 value-to-key conversion。
-对于buffer and in memory sort，主要思想是：在reduce()函数中，将某个key对应的所有value保存下来，然后进行排序。 这种方法最大的缺点是：可能会造成out of memory。<br />
-对于value-to-key conversion，主要思想是：将key和部分value拼接成一个组合key（实现WritableComparable接口或者调用setSortComparatorClass函数），这样reduce获取的结果便是先按key排序，后按value排序的结果，需要注意的是，用户需要自己实现Paritioner，以便只按照key进行数据划分。<br />
-Hadoop显式的支持二次排序，在Configuration类中有个setGroupingComparatorClass()方法，可用于设置排序group的key值
-实际工作多数情况下，会采用第一种，reduce side join 简单 安全  。。。。  </p>
-
-
-      <div class="readall"><a href="/blog/2015/05/16/MR-join.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/09/20/guanjianjiagouceng.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -274,330 +361,58 @@ Hadoop显式的支持二次排序，在Configuration类中有个setGroupingCompa
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/05/16/DB-yanjin.html">DB演进理解</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/09/20/duoyuan-ETL.html">多源ETL考虑</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2015年05月16日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#db">db</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h2 id="db">DB演进理解</h2>
-
-<ol>
-  <li>
-    <p>RDBMS<br />
-这是最熟悉的数据存储方式，一般情况下数据存储在一台机器上，这种形式方便提供完善ACID特性和丰富查询模型。这就是传统的关系型数据库的基础模式，但是面对现如今越来越大的数据量，这种模式的扩展变得难以满足。实践证明通过增加节点这种简单廉价的扩展方式是可行的。RDBMS的横向扩展主要有主从复制（Master-slave）、分表、分区等。 <br />
-横向扩展RDBMS – Master/Slave <br />
-利用数据库的复制或镜像功能，同时在多台数据库上保存相同的数据，从而将读操作和写操作分开，写操作集中在一台主数据库上，读操作集中在多台从数据库上。<br />
-问题：<br />
-读写同步需要一定的时间，导致关键的读取有出错风险；<br />
-主节点将数据复制到从节点，数据量很大是可能造成问题，  </p>
-
-    <p>横向扩展RDBMS - Sharding <br />
- 在满足ACID特性的数据库中进行扩展是非常难的。基于这个原因，对数据进行扩展，这个数据库本身就必须拥有简单的模型，将数据分割为N片，然后在单独的片中执行查询。数据分割的单元被称为“shard”。将N片数据分配个M个DBMS进行操作。DBMS并不会去管理数据片，程序开发负责数据片的处理。
- 不同的分片方法有：<br />
- - 垂直分区（Vertical Partitioning）：将不需要进行联合查询的数据表分散到不同的数据库服务器上。<br />
- - 水平分区(sharding) 将同一个表的记录拆分到不同的表甚至是服务器上，这往往需要一个稳定的算法来保证读取时能正确从不同的服务器上取得数据。如Range-Based Partitioning, Key or Hash-Based partitioning等。<br />
- 优点与不足<br />
- - 对读取和写入都有很好的扩展<br />
- - 不透明，程序需要识别分区 <br />
- - 不再有跨分区的关系/joins <br />
- - 参照完整性损失  </p>
-
-    <p>其他RDBMS扩展方法 <br />
- Multi-Master replication：所有成员都响应客户端数据查询。多主复制系统负责将任意成员做出的数据更新传播给组内其他成员，并解决不同成员间并发修改可能带来的冲突。<br />
- INSERT only, not UPDATES/DELETES：数据进行版本化处理。<br />
- No JOINs, thereby reducing query time：Join的开销很大,而且频繁访问会使开销随着时间逐渐增加。<br />
- 非规范化（Denormalization）可以降低数据仓库的复杂性，以提高效率和改善性能。<br />
- In-memory databases：磁盘数据库解决的是大容量存储和数据分析问题，内存数据库解决的是实时处理和高并发问题。主流常规的RDBMS更多的是磁盘密集型，而不是内存密集型。  </p>
-
-    <p>ACID Transactions<br />
- 一个完善的数据库系统都是希望支持“ACID transactions,”其包括:<br />
- Atomic : Either the whole process is done or none is.（原子性）<br />
- Consistent : Database constraints are preserved.（一致性）<br />
- Isolated : It appears to the user as if only one process executes at a time.（隔离性）<br />
- Durable : Effects of a process do not get lost if the system crashes.（持久性）  </p>
-  </li>
-  <li>
-    <p>NoSQL  </p>
-  </li>
-</ol>
-
-<p>NoSQL现在被理解为 Not Only SQL 的缩写，是对非关系型的数据库管理系统的统称
-NoSQL 与 RDBMS 不同点，<br />
--不使用SQL作为查询语言。<br />
--不需要固定的表模式(table schema)。<br />
-- 放宽一个或多个 ACID 属性（CAP定理）  </p>
-
-<p>补充：CAP理论<br />
-CAP理论是数据系统设计的基本理论，目前几乎所有的数据系统的设计都遵循了这个理论。CAP理论指出，分布式系统只能满足以下三项中的两项而不可能满足全部三项，<br />
-一致性（Consistency)（所有节点在同一时间具有相同的数据）<br />
-可用性（Availability）（保证每个请求不管成功或者失败都有响应）<br />
-分区容忍性（Partition tolerance）（系统中任意信息的丢失或失败不会影响系统的继续运作） </p>
-
-<p>一致性有两种类型：<br />
-- strong consistency – ACID(Atomicity Consistency Isolation Durability)：对于关系型数据库，要求更新过的数据能被后续所有的访问都看到，这是强一致性。<br />
-- weak consistency – BASE(Basically Available Soft-state Eventual consistency )
-– Basically Available - system seems to work all the time (基本可用)<br />
-– Soft State - it doesn’t have to be consistent all the time （不要求所有时间都一致）<br />
-– Eventually Consistent - becomes consistent at some later time （最终一致性）  </p>
-
-<p>对于分布式数据系统(scale out)，分区容忍性是基本要求，否则就失去了价值。因此只能在一致性和可用性上做取舍，如何处理这种取舍正是目前NoSQL数据库的核心焦点。牺牲一致性而换取高可用性。当然，牺牲一致性，只是不再要求关系数据库中的强一致性，而是只要系统能达到最终一致性即可。通常是通过数据的多份异步复制来实现系统的高可用和数据的最终一致性的。  </p>
-
-<p>NoSQL 的两种主要实现方式<br />
-1.Key/Value<br />
-Amazon S3 (Dynamo)<br />
-Voldemort <br />
-Scalaris <br />
-Memcached (in-memory key/value store)<br />
-Redis <br />
-2. 弱模式型（column-based, document-based or graph-based.）<br />
-Cassandra (column-based)<br />
-CouchDB (document-based)<br />
-MongoDB(document-based) <br />
-Neo4J (graph-based)<br />
-HBase (column-based)   </p>
-
-<p>K/V模式<br />
-优点:<br />
-very fast<br />
-very scalable<br />
-simple model<br />
-able to distribute horizontally<br />
-劣势: <br />
- many data structures (objects) can’t be easily modeled as key value pairs （需要多余转换）<br />
-Schema-Less 模式<br />
-优点<br />
-Schema-less data model is richer than key/value pairs
-eventual consistency<br />
-many are distributed<br />
-still provide excellent performance and scalability<br />
-劣势<br />
-typically no ACID transactions or joins  </p>
-
-<ol>
-  <li>HBase  </li>
-</ol>
-
-<p>HBase is an open-source, distributed, column-oriented database built on top of HDFS (or KFS) based on BigTable! <br />
-按照CAP理论，HBase属于C+P类型的系统。HBase是强一致性的（仅支持单行事务）。每一行由单个区域服务器（region server）host，行锁（row locks）和多版本并发控制(multiversion concurrency control)的组合被用来保证行的一致性。<br />
-查找:<br />
-快速定位使用row key + column family + column + timestamp.<br />
-按范围查找：start row key – end row key.<br />
-全表扫描<br />
-交互方式<br />
-- Java, REST, or Thrift APIs.<br />
-- Scripting via JRuby.  </p>
-
-<p>HBase 一些特性  </p>
-
-<pre><code>- No real indexes（row key 即数据的索引）  
-- Automatic partitioning（region自动split）  
-- Scale linearly and automatically with new nodes（扩展容易 节点添加方便）  
-- Commodity hardware（廉价硬件）  
-- Fault tolerance(较强的容错性)  
-- Batch processing(批处理能力优秀)  
-</code></pre>
-
-<ol>
-  <li>
-    <p>Hive    </p>
-
-    <ul>
-      <li>Provide higher-level language (HQL, like SQL) to facilitate large-data processing</li>
-      <li>Higher-level language “compiles down” to Hadoop Map/Reduce jobs</li>
-    </ul>
-  </li>
-  <li>
-    <p>Hive + HBase  </p>
-
-    <p>Reasons to use Hive on HBase:<br />
- A lot of data sitting in HBase due to its usage in a real-time environment, but never used for analysis<br />
- Give access to data in HBase usually only queried through MapReduce to people that don’t code (business analysts)<br />
- When needing a more flexible storage solution, so that rows can be updated live by either a Hive job or an application and can be seen immediately to the other</p>
-  </li>
-</ol>
-
-
-      <div class="readall"><a href="/blog/2015/05/16/DB-yanjin.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/05/16/CDH-install-question.html">CDH 安装问题</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年05月16日
+        2015年09月20日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <p><em>CDH5安装参照：http://www.tuicool.com/articles/ENjmeaY</em><br />
-Q1:安装过程中提示找不到MySQL 驱动jar包<br />
-	：在/usr/shar/java 中添加mysql-connector-java-5.1.30-bin.jar<br />
-Q2：安装hive提示找不到MySQL驱动jar包<br />
-：在/opt/cloudera/parcels/CDH-5.1.3-1.cdh5.1.3.p0.12/lib/hive/lib/ 中添加 mysql-connector-java-5.1.30-bin.jar<br />
-Q3: cloudera-server 或cloudera-agent  status 提示服务已经停止，pid仍然存在<br />
-	：查看对应的log 可能是端口占用或是数据库连接问题<br />
-Q4:MR2和HDFS安装好后 web ui无法访问，查看对应端口已经处于listen状态，<br />
-	：分别在对应的配置中的端口和地址选项中将“将 ResourceManager 绑定到通配符地址”项， 勾选上<br />
-没有这个选项的可以在高级设置中在XML文件中添加<br />
-Q5：jdk版本不对应<br />
-	： CDH默认获取的jdk 位于：/usr/java   可将需要的jdk 拷贝到这个目录中。  </p>
+      <p>ETL解决问题：<br />
+1.数据分散问题<br />
+2.数据不清洁问题<br />
+3.对数据格式不统一  </p>
 
-<p>Q6  sqoop导入数据时：User does not belong to hive<br />
-	I had same issue with permissions -&gt; chgrp: changing ownership of ‘/user/hive/warehouse/test/_log24310.txt’: User does not belong to hive.
-1.Added the existing user named cloudera to existing group named hive with command: usermod -a -G hive cloudera 
-2.Restarted the system 
-3.Used Load Command and after that did a select * from table_name -&gt; No data was getting displayed. 
-4.Executed select count(*) from table_name and a MapReduce job got started. 
-5.Executed select * from table and now results was returned correctly. 
-6.Opened a impala shell using impala-shell command. 
-7.Executed a select * from table_name and no results was getting returned. 
-8.Executed command invalidate metadata in the impala-shell 
-9.Executed command refresh table_name 
-10.Executed command show tables 
-11.Executed command select * from table_name and now results are getting displayed both in the impala-shell and hive shell. 
-  可以不必理会</p>
+<p>ETL 过程模型<br />
+1. 元数据库<br />
+ 元数据（metadata）是定义和描述其它数据的数据    关于数据内容、质量、状况和其他特性的信息，在整个数据抽取转换加载过程中起到基础的作用。元数据使用户可以掌握数据的历史情况，如数据从哪里来，流通时间多长，更新频率是多大，数据元素的含义是什么，对它已经进行了哪些计算、转换和筛选等等。<br />
+    元数据具有下列属性：<br />
+（1）描述性，元数据是描述数据的数据，这是元数据的最本质的特征。<br />
+（2）动态性，元数据不是静止不变的，它随着所描述对象的变化而变化。<br />
+（3）多样性，元数据的类型多样。<br />
+（4）复杂性，一方面元数据既可以是集合概念也可以是个体概念，元数据中还可以包括其它的元数据；另一方面对不同的描述对象，有些元数据项是必须有的，而有些却不一定强求，即强制性的元数据与选择性的元数据共存。<br />
+（5）多层次性，这是由元数据所描述对象的多层次和元数据使用对象的多层次性决定的。<br />
+（6）支撑性，元数据相对描述对象而言处于次要的地位，但又是必不可少的，起支撑的作用。<br />
+    元数据库是以一定的组织方式存储在一起的相关的元数据集合。  </p>
 
-<p>Q6：spark 安装不上<br />
-	未解决，网上有对应bug</p>
-
-<p>整个安装过程中遇到各种问题，主要解决得途径还是查看对应的log文件对应解决：<br />
-/var/log/hadoop*<br />
-/var/log/cloudera*<br />
-/opt/cm-5.1.3/log  </p>
-
-<h6 id="about">===========================about==================================================================================================================================</h6>
-<p>问题导读  </p>
-
-<pre><code>1.CM的安装目录在什么位置？  
-2.hadoop配置文件在什么位置？  
-3.Cloudera manager运行所需要的信息存在什么位置？  
-4.CM结构和功能是什么？  
-1. 相关目录  
-/var/log/cloudera-scm-installer : 安装日志目录。  
-/var/log/* : 相关日志文件（相关服务的及CM的）。  
-/usr/share/cmf/ : 程序安装目录。  
-/usr/lib64/cmf/ : Agent程序代码。  
-/var/lib/cloudera-scm-server-db/data : 内嵌数据库目录。  
-/usr/bin/postgres : 内嵌数据库程序。  
-/etc/cloudera-scm-agent/ : agent的配置目录。  
-/etc/cloudera-scm-server/ : server的配置目录。  
-/opt/cloudera/parcels/ : Hadoop相关服务安装目录。  
-/opt/cloudera/parcel-repo/ : 下载的服务软件包数据，数据格式为parcels。  
-/opt/cloudera/parcel-cache/ : 下载的服务软件包缓存数据。  
-/etc/hadoop/* : 客户端配置文件目录。  
-</code></pre>
-
-<ol>
-  <li>配置    </li>
-</ol>
-
-<p>Hadoop配置文件<br />
-配置文件放置于/var/run/cloudera-scm-agent/process/目录下。如：/var/run/cloudera-scm-agent/process/193-hdfs-NAMENODE/core-site.xml。这些配置文件是通过Cloudera Manager启动相应服务（如HDFS）时生成的，内容从数据库中获得（即通过界面配置的参数）。<br />
-在CM界面上更改配置是不会立即反映到配置文件中，这些信息会存储于数据库中，等下次重启服务时才会生成配置文件。且每次启动时都会产生新的配置文件。<br />
-CM Server主要数据库为scm基中放置配置的数据表为configs。里面包含了服务的配置信息，每一次配置的更改会把当前页面的所有配置内容添加到数据库中，以此保存配置修改历史。<br />
-scm数据库被配置成只能从localhost访问，如果需要从外部连接此数据库，修改vim /var/lib/cloudera-scm-server-db/data/pg_hba.conf文件,之后重启数据库。运行数据库的用户为cloudera-scm。  </p>
-
-<p>查看配置内容<br />
-1.直接查询scm数据库的configs数据表的内容。  <br />
-2.访问REST API： http://hostname:7180/api/v4/cm/deployment，返回JSON格式部署配置信息。  </p>
-
-<p>配置生成方式<br />
-CM为每个服务进程生成独立的配置目录（文件）。所有配置统一在服务端查询数据库生成（因为scm数据库只能在localhost下访问）生成配置文件，再由agent通过网络下载包含配置文件的zip包到本地解压到指定的目录。  </p>
-
-<p>配置修改<br />
-CM对于需要修改的配置预先定义，对于没有预先定义的配置,则通过在高级配置项中使用xml配置片段的方式进行配置。而对于/etc/hadoop/下的配置文件是客户端的配置，可以在CM通过部署客户端生成客户端配置。  </p>
-
-<ol>
-  <li>数据库<br />
-Cloudera manager主要的数据库为scm,存储Cloudera manager运行所需要的信息：配置，主机，用户等。  </li>
-  <li>CM结构 </li>
-</ol>
-
-<p>CM分为Server与Agent两部分及数据库（自带更改过的嵌入Postgresql）。它主要做三件事件：</p>
-
-<pre><code>1.管理监控集群主机。
-2.统一管理配置。
-3.管理维护Hadoop平台系统。
-实现采用C/S结构，Agent为客户端负责执行服务端发来的命令，执行方式一般为使用python调用相应的服务shell脚本。Server端为Java REST服务，提供REST API，Web管理端通过REST API调用Server端功能，Web界面使用富客户端技术（Knockout）。
-1.Server端主体使用Java实现。
-2.Agent端主体使用Python, 服务的启动通过调用相应的shell脚本进行启动，如果启动失败会重复4次调用启动脚本。
-3.Agent与Server保持心跳，使用Thrift RPC框架。
-</code></pre>
-
-<ol>
-  <li>升级  </li>
-</ol>
-
-<p>在CM中可以通过界面向导升级相关服务。升级过程为三步：</p>
-
-<pre><code>1.下载服务软件包。
-2.把所下载的服务软件包分发到集群中受管的机器上。
-3.安装服务软件包，使用软链接的方式把服务程序目录链接到新安装的软件包目录上。
-</code></pre>
-
-<ol>
-  <li>卸载  </li>
-</ol>
-
-<p>sudo /usr/share/cmf/uninstall-scm-express.sh, 然后删除/var/lib/cloudera-scm-server-db/目录，不然下次安装可能不成功。</p>
+<p>元数据可以应该包括下列7个组件。 <br />
+    （1）环境状况组件。环境状况组件主要是用于监控网络和源数据的状况，它包括：网络状态，各种源数据状态，最佳抽取时间。网络状态和各种源数据状态的数据可以通过定时对网络状况和源数据状况探测自动获取。通过对这两组数据的历史记录分析可以生成最佳抽取时间。<br />
+    （2）基本组件。基本组件包括数据源数据库表结构、数据源数据库表属性、数据仓库表结构、数据仓库表属性，等等。基本构件和其它元数据最大的区别在于它是具有版本标识的数据，具有版本标识的数据在很长的一段时间内可以跟踪数据的变化情况。基本构件主要是对源数据的特征进行描述，它包括：可以提供源数据的数据库名，数据库编号，这些数据库的表，表的编号，表中的属性，属性的编号，以及可以提供源数据的文件系统的文件类型、分隔符、转换为数据库系统中目标表的表名等。<br />
+    （3）数据状态组件。数据状态组件用于标识数据仓库中的数据是“活性”的还是“惰性”的。由于数据仓库中的数据都是基于共享设计的，因而当将数据仓库中的数据作为源数据进行抽取和转换时，其中的某些数据可能包括一些误导信息，因而对于这些表就需要数据状态字段对它进行控制。 <br />
+    （4）存取模式组件。存取模式组件是用于确定异构的源数据什么时候将什么数据迁移到数据仓库中，它包括：存取数据的类型、总数以及频率等。在并行环境下，它可以确定如何物理地分离数据，这样可以极大地提高数据传送的效率。 <br />
+    （5）数据质量要求组件。数据质量规则定义了源数据中的质量要求，它包括了数据源的编号、错误类型编号、可能的修改规则编号等。 <br />
+    （6）映射规则组件。映射规则定义了数据由数据源到数据仓库映射的规则，它包括：源字段的编号；简单的属性到属性的映射；字段类型的转换；多个源表到一个目标表之间复杂的转换；命名的改变；关键字的改变；等等。 <br />
+    （7）抽取日志组件。抽取日志组件记录了对数据仓库中的数据进行的每次操作的时间、操作方式、操作过程以及结果。这些信息对于数据仓库的维护非常有用，拥有这些信息可以对ETL过程中的每一步进行监控。 <br />
+ </p>
 
 <ol>
   <li>
-    <p>开启postgresql远程访问  </p>
-
-    <p>CM内嵌数据库被配置成只能从localhost访问，如果需要从外部查看数据，数据修改vim /var/lib/cloudera-scm-server-db/data/pg_hba.conf文件,之后重启数据库。运行数据库的用户为cloudera-scm。</p>
+    <p>数据预抽取<br />
+    按照元数据定义的内容、频率和规则，将保存在有关数据源中的数据抽取出来，存放到另外的数据库中，并将预抽取操作记录在元数据库中。</p>
+  </li>
+  <li>
+    <p>数据质量检验 <br />
+    数据质量是数据使用的适合性。数据质量要求是关于数据明示的、通常隐含的或必须履行的需求或期望。
+    数据质量检验是依据元数据中定义的各数据质量要求，通过判断，对数据与质量要求的符合性进行评价，并将数据质量检验操作记录在元数据库中。
+    数据质量主要有两个方面的问题：一个是单数据源数据质量问题，另一个是多数据源的数据交互集成时的数据质量问题。</p>
   </li>
 </ol>
 
-      <div class="readall"><a href="/blog/2015/05/16/CDH-install-question.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
 
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point9.html">Linux学习笔记9-AWK</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年02月01日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#linux">linux</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h2 id="linux9-awk">Linux学习笔记9-AWK</h2>
-<p>AWK是所有shell过滤工具中最难掌握的，不知道为什么，也许是其复杂的语法或含义不明确的错误提示信息。在学习awk语言过程中，就会慢慢掌握诸如Bailing out 和awk:cmd.Line:等错误信息。可以说awk是一种自解释的编程语言，之所以要在shell中使用awk是因为awk本身是学习的好例子，但结合awk与其他工具诸如grep和sed，将会使shell编程更加
-容易。<br />
-调用：<br />
-有三种方式调用awk，第一种是命令行方式，如：<br />
-awk [-F field-separator] ‘awk命令’ input-file(s)<br />
-[-F域分隔符]是可选的，因为awk使用空格作为缺省的域分隔符，因此如果
-要浏览域间有空格的文本，不必指定这个选项，但如果要浏览诸如passwd文件，此文件各域以冒号作为分隔符，则必须指明- F选项<br />
-awk -F:’awk命令’ input-file<br />
-第二种方法是将所有awk命令插入一个文件，并使awk程序可执行，然后用awk命令解释器作为脚本的首行，以便通过键入脚本名称来调用它<br />
-awk -f awk-script-file input-files<br />
-第三种方式是将所有的awk命令插入一个单独文件. -f选项指明在文件awk_scriptfile中的awk脚本，inputfile(s)是使用awk进行浏览的文件
-名。  </p>
-
-<p>awk脚本<br />
-在命令中调用awk时，awk脚本由各种操作和模式组成。<br />
-如果设置了-F选项，则awk每次读一条记录或一行，并使用指定的分隔符分隔指定域，但如果未设置-F选项，awk假定空格为域分隔符，并保持这个设置直到发现一新行。当新行出现时，awk命令获悉已读完整条记录，然后在下一个记录启动读命令，这个读进程将持续到文件尾或文件不再存在。</p>
-
-
-      <div class="readall"><a href="/blog/2015/02/01/Linux-point9.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/09/20/duoyuan-ETL.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

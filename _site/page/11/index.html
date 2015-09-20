@@ -64,7 +64,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/HBASE.html">HBASE性能优化方法总结</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/MapReduce.html">Map/Reduce第一次开发记录</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
@@ -74,382 +74,69 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
       </p>
     </header>
     <div class="post-main">
-      <p>From :http://www.blogjava.net/paulwong/archive/2012/11/29/392232.html</p>
+      <p>1.main()
+作用：配置job, 提交job
+main()运行于JobTracker</p>
 
 <ol>
   <li>
-    <p>表的设计</p>
+    <p>map/reduce运行流程：</p>
 
-    <p>1.1 Pre-Creating Regions</p>
-
-    <p>默认情况下，在创建HBase表的时候会自动创建一个region分区，当导入数据的时候，所有的HBase客户端都向这一个region写数据，直到这个region足够大了才进行切分。一种可以加快批量写入速度的方法是通过预先创建一些空的regions，这样当数据写入HBase时，会按照region分区情况，在集群内做数据的负载均衡。</p>
-
-    <p>有关预分区，详情参见：Table Creation: Pre-Creating Regions，下面是一个例子：
-     publicstaticbooleancreateTable(HBaseAdmin admin, HTableDescriptor table,byte[][] splits)
-     throwsIOException {
-       try{
-         admin.createTable(table, splits);
-         returntrue;
-       }catch(TableExistsException e) {
-         logger.info(“table “+ table.getNameAsString() +” already exists”);
-         // the table already exists
-         returnfalse;
-       }
-     }</p>
-
-    <pre><code> publicstaticbyte[][] getHexSplits(String startKey, String endKey,intnumRegions) {
-   byte[][] splits =newbyte[numRegions-1][];
-   BigInteger lowestKey =newBigInteger(startKey,16);
-   BigInteger highestKey =newBigInteger(endKey,16);
-   BigInteger range = highestKey.subtract(lowestKey);
-   BigInteger regionIncrement = range.divide(BigInteger.valueOf(numRegions));
-   lowestKey = lowestKey.add(regionIncrement);
-   for(inti=0; i &lt; numRegions-1;i++) {
-     BigInteger key = lowestKey.add(regionIncrement.multiply(BigInteger.valueOf(i)));
-     byte[] b = String.format("%016x", key).getBytes();
-     splits[i] = b;
-   }
-   returnsplits;
- }
-</code></pre>
-
-    <p>1.2 Row Key</p>
-
-    <p>HBase中row key用来检索表中的记录，支持以下三种方式：</p>
-
-    <p>通过单个row key访问：即按照某个row key键值进行get操作；
- 通过row key的range进行scan：即通过设置startRowKey和endRowKey，在这个范围内进行扫描；
- 全表扫描：即直接扫描整张表中所有行记录。
- 在HBase中，row key可以是任意字符串，最大长度64KB，实际应用中一般为10~100bytes，存为byte[]字节数组，一般设计成定长的。</p>
-
-    <p>row key是按照字典序存储，因此，设计row key时，要充分利用这个排序特点，将经常一起读取的数据存储到一块，将最近可能会被访问的数据放在一块。</p>
-
-    <p>举个例子：如果最近写入HBase表中的数据是最可能被访问的，可以考虑将时间戳作为row key的一部分，由于是字典序排序，所以可以使用Long.MAX_VALUE – timestamp作为row key，这样能保证新写入的数据在读取时可以被快速命中。</p>
-
-    <p>1.3 Column Family</p>
-
-    <p>不要在一张表里定义太多的column family。目前Hbase并不能很好的处理超过2~3个column family的表。因为某个column family在flush的时候，它邻近的column family也会因关联效应被触发flush，最终导致系统产生更多的I/O。感兴趣的同学可以对自己的HBase集群进行实际测试，从得到的测试结果数据验证一下。</p>
-
-    <p>1.4 In Memory</p>
-
-    <p>创建表的时候，可以通过HColumnDescriptor.setInMemory(true)将表放到RegionServer的缓存中，保证在读取的时候被cache命中。</p>
-
-    <p>1.5 Max Version</p>
-
-    <p>创建表的时候，可以通过HColumnDescriptor.setMaxVersions(int maxVersions)设置表中数据的最大版本，如果只需要保存最新版本的数据，那么可以设置setMaxVersions(1)。</p>
-
-    <p>1.6 Time To Live</p>
-
-    <p>创建表的时候，可以通过HColumnDescriptor.setTimeToLive(int timeToLive)设置表中数据的存储生命期，过期数据将自动被删除，例如如果只需要存储最近两天的数据，那么可以设置setTimeToLive(2 * 24 * 60 * 60)。</p>
-
-    <p>1.7 Compact &amp; Split</p>
-
-    <p>在HBase中，数据在更新时首先写入WAL 日志(HLog)和内存(MemStore)中，MemStore中的数据是排序的，当MemStore累计到一定阈值时，就会创建一个新的MemStore，并且将老的MemStore添加到flush队列，由单独的线程flush到磁盘上，成为一个StoreFile。于此同时， 系统会在zookeeper中记录一个redo point，表示这个时刻之前的变更已经持久化了(minor compact)。</p>
-
-    <p>StoreFile是只读的，一旦创建后就不可以再修改。因此Hbase的更新其实是不断追加的操作。当一个Store中的StoreFile达到一定的阈值后，就会进行一次合并(major compact)，将对同一个key的修改合并到一起，形成一个大的StoreFile，当StoreFile的大小达到一定阈值后，又会对 StoreFile进行分割(split)，等分为两个StoreFile。</p>
-
-    <p>由于对表的更新是不断追加的，处理读请求时，需要访问Store中全部的StoreFile和MemStore，将它们按照row key进行合并，由于StoreFile和MemStore都是经过排序的，并且StoreFile带有内存中索引，通常合并过程还是比较快的。</p>
-
-    <p>实际应用中，可以考虑必要时手动进行major compact，将同一个row key的修改进行合并形成一个大的StoreFile。同时，可以将StoreFile设置大些，减少split的发生。</p>
-  </li>
-  <li>
-    <p>写表操作</p>
-
-    <p>2.1 多HTable并发写
- 创建多个HTable客户端用于写操作，提高写数据的吞吐量，一个例子：</p>
-
-    <pre><code> staticfinalConfiguration conf = HBaseConfiguration.create();
- staticfinalString table_log_name = “user_log”;
- wTableLog =newHTable[tableN];
- for(inti =0; i &lt; tableN; i++) {
- wTableLog[i] =newHTable(conf, table_log_name);
- wTableLog[i].setWriteBufferSize(5*1024*1024);//5MB
- wTableLog[i].setAutoFlush(false);
- }  2.2 HTable参数设置
-</code></pre>
-
-    <p>2.2.1 Auto Flush</p>
-
-    <p>通过调用HTable.setAutoFlush(false)方法可以将HTable写客户端的自动flush关闭，这样可以批量写入数据到HBase，而不是有一条put就执行一次更新，只有当put填满客户端写缓存时，才实际向HBase服务端发起写请求。默认情况下auto flush是开启的。</p>
-
-    <p>2.2.2 Write Buffer</p>
-
-    <p>通过调用HTable.setWriteBufferSize(writeBufferSize)方法可以设置HTable客户端的写buffer大小，如果新设置的buffer小于当前写buffer中的数据时，buffer将会被flush到服务端。其中，writeBufferSize的单位是byte字节数，可以根据实际写入数据量的多少来设置该值。</p>
-
-    <p>.2.3 WAL Flag</p>
-
-    <p>在HBae中，客户端向集群中的RegionServer提交数据时（Put/Delete操作），首先会先写WAL（Write Ahead Log）日志（即HLog，一个RegionServer上的所有Region共享一个HLog），只有当WAL日志写成功后，再接着写MemStore，然后客户端被通知提交数据成功；如果写WAL日志失败，客户端则被通知提交失败。这样做的好处是可以做到RegionServer宕机后的数据恢复。</p>
-
-    <p>因此，对于相对不太重要的数据，可以在Put/Delete操作时，通过调用Put.setWriteToWAL(false)或Delete.setWriteToWAL(false)函数，放弃写WAL日志，从而提高数据写入的性能。</p>
-
-    <p>值得注意的是：谨慎选择关闭WAL日志，因为这样的话，一旦RegionServer宕机，Put/Delete的数据将会无法根据WAL日志进行恢复。</p>
-
-    <p>2.3 批量写</p>
-
-    <p>通过调用HTable.put(Put)方法可以将一个指定的row key记录写入HBase，同样HBase提供了另一个方法：通过调用HTable.put(List<put>)方法可以将指定的row key列表，批量写入多行记录，这样做的好处是批量执行，只需要一次网络I/O开销，这对于对数据实时性要求高，网络传输RTT高的情景下可能带来明显的性能提升。</put></p>
-
-    <p>2.4 多线程并发写</p>
-
-    <p>在客户端开启多个HTable写线程，每个写线程负责一个HTable对象的flush操作，这样结合定时flush和写buffer（writeBufferSize），可以既保证在数据量小的时候，数据可以在较短时间内被flush（如1秒内），同时又保证在数据量大的时候，写buffer一满就及时进行flush。下面给个具体的例子：</p>
-
-    <pre><code> for(inti =0; i &lt; threadN; i++) {
- Thread th =newThread() {
- publicvoidrun() {
- while(true) {
- try{
- sleep(1000);//1 second
- }catch(InterruptedException e) {
- e.printStackTrace();
- }
- synchronized(wTableLog[i]) {
- try{
- wTableLog[i].flushCommits();
- }catch(IOException e) {
- e.printStackTrace();
- }
- }
- }
- }
- };
- th.setDaemon(true);
- th.start();
- }
+    <pre><code> map(k1, v1)--&gt;(k2, v2)--&gt;combiner(k2, v2)--&gt;(k3, v3)--&gt;reduce(k3, v3)--&gt;(k4, v4)
+ InputFormat  程序逻辑          map的输出               combiner的输出  最终输出
 </code></pre>
   </li>
   <li>
-    <p>读表操作</p>
+    <p>不要在map类中自己实现combiner或reduce的功能。可能导致内存不足。
+context.write();方法在当写入量超过一定值后，会写入文件。</p>
+  </li>
+  <li>
+    <p>setNumReduce() 设置reduce的个数，默认为1. 另外当map/reduce运行在本地时此方法的设置无效。
+对于reduce的个数一般由metadata来决定。</p>
+  </li>
+  <li>
+    <p>map/reduce 程序的运行方式：</p>
 
-    <p>3.1 多HTable并发读
- 创建多个HTable客户端用于读操作，提高读数据的吞吐量，一个例子：</p>
+    <p>a: 将写好的程序，打成jar包，将其和其依赖的jar包放置于 hadoop安装环境上 然后在hadoop上以 hadoop -jar /path/***.jar
+ b：在eclipse中run
+ c: 编写servlet, 在servlet 中调用a方法中的命令 运行程序。</p>
+  </li>
+  <li>
+    <p>Combiner</p>
 
-    <p>staticfinalConfiguration conf = HBaseConfiguration.create();
- staticfinalString table_log_name = “user_log”;
- rTableLog =newHTable[tableN];
- for(inti =0; i &lt; tableN; i++) {
- rTableLog[i] =newHTable(conf, table_log_name);
- rTableLog[i].setScannerCaching(50);
- }</p>
+    <p>在map端实现对key的聚合，然后再有reduce从聚合以后的数据中获取，从而减少map于reduce之间的数据传输，提高程序效率。
+ 另外使用Combiner,应考虑使用combiner对数据的聚合程度。如果聚合量太少，是没有必要的。</p>
+  </li>
+  <li>
+    <p>Partitioner  (shuffle)
+ Partitioner 实现将map或是combiner的输出发送到对应的reduce的功能.
+ 可以自定义实现。默认为HashPartitioner</p>
+  </li>
+  <li>
+    <p>configuration：作用：实现对job的配置
+ 可以作为jobtracker,map,reduce之间的参数传递，configuration对象在设置后，在程序的任何地方都能获取。</p>
+  </li>
+  <li>
+    <p>在本地run map/redcue 程序时 需要修改源码中FileUtil类如下：</p>
 
-    <p>3.2 HTable参数设置
- 3.2.1 Scanner Caching
- 通过调用HTable.setScannerCaching(int scannerCaching)可以设置HBase scanner一次从服务端抓取的数据条数，默认情况下一次一条。通过将此值设置成一个合理的值，可以减少scan过程中next()的时间开销，代价是scanner需要通过客户端的内存来维持这些被cache的行记录。</p>
-
-    <p>3.2.2 Scan Attribute Selection
- scan时指定需要的Column Family，可以减少网络传输数据量，否则默认scan操作会返回整行所有Column Family的数据。</p>
-
-    <p>3.2.3 Close ResultScanner
- 通过scan取完数据后，记得要关闭ResultScanner，否则RegionServer可能会出现问题（对应的Server资源无法释放）。</p>
-
-    <p>3.3 批量读
- 通过调用HTable.get(Get)方法可以根据一个指定的row key获取一行记录，同样HBase提供了另一个方法：通过调用HTable.get(List)方法可以根据一个指定的row key列表，批量获取多行记录，这样做的好处是批量执行，只需要一次网络I/O开销，这对于对数据实时性要求高而且网络传输RTT高的情景下可能带来明显的性能提升。</p>
-
-    <p>3.4 多线程并发读
- 在客户端开启多个HTable读线程，每个读线程负责通过HTable对象进行get操作。下面是一个多线程并发读取HBase，获取店铺一天内各分钟PV值的例子：</p>
-
-    <pre><code> publicclassDataReaderServer {
- //获取店铺一天内各分钟PV值的入口函数
- publicstaticConcurrentHashMap getUnitMinutePV(longuid,longstartStamp,longendStamp){
- longmin = startStamp;
- intcount = (int)((endStamp - startStamp) / (60*1000));
- List lst =newArrayList();
- for(inti =0; i &lt;= count; i++) {
- min = startStamp + i *60*1000;
- lst.add(uid +"_"+ min);
- }
- returnparallelBatchMinutePV(lst);
- }
- //多线程并发查询，获取分钟PV值
- privatestaticConcurrentHashMap parallelBatchMinutePV(List lstKeys){
- ConcurrentHashMap hashRet =newConcurrentHashMap();
- intparallel =3;
- List&lt;List&lt;String&gt;&gt; lstBatchKeys =null;
- if(lstKeys.size() &lt; parallel ){
- lstBatchKeys =newArrayList&lt;List&lt;String&gt;&gt;(1);
- lstBatchKeys.add(lstKeys);
- }
- else{
- lstBatchKeys =newArrayList&lt;List&lt;String&gt;&gt;(parallel);
- for(inti =0; i &lt; parallel; i++ ){
- List lst =newArrayList();
- lstBatchKeys.add(lst);
- }
-	
- for(inti =0; i &lt; lstKeys.size() ; i ++ ){
- lstBatchKeys.get(i%parallel).add(lstKeys.get(i));
- }
- }
-	
- List &gt;&gt; futures =newArrayList &gt;&gt;(5);
-	
- ThreadFactoryBuilder builder =newThreadFactoryBuilder();
- builder.setNameFormat("ParallelBatchQuery");
- ThreadFactory factory = builder.build();
- ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(lstBatchKeys.size(), factory);
-	
- for(List keys : lstBatchKeys){
- Callable&lt; ConcurrentHashMap &gt; callable =newBatchMinutePVCallable(keys);
- FutureTask&lt; ConcurrentHashMap &gt; future = (FutureTask&lt; ConcurrentHashMap &gt;) executor.submit(callable);
- futures.add(future);
- }
- executor.shutdown();
-	
- // Wait for all the tasks to finish
- try{
- booleanstillRunning = !executor.awaitTermination(
- 5000000, TimeUnit.MILLISECONDS);
- if(stillRunning) {
- try{
- executor.shutdownNow();
- }catch(Exception e) {
- // TODO Auto-generated catch block
- e.printStackTrace();
- }
- }
- }catch(InterruptedException e) {
- try{
- Thread.currentThread().interrupt();
- }catch(Exception e1) {
- // TODO Auto-generated catch block
- e1.printStackTrace();
- }
- }
-	
- // Look for any exception
- for(Future f : futures) {
- try{
- if(f.get() !=null)
- {
- hashRet.putAll((ConcurrentHashMap)f.get());
- }
- }catch(InterruptedException e) {
- try{
- Thread.currentThread().interrupt();
- }catch(Exception e1) {
- // TODO Auto-generated catch block
- e1.printStackTrace();
- }
- }catch(ExecutionException e) {
- e.printStackTrace();
- }
- }
-	
- returnhashRet;
- }
- //一个线程批量查询，获取分钟PV值
- protectedstaticConcurrentHashMap getBatchMinutePV(List lstKeys){
- ConcurrentHashMap hashRet =null;
- List lstGet =newArrayList();
- String[] splitValue =null;
- for(String s : lstKeys) {
- splitValue = s.split("_");
- longuid = Long.parseLong(splitValue[0]);
- longmin = Long.parseLong(splitValue[1]);
- byte[] key =newbyte[16];
- Bytes.putLong(key,0, uid);
- Bytes.putLong(key,8, min);
- Get g =newGet(key);
- g.addFamily(fp);
- lstGet.add(g);
- }
- Result[] res =null;
- try{
- res = tableMinutePV[rand.nextInt(tableN)].get(lstGet);
- }catch(IOException e1) {
- logger.error("tableMinutePV exception, e="+ e1.getStackTrace());
- }
-	
- if(res !=null&amp;&amp; res.length &gt;0) {
- hashRet =newConcurrentHashMap(res.length);
- for(Result re : res) {
- if(re !=null&amp;&amp; !re.isEmpty()) {
- try{
- byte[] key = re.getRow();
- byte[] value = re.getValue(fp, cp);
- if(key !=null&amp;&amp; value !=null) {
- hashRet.put(String.valueOf(Bytes.toLong(key,
- Bytes.SIZEOF_LONG)), String.valueOf(Bytes
- .toLong(value)));
- }
- }catch(Exception e2) {
- logger.error(e2.getStackTrace());
- }
- }
- }
- }
-	
- returnhashRet;
- }
- }
- //调用接口类，实现Callable接口
- classBatchMinutePVCallableimplementsCallable&gt;{
- privateList keys;
-	
- publicBatchMinutePVCallable(List lstKeys ) {
- this.keys = lstKeys;
- }
-	
- publicConcurrentHashMap call()throwsException {
- returnDataReadServer.getBatchMinutePV(keys);
- }
+    <pre><code> private static void checkReturnValue(boolean rv, File p,
+ FsPermission permission
+ ) throws IOException {
+ // if (!rv) {
+ // throw new IOException("Failed to set permissions of path: " + p +
+ // " to " +
+ // String.format("%04o", permission.toShort()));
+ // }
  }
 </code></pre>
-
-    <p>3.5 缓存查询结果
- 对于频繁查询HBase的应用场景，可以考虑在应用程序中做缓存，当有新的查询请求时，首先在缓存中查找，如果存在则直接返回，不再查询HBase；否则对HBase发起读请求查询，然后在应用程序中将查询结果缓存起来。至于缓存的替换策略，可以考虑LRU等常用的策略。</p>
-
-    <p>3.6 Blockcache
- HBase上Regionserver的内存分为两个部分，一部分作为Memstore，主要用来写；另外一部分作为BlockCache，主要用于读。</p>
-
-    <p>写请求会先写入Memstore，Regionserver会给每个region提供一个Memstore，当Memstore满64MB以后，会启动 flush刷新到磁盘。当Memstore的总大小超过限制时（heapsize * hbase.regionserver.global.memstore.upperLimit * 0.9），会强行启动flush进程，从最大的Memstore开始flush直到低于限制。</p>
-
-    <p>读请求先到Memstore中查数据，查不到就到BlockCache中查，再查不到就会到磁盘上读，并把读的结果放入BlockCache。由于BlockCache采用的是LRU策略，因此BlockCache达到上限(heapsize * hfile.block.cache.size * 0.85)后，会启动淘汰机制，淘汰掉最老的一批数据。</p>
-
-    <p>一个Regionserver上有一个BlockCache和N个Memstore，它们的大小之和不能大于等于heapsize * 0.8，否则HBase不能启动。默认BlockCache为0.2，而Memstore为0.4。对于注重读响应时间的系统，可以将 BlockCache设大些，比如设置BlockCache=0.4，Memstore=0.39，以加大缓存的命中率。</p>
-
-    <p>有关BlockCache机制，请参考这里：HBase的Block cache，HBase的blockcache机制，hbase中的缓存的计算与使用。</p>
   </li>
 </ol>
 
-<p>4.数据计算</p>
+<p>可以把这个类copy到你eclipse工程中的源程序中，包名和类名都不变。
+在eclipse中运行时将优先使用你copy过来修改的那个类。
+没有必要重新编译整个hadoop的类。</p>
 
-<pre><code>4.1 服务端计算
-Coprocessor运行于HBase RegionServer服务端，各个Regions保持对与其相关的coprocessor实现类的引用，coprocessor类可以通过RegionServer上classpath中的本地jar或HDFS的classloader进行加载。
-
-目前，已提供有几种coprocessor：
-
-Coprocessor：提供对于region管理的钩子，例如region的open/close/split/flush/compact等；
-RegionObserver：提供用于从客户端监控表相关操作的钩子，例如表的get/put/scan/delete等；
-Endpoint：提供可以在region上执行任意函数的命令触发器。一个使用例子是RegionServer端的列聚合，这里有代码示例。
-以上只是有关coprocessor的一些基本介绍，本人没有对其实际使用的经验，对它的可用性和性能数据不得而知。感兴趣的同学可以尝试一下，欢迎讨论。
-
-4.2 写端计算
-
-4.2.1 计数
-
-HBase本身可以看作是一个可以水平扩展的Key-Value存储系统，但是其本身的计算能力有限（Coprocessor可以提供一定的服务端计算），因此，使用HBase时，往往需要从写端或者读端进行计算，然后将最终的计算结果返回给调用者。举两个简单的例子：
-
-PV计算：通过在HBase写端内存中，累加计数，维护PV值的更新，同时为了做到持久化，定期（如1秒）将PV计算结果同步到HBase中，这样查询端最多会有1秒钟的延迟，能看到秒级延迟的PV结果。
-分钟PV计算：与上面提到的PV计算方法相结合，每分钟将当前的累计PV值，按照rowkey + minute作为新的rowkey写入HBase中，然后在查询端通过scan得到当天各个分钟以前的累计PV值，然后顺次将前后两分钟的累计PV值相减，就得到了当前一分钟内的PV值，从而最终也就得到当天各个分钟内的PV值。
-
-4.2.2 去重
-
-对于UV的计算，就是个去重计算的例子。分两种情况：
-
-如果内存可以容纳，那么可以在Hash表中维护所有已经存在的UV标识，每当新来一个标识时，通过快速查找Hash确定是否是一个新的UV，若是则UV值加1，否则UV值不变。另外，为了做到持久化或提供给查询接口使用，可以定期（如1秒）将UV计算结果同步到HBase中。
-如果内存不能容纳，可以考虑采用Bloom Filter来实现，从而尽可能的减少内存的占用情况。除了UV的计算外，判断URL是否存在也是个典型的应用场景。
-
-4.3 读端计算
-
-如果对于响应时间要求比较苛刻的情况（如单次http请求要在毫秒级时间内返回），个人觉得读端不宜做过多复杂的计算逻辑，尽量做到读端功能单一化：即从HBase RegionServer读到数据（scan或get方式）后，按照数据格式进行简单的拼接，直接返回给前端使用。当然，如果对于响应时间要求一般，或者业务特点需要，也可以在读端进行一些计算逻辑。
-</code></pre>
-
-<p>5.总结</p>
-
-<p>作为一个Key-Value存储系统，HBase并不是万能的，它有自己独特的地方。因此，基于它来做应用时，我们往往需要从多方面进行优化改进（表设计、读表操作、写表操作、数据计算等），有时甚至还需要从系统级对HBase进行配置调优，更甚至可以对HBase本身进行优化。这属于不同的层次范畴。</p>
-
-<p>总之，概括来讲，对系统进行优化时，首先定位到影响你的程序运行性能的瓶颈之处，然后有的放矢进行针对行的优化。如果优化后满足你的期望，那么就可以停止优化；否则继续寻找新的瓶颈之处，开始新的优化，直到满足性能要求。</p>
-
-      <div class="readall"><a href="/blog/2014/09/27/HBASE.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/MapReduce.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -457,111 +144,223 @@ PV计算：通过在HBase写端内存中，累加计数，维护PV值的更新�
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/EJob.html">EJob</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/MVC.html">MVC框架简单实现</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+        <a class="post-category" href="/page/category.html#f2e">f2e</a>
       </p>
     </header>
     <div class="post-main">
-      <pre><code>import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
+      <p>MVC框架实现</p>
 
-public class EJob {
+<p>1.MVC（Model—View—Controler)介绍</p>
 
-// To declare global field
-private static List&lt;URL&gt; classPath = new ArrayList&lt;URL&gt;();
+<p>MVC模式最早由Trygve Reenskaug在1978年提出，是施乐帕罗奥多研究中心（Xerox PARC）在20世纪80年代为程序语言Smalltalk发明的一种软件设计模式。当前备受推崇的一种设计模式，更是web项目的标配。</p>
 
-// To declare method
-public static File createTempJar(String root) throws IOException {
-if (!new File(root).exists()) {
-return null;
-}
-Manifest manifest = new Manifest();
-manifest.getMainAttributes().putValue("Manifest-Version", "1.0");
-final File jarFile = File.createTempFile("EJob-", ".jar", new File(
-System.getProperty("java.io.tmpdir")));
+<p>MVC强制将程序的input、process和output分割独立分别由对应的mvc组建负责。控制器接受用户的请求，调用相应的模型来进行业务处理，并返回数据给控制器。控制器调用相应的视图来显示处理的结果。并通过视图呈现给用户。</p>
 
-Runtime.getRuntime().addShutdownHook(new Thread() {
-public void run() {
-jarFile.delete();
-}
-});
+<p>优点：</p>
 
-JarOutputStream out = new JarOutputStream(
-new FileOutputStream(jarFile), manifest);
-createTempJarInner(out, new File(root), "");
-out.flush();
-out.close();
-return jarFile;
-}
+<pre><code>MVC模式的目的是实现动态的程序设计开发，使得开发或维护过程中对程序的修改和扩展变得更加简单，
+程序的复用性变得更好。
+提高了程序的灵活性和可配置性。
+程序结构更加直观。
+各个组建对应功能明确，开发人员能够更好的发挥所长分工作业。
+</code></pre>
 
-private static void createTempJarInner(JarOutputStream out, File f,
-String base) throws IOException {
-if (f.isDirectory()) {
-File[] fl = f.listFiles();
-if (base.length() &gt; 0) {
-base = base + "/";
-}
-for (int i = 0; i &lt; fl.length; i++) {
-createTempJarInner(out, fl[i], base + fl[i].getName());
-}
-} else {
-out.putNextEntry(new JarEntry(base));
-FileInputStream in = new FileInputStream(f);
-byte[] buffer = new byte[1024];
-int n = in.read(buffer);
-while (n != -1) {
-out.write(buffer, 0, n);
-n = in.read(buffer);
-}
-in.close();
-}
-}
+<p>缺陷：</p>
 
-public static ClassLoader getClassLoader() {
-ClassLoader parent = Thread.currentThread().getContextClassLoader();
-if (parent == null) {
-parent = EJob.class.getClassLoader();
-}
-if (parent == null) {
-parent = ClassLoader.getSystemClassLoader();
-}
-return new URLClassLoader(classPath.toArray(new URL[0]), parent);
-}
+<pre><code>技术论坛里，时不时会有MVC已死的声音。现在如日中天的MVC是否真的廉颇老矣？这里摘取《Object Design: Roles, Responsibilities, and Collaborations》一书中对MVC集中式控制器总结了一下四大缺点：
 
-public static void addClasspath(String component) {
+Control logic can get overly complex.
 
-if ((component != null) &amp;&amp; (component.length() &gt; 0)) {
+控制器会变得复杂，很多人在Struts的Action控制器中写业务代码已经变得很常见。
+
+Controllers can become dependent on information holders' contents.
+
+控制器变得依赖信息数据中心或数据库了，控制器做很多事情。
+
+Objects can become coupled indirectly through the actions of their controller.
+
+对象将间接地通过控制器的action耦合在一起，一个对象在控制器中查询获得，然后复制给另外一个对象，这两个对象就耦合在一起。
+
+The only interesting work is done in the controller.
+
+唯一有趣的工作是做控制器，Responsibilities职责被吸进控制器对象，只将一些行为留给角色模型完成，重要的事情都集中在控制器中了。
+
+传说中的替代架构：DCI(Data Context Interactions)
+</code></pre>
+
+<ol>
+  <li>
+    <p>流行实现框架分析</p>
+
+    <p>闲话休多，好与坏都需要自己亲身去实践，需要透彻的了解这种设计。本篇文章旨在通过参考现今主流MVC框架的设计思路自己实现一个简单的mvc框架，从而更加深入透彻的理解与掌握MVC。</p>
+
+    <p>首先简单分析一下流行的MVC框架 如struts2 和 springmvc</p>
+  </li>
+</ol>
+
+<p>Struts2
+请求流程：</p>
+
+<p><img src="/image/strus-workflow.png" alt="" /></p>
+
+<p>struts request 流程图
+上面这张图是官方给出的struts2.0请求处理流程图，struts2.0对一个请求的处理可以分为以下几个步骤：</p>
+
+<pre><code>客户端发送请求。
+
+请求先通过ActionContextCleanUp--&gt;FilterDispatcher。
+
+FilterDispatcher通过ActionMapper来决定这个Request需要调用哪个Action。
+
+如果ActionMapper决定调用某个Action，FilterDispatcher把请求的处理交给ActionProxy，这儿已经转到它的Delegate—Dispatcher来执行。
+
+ActionProxy根据ActionMapping和ConfigurationManager找到需要调用的Action类
+
+ActionProxy创建一个ActionInvocation的实例。
+
+ActionInvocation调用真正的Action，当然这涉及到相关拦截器的调用。
+
+Action执行完毕，ActionInvocation创建Result并返回，当然，如果要在返回之前做些什么，可以实现PreResultListener。添加PreResultListener可以在Interceptor中实现。
+</code></pre>
+
+<p>springmvc
+请求流程：<br />
+<img src="/image/Spring1.jpg" alt="" />)</p>
+
+<p>具体流程步骤如下：</p>
+
+<pre><code>1. 首先用户发送请求=&gt;DispatcherServlet，前端控制器收到请求后自己不进行处理，而是委托给其他的解析器进行处理，作为统一访问点，进行全局的流程控制。
+
+2. DispatcherServlet=&gt;HandlerMapping， HandlerMapping将会把请求映射为HandlerExecutionChain对象（包含一个Handler处理器（页面控制器）对象、多个HandlerInterceptor拦截器）对象，通过这种策略模式，很容易添加新的映射策略。
+
+3. DispatcherServlet=&gt;HandlerAdapter，HandlerAdapter将会把处理器包装为适配器，从而支持多种类型的处理器。
+
+4. HandlerAdapter=&gt;处理器功能处理方法的调用，HandlerAdapter将会根据适配的结果调用真正的处理器的功能处理方法，完成功能处理；并返回一个ModelAndView对象（包含模型数据、逻辑视图名）。
+
+5. ModelAndView的逻辑视图名=&gt; ViewResolver， ViewResolver将把逻辑视图名解析为具体的View。
+
+6. View=&gt;渲染，View会根据传进来的Model模型数据进行渲染，此处的Model实际是一个Map数据结构，因此很容易支持其他视图技术；
+
+7. 返回控制权给DispatcherServlet，由DispatcherServlet返回响应给用户，流程结束。
+</code></pre>
+
+<ol>
+  <li>实现</li>
+</ol>
+
+<p>经过对struts2和springmvc的分析，可以看出要实现mvc这样的表现层框架，总体上来说需要实现以下三点：</p>
+
+<p>URL到框架的映射。</p>
+
+<p>Http请求参数绑定。</p>
+
+<p>Http响应的生成和输出。</p>
+
+<p>将其具体到实现可以分为：</p>
+
+<p>配置元素的对象化（解析配置文件，初始化环境）。</p>
+
+<pre><code>publicvoid init() throws ServletException {
+
+super.init();
+
 try {
-File f = new File(component);
 
-if (f.exists()) {
-URL key = f.getCanonicalFile().toURL();
-if (!classPath.contains(key)) {
-classPath.add(key);
+actionConfigs = XMLUtil.parseConfig();
+
+} catch (Exception e) {
+
+e.printStackTrace();
+
 }
-}
-} catch (IOException e) {
-}
-}
-}
+
 }
 </code></pre>
 
-      <div class="readall"><a href="/blog/2014/09/27/EJob.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<ol>
+  <li>
+    <p>对Http请求进行初步处理，查找与之对应的处理类（方法）</p>
+
+    <pre><code> String handlerMappingClassName = handlerBeanConfigs.get(Constants.HAND LER_MAPPING).getClazz();
+	
+ String actionName = ((HandlerMapping)
+	
+ ReflectUtil.getInstance(handlerMappingClassName)).handlerMapping(req);
+</code></pre>
+  </li>
+  <li>
+    <p>调用相应的处理类（方法）完成业务逻辑对处理类（方法）</p>
+
+    <pre><code> ActionConfig actionConfig = actionConfigs.get(actionName);
+	
+ String handlerAdapterClassName = handlerBeanConfigs.
+	
+ get(Constants.HANDLER_ADAPTER).getClazz();
+	
+ String result = ((HandlerAdapter)ReflectUtil.
+	
+ getInstance(handlerAdapterClassName))
+	
+ .handlerAdapter(req, actionConfig, actionName);
+</code></pre>
+  </li>
+  <li>
+    <p>根据处理类（方法）的调用结果，进行Http响应处理</p>
+
+    <pre><code> String handlerViewClassName = handlerBeanConfigs.
+	
+ get(Constants.HANDLER_VIEW).getClazz();
+	
+ ((HandlerView) ReflectUtil.getInstance(handlerViewClassName)).
+	
+ handlerView(req, resp, actionConfig, result);
+</code></pre>
+  </li>
+</ol>
+
+<p>以上是整个框架处理的核心流程,核心流程的控制在DispatcherServlet类中完成。同时整个流程又分为以上的几个步骤，对于每个步骤的具体实现,采用开放接口的方式提供给框架使用者。可以实现其中的对应接口,并在配置文件中注册具体实现类。即可实现修改框架默认定制属于自己实现。</p>
+
+<p>具体提供以下三个接口分别对应上面2，3，4步的处理逻辑，分别为：</p>
+
+<p>HandlerMapping</p>
+
+<p>HandlerAdapter</p>
+
+<p>HandlerView</p>
+
+<p>扩展举例：实现定制Http请求进行初步处理，查找与之对应的处理类（方法）</p>
+
+<pre><code>publicclass HandlerURLMapping implements HandlerMapping {
+
+@Override
+
+public String handlerMapping(HttpServletRequest request) throws Exception {
+
+String contextPath = request.getContextPath();
+
+String uri = request.getRequestURI();
+
+String actionName = uri.substring(contextPath.length() + 1, uri.length());
+
+return actionName;
+
+}
+
+}
+</code></pre>
+
+<p>框架request请求执行逻辑图如下：</p>
+
+<p><img src="/image/my-mvc.png" alt="" /></p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/MVC.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -569,7 +368,7 @@ classPath.add(key);
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Dflinux.html">Df命令linux系统以磁盘</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/Linux-SSH-.html">Linux SSH 登录</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
@@ -579,67 +378,54 @@ classPath.add(key);
       </p>
     </header>
     <div class="post-main">
-      <p>Df命令是linux系统以磁盘分区为单位查看文件系统，可以加上参数查看磁盘剩余空间信息，命令格式：</p>
+      <p>服务器IP地址为192.168.1.1，机器名：will_s
+客户端IP地址为172.16.16.1，机器名：will_c
+客户端用户will需要使用ssh无密码登录服务器的will帐户</p>
 
-<p>df -hl</p>
+<p>实现原理
+使用”公私钥”认证的方式来进行ssh登录.
+在客户端上创建一对公私钥 （公钥文件：~/.ssh/id_rsa.pub； 私钥文件：~/.ssh/id_rsa）
+然后把公钥放到服务器上（~/.ssh/authorized_keys）, 自己保留好私钥
+当ssh登录时,ssh程序会发送私钥去和服务器上的公钥做匹配.如果匹配成功就可以登录了</p>
 
-<p>显示格式为：</p>
+<p>设置如下：</p>
 
-<p>文件系统              容量 已用 可用 已用% 挂载点　</p>
+<ol>
+  <li>
+    <p>以will用户登录客户机器并在客户端机器上执行”ssh-keygen -t rsa”
+(注：每次执行”ssh-keygen -t rsa”产生的私钥文件都会不同)</p>
 
-<p>Filesystem            Size Used Avail Use% Mounted on</p>
+    <p>a）如果文件”~/.ssh/id_rsa”存在，会提示是否覆盖该文件，此时可选择”n”不覆盖该文件而使用已有的id_rsa文件；
+ 如果选择”y”则会重新生成”~/.ssh/id_rsa”文件，接下来会提示输入passphrase，
+ 回车确定使用空的passphrase，再次回车确认（这里也可以输出passphrase，相当于ssh时登录的密码）。
+ 然后会重新生成”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件。</p>
 
-<p>/dev/hda2              45G   19G   24G 44% /</p>
+    <p>b）如果”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件不存在则会自动创建新的”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件，
+ passphrase设置同上。</p>
+  </li>
+  <li>
+    <p>使用ssh will@192.168.1.1登录到服务器，编辑服务器上”~/.ssh/authorized_keys”文件，
+将客户端机器上的”~/.ssh/id_rsa.pub”文件内容追加到”~/.ssh/authorized_keys”文件中。
+（注：可以在客户端机器上使用以下命令来实现：</p>
 
-<p>/dev/hda1             494M   19M 450M   4% /boot</p>
+    <pre><code> cat ~/.ssh/id_rsa.pub | ssh will@192.168.1.1 "cat - &gt;&gt; ~/.ssh/authorized_keys" 此时会要求输入will用户在服务器上的登录密码，输入后即会将客户端机器上的"~/.ssh/id_rsa.pub"文件内容追加到服务器上的 "~/.ssh/authorized_keys"文件中） 如果是首次连接服务器会出现以下的提示，确认连接并输入密码后其他直接回车确定。
+</code></pre>
+  </li>
+  <li>
+    <p>如果在第1步中使用了空的passphrase，则可以跳过第4步，此时在客户端即可以使用”ssh zhaoy@192.168.1.1”即可无密码登录到服务器；
+如果第一步中设置了passphrase，则继续执行以下步骤。</p>
+  </li>
+  <li>
+    <p>如果第1步中设置了passphrase，则此时需要输入该passphrase登录服务器。
+此时前面我们把输入密码变成了输入passphrase，这没有带来任何方便。
+但是我们可以通过ssh-agent来帮助我们自动输入passphrase(只是看起来像是自动输入而已)，
+我们只要在第一次登录时输入一次passphrase, 以后的工作就可以交给ssh-agent。在客户端机器上执行命令ssh-add，
+这里会提示输入一次passphrase。输入第一步中设置的passphrase之后会修改”~/.ssh/id_rsa”文件。
+再在客户端执行”ssh will@192.168.1.1”即可无密码登录到服务器端。</p>
+  </li>
+</ol>
 
-<p>/dev/hda6             4.9G 2.2G 2.5G 47% /home</p>
-
-<p>/dev/hda5             9.7G 2.9G 6.4G 31% /opt</p>
-
-<p>none                 1009M     0 1009M   0% /dev/shm</p>
-
-<p>/dev/hda3             9.7G 7.2G 2.1G 78% /usr/local</p>
-
-<p>/dev/hdb2              75G   75G     0 100% /</p>
-
-<p>/dev/hdb2              75G   75G     0 100% /</p>
-
-<p>以上面的输出为例，表示的意思为：</p>
-
-<p>HD硬盘接口的第二个硬盘（b），第二个分区（2），容量是75G，用了75G，可用是0，因此利用率是100%， 被挂载到根分区目录上（/）。</p>
-
-<p>下面是相关命令的解释：</p>
-
-<p>df -hl 查看磁盘剩余空间</p>
-
-<p>df -h 查看每个根路径的分区大小</p>
-
-<p>du -sh [目录名] 返回该目录的大小</p>
-
-<p>du -sm [文件夹] 返回该文件夹总M数</p>
-
-<p>更多功能可以输入一下命令查看：</p>
-
-<p>df –help</p>
-
-<p>du –help</p>
-
-<p>查看硬盘的分区 #sudo fdisk -l</p>
-
-<p>查看IDE硬盘信息 #sudo hdparm -i /dev/hda</p>
-
-<p>查看STAT硬盘信息 #sudo hdparm -I /dev/sda 或 #sudo apt-get install blktool #sudo blktool /dev/sda id</p>
-
-<p>查看硬盘剩余空间 #df -h #df -H</p>
-
-<p>查看目录占用空间 #du -hs 目录名</p>
-
-<p>优盘没法卸载 #sync fuser -km /media/usbdisk</p>
-
-<p>http://blog.163.com/yes___ican/blog/static/18506244920124394617622/</p>
-
-      <div class="readall"><a href="/blog/2014/09/27/Dflinux.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/Linux-SSH-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -647,134 +433,47 @@ classPath.add(key);
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/DB-Index.html">DB Index</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/Java-class-loader.html">Java class loader</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#db">db</a>
+        <a class="post-category" href="/page/category.html#java">java</a>
       </p>
     </header>
     <div class="post-main">
-      <p>理解索引结构     </p>
-
-<p>实际上，可以把索引理解为一种特殊的目录。微软的SQL SERVER提供了两种索引：聚集索引（clustered index，也称聚类索引、簇集索引）和非聚集索引（nonclustered index，也称非聚类索引、非簇集索引）。下面，我们举例来说明一下聚集索引和非聚集索引的区别： </p>
-
-<p>其实，我们的汉语字典的正文本身就是一个聚集索引。比如，我们要查”安”字，就会很自然地翻开字典的前几页，因为”安”的拼音是”an”，而按照拼音排序汉字的字典是以英文字母”a”开头并以”z”结尾的，那么”安”字就自然地排在字典的前部。如果您翻完了所有以”a”开头的部分仍然找不到这个字，那么就说明您的字典中没有这个字；同样的，如果查”张”字，那您也会将您的字典翻到最后部分，因为”张”的拼音是”zhang”。也就是说，字典的正文部分本身就是一个目录，您不需要再去查其他目录来找到您需要找的内容。  </p>
-
-<p>我们把这种正文内容本身就是一种按照一定规则排列的目录称为”聚集索引”。      </p>
-
-<p>如果您认识某个字，您可以快速地从自动中查到这个字。但您也可能会遇到您不认识的字，不知道它的发音，这时候，您就不能按照刚才的方法找到您要查的字，而需要去根据”偏旁部首”查到您要找的字，然后根据这个字后的页码直接翻到某页来找到您要找的字。但您结合”部首目录”和”检字表”而查到的字的排序并不是真正的正文的排序方法，比如您查”张”字，我们可以看到在查部首之后的检字表中”张”的页码是672页，检字表中”张”的上面是”驰”字，但页码却是63页，”张”的下面是”弩”字，页面是390页。很显然，这些字并不是真正的分别位于”张”字的上下方，现在您看到的连续的”驰、张、弩”三字实际上就是他们在非聚集索引中的排序，是字典正文中的字在非聚集索引中的映射。我们可以通过这种方式来找到您所需要的字，但它需要两个过程，先找到目录中的结果，然后再翻到您所需要的页码。 </p>
-
-<p>我们把这种目录纯粹是目录，正文纯粹是正文的排序方式称为”非聚集索引”。 </p>
-
-<p>何时使用聚集索引或非聚集索引    <br />
-下面的表总结了何时使用聚集索引或非聚集索引（很重要）。   </p>
-
-<pre><code>	动作描述        使用聚集索引 使用非聚集索引     
-	列经常被分组排序      应        应     
-	返回某范围内的数据          应      不应        
-	一个或极少不同值           不应     不应     
-	小数目的不同值                应     不应     
-	大数目的不同值              不应    应     
-	频繁更新的列                 不应   应     
-	外键列                  应 应     
-	主键列               应   应     
-	频繁修改索引列       不应      应        
-</code></pre>
-
-<p>几种常见的MySQL索引类型。</p>
+      <p><strong>java classloader 结构：</strong></p>
 
 <ol>
-  <li>
-    <p>普通型索引
- 这是最基本的索引类型，而且它没有唯一性之类的限制。普通索引可以通过以下几种方式创建： </p>
-  </li>
-  <li>创建索引，例如CREATE INDEX 索引的名字 ON tablename (列名1，列名2,…); </li>
-  <li>修改表，例如ALTER TABLE tablename ADD INDEX 索引的名字 (列名1，列名2,…); </li>
-  <li>创建表的时候指定索引，例如CREATE TABLE tablename ( […], INDEX 索引的名字 (列名1，列名
-2,…) );</li>
-  <li>
-    <p>唯一索引
-   这种索引和前面的“普通索引”基本相同，但有一个区别：索引列的所有值都只能出现一次，即必须唯一。唯一性索引可以用以下几种方式创建： </p>
-  </li>
-  <li>创建索引，例如CREATE UNIQUE INDEX 索引的名字 ON tablename (列的列表); </li>
-  <li>修改表，例如ALTER TABLE tablename ADD UNIQUE 索引的名字 (列的列表); </li>
-  <li>
-    <p>创建表的时候指定索引，例如CREATE TABLE tablename ( […], UNIQUE 索引的名字 (列的列
-     表) );</p>
-  </li>
-  <li>
-    <p>主键</p>
-
-    <p>主键是一种唯一性索引，但它必须指定为“PRIMARY KEY”。如果你曾经用过AUTO_INCREMENT类型的列，你可能已经熟悉主键之类的概念了。主键一般在创建表的时候指定，例如“CREATE TABLE tablename ( […], PRIMARY KEY (列的列表) ); ”。但是，我们也可以通过修改表的方式加入主键，例如“ALTER TABLE tablename ADD PRIMARY KEY (列的列表); ”。每个表只能有一个主键。 （主键相当于聚合索引，是查找最快的索引）</p>
-  </li>
-  <li>
-    <p>单列索引和多列索引</p>
-
-    <p>索引可以是单列索引，也可以是多列索引。
- 1. 单列索引就是常用的一个列字段的索引，常见的索引。
- 2. 多列索引就是含有多个列字段的索引</p>
-
-    <pre><code> 	 alter table student add index sy(name,age，score);
- 	 索引sy就为多列索引，多列索引在以下几中情况下才能有效：
- 	 select * from student where name='jia' and age&gt;='12' //where条件中含有索引的首列字段和
-		   第二个字段
- 	 select * from student where name='jia' //where条件中只含有首列字段
- 	 select * from student where name='jia' and score&lt;60//where条件中含有首列字段和第三个字
-		  段
-		 总结：多列索引只有在where条件中含有索引中的首列字段时才有效
-</code></pre>
-  </li>
-  <li>
-    <p>选择索引列</p>
-
-    <p>应该怎样选择索引列，首先要看查询条件，一般将查询条件中的列作为索引</p>
-  </li>
+  <li>Bootstrap classloader(启动类加载器)
+主要负责jdk_home/lib目录下的核心API或-Xbootclasspath选项指定的jar包的装入工作</li>
+  <li>Extension Classloader(扩展类加载器)
+负责jdk_home/lib/ext目录下的jar包或者-Djava.ext.dirs指定目录下的jar包装入工作
+3.System classloader(系统类加载器)
+负责Java -classpath/-Djava.class.path所指定的类与jar包的装入</li>
+  <li>User Custom classloader（用户自定义类加载器（java.lang.ClassLoader的子类））
+以上每一个classloader都会维护一份自己的名称空间，同一个名称空间不能出现两个同名的类。
+为了实现Java安全沙箱模型顶层的类加载器安全机制，Java默认采用 双亲委派的加载链 结构</li>
 </ol>
 
-<p><strong>联合索引使用结论:</strong></p>
+<p>在jvm启动时就会构建bootstrap classloader 负责Java平台核心库</p>
+
+<p><strong>每个ClassLoader加载Class的过程是：</strong></p>
 
 <ol>
-  <li>查询条件中出现联合索引第一列,或者全部,则能利用联合索引.</li>
-  <li>条件列中只要条件相连在一起,以本文例子来说就是:
-last_name=’1′ and first_name=’1′与first_name=’1′ and last_name=’1′
-,无论前后,都会利用上联合索引.</li>
-  <li>查询条件中没有出现联合索引的第一列,而出现联合索引的第二列,或者第三列,都不会利用联合索引查询.</li>
+  <li>检测此Class是否载入过（即在cache中是否有此Class），如果有到8,如果没有到2</li>
+  <li>如果parent classloader不存在（没有parent，那parent一定是bootstrap classloader了），到4</li>
+  <li>请求parent classloader载入，如果成功到8，不成功到5</li>
+  <li>请求jvm从bootstrap classloader中载入，如果成功到8</li>
+  <li>寻找Class文件（从与此classloader相关的类路径中寻找）。如果找不到则到7.</li>
+  <li>从文件中载入Class，到8.</li>
+  <li>抛出ClassNotFoundException.</li>
+  <li>返回Class.</li>
 </ol>
 
-<p><strong>单一列索引的应用结论:</strong></p>
 
-<p>只要条件列中出现索引列,无论在什么位置,都能利用索引查询.</p>
-
-<p><strong>两者的共同点:</strong></p>
-
-<ol>
-  <li>要想利用索引,都要符合SARG标准.</li>
-  <li>都是为了提高查询速度.</li>
-  <li>都需要额外的系统开销,磁盘空间.</li>
-</ol>
-
-<p>补充说明: stmtText信息来产生,在查询语句前面加上:SET STATISTICS PROFILE on.可以通过运行它,来观察你的查询是否合理,这样才能真正做到优化.</p>
-
-<p><strong>主旨:讨论什么情况下能利用上索引.</strong></p>
-
-<p>索引:创建索引可以根据查询业务的不同分为两种:单一列的索引,联合索引. 顾名思义,单一列索引就是指在表的某一列上创建索引,联合索引是在多个列上联合创建索引.</p>
-
-<p>优缺点比较:</p>
-
-<ol>
-  <li>索引所占用空间:单一列索引相对要小.</li>
-  <li>索引创建时间:单一列索引相对短.</li>
-  <li>索引对insert,update,delete的影响程序:单一列索引要相对低.</li>
-  <li>在多条件查询时,联合索引效率要高.</li>
-</ol>
-
-<p>索引的使用范围:单一列索引可以出现在where 条件中的任何位置,而联合索引需要按一定的顺序来写. </p>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/DB-Index.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/Java-class-loader.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -782,166 +481,108 @@ last_name=’1′ and first_name=’1′与first_name=’1′ and last_name=’1
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/AMD--CMD.html">AMD & CMD</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/Java-Serialization.html">Java Serialization</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#不懂">不懂</a>
+        <a class="post-category" href="/page/category.html#java">java</a>
       </p>
     </header>
     <div class="post-main">
-      <p>http://blog.csdn.net/dojotoolkit/article/details/7820321</p>
+      <p>目的：</p>
 
-<p><strong>AMD</strong></p>
+<p>保存对象的状态，并且可以把保存的对象状态再读取出来进行恢复。</p>
 
-<p>随着web应用不断发展和对JavaScript依赖的进一步加深，
-出现了使用模块（Modules）来组织代码和依赖性。模块使得我们创建明确清晰的组件和接口，
-这些组件和接口能够很容易的加载并连接到其依赖组件。 AMD模块系统提供了使用JavaScript模块来构建Web应用的完美方式，
-并且这种方式具有形式简单，异步加载和广泛采用的特点。</p>
-
-<p>异步模块定义（AMD）格式是一套API，它用于定义可重用的并能在多种框架使用的模块。
-开发AMD是为了提供一种定义模块的方式，这种方式可以使用原生的浏览器脚本元素机制来实现模块的异步加载。
-AMD API由2009年Dojo 社区的讨论中产生，然后移动到讨论CommonJS如何更好的为浏览器适应CommonJS模块格式（被NodeJS使用）。
-CommonJS已经发展成为单独的一个标准并有其专门的社区。AMD已经广泛普及，形成了众多模块加载实现并被广泛使用。在SitePen公司，
-我们广泛的使用Dojo的AMD机制工作，为其提供支持，并积极的建设这一机制。</p>
-
-<p>CMD Common Module Definition</p>
-
-<p>在CMD规范里面，一个模块就是一个Javascript文件</p>
-
-<pre><code>define(factory); define是全局函数，来定义模块 仅接收一个factory参数，可以是函数，对象，字符串等类型
-</code></pre>
+<p>场景：</p>
 
 <ol>
-  <li>
-    <p>factory为对象、字符串等非函数类型时候，表示模块的接口是该对象、字符串等值
-Js代码</p>
-
-    <pre><code> define({
- "foo":"bar"
- }); 通过字符串定义模版模块 Js代码
-
- define('I am a template.My name is .');
-</code></pre>
-  </li>
-  <li>
-    <p>factory为函数时候，表示模块的构造方法。
-执行该方法，可以得到模块向外提供的接口。默认3个参数：require 、 exports 、 module
-Js代码</p>
-
-    <pre><code> define(function(require,exports,module){
- //...
- });
- require --------- 是一个方法，用来获取其他模块提供的接口。 Js代码
-</code></pre>
-
-    <p>define(function(require){
- var a = require(‘./a’);
- a.doSomething;
- });
-require接受模块标识作为唯一参数，模块标识书写需要遵循一些规范。</p>
-
-    <p>require.async
-———- 可以用来异步加载模块，并在加载完成后执行指定的回调。
-Js代码</p>
-
-    <pre><code> define(function(require,exports,module){
- //异步加载b
- require.async('./b',function(b){
- b.doSomething;
- });
- //异步加载多个模块
- require.async(['./c','./d'],function(c,d){
- //
- ........
- })
- });
- require.resolve --------- 使用模块系统内部的路径解析机制来返回模块的路径。该函数不会加载模块，只返回解析后的绝对路径。 Js代码
-</code></pre>
-
-    <p>define(function(require,exports){
- console.log(require.resolve(‘./b’));
- //../b.js
- });
- require.cache
-———- 可以查看模块系统加载过的所有模块。
-某些情况下，需要重新加载某个模块，可以得到该模块的url，然后通过delete require.cache[url] 来将其信息删除。
-exports
-——– 是一个对象，用来向外提供模块接口。
-Js代码</p>
-
-    <pre><code> define(function(require,exports){
- exports.foo = "bar";
- exports.doSomething = function(){
- ...............
- }
- }); 除了给exports对象增加成员，还可以以return的方式直接向外提供接口。 Js代码
-
- define(function(require,exports,module){
- return {
- fool: "bar",
- doSomething:function(){
- .............
- }
- };
- }); 当然如果只是返回一个对象，可以直接： Js代码
-
- define({
- foo: "bar",
- doSomething:function(){}
- });
-</code></pre>
-  </li>
+  <li>需要把内存中对象状态保存到一个文件中或者数据库中时</li>
+  <li>需要用套接字在网络上传送对象时</li>
+  <li>需要通过RMI传输对象时
+特点：</li>
+  <li>序列化时 只对对象的状态进行保存 而不管对象的方法</li>
+  <li>当一个父类实现序列化，子类自动实现序列化 无须显式实现Serializable借口</li>
+  <li>当一个对象的实例变量引用其他对象，序列化该对象时也会把引用对象进行序列化</li>
+  <li>并非所有对象都可以序列化：
+socket/thread</li>
 </ol>
 
-<p>注释：在factory里面给exports重新赋值是没有意义的，因为exports仅仅是module.exports的一个引用，直接给exports重新赋值并不会修改module.exports的值。
-错误的例子：</p>
+<p>Serialization 是一种将对象以一连串的字节描述的过程，deserialization 将这些字节重构成一个对象的过程。Java序列化API提供一种处理对象序列化的标准机制。</p>
 
-<p>Js代码</p>
+<h2 id="section">进阶问题：</h2>
 
-<pre><code>	define(function(require,exports,module){
-	exports = {
-	foo: "bar",
-	doSomething:function(){}
-	}
-	}); 正确的应该是：
+<p><strong>序列化ID的问题</strong></p>
+
+<p>serialVersionID即 序列化的版本号，是为了保证不同版本之间的兼容性。向前兼容以及向后兼容。
+两种生成方式：</p>
+
+<ol>
+  <li>使用默认的1L</li>
+  <li>根据类名 接口名 成员方法以及属性来生成</li>
+</ol>
+
+<p>如果一个类实现了序列化 但没有显示的申明序列化版本号  在程序编译的时候会自动生成一个版本号。存储在文件中，如果类有改动版本号也会随之改变。 在反序列化的时候JVM会将文件中的ID与本地相应实体类的ID比较  两者一致才能够序列化成功。否则会抛InvalidClassException异常。</p>
+
+<p>静态化变量的序列化</p>
+
+<pre><code>                    //初始时staticVar为5
+                    ObjectOutputStream out = new ObjectOutputStream(
+                                    new FileOutputStream("result.obj"));
+                    out.writeObject(new Test());
+                    out.close();
+
+                    //序列化后修改为10
+                    Test.staticVar = 10;
+
+                    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
+                                    "result.obj"));
+                    Test t = (Test) oin.readObject();
+                    oin.close();
+                    //再读取，通过t.staticVar打印新的值
+                    System.out.println(t.staticVar); 以上代码的输出结果为10.。。因为序列化并不保存静态化变量。
 </code></pre>
 
-<p>Js代码</p>
+<p><strong>父类的序列化</strong></p>
 
-<pre><code>	define(function(require,exports,module){
-	module.exports = {
-	foo: "bar",
-	doSomething:function(){}
-	}
-	}); module module 是一个对象，存储了与当前模块关联的一些属性和方法。 module.id ---------- 模块标识 Js代码
+<p>一个子类实现了Serializable接口  它的父类没有实现Serializable接口   序列化该子类对象然后反序列化输出父类定义的某变量的数值  该数值与序列化时的数值不同</p>
 
-	define(function(require,exports,module){
-	console.log(require(module.id) === exports); // true
-	});
-	module.uri
-	------------ 根据模块系统的路径解析规则得到的模块绝对路径
-	module.dependencies
-	------------ 是一个数组，标识当前模块的依赖列表
-	module.parent
-	------------ 指向初始化调用当前模块的模块。可以得到模块初始化的callstack
-	module.factory
-	------------ 指向define(factory)中的factory参数
-	module.status
-	------------ 当前模块的状态，是一个数值
-	module.exports ------------ 当前模块对外提供的接口 传给factory构造方法的exports参数是module.exports对象的一个引用。 比如当模块的接口是某一个类的实例时候，需要通过module.exports来实现 Js代码
+<p>在父类没有实现Serializable接口时  JVM将不会序列化父类对象  而一个Java对象的构造必须有父类对象 所以在反序列化时 只能调用父类的无参构造器作为默认的父对象  所以这是可以在父类的无参构造器中对变量进行初始化 否则父类变量都是默认的值</p>
 
-	define(function(require,exports,module){
-	console.log(module.exports === exports); // true
-	module.exports = new SomeClass();
-	console.log(module.exports === exports); //false
-	});
-	module.require 在module环境中运行require，一般用于插件开发
+<p><strong>Transient关键字</strong></p>
+
+<p>Transient关键字的作用是控制变量的序列化，在变量申明前加上次关键字可以阻止该变量被序列化</p>
+
+<p><strong>序列化存储规则</strong></p>
+
+<pre><code> ObjectOutputStream out = new ObjectOutputStream(
+                                    new FileOutputStream("result.obj"));
+    Test test = new Test();
+    //试图将对象两次写入文件
+    out.writeObject(test);
+    out.flush();
+    System.out.println(new File("result.obj").length());
+    out.writeObject(test);
+    out.close();
+    System.out.println(new File("result.obj").length());
+
+    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
+                    "result.obj"));
+    //从文件依次读出两个文件
+    Test t1 = (Test) oin.readObject();
+    Test t2 = (Test) oin.readObject();
+    oin.close();
+    //判断两个引用是否指向同一个对象
+    System.out.println(t1 == t2);
 </code></pre>
 
-      <div class="readall"><a href="/blog/2014/09/27/AMD--CMD.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<p>同一对象两次写入文件，打印出写入一次对象后的存储大小和写入两次后的存储大小，然后从文件中反序列化出两个对象，比较这两个对象是否为同一对象。一般的思维是，两次写入对象，文件大小会变为两倍的大小，反序列化时，由于从文件读取，生成了两个对象，判断相等时应该是输入 false 才对，最后却为TRUE。</p>
+
+<p>因为：Java 序列化机制为了节省磁盘空间，具有特定的存储规则，当写入文件的为同一对象时，并不会再将对象的内容进行存储，而只是再次存储一份引用，上面增加的 5 字节的存储空间就是新增引用和一些控制信息的空间。反序列化时，恢复引用关系，使得清单 3 中的 t1 和 t2 指向唯一的对象，二者相等，输出 true。该存储规则极大的节省了存储空间。</p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/Java-Serialization.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -949,60 +590,283 @@ Js代码</p>
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/06/08/HBasesession.html">HBase第一次session记录</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/Java-File.html">Java File</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年06月08日
+        2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+        <a class="post-category" href="/page/category.html#java">java</a>
       </p>
     </header>
     <div class="post-main">
-      <ol>
-  <li>数据本地化(Data Localization)
-数据存在当前JVM 或是当前磁盘</li>
-  <li>HBase的架构 实现数据与操作的分离，没有本地数据。
-其数据存放于hadoop上，所以集群能具有很强的健壮性：
-hase写过程：先写Hlog</li>
-  <li>HBase的没有指定master，在哪台机器上启动HBase集群，该台机就是master。</li>
-  <li>rowkey是数据的一部分，其必须人工指定。
-column family 在定义表时需指明。</li>
-  <li>HBase没有database的概念。</li>
-  <li>
-    <p>HBase表结构：</p>
+      <p>/**
+ * @author Toby 通用工具类
+ */
+public class Utils {</p>
 
-    <pre><code> table
- |-column family
- |-column
- |-cell
- |-timestamp
- |-value
+<pre><code>/**
+ * @param args
+ * @throws Exception
+ * @throws IOException
+ */
+public static void main(String[] args) throws IOException, Exception {
+    // TODO Auto-generated method stub
+    // File file = new File("D:/user/mms.xml");
+    // System.out.println(file.renameTo(new File("D:/user/mms5.xml")));
+
+    // 1
+    // compress("D:/user/test", "D:/user/test.zip");
+
+    /*
+     * String fileName = "D:/user/88.zip"; try {
+     * System.out.println(encryptBASE64(readFileToBytes(fileName))); } catch
+     * (Exception e) { // TODO Auto-generated catch block
+     * e.printStackTrace(); }
+     */
+
+    /*
+     * String mi
+     * ="UEsDBBQACAA";
+     * RandomAccessFile inOut = new RandomAccessFile(
+     * "D:/user/sample.","rw"); inOut.write(decryptBASE64(mi));
+     * inOut.close();
+     */
+
+    // System.out.println(new String(decryptBASE64("5rWL6K+V"),"utf-8"));
+    // 2
+    // String xml =
+    // createXML("1828","qww","123456","10658103619033","15918542546",encryptBASE64("两款茶饮润肺护肤防过敏".getBytes()),encryptBASE64(readFileToBytes("D:/user/test.zip")));
+    // System.out.println(xml);
+    /*
+     * String xml = "&lt;?xml version=\"1.0\" encoding=\"UTF-8\"
+     * standalone=\"yes\"?&gt;&lt;TaskDataTransfer4ERsp
+     * xmlns=\"http://www.aspirehld.com/iecp/TaskDataTransfer4ERsp\"&gt;&lt;ResultCode&gt;2000&lt;/ResultCode&gt;&lt;TaskId&gt;&lt;/TaskId&gt;&lt;ResultMSG&gt;没有获得IP鉴权!&lt;/ResultMSG&gt;&lt;/TaskDataTransfer4ERsp&gt;";
+     * 
+     * Document doc = DocumentHelper.parseText(xml); // 将字符串转为XML Element
+     * rootElt = doc.getRootElement(); // 获取根节点
+     * 
+     * String resultCode = rootElt.element("ResultCode").getTextTrim();
+     * String TaskId = rootElt.element("TaskId").getTextTrim(); String
+     * ResultMSG = rootElt.element("ResultMSG").getTextTrim();
+     * System.out.println(" "+resultCode+" "+TaskId+" "+ResultMSG);
+     */
+
+}
+
+/**
+ * BASE64解密
+ * 
+ * @param key
+ * @return
+ * @throws Exception
+ */
+public static byte[] decryptBASE64(String key) throws Exception {
+    return (new BASE64Decoder()).decodeBuffer(key);
+}
+
+/**
+ * BASE64加密
+ * 
+ * @param key
+ * @return
+ * @throws Exception
+ */
+public static String encryptBASE64(byte[] key) throws Exception {
+    return (new BASE64Encoder()).encodeBuffer(key);
+}
+
+/**
+ * 获取路径下所有文件名
+ * 
+ * @param path
+ * @return
+ */
+public static String[] getFile(String path) {
+    File file = new File(path);
+    String[] name = file.list();
+    return name;
+}
+
+/**
+ * 
+ * @param sourceDirPath
+ * @param targetDirPath
+ * @throws IOException
+ */
+public static void copyDir(String sourceDirPath, String targetDirPath) throws IOException {
+    // 创建目标文件夹
+    (new File(targetDirPath)).mkdirs();
+    // 获取源文件夹当前下的文件或目录
+    File[] file = (new File(sourceDirPath)).listFiles();
+    for (int i = 0; i &lt; file.length; i++) {
+        if (file[i].isFile()) {
+            // 复制文件
+            String type = file[i].getName().substring(file[i].getName().lastIndexOf(".") + 1);
+
+            if (type.equalsIgnoreCase("txt"))
+                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()), MTOServerConstants.CODE_UTF_8,
+                        MTOServerConstants.CODE_GBK);
+            else
+                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()));
+        }
+        if (file[i].isDirectory()) {
+            // 复制目录
+            String sourceDir = sourceDirPath + File.separator + file[i].getName();
+            String targetDir = targetDirPath + File.separator + file[i].getName();
+            FileUtil.copyDirectiory(sourceDir, targetDir);
+        }
+    }
+}
+
+/**
+ * 读取文件中内容
+ * 
+ * @param path
+ * @return
+ * @throws IOException
+ */
+public static String readFileToString(String path) throws IOException {
+    String resultStr = null;
+    FileInputStream fis = null;
+    try {
+        fis = new FileInputStream(path);
+        byte[] inBuf = new byte[2000];
+        int len = inBuf.length;
+        int off = 0;
+        int ret = 0;
+        while ((ret = fis.read(inBuf, off, len)) &gt; 0) {
+            off += ret;
+            len -= ret;
+        }
+        resultStr = new String(new String(inBuf, 0, off, MTOServerConstants.CODE_GBK).getBytes());
+    } finally {
+        if (fis != null)
+            fis.close();
+    }
+    return resultStr;
+}
+
+/**
+ * 文件转成字节数组
+ * 
+ * @param path
+ * @return
+ * @throws IOException
+ */
+public static byte[] readFileToBytes(String path) throws IOException {
+    byte[] b = null;
+    InputStream is = null;
+    File f = new File(path);
+    try {
+        is = new FileInputStream(f);
+        b = new byte[(int) f.length()];
+        is.read(b);
+    } finally {
+        if (is != null)
+            is.close();
+    }
+    return b;
+}
+
+/**
+ * 将byte写入文件中
+ * 
+ * @param fileByte
+ * @param filePath
+ * @throws IOException
+ */
+public static void byteToFile(byte[] fileByte, String filePath) throws IOException {
+    OutputStream os = null;
+    try {
+        os = new FileOutputStream(new File(filePath));
+        os.write(fileByte);
+        os.flush();
+    } finally {
+        if (os != null)
+            os.close();
+    }
+}
+
+/**
+ * 将目录文件打包成zip
+ * 
+ * @param srcPathName
+ * @param zipFilePath
+ * @return 成功打包true 失败false
+ */
+public static boolean compress(String srcPathName, String zipFilePath) {
+    if (strIsNull(srcPathName) || strIsNull(zipFilePath))
+        return false;
+
+    File zipFile = new File(zipFilePath);
+    File srcdir = new File(srcPathName);
+    if (!srcdir.exists())
+        return false;
+    Project prj = new Project();
+    Zip zip = new Zip();
+    zip.setProject(prj);
+    zip.setDestFile(zipFile);
+    FileSet fileSet = new FileSet();
+    fileSet.setProject(prj);
+    fileSet.setDir(srcdir);
+    zip.addFileset(fileSet);
+    zip.execute();
+    return zipFile.exists();
+}
+
+/**
+ * 判空字串
+ * 
+ * @param str
+ * @return 为空true
+ */
+public static boolean strIsNull(String str) {
+    return str == null || str.equals("");
+}
+
+/**
+ * 折分数组
+ * 
+ * @param ary
+ * @param subSize
+ * @return
+ */
+public static List&lt;List&lt;Object&gt;&gt; splitAry(Object[] ary, int subSize) {
+    int count = ary.length % subSize == 0 ? ary.length / subSize : ary.length / subSize + 1;
+
+    List&lt;List&lt;Object&gt;&gt; subAryList = new ArrayList&lt;List&lt;Object&gt;&gt;();
+
+    for (int i = 0; i &lt; count; i++) {
+        int index = i * subSize;
+
+        List&lt;Object&gt; list = new ArrayList&lt;Object&gt;();
+        int j = 0;
+        while (j &lt; subSize &amp;&amp; index &lt; ary.length) {
+            list.add(ary[index++]);
+            j++;
+        }
+
+        subAryList.add(list);
+    }
+
+    return subAryList;
+}
+
+/**
+ * @param mobile
+ * @return
+ */
+public static String ArrayToString(Object[] mobile) {
+    String destId = "";
+    for (Object phone : mobile) {
+        destId += " " + (String) phone;
+    }
+    return destId.trim();
+} }
 </code></pre>
-  </li>
-  <li>HBase最佳实践：column family 不应超过两个，因为一个column family 对应一个store，flush和compaction的触发的基本单位都是Region级别，所以当一个column family有大量的数据的时候会触发整个region里面的其他column family的memstore（其实这些memstore可能仅有少量的数据，还不需要flush的）也发生flush动作；另外compaction触发的条件是当store file的个数（不是总的store file的大小）达到一定数量的时候会发生，而flush产生的大量store file通常会导致compaction，flush/compaction会发生很多IO相关的负载，这对Hbase的整体性能有很大影响。</li>
-  <li>一个table对应一个或多个region，在map/reduce 中对应一个map
-一个column family 对应一个store。 store 中含一个menstore 和多个fileStore
-当menstore 存储到达一定阀值就生成一个filestore， fileStore存放在hdfs上，
-当fileStore 数量到达一定阀值就将其合并成一个大的file。</li>
-  <li>qualifier对应column</li>
-  <li>在插入rowkey时，不考虑region的大小及状态，只是根据它的access 编码排序，找到对应的startkey，endkey,确定插入的位置。</li>
-  <li>HBase两张管理表：+
-.META.:管理用户region，它可以有多个region。
-ROOT: 管理.META.的region，它只有一个region。
-所以读写数据的流程为：
-client–&gt;ROOT–&gt;META–&gt;regionserver
-在数据的读写过程中client不会与master产生关系
-master只是负责管理表结构。</li>
-  <li>利用backup-master机制，解决master单点的问题。</li>
-  <li>region在存储的数据到达一定阀值后将split，split的同时更形.META.和ROOT表的相关数据。
-split region的过程不需要master的参与，master只负责将split后新的region分配到对应的regionserver。</li>
-  <li>HBase的数据安全机制之一：在插入数据时先写Hlog然后在写到内存。
-一个regionserver中只有一个Hlog， Hlog中只记录内存中存放的数据。
-当机器挂掉后，master会根据Hlog中region将其分割，然后分配到不同的机器加载，做数据恢复。</li>
-</ol>
 
-      <div class="readall"><a href="/blog/2014/06/08/HBasesession.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/Java-File.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

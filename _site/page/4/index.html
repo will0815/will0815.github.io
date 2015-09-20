@@ -64,7 +64,436 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point1.html">Linux学习笔记1-文件安全与权限</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point10.html">Linux学习笔记10-sed</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="linux10-sed">Linux学习笔记10-sed</h2>
+<p>sed是一个非交互性文本流编辑器。它编辑文件或标准输入导出的文本拷贝。标准输入可能是来自键盘、文件重定向、字符串或变量，或者是一个管道的文本。sed可以做些什么呢,与同是编辑器的vi有何不同？  </p>
+
+<p>可以在命令行输入sed命令，也可以在一个文件中写入命令，然后调用sed，这与awk基本相同。使用sed需要记住的一个重要事实是，无论命令是什么， sed并不与初始化文件打交道，它操作的只是一个拷贝，然后所有的改动如果没有重定向到一个文件，将输出到屏幕。<br />
+因为sed是一个非交互性编辑器，必须通过行号或正则表达式指定要改变的文本行。<br />
+和grep与awk一样，sed是一种重要的文本过滤工具，或者使用一行命令或者使用管道与grep与awk相结合  </p>
+
+<p>读取数据<br />
+sed从文件的一个文本行或从标准输入的几种格式中读取数据，将之拷贝到一个编辑缓冲区，然后读命令行或脚本的第一条命令，并使用这些命令查找模式或定位行号编辑它。重复此过程直到命令结束。  </p>
+
+<p>调用sed<br />
+调用sed有三种方式：<br />
+1.在命令行键入命令；<br />
+	sed [选项] sed命令输入文件。<br />
+	在命令行使用sed命令时，实际命令要加单引号。sed也允许加双引号。<br />
+2.将sed命令插入脚本文件，然后调用sed；<br />
+	sed [选项] -f sed脚本文件输入文件<br />
+3.将sed命令插入脚本文件，并使sed脚本可执行。<br />
+	sed脚本文件[选项] 输入文件<br />
+不管是使用shell命令行方式或脚本文件方式，如果没有指定输入文件， sed从标准输入中接受输入，一般是键盘或重定向结果。<br />
+sed选项如下：<br />
+n 不打印；sed不写编辑行到标准输出，缺省为打印所有行（编辑和未编辑）。p命令可以用来打印编辑行。<br />
+c 下一命令是编辑命令。使用多项编辑时加入此选项。如果只用到一条sed命令，此选项无用，但指定它也没有关系。<br />
+f 如果正在调用sed脚本文件，使用此选项。此选项通知sed一个脚本文件支持所有的sed<br />
+命令，例如：sed -f myscript.sed input_file，这里myscript.sed即为支持sed命令的文件。  </p>
+
+<p>保存sed输出<br />
+由于不接触初始化文件，如果想要保存改动内容，简单地将所有输出重定向到一个文件即可。下面的例子重定向sed命令的所有输出至文件‘myoutfile’，当对结果很满意时使用这种方法。<br />
+sed ‘some-sed-commands’ input-file &gt; myoutfile  </p>
+
+<p>使用sed在文件中查询文本<br />
+sed浏览输入文件时，缺省从第一行开始，有两种方式定位文本：<br />
+1) 使用行号，可以是一个简单数字，或是一个行号范围。<br />
+2) 使用正则表达式。<br />
+如：<br />
+x                       x为一行号，如1<br />
+x , y                   表示行号范围从x到y，如2，5表示从第2行到第5行<br />
+/pattern/               查询包含模式的行。例如/disk/或/[a-z]/<br />
+/pattern/pattern/       查询包含两个模式的行。例如/disk/  disks/<br />
+/pattern/, x            在给定行号上查询包含模式的行。如/ribbon/,3<br />
+x,/pattern/             通过行号和模式查询匹配行。3./vdu/<br />
+x,y!                    查询不包含指定行号x和y的行。1 , 2 !  </p>
+
+<p>基本sed编辑命令
+p    打印匹配行
+=    显示文件行号
+a\   在定位行号后附加新文本信息
+i\   在定位行号后插入新文本信息
+d    删除定位行
+c\   用新文本替换定位文本
+s    使用替换模式替换相应模式
+r    从另一个文件中读文本
+w    写文本到一个文件
+q    第一个模式匹配完成后推出或立即推出
+l    显示与八进制A S C I I代码等价的控制字符
+{}   在定位行执行的命令组
+n    从另一个文件中读文本下一行，并附加在下一行
+g    将模式2粘贴到/pattern n/
+y    传送字符
+n    延续到下一输入行；允许跨行的模式匹配语句</p>
+
+      <div class="readall"><a href="/blog/2015/02/01/Linux-point10.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/Hive-structure.html">Hive基础架构</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>Hive基础架构<br />
+Hive是基于Hadoop的一个数据仓库工具，可以将结构化的数据文件映射为一张数据库表，并提供完整的sql查询功能，可以将sql语句转换为MapReduce任务进行运行。其优点是学习成本低，可以通过类SQL语句快速实现简单的MapReduce统计，不必开发专门的MapReduce应用，十分适合数据仓库的统计分析,Hive是建立在 Hadoop 上的数据仓库基础构架。它提供了一系列的工具，可以用来进行数据提取转化加载（ETL），这是一种可以存储、查询和分析存储在 Hadoop 中的大规模数据的机制。Hive 定义了简单的类 SQL 查询语言，称为 HQL，它允许熟悉 SQL 的用户查询数据。同时，这个语言也允许熟悉 MapReduce 开发者的开发自定义的 mapper 和 reducer 来处理内建的 mapper 和 reducer 无法完成的复杂的分析工作。 <br />
+Hive技术架构图：<br />
+<img src="/image/hive1.png" alt="" /><br />
+服务端组件： <br />
+Driver组件：该组件包括Complier、Optimizer和Executor，它的作用是将HiveQL（类SQL）语句进行解析、编译优化，生成执行计划，然后调用底层的mapreduce计算框架。 <br />
+Metastore组件：元数据服务组件，这个组件存储hive的元数据，hive的元数据存储在关系数据库里，hive支持的关系数据库有derby、mysql。元数据对于hive十分重要，因此hive支持把metastore服务独立出来，安装到远程的服务器集群里，从而解耦hive服务和metastore服务，保证hive运行的健壮性。<br />
+Thrift服务：thrift是facebook开发的一个软件框架，它用来进行可扩展且跨语言的服务的开发，hive集成了该服务，能让不同的编程语言调用hive的接口。 <br />
+客户端组件： <br />
+CLI：command line interface，命令行接口。 <br />
+Thrift客户端：上面的架构图里没有写上Thrift客户端，但是hive架构的许多客户端接口是建立在thrift客户端之上，包括JDBC和ODBC接口。 <br />
+WEBGUI：hive客户端提供了一种通过网页的方式访问hive所提供的服务。这个接口对应hive的hwi组件（hive web interface），使用前要启动hwi服务。 <br />
+一个Hive hsql 执行流程<br />
+<img src="/image/hive2.png" alt="" />  </p>
+
+      <div class="readall"><a href="/blog/2015/02/01/Hive-structure.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/Hive-partition.html">Hive分区分桶</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="hive">Hive分区分桶</h2>
+<p>Hive 分区表<br />
+在Hive Select查询中一般会扫描整个表内容，会消耗很多时间做没必要的工作。有时候只需要扫描表中关心的一部分数据，因此建表时引入了partition概念。分区表指的是在创建表时指定的partition的分区空间。 <br />
+Hive可以对数据按照某列或者某些列进行分区管理，所谓分区我们可以拿下面的例子进行解释。 存储日志，其中必然有个属性是日志产生的日期。在产生分区时，就可以按照日志产生的日期列进行划分。把每一天的日志当作一个分区。   
+将数据组织成分区，主要可以提高数据的查询速度。至于用户存储的每一条记录到底放到哪个分区，由用户决定。即用户在加载数据的时候必须显示的指定该部分数据放到哪个分区。 
+1、一个表可以拥有一个或者多个分区，每个分区以文件夹的形式单独存在表文件夹的目录下。 <br />
+2、表和列名不区分大小写。 <br />
+3、分区是以字段的形式在表结构中存在，通过describe table命令可以查看到字段存在， 但是该字段不存放实际的数据内容，仅仅是分区的表示（伪列） 。<br />
+语法  </p>
+
+<pre><code>1. 创建一个分区表，以 ds 为分区列： 
+create table invites (id int, name string) partitioned by (ds string) row format delimited fields terminated by 't' stored as textfile; 
+2. 将数据添加到时间为 2013-08-16 这个分区中： 
+load data local inpath '/home/hadoop/Desktop/data.txt' overwrite into table invites partition (ds='2013-08-16'); 
+3. 将数据添加到时间为 2013-08-20 这个分区中： 
+load data local inpath '/home/hadoop/Desktop/data.txt' overwrite into table invites partition (ds='2013-08-20'); 
+4. 从一个分区中查询数据： 
+select * from invites where ds ='2013-08-12'; 
+5.  往一个分区表的某一个分区中添加数据： 
+insert overwrite table invites partition (ds='2013-08-12') select id,max(name) from test group by id; 
+可以查看分区的具体情况，使用命令： 
+hadoop fs -ls /home/hadoop.hive/warehouse/invites 
+或者： 
+show partitions tablename; 静态/动态分区   （1）静态分区   
+
+create table if not exists sopdm.wyp2(id int,name string,tel string)
+partitioned by(age int)
+row format delimited
+fields terminated by ','
+stored as textfile;
+--overwrite是覆盖，into是追加
+insert into table sopdm.wyp2
+partition(age='25')
+select id,name,tel from sopdm.wyp; （2）动态分区  
+
+--设置为true表示开启动态分区功能（默认为false）
+set hive.exec.dynamic.partition=true;
+--设置为nonstrict,表示允许所有分区都是动态的（默认为strict）
+set hive.exec.dynamic.partition.mode=nonstrict;
+--insert overwrite是覆盖，insert into是追加
+set hive.exec.dynamic.partition.mode=nonstrict;
+insert overwrite table sopdm.wyp2
+partition(age)
+select id,name,tel,age from sopdm.wyp;
+</code></pre>
+
+<p>hive中创建分区表没有复杂的分区类型(范围分区、列表分区、hash分区、混合分区等)。分区列也不是表中的一个实际的字段，而是一个或者多个伪列。意思是说在表的数据文件中实际上并不保存分区列的信息与数据。<br />
+下面的语句创建了一个简单的分区表：  </p>
+
+<pre><code>create table partition_test
+(member_id string,
+name string
+)
+partitioned by (
+stat_date string,
+province string)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','; 这个例子中创建了stat_date和province两个字段作为分区列。通常情况下需要先预先创建好分区，然后才能使用该分区，例如： 
+ 
+alter table partition_test add partition (stat_date='20110728',province='zhejiang');  这样就创建好了一个分区。这时我们会看到hive在HDFS存储中创建了一个相应的文件夹 每一个分区都会有一个独立的文件夹，下面是该分区所有的数据文件。在这个例子中stat_date是主层次，province是副层次，所有stat_date='20110728'，而province不同的分区都会在/user/hive/warehouse/partition_test/stat_date=20110728 下面，而stat_date不同的分区都会在/user/hive/warehouse/partition_test/ 下面.    注意，因为分区列的值要转化为文件夹的存储路径，所以如果分区列的值中包含特殊值，如 '%', ':', '/', '#',它将会被使用%加上2字节的ASCII码进行转义，    特别要注意，在其他数据库中，一般向分区表中插入数据时系统会校验数据是否符合该分区，如果不符合会报错。而在hive中，向某个分区中插入什么样的数据完全是由人来控制的，因为分区键是伪列，不实际存储在文件中，   
+</code></pre>
+
+<p>动态分区，  <br />
+因为按照上面的方法向分区表中插入数据，如果源数据量很大，那么针对一个分区就要写一个insert，非常麻烦。况且在之前的版本中，必须先手动创建好所有的分区后才能插入，这就更麻烦了，你必须先要知道源数据中都有什么样的数据才能创建分区。<br />
+使用动态分区可以很好的解决上述问题。动态分区可以根据查询得到的数据自动匹配到相应的分区中去。 <br />
+使用动态分区要先设置hive.exec.dynamic.partition参数值为true，默认值为false，即不允许使用：  </p>
+
+<pre><code>hive&gt; 	
+hive.exec.dynamic.partition=false
+hive&gt; set hive.exec.dynamic.partition=true; 动态分区的使用方法很简单，假设我想向stat_date='20110728'这个分区下面插入数据，至于province插入到哪个子分区下面让数据库自己来判断，那可以这样写：  
+
+hive&gt; insert overwrite table partition_test partition(stat_date='20110728',province)
+&gt; select member_id,name,province from partition_test_input where stat_date='20110728'; stat_date叫做静态分区列，province叫做动态分区列。select子句中需要把动态分区列按照分区的顺序写出来，静态分区列不用写出来。这样stat_date='20110728'的所有数据，会根据province的不同分别插入到/user/hive/warehouse/partition_test/stat_date=20110728/下面的不同的子文件夹下，如果源数据对应的province子分区不存在，则会自动创建，非常方便，而且避免了人工控制插入数据与分区的映射关系存在的潜在风险。   注意，动态分区不允许主分区采用动态列而副分区采用静态列，这样将导致所有的主分区都要创建副分区静态列所定义的分区   动态分区可以允许所有的分区列都是动态分区列，但是要首先设置一个参数  hive.exec.dynamic.partition.mode ：
+
+hive&gt; set hive.exec.dynamic.partition.mode;
+hive.exec.dynamic.partition.mode=strict 它的默认值是strick，即不允许分区列全部是动态的，这是为了防止用户有可能原意是只在子分区内进行动态建分区，但是由于疏忽忘记为主分区列指定值了，这将导致一个dml语句在短时间内创建大量的新的分区（对应大量新的文件夹），对系统性能带来影响。   所以我们要设置：  
+
+hive&gt; set hive.exec.dynamic.partition.mode=nostrick;
+</code></pre>
+
+<p>再介绍3个参数：<br />
+hive.exec.max.dynamic.partitions.pernode （缺省值100）：每一个mapreduce job允许创建的分区的最大数量，如果超过了这个数量就会报错<br />
+hive.exec.max.dynamic.partitions （缺省值1000）：一个dml语句允许创建的所有分区的最大数量<br />
+hive.exec.max.created.files （缺省值100000）：所有的mapreduce job允许创建的文件的最大数量  </p>
+
+<p>Hive 桶<br />
+对于每一个表（table）或者分区， Hive可以进一步组织成桶，也就是说桶是更为细粒度的数据范围划分。Hive也是 针对某一列进行桶的组织。Hive采用对列值哈希，然后除以桶的个数求余的方式决定该条记录存放在哪个桶当中。<br />
+把表（或者分区）组织成桶（Bucket）有两个理由：<br />
+（1）获得更高的查询处理效率。桶为表加上了额外的结构，Hive 在处理有些查询时能利用这个结构。具体而言，连接两个在（包含连接列的）相同列上划分了桶的表，可以使用 Map 端连接 （Map-side join）高效的实现。比如JOIN操作。对于JOIN操作两个表有一个相同的列，如果对这两个表都进行了桶操作。那么将保存相同列值的桶进行JOIN操作就可以，可以大大较少JOIN的数据量。<br />
+（2）使取样（sampling）更高效。在处理大规模数据集时，在开发和修改查询的阶段，如果能在数据集的一小部分数据上试运行查询，会带来很多方便。  </p>
+
+<p>创建带桶的 table:  </p>
+
+<pre><code>create table bucketed_user(id int,name string) clustered by (id) sorted by(name) into 4 buckets row format delimited fields terminated by '\t' stored as textfile; 
+</code></pre>
+
+<p>首先，使用CLUSTERED BY 子句来指定划分桶所用的列和要划分的桶的个数： </p>
+
+<pre><code>CREATE TABLE bucketed_user (id INT) name STRING)  CLUSTERED BY (id) INTO 4 BUCKETS;  在这里，我们使用用户ID来确定如何划分桶(Hive使用对值进行哈希并将结果除 以桶的个数取余数。 对于map端连接的情况，两个表以相同方式划分桶。处理左边表内某个桶的 mapper知道右边表内相匹配的行在对应的桶内。因此，mapper只需要获取那个桶 (这只是右边表内存储数据的一小部分)即可进行连接。这一优化方法并不一定要求 两个表必须桶的个数相同，两个表的桶个数是倍数关系也可以。 桶中的数据可以根据一个或多个列另外进行排序。由于这样对每个桶的连接变成了高效的归并排序(merge-sort), 因此可以进一步提升map端连接的效率。以下语法声明一个表使其使用排序桶：    
+CREATE TABLE bucketed_users (id INT, name STRING)  CLUSTERED BY (id) SORTED BY (id ASC) INTO 4 BUCKETS;  我们如何保证表中的数据都划分成桶了呢？把在Hive外生成的数据加载到划分成桶的表中，当然是可以的。其实让Hive来划分桶更容易。这一操作通常针对已有的表。    Hive并不检查数据文件中的桶是否和表定义中的桶一致(无论是对于桶 的数量或用于划分桶的列）。如果两者不匹配，在査询时可能会碰到错 误或未定义的结果。因此，建议让Hive来进行划分桶的操作。   
+</code></pre>
+
+<p>索引<br />
+索引可以加快含有group by语句的查询的计算速度  </p>
+
+<pre><code>create index employees_index on table employees(country)
+as  'org.apache.hadoop.hive.ql.index.compact.CompactIndexHandler'
+with deferred rebuild
+in table employees_index_table ;
+</code></pre>
+
+      <div class="readall"><a href="/blog/2015/02/01/Hive-partition.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/HBase-desgin-optimal.html">HBase设计优化</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="hbase">HBase设计优化</h2>
+<p>一、Table<br />
+1. 创建表时预分区<br />
+Hbase在创建表时默认只有一个region，这样的话在大量数据导入时会频繁发生region的split，从而导致region 暂停对外服务。同时大量client向同一个region server写数据也会导致集群负载不均衡，影响导入数据。 <br />
+一种可以加快批量写入速度的方法是通过预先创建一些空的regions，这样当数据写入HBase时，会按照region分区情况，在集群内做数据的负载均衡。 <br />
+参考：http://hbase.apache.org/book.html#precreate.regions<br />
+简单实现：  </p>
+
+<pre><code>public static byte[][] getHexSplits(String startKey, String endKey, int numRegions) {
+  byte[][] splits = new byte[numRegions-1][];
+  BigInteger lowestKey = new BigInteger(startKey, 16);
+  BigInteger highestKey = new BigInteger(endKey, 16);
+  BigInteger range = highestKey.subtract(lowestKey);
+  BigInteger regionIncrement = range.divide(BigInteger.valueOf(numRegions));
+  lowestKey = lowestKey.add(regionIncrement);
+  for(int i=0; i &lt; numRegions-1;i++) {
+    BigInteger key = lowestKey.add(regionIncrement.multiply(BigInteger.valueOf(i)));
+    byte[] b = String.format("%016x", key).getBytes();
+    splits[i] = b;
+  }
+  return splits;
+}
+</code></pre>
+
+<ol>
+  <li>Row key<br />
+Row key 即为Hbase数据的天然索引，通过Row key可以实现：<br />
+通过单个row key访问：即按照某个row key键值进行get操作；<br />
+通过row key的range进行scan：即通过设置startRowKey和endRowKey，在这个范围内进行扫描；  </li>
+</ol>
+
+<p>row key可以是任意字符串，最大长度64KB，因为row key在数据中是冗余存在的所以设计row key时也要考虑数据的冗余尤其是海量数据时如果row key设计过长可能导致数据成倍增长，实际应用中一般为10~100bytes，存为byte[]字节数组， 一般设计成定长的 。<br />
+row key是按照字典序存储，因此，设计row key时，也需要考虑这个问题。同时需要注意避免数据热点问题等<br />
+3. Column Family<br />
+不要在一张表里定义太多的 column family 。目前Hbase并不能很好的处理超过2~3个column family的表。因为某个column family在flush的时候，它邻近的column family也会因关联效应被触发flush，最终导致系统产生更多的I/O。（未经验证，不是很理解）。.<br />
+4. In Memory<br />
+创建表的时候，可以通过HColumnDescriptor.setInMemory(true)将表放到RegionServer的缓存中，保证在读取的时候被cache命中。<br />
+5. Max Version<br />
+创建表的时候，可以通过HColumnDescriptor.setMaxVersions(int maxVersions)设置表中数据的最大版本，如果只需要保存最新版本的数据，那么可以设置setMaxVersions(1)。<br />
+6. Time To Live<br />
+创建表的时候，可以通过HColumnDescriptor.setTimeToLive(int timeToLive)设置表中数据的存储生命期，过期数据将自动被删除，例如如果只需要存储最近两天的数据，那么可以设置setTimeToLive(2 * 24 * 60 * 60)。<br />
+7. Compact &amp; Split<br />
+在HBase中，数据在更新时首先写入WAL 日志(HLog)（如果数据安全不是很重要可以关闭先写日志的功能：putrow.setWriteToWAL(false);）和内存(MemStore)中，MemStore中的数据是排序的，当MemStore累计到一定阈值时，就会创建一个新的MemStore，并且将老的MemStore添加到flush队列，由单独的线程flush到磁盘上，成为一个StoreFile。于此同时， 系统会在zookeeper中记录一个redo point，表示这个时刻之前的变更已经持久化了 (minor compact) 。 <br />
+StoreFile是只读的，一旦创建后就不可以再修改。因此Hbase的更新其实是不断追加的操作。当一个Store中的StoreFile达到一定的阈值后，就会进行一次合并 (major compact) ，将对同一个key的修改合并到一起，形成一个大的StoreFile，当StoreFile的大小达到一定阈值后，又会对 StoreFile进行分割 (split) ，等分为两个StoreFile。 由于对表的更新是不断追加的，处理读请求时，需要访问Store中全部的StoreFile和MemStore，将它们按照row key进行合并，由于StoreFile和MemStore都是经过排序的，并且StoreFile带有内存中索引，通常合并过程还是比较快的。  </p>
+
+<p>二、Hbase client HTable<br />
+写：<br />
+1. Auto Flush<br />
+通过调用HTable.setAutoFlush(false)方法可以将HTable写客户端的自动flush关闭，这样可以批量写入数据到HBase，而不是有一条put就执行一次更新，只有当put填满客户端写缓存时，才实际向HBase服务端发起写请求。默认情况下auto flush是开启的。<br />
+2. Write Buffer<br />
+通过调用HTable.setWriteBufferSize(writeBufferSize)方法可以设置HTable客户端的写buffer大小，如果新设置的buffer小于当前写buffer中的数据时，buffer将会被flush到服务端。其中，writeBufferSize的单位是byte字节数，可以根据实际写入数据量的多少来设置该值。<br />
+3. WAL Flag<br />
+在HBae中，客户端向集群中的RegionServer提交数据时（Put/Delete操作），首先会先写WAL（Write Ahead Log）日志（即HLog，一个RegionServer上的所有Region共享一个HLog），只有当WAL日志写成功后，再接着写MemStore，然后客户端被通知提交数据成功；如果写WAL日志失败，客户端则被通知提交失败。这样做的好处是可以做到RegionServer宕机后的数据恢复。因此，对于相对不太重要的数据，可以在Put/Delete操作时，通过调用Put.setWriteToWAL(false)或Delete.setWriteToWAL(false)函数，放弃写WAL日志，从而提高数据写入的性能。<br />
+4. 批量写<br />
+通过调用HTable.put(Put)方法可以将一个指定的row key记录写入HBase，同样HBase提供了另一个方法：通过调用HTable.put(List<put>)方法可以将指定的row key列表，批量写入多行记录，这样做的好处是批量执行，只需要一次网络I/O开销，这对于对数据实时性要求高，网络传输RTT高的情景下可能带来明显的性能提升。  
+读：  
+1. Scanner Caching  
+通过调用HTable.setScannerCaching(int scannerCaching)可以设置HBase scanner一次从服务端抓取的数据条数，默认情况下一次一条。通过将此值设置成一个合理的值，可以减少scan过程中next()的时间开销，代价是scanner需要通过客户端的内存来维持这些被cache的行记录。  
+2. Scan Attribute Selection  
+scan时指定需要的Column Family，可以减少网络传输数据量，否则默认scan操作会返回整行所有Column Family的数据  
+3. Close ResultScanner   
+通过scan取完数据后，记得要关闭ResultScanner  
+4. 批量读  
+通过调用HTable.get(Get)方法可以根据一个指定的row key获取一行记录，同样HBase提供了另一个方法：通过调用HTable.get(List)方法可以根据一个指定的row key列表，批量获取多行记录，这样做的好处是批量执行，只需要一次网络I/O开销，这对于对数据实时性要求高而且网络传输RTT高的情景下可能带来明显的性能提升。  
+5. Blockcache  
+HBase上Regionserver的内存分为两个部分，一部分作为Memstore，主要用来写；另外一部分作为BlockCache，主要用于读。  
+写请求会先写入Memstore，Regionserver会给每个region提供一个Memstore，当Memstore满64MB以后，会启动 flush刷新到磁盘。当Memstore的总大小超过限制时（heapsize * hbase.regionserver.global.memstore.upperLimit * 0.9），会强行启动flush进程，从最大的Memstore开始flush直到低于限制。  
+读请求先到Memstore中查数据，查不到就到BlockCache中查，再查不到就会到磁盘上读，并把读的结果放入BlockCache。由于BlockCache采用的是LRU策略，因此BlockCache达到上限(heapsize * hfile.block.cache.size * 0.85)后，会启动淘汰机制，淘汰掉最老的一批数据。  
+一个Regionserver上有一个BlockCache和N个Memstore，它们的大小之和不能大于等于heapsize * 0.8，否则HBase不能启动。默认BlockCache为0.2，而Memstore为0.4。对于注重读响应时间的系统，可以将 BlockCache设大些，比如设置BlockCache=0.4，Memstore=0.39，以加大缓存的命中率。  </put></p>
+
+<p>服务端计算<br />
+Coprocessor运行于HBase RegionServer服务端，各个Regions保持对与其相关的coprocessor实现类的引用，coprocessor类可以通过RegionServer上classpath中的本地jar或HDFS的classloader进行加载。<br />
+目前，已提供有几种coprocessor：<br />
+Coprocessor：提供对于region管理的钩子，例如region的open/close/split/flush/compact等； 
+RegionObserver：提供用于从客户端监控表相关操作的钩子，例如表的get/put/scan/delete等； 
+Endpoint：提供可以在region上执行任意函数的命令触发器。  </p>
+
+<p>写端计算（不了解）<br />
+	计数<br />
+HBase本身可以看作是一个可以水平扩展的Key-Value存储系统，但是其本身的计算能力有限  （Coprocessor可以提供一定的服务端计算），因此，使用HBase时，往往需要从写端或者读端进行计算，然后将最终的计算结果返回给调用者。举两个简单的例子：<br />
+PV计算：通过在HBase写端内存中，累加计数，维护PV值的更新，同时为了做到持久化，定期（如1秒）将PV计算结果同步到HBase中，这样查询端最多会有1秒钟的延迟，能看到秒级延迟的PV结果。 <br />
+分钟PV计算：与上面提到的PV计算方法相结合，每分钟将当前的累计PV值，按照rowkey + minute作为新的rowkey写入HBase中，然后在查询端通过scan得到当天各个分钟以前的累计PV值，然后顺次将前后两分钟的累计PV值相减，就得到了当前一分钟内的PV值，从而最终也就得到当天各个分钟内的PV值。 <br />
+	去重<br />
+对于UV的计算，就是个去重计算的例子。分两种情况：<br />
+如果内存可以容纳，那么可以在Hash表中维护所有已经存在的UV标识，每当新来一个标识时，通过快速查找Hash确定是否是一个新的UV，若是则UV值加1，否则UV值不变。另外，为了做到持久化或提供给查询接口使用，可以定期（如1秒）将UV计算结果同步到HBase中。   <br />
+如果内存不能容纳，可以考虑采用Bloom Filter来实现，从而尽可能的减少内存的占用情况。除了UV的计算外，判断URL是否存在也是个典型的应用场景。 <br />
+	读端计算<br />
+如果对于响应时间要求比较苛刻的情况（如单次http请求要在毫秒级时间内返回），个人觉得读端不宜做过多复杂的计算逻辑，尽量做到读端功能单一化：即从HBase RegionServer读到数据（scan或get方式）后，按照数据格式进行简单的拼接，直接返回给前端使用。当然，如果对于响应时间要求一般，或者业务特点需要，也可以在读端进行一些计算逻辑。  </p>
+
+
+      <div class="readall"><a href="/blog/2015/02/01/HBase-desgin-optimal.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/HBase-config-optimal.html">HBase配置优化</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="hbase">HBase配置优化</h2>
+<p>zookeeper.session.timeout<br />
+默认值：3分钟（180000ms）<br />
+说明：RegionServer与Zookeeper间的连接超时时间。当超时时间到后，ReigonServer会被Zookeeper从集群清单中移除，HMaster收到移除通知后，会对这台server负责的regions重新balance，让其他存活的RegionServer接管.<br />
+调优：<br />
+这个timeout决定了RegionServer是否能够及时的failover。设置成1分钟或更低，可以减少因等待超时而被延长的failover时间。但是，对于一些Online应用，RegionServer从宕机到恢复时间本身就很短的（网络闪断，crash等故障，运维可快速介入），如果调低timeout时间，反而会得不偿失。因为当ReigonServer被正式从RS集群中移除时，HMaster就开始做balance了（让其他RS根据故障机器记录的WAL日志进行恢复）。当故障的RS在人工介入恢复后，这个balance动作是毫无意义的，反而会使负载不均匀，给RS带来更多负担。另外这个值太小也可能因为集群节点间时间误差造成region server 被下线。<br />
+hbase.regionserver.handler.count<br />
+默认值：10<br />
+说明：RegionServer的请求处理IO线程数。<br />
+调优：<br />
+这个参数的调优与内存息息相关。<br />
+较少的IO线程，适用于处理单次请求内存消耗较高的Big PUT场景（大容量单次PUT或设置了较大cache的scan，均属于Big PUT）或ReigonServer的内存比较紧张的场景。<br />
+较多的IO线程，适用于单次请求内存消耗低，TPS要求非常高的场景。设置该值的时候，以监控内存为主要参考。<br />
+另外如果大量的请求都落在一个region上，会导致充满memstore触发flush导致的读写锁会影响全局TPS，不是IO线程数越高越好。<br />
+hbase.hregion.max.filesize<br />
+默认值：256M<br />
+说明：在当前ReigonServer上单个Reigon的最大存储空间，单个Region超过该值时，这个Region会被自动split成更小的region。<br />
+调优：<br />
+小region对split和compaction友好，因为拆分region或compact小region里的storefile速度很快，内存占用低。缺点是split和compaction会很频繁，会导致集群响应时间波动很大。<br />
+一般512以下的都算小region。<br />
+大region，则不太适合经常split和compaction，因为做一次compact和split会产生较长时间的停顿，对应用的读写性能冲击非常大。此外，大region意味着较大的storefile，compaction时对内存也是一个挑战。<br />
+当然，大region也有其用武之地。如果你的应用场景中，某个时间点的访问量较低，那么在此时做compact和split，既能顺利完成split和compaction，又能保证绝大多数时间平稳的读写性能。
+既然split和compaction如此影响性能，有没有办法去掉？<br />
+compaction是无法避免的，split倒是可以从自动调整为手动。 <br />
+只要通过将这个参数值调大到某个很难达到的值，比如100G，就可以间接禁用自动split（RegionServer不会对未到达100G的region做split）。<br />
+再配合RegionSplitter这个工具，在需要split时，手动split。<br />
+手动split在灵活性和稳定性上比起自动split要高很多，相反，管理成本增加不多，比较推荐online实时系统使用。内存方面，小region在设置memstore的大小值上比较灵活，大region则过大过小都不行，过大会导致flush时app的IO wait增高，过小则因store file过多影响读性能。<br />
+hbase.regionserver.global.memstore.upperLimit/lowerLimit<br />
+默认值：0.4/0.35<br />
+upperlimit说明：hbase.hregion.memstore.flush.size 这个参数的作用是当单个Region内所有的memstore大小总和超过指定值时，flush该region的所有memstore。RegionServer的flush是通过将请求添加一个队列，模拟生产消费模式来异步处理的。如果当队列来不及消费，产生大量积压请求时，可能会导致内存陡增，最坏的情况是触发OOM。<br />
+这个参数的作用是防止内存占用过大，当ReigonServer内所有region的memstores所占用内存总和达到heap的40%时，HBase会强制block所有的更新并flush这些region以释放所有memstore占用的内存。<br />
+lowerLimit说明： 同upperLimit，只不过lowerLimit在所有region的memstores所占用内存达到Heap的35%时，不flush所有的memstore。它会找一个memstore内存占用最大的region，做个别flush，此时写更新还是会被block。lowerLimit算是一个在所有region强制flush导致性能降低前的补救措施。在日志中，表现为 “** Flush thread woke up with memory above low water.”
+调优：这是一个Heap内存保护参数，默认值已经能适用大多数场景。<br />
+参数调整会影响读写，如果写的压力大导致经常超过这个阀值，则调小读缓存  hfile.block.cache.size增大该阀值，或者Heap余量较多时，不修改读缓存大小。<br />
+如果在高压情况下，也没超过这个阀值，那么建议你适当调小这个阀值再做压测，确保触发次数不要太多，然后还有较多Heap余量的时候，调大hfile.block.cache.size提高读性能。<br />
+还有一种可能性是 hbase.hregion.memstore.flush.size保持不变，但RS维护了过多的region，要知道 region数量直接影响占用内存的大小。<br />
+hfile.block.cache.size<br />
+默认值：0.2<br />
+说明：storefile的读缓存占用Heap的大小百分比，0.2表示20%。该值直接影响数据读的性能。
+调优：当然是越大越好，如果写比读少很多，开到0.4-0.5也没问题。如果读写较均衡，0.3左右。如果写比读多，果断默认吧。设置这个值的时候，你同时要参考 hbase.regionserver.global.memstore.upperLimit ，该值是memstore占heap的最大百分比，两个参数一个影响读，一个影响写。如果两值加起来超过80-90%，会有OOM的风险，谨慎设置。<br />
+hbase.hstore.blockingStoreFiles<br />
+默认值：7<br />
+说明：在flush时，当一个region中的Store（Coulmn Family）内有超过7个storefile时，则block所有的写请求进行compaction，以减少storefile数量。<br />
+调优：block写请求会严重影响当前regionServer的响应时间，但过多的storefile也会影响读性能。从实际应用来看，为了获取较平滑的响应时间，可将值设为无限大。如果能容忍响应时间出现较大的波峰波谷，那么默认或根据自身场景调整即可。  <br />
+hbase.hregion.memstore.block.multiplier  <br />
+默认值：2  <br />
+说明：当一个region里的memstore占用内存大小超过hbase.hregion.memstore.flush.size两倍的大小时，block该region的所有请求，进行flush，释放内存。<br />
+虽然我们设置了region所占用的memstores总内存大小，比如64M，但想象一下，在最后63.9M的时候，我Put了一个200M的数据，此时memstore的大小会瞬间暴涨到超过预期的  hbase.hregion.memstore.flush.size的几倍。这个参数的作用是当memstore的大小增至超过hbase.hregion.memstore.flush.size 2倍时，block所有请求，遏制风险进一步扩大。<br />
+调优： 这个参数的默认值还是比较靠谱的。如果你预估你的正常应用场景（不包括异常）不会出现突发写或写的量可控，那么保持默认值即可。如果正常情况下，你的写请求量就会经常暴长到正常的几倍，那么你应该调大这个倍数并调整其他参数值，比如hfile.block.cache.size和hbase.regionserver.global.memstore.upperLimit/lowerLimit，以预留更多内存，防止HBase server OOM。<br />
+hbase.hregion.memstore.mslab.enabled<br />
+默认值：true<br />
+说明：减少因内存碎片导致的Full GC，提高整体性能。  </p>
+
+<p>其他<br />
+启用LZO压缩<br />
+LZO对比Hbase默认的GZip，前者性能较高，后者压缩比较高，<br />
+批量导入<br />
+在批量导入数据到Hbase前，你可以通过预先创建regions，来平衡数据的负载。<br />
+HBase使用CMS GC。默认触发GC的时机是当年老代内存达到90%的时候，这个百分比由   -XX:CMSInitiatingOccupancyFraction=N 这个参数来设置。concurrent mode failed发生在这样一个场景：<br />
+当年老代内存达到90%的时候，CMS开始进行并发垃圾收集，于此同时，新生代还在迅速不断地晋升对象到年老代。当年老代CMS还未完成并发标记时，年老代满了，悲剧就发生了。CMS因为没内存可用不得不暂停mark，并触发一次stop the world（挂起所有jvm线程），然后采用单线程拷贝方式清理所有垃圾对象。这个过程会非常漫长。为了避免出现concurrent mode failed，建议让GC在未到90%时，就触发。<br />
+通过设置 -XX:CMSInitiatingOccupancyFraction=N<br />
+这个百分比， 可以简单的这么计算。如果你的 hfile.block.cache.size   和 hbase.regionserver.global.memstore.upperLimit 加起来有60%（默认），那么你可以设置 70-80，一般高10%左右差不多。  </p>
+
+      <div class="readall"><a href="/blog/2015/02/01/HBase-config-optimal.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point5.html">Linux 学习笔记5 shell输入输出</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2015年01月23日
@@ -74,676 +503,27 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
       </p>
     </header>
     <div class="post-main">
-      <h1 id="section">文件安全与权限</h1>
-<p>包含内容：<br />
-• 文件和目录的权限。<br />
-• setuid。<br />
-• chown和chgrp。<br />
-• umask。<br />
-• 符号链接。  </p>
-
-<p>创建文件时系统保存文件的有关信息包括：<br />
-1、长度<br />
-2、类型<br />
-3、位置<br />
-4、所属用户以及哪些用户可以访问<br />
-5、i节点<br />
-6、修改时间 （-rwxr-xr-x：分别表示文件所有者、同组、以及其他用户对该文件的权限）  </p>
-
-<p>文件类型: 如上权限位-rwxr-xr-x 其中最前面的横杠即表示该文件的类型（这里为普通文件）<br />
-文件类型分为：<br />
-d 目录<br />
-l 符号链接。<br />
-s 套接字文件<br />
-b 块设备文件<br />
-c 字符设备文件<br />
-p 命名管道文件  </p>
-
-<p><strong>更改文件权限位命令：chmod</strong> 
-chmod [who] operator [permission] filename<br />
-who:<br />
-u 文件所有者<br />
-g 同组用户<br />
-o 其他用户<br />
-a 所有用户<br />
-operator：<br />
-+ 增加权限<br />
-- 取消权限<br />
-= 设定权限<br />
-permission：<br />
-r 读<br />
-w 写<br />
-x 执行<br />
-s 文件所有者和组set-ID<br />
-t 粘性位*<br />
-l 给文件加锁 是其他用户无法访问<br />
-u  </p>
-
-<p>chmod命令的绝对模式<br />
-chmod [mode] file<br />
-如： chmod -R 755 myfile<br />
-755 分别对应文件所有者、同组、以及其他用户对该文件的权限<br />
-7：rwx(4+2+1)<br />
-5: rx(4+1)<br />
--R 表示如果是目录及将对应操作应用于每一个子目录及文件  </p>
-
-<p>目录与文件<br />
-目录权限中<br />
-r：列出目录内容<br />
-w: 创建文件<br />
-x: 搜索和访问<br />
-如果一个目录只有执行（x）权限，但目录中有个可执行程序，只要用户知道它的路径仍然可以执行，此时用户不能进入目录但可以执行其中的程序
-目录的权限将会覆盖目录中文件的权限   </p>
-
-<p>chown和chgrp<br />
-当你创建一个文件时，你就是该文件的属主。一旦你拥有某个文件，就可以改变它的所<br />
-有权，把它的所有权交给另外一个/etc/passwd文件中存在的合法用户。可以使用用户名或用<br />
-户ID号来完成这一操作。在改变一个文件的所有权时，相应的suid也将被清除，这是出于安<br />
-全性的考虑。只有文件的属主和系统管理员可以改变文件的所有权。一旦将文件的所有权交<br />
-给另外一个用户，就无法再重新收回它的所有权。如果真的需要这样做，那么就只有求助于<br />
-系统管理员了。<br />
-chown命令的一般形式为：<br />
-chmod -R -h owner file<br />
--R选项意味着对所有子目录下的文件也都进行同样的操作。-h选项意味着在改变符号链<br />
-接文件的属主时不影响该链接所指向的目标文件。<br />
-chgrp与chown类似  </p>
-
-<p>umask<br />
-umask命令确定创建文件的缺省模式。系统管理员必须要为你设置一个合理的umask值，以确保你创建的<br />
-文件具有所希望的缺省权限，防止其他非同组用户对你的文件具有写权限。
-在已经登录之后，可以按照个人的偏好使用umask命令来改变文件创建的缺省权限。相应<br />
-的改变直到退出该shell或使用另外的umask命令之前一直有效。
-一般来说,umask命令是在/etc/profile文件中设置的，每个用户在登录时都会引用这个文件，所以如果希望改变所有用户的umask，可以在该文件中加入相应的条目。如果希望永久性地设置自己的umask值，那么就把它放在自己$HOME目录下的.profile文件中。  </p>
-
-<p>符号链接<br />
-两种不同类型的链接：软链接（指向文件的指针)/硬链接<br />
-软链接可以理解为windows中的快捷方式 <br />
-该命令的一般形式为： <br />
-ln [-s] source_path target_path <br />
-其中的路径可以是目录也可以是文件。    </p>
-
-
-      <div class="readall"><a href="/blog/2015/01/23/Linux-point1.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/11/30/collaborative-filtering-algorithm.html">协同过滤简解</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年11月30日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h2 id="section">协同过滤算法</h2>
-<p><strong>Collaborative Filtering</strong><br />
-基于一组兴趣相同的用户进行推荐。协同过滤基于这样的假设：为用户找到他真正感兴趣的内容的好方法是，首先找他与他兴趣相似的用户，然后将这些用户感兴趣的内容推荐给此用户</p>
-
-<p>协同过滤技术可以分为三类：<br />
-基于用户（User-based）的协同过滤；<br />
-基于项目（Item-based）的协同过滤；<br />
-基于模型（Model-based）的协同过滤</p>
-
-<p>步骤一，收集可以代表用户兴趣的信息。<br />
-如传统的打分的方式，豆瓣上的“我来评价”之类也是这种方法。这种方式被称为“显式评分”方法。其缺点是，收集数据比较困难，用户通常并不愿意费力气为你贡献这种数据。这导致这种系统通常更多出现在实验室或者论文里面。在实际的商业系统中，即使使用了这种方法，也多会被包装为一种更加有好如游戏方式。<br />
-另外一种被认为更有效的方法是“隐式评分”方法。这种方法不需要用户直接输入评价数据，而是根据用户的行为特征由系统代替用户完成评价。一种研究得比较多的方法是 Web Mining 。电子商务网站在隐式评分的数据获取上有先天的优势，用户购买的商品记录是非常有用的数据。</p>
-
-<p>步骤二，最近邻搜索。<br />
-协同过滤的出发点是与你兴趣相同的一组用户，术语叫做“最近邻”。最近邻搜索的核心是计算两个用户的相似度。例如用户A和用户B，首先需要获取用户A和用户B所有的评分项，然后选择一个合适的相似度计算方法，基于评分项数据，计算得到用户A和用户B的相似度数值。<br />
-目前使用比较多的相似度算法包括，皮尔森相关系数（Person Correlation Coefficient）、余弦相似性（Cosine-based Similarity）以及调整余弦相似性（Adjusted Consine Similarity）</p>
-
-<p>步骤三，生成推荐结果。<br />
-有了最近邻集合，就可以对目标用户的兴趣进行预测，生成推荐结果。通常根据推荐目的的不同，可以进行多种形式的推荐。最常见的推荐结果有两种，Top-N 推荐和关联推荐。<br />
-Top-N 推荐，这里的 Top-N 和一般网站（比如 digg）上见到的“最热门”列表是不同的。热门列表是基于全部数据集产生的，它对每个人都是一样的；Top-N 推荐是针对单个用户产生的，它对每个人是不一样的：通过对你的最近邻用户进行统计，选择出现频率最高且在你的评分项目中不存在的项目作为推荐结果。豆瓣上的“排行”栏目，应该是传统的“热门”列表，不是 Top-N 推荐。<br />
-关联推荐，也称为基于关联规则的推荐。与传统关联规则针对全部数据进行挖掘不同的是，此方法仅对最近邻用户的购买记录进行关联规则挖掘。如果你曾经购买过关联规则左边的商品，而没有购买过关联规则右边的商品，那么就把右边的这个商品推荐给你。它最突出的优点就是，可以帮助你发现你感兴趣的而以前却从来没有注意过的商品。在 Amazon 介绍书的详细信息的页面上，可以看到这种推荐的一个实际应用。例如在《The Search》的页面上，Amazon 给我的推荐是，</p>
-
-      <div class="readall"><a href="/blog/2014/11/30/collaborative-filtering-algorithm.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/11/30/clustering-algorithm.html">聚类以及增量聚类的简单理解</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年11月30日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h2 id="section">聚类以及增量聚类的简单理解</h2>
-<p>K-Means聚类基本步骤如下：   </p>
-
-<pre><code>Step1: 确定K值以及初始化聚类中心，选取K个初始凝聚点，做为欲形成的中心（最简单的方法就是K的值自己确定，但必须小于数据集个数，然后从数据集中选取K个数据做为初始聚类中心）；  
-Step2: 计算每个数据到K个初始凝聚点的距离，将每个数据和最近的凝聚点分到一组，形成K个初始分类；  
-Step3: 计算初始分类的重心（或均值），做为新的凝聚点，重新计算每个数据到分类重心（或均值）的距离，将每个数据和最近的凝聚点分为一组；
-Step4: 重复进行Step2和Step3，直到分类的重心或均值没有明显变化为止。
-</code></pre>
-
-<p>Canopy算法流程  </p>
-
-<pre><code>      （1）、将数据集向量化得到一个list后放入内存，选择两个距离阈值：T1和T2，其中T1 &gt; T2，对应上图，实线圈为T1，虚线圈为T2，T1和T2的值可以用交叉校验来确定；  
-      （2）、从list中任取一点P，用低计算成本方法快速计算点P与所有Canopy之间的距离（如果当前不存在Canopy，则把点P作为一个Canopy），如果点P与某个Canopy距离在T1以内，则将点P加入到这个Canopy；  
-      （3）、如果点P曾经与某个Canopy的距离在T2以内，则需要把点P从list中删除，这一步是认为点P此时与这个Canopy已经够近了，因此它不可以再做其它Canopy的中心了；  
-      （4）、重复步骤2、3，直到list为空结束。
-</code></pre>
-
-<p>单机版Canopy算法：  </p>
-
-<pre><code>      1、从PointList中取一个Point ，寻找已经建立好的Canopy 计算这个点于所有的Canopy的距离。如果和某一个Canopy的距离小于T1，则把这个点加到Canopy中，如果没有Canopy则选择这个点为一个Canopy的中心。  
-      2、如果这个店Point和某个Canopy的距离小于T2,则把这个点从PointList中删除（这个点以后做不了其他的Canopy的中心了）。  
-      3、循环直到所有的Point都被加入进来，然后计算各个Canopy的Center和Radius。
-</code></pre>
-
-<p>MapReduce：</p>
-
-<pre><code>  1、把数据整理成SequcnceFile格式（Mahout-InputMapper）作为初始化文件PointFile  
-  2、CanopyMapper阶段本机聚成小的Canopy 中间文件写成SequenceFile 这一步的T1、T2 和Reduce的T1、T2可以是不同的（ index、Canpy）  
-  3、所有的Mapper阶段的输出到1个Reducer中 然后Reduce把Map阶段中的Center点再次做聚类算法。聚出全局的Canopy。同时计算每个Canopy的CenterPoint点。写到临时文件CenterPoint中。  
-  4、针对全集合PointFile在CenterPoint上的findClosestCanopy操作（通过传入的距离算法）。然后输出一个SequenceFile。     
-</code></pre>
-
-<p>基于距离-增量聚类的实现方式</p>
-
-<pre><code>1.
-每增加一个数据，立即(或延迟)计算它与其他对象之间
-的相异度度量值，并将其插入到R2中；检查计算出相异度
-度量值，当d(id，j)&lt;δ时，如果id在R3中存在，则elements= 
-elements+1；否则在R3中插入一个新记录(id，1)。  
-
-2.
-数据的增加部分可以简单的加到原有聚类结果中,具体情况可以分两种: 
-(1)增加记录在原有聚类结果的某一类范围内(n维空间),这样这条记录的加入增加了这类的数据密度,因此可以直接把这条记录加入这一类当中. 
-(2)增加记录不在原来聚类结果的任何一类范围内,也就是相当于n维空间上的一个孤立的点,这种情况可暂把这条数据记录单独看成一类. 
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/11/30/clustering-algorithm.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/11/04/mahout-xiangjie.html">mahout--初学</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年11月04日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h2 id="mahout">Mahout</h2>
-<p><strong>What is Mahout</strong></p>
-
-<p>官方解释：<br />
-The Apache Mahout project’s goal is to build a scalable machine learning library.<br />
-—-即一个可扩展的机器学习程序库<br />
-Mahout是Hadoop家族中与众不同的一个成员，他是基于一个Hadoop的机器学习和数据挖掘的分布式计算框架。是一个跨学科产品，是现在Hadoop生态环境中，对于普通开发者来说最具竞争力，最难掌握，也是最值得学习的一个项目之一。它为数据分析人员，降低了大数据分析的门槛；为算法工程师，提供基础的算法库；为Hadoop开发人员，提供了数据建模的标准。 <br />
-**Mahout 0.9 Applicable Models:  **</p>
-
-<pre><code>	• User and Item based recommenders （基于用户/物品推荐）
-	• Matrix factorization based recommenders （基于矩阵因数分解推荐）
-	• K-Means, Fuzzy K-Means clustering（K-Means 聚类）
-	• Latent Dirichlet Allocation （三层贝叶斯概率模型）
-	• Singular Value Decomposition （奇异值分解）
-	• Logistic regression classifier （逻辑回归 LR分类器）
-	• (Complementary) Naive Bayes classifier（朴素贝叶斯分类器）
-	• Random forest classifier （随机森林基于决策树的分类器）
-	• High performance java collections （高性能java集合(以前的colt集合)）
-	• A vibrant community （社区）
-</code></pre>
-
-<p><strong>Mahout运行/开发环境</strong><br />
-运行：<br />
-Mahout运行可以指定运行在hadoop上或是直接本地运行。 默认是在hadoop环境上运行，Mahout运行时会读取profile文件中我们配置的HADOOP_HOME和HADOOP_CONF_DIR项读取hadoop环境，从而在得以运行于hadoop上。 
-但是如果少量的数据分析可能不需要hadoop的介入，单机就能分析完成而且效率会更好，这时只需要在运行Mahout时加上参数 MAHOUT_LOCAL：设置是否本地运行，如果设置这个参数就不会运行hadoop了，一旦设置这个参数，那HADOOP_CONF_DIR 和HADOOP_HOME 这两个参数的设置就自动失效了。
-开发：<br />
-Mahout以maven构建，在开发Mahout相关程序时只需要在maven工程中引入Mahout相关依赖即可。如：  </p>
-
-<pre><code>&lt;dependencies&gt;
-		&lt;dependency&gt;
-			&lt;groupId&gt;org.apache.mahout&lt;/groupId&gt;
-			&lt;artifactId&gt;mahout-core&lt;/artifactId&gt;
-			&lt;version&gt;${mahout.version}&lt;/version&gt;
-		&lt;/dependency&gt;
-		&lt;dependency&gt;
-			&lt;groupId&gt;org.apache.mahout&lt;/groupId&gt;
-			&lt;artifactId&gt;mahout-integration&lt;/artifactId&gt;
-			&lt;version&gt;${mahout.version}&lt;/version&gt;
-			&lt;exclusions&gt;
-				&lt;exclusion&gt;
-					&lt;groupId&gt;org.mortbay.jetty&lt;/groupId&gt;
-					&lt;artifactId&gt;jetty&lt;/artifactId&gt;
-				&lt;/exclusion&gt;
-				&lt;exclusion&gt;
-					&lt;groupId&gt;org.apache.cassandra&lt;/groupId&gt;
-					&lt;artifactId&gt;cassandra-all&lt;/artifactId&gt;
-				&lt;/exclusion&gt;
-				&lt;exclusion&gt;
-					&lt;groupId&gt;me.prettyprint&lt;/groupId&gt;
-					&lt;artifactId&gt;hector-core&lt;/artifactId&gt;
-				&lt;/exclusion&gt;
-			&lt;/exclusions&gt;
-		&lt;/dependency&gt;
-	&lt;/dependencies&gt;
-</code></pre>
-
-<p>坑：在实际开发中如果只是像上面引用Mahout依赖，然后maven打包放到hadoop环境中去运行会出现各种问题，如jar包不兼容丢失等等。
-解决办法：参考Mahout-examples中的pom.xml配置加入 job.xml文件</p>
-
-<p><strong>Mahout学习路线图：</strong> 
-<img src="/image/mahout1.png" alt="" />  </p>
-
-<p><strong>聚类算法(clustering algorithm)</strong> 
-<strong><em>What is clustering</em></strong> <br />
-   Clustering–聚类,即将数据对象分组成为多个类或者簇 (Cluster)，它的目标：在同一个簇中的对象之间具有较高的相似度，而不同簇中的对象差别较大。即一个簇中的数据对象应当可以被作为一个整体来对待，从而减少计算量或者提高计算质量。 <br />
-聚类分析广泛的应用在许多应用中，包括模式识别，数据分析，图像处理以及市场研究。通过聚类，人们能意识到密集和稀疏的区域，发现全局的分布模式，以及数据属性之间的相互关系。<br />
-最被广泛使用的既是对 Web 上的文档进行分类，组织信息的发布，给用户一个有效分类的内容浏览系统（门户网站），同时可以加入时间因素，进而发现各个类内容的信息发展，最近被大家关注的主题和话题，或者分析一段时间内人们对什么样的内容比较感兴趣，这些有趣的应用都得建立在聚类的基础之上。作为一个数据挖掘的功能，聚类分析能作为独立的工具来获得数据分布的情况，观察每个簇的特点，集中对特定的某些簇做进一步的分析，此外，聚类分析还可以作为其他算法的预处理步骤，简化计算量，提高分析效率。它是数据挖掘及机器学习领域内的重点问题之一<br />
-   聚类是在给定的数据集合中寻找同类的数据子集合，每一个子集合形成一个类簇，同类簇中的数据具有更大的相似性。聚类算法大体上可分为基于划分的方法、基于层次的方法、基于密度的方法、基于网格的方法以及基于模型的方法。选择聚类算法是需要考虑如下几个方面：   </p>
-
-<pre><code>1.聚类结果是排他的还是可重叠的
-  一个元素，他是否可以属于聚类结果中的多个簇中，如果是，则是一个可重叠的聚类问题，如果否，那么是一个排他的聚类问题。
-2. 基于层次还是基于划分.
-  基于划分：一组对象，按照一定的原则将它们分成不同的组，这是典型的划分聚类问题
-  基于层次：顶层将对象进行大致的分组，随后每一组再被进一步的细分，也许所有路径最终都要到达一个单独实例（或者自底向上）
-3. 簇数目固定的还是无限制的聚类
-   聚类问题是在执行聚类算法前已经确定聚类的结果应该得到多少簇，还是根据数据本身的特征，由聚类算法选择合适的簇的数目。
-4. 基于距离还是基于概率分布模型
-   基于距离的聚类问题很好理解，即距离近的相似的对象聚在一起
-   基于概率分布模型的聚类问题，就是在一组对象中，找到能符合特定分布模型的点的集合，他们不一定是距离最近的或者最相似的，而是能完美的呈现出概率分布模型所描述的模型。
-</code></pre>
-
-<p><strong>Mahout clustering</strong> <br />
-数据模型<br />
-Mahout 的聚类算法将对象表示成一种简单的数据模型：向量 (Vector)。在向量数据描述的基础上，可以轻松的计算两个对象的相似性.Mahout 中的向量 Vector 是一个每个域是浮点数 (double) 的复合对象，最容易想到的实现就是一个浮点数的数组。但在具体应用由于向量本身数据内容的不同，比如有些向量的值很密集，每个域都有值；有些则是很稀疏，可能只有少量域有值，所以 Mahout 提供了多个实现：  </p>
-
-<pre><code>1. DenseVector，它的实现就是一个浮点数数组，对向量里所有域都进行存储，适合用于存储密集向量。
-2. RandomAccessSparseVector 基于浮点数的 HashMap 实现的，key 是整形 (int) 类型，value 是浮点数 (double) 类型，它只存储向量中不为空的值，并提供随机访问。
-3. SequentialAccessVector 实现为整形 (int) 类型和浮点数 (double) 类型的并行数组，它也只存储向量中不为空的值，但只提供顺序访问。
-</code></pre>
-
-<p><strong>K-Maens:</strong><br />
-K-Means算法是一种得到最广泛使用的基于划分的聚类算法，把n个对象分为k个簇，以使簇内具有较高的相似度。相似度的计算根据一个簇中对象的平均值来进行。算法首先随机地选择k个对象，每个对象初始地代表了一个簇的平均值或中心。对剩余的每个对象根据其与各个簇中心的距离，将它赋给最近的簇，然后重新计算每个簇的平均值。这个过程不断重复，直到准则函数收敛。
-K-Means是典型的基于距离的排他的划分方法：给定一个 n 个对象的数据集，它可以构建数据的 k 个划分，每个划分就是一个聚类，并且 k&lt;=n，同时还需要满足两个要求：  </p>
-
-<ol>
-  <li>每个组至少包含一个对象</li>
-  <li>每个对象必须属于且仅属于一个组。</li>
-</ol>
-
-<p>基本原理:  </p>
-
-<ol>
-  <li>首先创建一个初始划分，随机地选择 k 个对象，每个对象初始地代表了一个簇中心。对于其他的对象，根据其与各个簇中心的距离，将它们赋给最近的簇。</li>
-  <li>然后采用一种迭代的重定位技术，尝试通过对象在划分间移动来改进划分。所谓重定位技术，就是当有新的对象加入簇或者已有对象离开簇的时候，重新计算簇的平均值，然后对对象进行重新分配。这个过程不断重复，直到没有簇中对象的变化。</li>
-</ol>
-
-<p>优缺点：<br />
-首先原理简单，实现起来也相对简单，同时执行效率和对于大数据量的可伸缩性还是较强的。当结果簇是密集的，而且簇和簇之间的区别比较明显时，K-Means的效果比较好。<br />
-K-Means的最大问题是要求用户必须事先给出 k 的个数，k 的选择一般都基于一些经验值和多次实验结果，对于不同的数据集，k 的取值没有可借鉴性。另外，K 均值对“噪音”和孤立点数据是敏感的，少量这类的数据就能对平均值造成极大的影响。</p>
-
-<p>基于 Hadoop 的 Mahout K-Means聚类算法实现（主要步骤代码）</p>
-
-<pre><code>  //将原始数据randomData.csv，指定向量类型，转成Mahout sequence files of VectorWritable。
-    InputDriver.runJob(new Path(inPath), new Path(seqFile), "org.apache.mahout.math.RandomAccessSparseVector");
-    //指定聚类的簇数
-    //通过随机的方法，选中kmeans的3个中心，做为初始集群
-    int k = 3;
-    Path seqFilePath = new Path(seqFile);
-    Path clustersSeeds = new Path(seeds);
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
-    clustersSeeds = RandomSeedGenerator.buildRandom(conf, seqFilePath, clustersSeeds, k, measure);
-    //利用K-means算法实现聚类分析
-    //根据迭代次数的设置，执行MapReduce，进行 10次迭代计算
-    KMeansDriver.run(conf, seqFilePath, clustersSeeds, new Path(outPath), measure, 0.01, 10, true, 0.01, false);
-    Path outGlobPath = new Path(outPath, "clusters-*-final");
-    Path clusteredPointsPath = new Path(clusteredPoints);
-    System.out.printf("Dumping out clusters from clusters: %s and clusteredPoints: %s\n", outGlobPath, clusteredPointsPath);
-    //结果输出
-    ClusterDumper clusterDumper = new ClusterDumper(outGlobPath, clusteredPointsPath);
-    clusterDumper.printClusters(null);
-</code></pre>
-
-<p>对于K-Means不足的补救办法：<br />
-对于K-Means 需要事先指定簇数的不足，我们可以结合另一个聚类算法:canopy,从而解决这个不足。<br />
-<strong>Canopy 聚类算法：</strong><br />
-Canopy 聚类算法的基本原则是：首先应用成本低的近似的距离计算方法高效的将数据分为多个组，这里称为一个 Canopy，Canopy 之间可以有重叠的部分；然后采用严格的距离计算方式准确的计算在同一 Canopy 中的点，将他们分配与最合适的簇中。Canopy 聚类算法经常用于 K 均值聚类算法的预处理，用来找合适的 k 值和簇中心。  </p>
-
-<p>在Mahout的examples中的kmeans算法实现就是这种解决思维：</p>
-
-<pre><code>public static void run(Configuration conf, Path input, Path output, DistanceMeasure measure, double t1, 	double t2, double convergenceDelta, int maxIterations)throws Exception{
-	Path directoryContainingConvertedInput = new Path(output,DIRECTORY_CONTAINING_CONVERTED_INPUT);
-	log.info("Preparing Input");
-	InputDriver.runJob(input, directoryContainingConvertedInput,"org.apache.mahout.math.RandomAccessSparseVector");
-	log.info("Running Canopy to get initial clusters");
-	CanopyDriver.run(conf, directoryContainingConvertedInput, output, measure,t1, t2, false, false);
-	log.info("Running KMeans");
-	KMeansDriver.run(conf, directoryContainingConvertedInput, new Path(output,Cluster.INITIAL_CLUSTERS_DIR), output, measure,convergenceDelta,maxIterations, true, false);
-	// run ClusterDumper
-	ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-	output, maxIterations), new Path(output, "clusteredPoints"));
-	clusterDumper.printClusters(null);
-} CanopyDriver.run( ) ： 即用Canopy算法确定初始簇的个数和簇的中心。 KMeansDriver.run( ) ： K-means算法进行聚类。
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/11/04/mahout-xiangjie.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/10/12/nosqlhbase.html">nosql&hbase</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年10月12日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h2 id="nosqlhbase">NoSQL/Hbase</h2>
-
-<p><strong>NoSQL (Not Only SQL )</strong></p>
-
-<p>一项全新的数据库革命性运动，早期就有人提出，发展至2009年趋势越发高涨。NoSQL的拥护者们提倡运用非关系型的数据存储，相对于铺天盖地的关系型数据库运用，这一概念无疑是一种全新的思维的注入。任何技术的流行都有着现实的强烈需求，NoSQL也是如此，随着互联网的移动化、大数据化，超大规模和高并发的现实需求 传统的关系型数据暴露出越来越多难以满足的缺陷。如：</p>
-
-<pre><code>1、High performance - 对数据库高并发读写的需求
-2、Huge Storage - 对海量数据的高效率存储和访问的需求
-3、High Scalability &amp;&amp; High Availability- 对数据库的高可扩展性和高可用性的需求
-</code></pre>
-
-<p>什么是NoSQL：</p>
-
-<p>wiki上的定义是“NoSQL is a movement promoting a loosely defined class of non-relational data stores that break with a long history of relational databases”。其实并不存在一个叫NoSQL的产品，它是一类non-relational data stores的集合。NoSQL的重点是non-relational，而传统的数据库是relational。传统关系型数据库的最大缺陷是扩展性，虽然各个数据库厂家都有cluster的解决方案，但是不管是share storage还是share nothing的解决方案，扩展性都十分有限。目前解决数据库扩展性的思路主要有两个：第一是数据分片(sharding)或者功能分区，虽然说可以很好的解决数据库扩展性的问题，但是在实际使用过程中，一旦采用数据分片或者功能分区，必然会导致牺牲“关系型”数据库的最大优势-join，对业务局限性非常大，而数据库也退化成为一个简单的存储系统。另外一个思路是通过maser-slave复制的方式，通过读写分离技术在某种程度上解决扩展性的问题，但这种方案中，由于每个数据库节点必须保存所有的数据，这样每个存储的IO subsystem必然成为扩展的瓶颈，而且masert节点也是一个瓶颈。总的来说，传统关系型数据库的扩展能力十分有限。</p>
-
-<p>NoSQL与关系型数据库在概念上的不同：</p>
-
-<p>CAP：</p>
-
-<pre><code>Consistency(一致性)，数据一致更新，所有数据变动都是同步的
-Availability(可用性)，好的响应性能
-Partition tolerance(分区容错性) 可靠性 CAP原理告诉我们，这三个因素最多只能满足两个，不可能三者兼顾。对于分布式系统来说，分区容错是基本要求，所以必然要放弃一致性。对于大型网站来说，分区容错和可用性的要求更高，所以一般都会选择适当放弃一致性。对应CAP理论，NoSQL追求的是AP，而传统数据库追求的是CA，这也可以解释为什么传统数据库的扩展能力有限的原因。
-</code></pre>
-
-<p>BASE：</p>
-
-<pre><code>Basically Availble：基本可用
-Soft-state： 软状态/柔性事务
-Eventual Consistency：最终一致性 BASE模型是传统ACID模型的反面，不同与ACID，BASE强调牺牲高一致性，从而获得可用性，数据允许在一段时间内的不一致，只要保证最终一致就可以了。最终一致性是整个NoSQL中的一个核心理念。
-</code></pre>
-
-<p>现如今NoSQL产品分类：</p>
-
-<pre><code>Key-Value模型：Key-Value模型是最简单，也是使用最方便的数据模型，它支持简单的key对value的键值存储和提取；Key-Value模型的一个大问题是它通常是由HashTable实现的，所以无法进行范围查询，所以有序Key-Value模型就出现了，有序Key-Value支持范围查询；
-
-Ordered Key-Value：虽然有序Key-Value模型能够解决范围查询和问题，但是其Value值依然是无结构的二进制码或纯字符串，通常我们只能在应用层去解析相应的结构。
-
-BigTable的数据模型，能够支持结构化的数据，包括列、列簇、时间戳以及版本控制等元数据的存储；
-文档型存储相对到类BigTable存储又有两个大的提升，一是其Value值支持复杂的结构定义，二是支持数据库索引的定义；全文索引模型与文档型存储的主要区别在于文档型存储的索引主要是按照字段名来组织的，而全文索引模型是按字段的具体值来组织的；
-
-图数据库模型也可以看作是从Key-Value模型发展出来的一个分支，不同的是它的数据之间有着广泛的关联，并且这种模型支持一些图结构的算法。
-他们之间的关系幽默的表示如下： ![](/image/nosql.jpg)
-</code></pre>
-
-<p>目前NoSQL几个分类的代表产品： </p>
-
-<pre><code>Key-Value 存储：Oracle Coherence、Redis、Kyoto Cabinet
-类BigTable存储：Apache HBase、Apache Cassandra
-文档数据库：MongoDB、CouchDB
-全文索引：Apache Lucene、Apache Solr
-图数据库：neo4j、FlockDB
-</code></pre>
-
-<p><strong>NoSQL 之Hbase</strong></p>
-
-<p>Hbase是从hadoop中分离出来的apache顶级开源项目。用java实现了Google的Bigtable系统大部分特性，是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，利用HBase技术可在廉价PC Server上搭建起大规模结构化存储集群。类似Google Bigtable利用GFS作为其文件存储系统，HBase利用Hadoop HDFS作为其文件存储系统；Google Bigtable利用 Chubby作为协同服务，HBase利用Zookeeper作为对应。</p>
-
-<p>Hbase在Hadoop 生态环境中的位置：
-<img src="/image/hbase-local-in-hadooop.jpg" alt="" /></p>
-
-<p>如上图HBase位于Hadoop ecosystem结构化存储层，Hadoop HDFS为HBase提供了高可靠性的底层存储支持，Hadoop MapReduce为HBase提供了高性能的计算能力，Zookeeper为HBase提供了稳定服务和failover机制。此外，Pig和Hive还为HBase提供了高层语言支持，使得在HBase上进行数据统计处理变的非常简单。 Sqoop则为HBase提供了方便的RDBMS数据导入功能，使得传统数据库数据向HBase中迁移变的非常方便。与hadoop一样，Hbase目标主要依靠横向扩展，通过不断增加廉价的商用服务器，来增加计算和存储能力。</p>
-
-<p>HBase中的表一般有这样的特点：</p>
-
-<pre><code>1 大：一个表可以有上亿行，上百万列
-2 面向列:面向列(族)的存储和权限控制，列(族)独立检索。
-3 稀疏:对于为空(null)的列，并不占用存储空间，因此，表可以设计的非常稀疏。
-</code></pre>
-
-<p><strong>HBase数据模型</strong></p>
-
-<p>Table:</p>
-
-<pre><code>table
-  |-column family
-  	|-column
-  		|-cell
-			|-rowkey
-			|-timestamp
-  			|-value HBase没有database的概念。rowkey是数据的一部分，其必须人工指定。 column family 在定义表时需指明。数据存储逻辑视图如下：
-
-Row Key	Timestamp	Column Family
-		URI	Parser
-r1	T3	url=http://www.xxxx.com	title=xxxx
-	T2	host=xxxx.com	 
-	T1	 	 
-r2	T2	url=http://www.xxxx.com	content=xxxx…
-	T1	host=xxxx.com	 
-
-Ø Row Key: 行键，Table的主键，Table中的记录按照Row Key排序
-Ø Timestamp: 时间戳，每次数据操作对应的时间戳，可以看作是数据的version number
-Ø Column Family：列簇，Table在水平方向有一个或者多个Column Family组成，
-一个Column Family中可以由任意多个Column组成，即Column Family支持动态扩展，
-无需预先定义Column的数量以及类型，所有Column均以二进制格式存储，用户需要自行进行类型转换。
-</code></pre>
-
-<p>Region:</p>
-
-<pre><code>当Table随着记录数不断增加而变大后，会逐渐分裂成多份splits，成为regions，一个region由
-[startkey,endkey)表示，不同的region会被Master分配给相应的RegionServer进行管理：
-</code></pre>
-
-<p>-ROOT- &amp;&amp; .META. Table</p>
-
-<pre><code>HBase中有两张特殊的Table，-ROOT-和.META.
-Ø .META.：记录了用户表的Region信息，.META.可以有多个regoin
-Ø -ROOT-：记录了.META.表的Region信息，-ROOT-只有一个region
-Ø Zookeeper中记录了-ROOT-表的location
-</code></pre>
-
-<p>Hbase整体寻址结构如下：</p>
-
-<pre><code> ![](/image/hbase-addre.jpg)
-</code></pre>
-
-<p>Client访问用户数据之前需要首先访问zookeeper，然后访问-ROOT-表，接着访问.META.表，最后才能找到用户数据的位置去访问，中间需要多次网络操作，不过client端会做cache缓存。
-HBase系统架构</p>
-
-<p><img src="/image/hbase-structure.jpg" alt="" /></p>
-
-<p>Client</p>
-
-<pre><code>HBase Client使用HBase的RPC机制与HMaster和HRegionServer进行通信，对于管理类操作，
-Client与HMaster进行RPC；对于数据读写类操作，Client与HRegionServer进行RPC Zookeeper
-
-Zookeeper Quorum中除了存储了-ROOT-表的地址和HMaster的地址，HRegionServer也会把自己以
-Ephemeral方式注册到 Zookeeper中，使得HMaster可以随时感知到各个HRegionServer的健康状态
-。此外，Zookeeper也避免了HMaster的 单点问题。 HMaster
-
-HMaster没有单点问题，HBase中可以启动多个HMaster，通过Zookeeper的Master Election机
-制保证总有一个Master运行，HMaster在功能上主要负责Table和Region的管理工作：
-1.       管理用户对Table的增、删、改、查操作
-2.       管理HRegionServer的负载均衡，调整Region分布
-3.       在Region Split后，负责新Region的分配
-4.       在HRegionServer停机后，负责失效HRegionServer 上的Regions迁移 HRegionServer
-</code></pre>
-
-<p><img src="/image/region-server.jpg" alt="" /></p>
-
-<p>HRegionServer主要负责响应用户I/O请求，向HDFS文件系统中读写数据，是HBase中最核心的模块。
-HRegionServer内部管理了一系列HRegion对象，每个HRegion对应了Table中的一个Region，HRegion中由多 个HStore组成。每个HStore对应了Table中的一个Column Family的存储，可以看出每个Column Family其实就是一个集中的存储单元，因此最好将具备共同IO特性的column放在一个Column Family中，这样最高效。</p>
-
-<p>HStore存储是HBase存储的核心了，其中由两部分组成，一部分是MemStore，一部分是StoreFiles。MemStore是 Sorted Memory Buffer，用户写入的数据首先会放入MemStore，当MemStore满了以后会Flush成一个StoreFile（底层实现是HFile）， 当StoreFile文件数量增长到一定阈值，会触发Compact合并操作，将多个StoreFiles合并成一个StoreFile，合并过程中会进 行版本合并和数据删除，因此可以看出HBase其实只有增加数据，所有的更新和删除操作都是在后续的compact过程中进行的，这使得用户的写操作只要 进入内存中就可以立即返回，保证了HBase I/O的高性能。当StoreFiles Compact后，会逐步形成越来越大的StoreFile，当单个StoreFile大小超过一定阈值后，会触发Split操作，同时把当前 Region Split成2个Region，父Region会下线，新Split出的2个孩子Region会被HMaster分配到相应的HRegionServer 上，使得原先1个Region的压力得以分流到2个Region上。下图描述了Compaction和Split的过程：</p>
-
-<p><img src="/image/region-compacte.png" alt="" /></p>
-
-<p>在理解了上述HStore的基本原理后，还必须了解一下HLog的功能，因为上述的HStore在系统正常工作的前提下是没有问题的，但是在分布式 系统环境中，无法避免系统出错或者宕机，因此一旦HRegionServer意外退出，MemStore中的内存数据将会丢失，这就需要引入HLog了。 每个HRegionServer中都有一个HLog对象，HLog是一个实现Write Ahead Log的类，在每次用户操作写入MemStore的同时，也会写一份数据到HLog文件中，HLog文件定期会滚动出新的，合并删除旧的文件（已持久化到StoreFile中的数据）。当HRegionServer意外终止后，HMaster会通过Zookeeper感知到，HMaster首先会处理遗留的 HLog文件，将其中不同Region的Log数据进行拆分，分别放到相应region的目录下，然后再将失效的region重新分配，领取 到这些region的HRegionServer在Load Region的过程中，会发现有历史HLog需要处理，因此会Replay HLog中的数据到MemStore中，然后flush到StoreFiles，完成数据恢复。</p>
-
-<pre><code>HBase实践总结：
-column family 不应超过两个，因为一个column family 对应一个store，flush和compaction的触发的基本单位都是Region级别，所以当一个column family有大量的数据的时候会触发整个region里面的其他column family的memstore（其实这些memstore可能仅有少量的数据，还不需要flush的）也发生flush动作；另外compaction触发的条件是当store file的个数（不是总的store file的大小）达到一定数量的时候会发生，而flush产生的大量store file通常会导致compaction，flush/compaction会发生很多IO相关的负载，这对Hbase的整体性能有很大影响。
-
-一个table对应一个或多个region，在map/reduce 中对应一个map 一个column family 对应一个store。 store 中含一个menstore 和多个fileStore 当menstore 存储到达一定阀值就生成一个filestore， fileStore存放在hdfs上， 当fileStore 数量到达一定阀值就将其合并成一个大的file。
-
-在插入rowkey时，不考虑region的大小及状态，只是根据它的access 编码排序，找到对应的startkey，endkey,确定插入的位置。
-HBase两张管理表：+ .META.:管理用户region，它可以有多个region。 ROOT: 管理.META.的region，它只有一个region。 所以读写数据的流程为： client–&gt;ROOT–&gt;META–&gt;regionserver 在数据的读写过程中client不会与master产生关系 master只是负责管理表结构。
-
-利用backup-master机制，解决master单点的问题。
-region在存储的数据到达一定阀值后将split，split的同时更形.META.和ROOT表的相关数据。 split region的过程不需要master的参与，master只负责将split后新的region分配到对应的regionserver。
-
-HBase的数据安全机制之一：在插入数据时先写Hlog然后在写到内存。 一个regionserver中只有一个Hlog， Hlog中只记录内存中存放的数据。 当机器挂掉后，master会根据Hlog中region将其分割，然后分配到不同的机器加载，做数据恢复。
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/10/12/nosqlhbase.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/10/09/zookeeper-install.html">zookeeper install</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年10月09日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p><strong>Zookeeper集群安装配置</strong></p>
-
-<ol>
-  <li>
-    <p>修改zookeeper配置文件zoo.cfg</p>
-
-    <p>在Linux系统下解压zookeeper安装包zookeeper-3.4.3.tar.gz ，进入到conf目录，将zoo_sample.cfg拷贝一份命名为zoo.cfg（Zookeeper 在启动时会找这个文件作为默认配置文件），打开该文件进行修改为以下格式</p>
-
-    <pre><code> dataDir=/home/hadoop/temp/zookeeper/data
- server.23=192.168.6.23:2888:3888
- server.24=192.168.6.24:2888:3888
- server.25=192.168.6.25:2888:3888
-</code></pre>
-  </li>
-  <li>
-    <p>新建目录、新建并编辑myid文件
-（本次配置myid文件放在/home/hadoop/temp/zookeeper/data目录下）</p>
-
-    <pre><code> mkdir /home/hadoop/will/zookeeper/data	//dataDir目录
- vi /home/hadoop/temp/zookeeper/data/myid  注意myid文件中的内容为：Master中为0，Slave1中为1，Slave2中为2，分别与zoo.cfg中对应起来。
-</code></pre>
-  </li>
-  <li>
-    <p>同步安装包</p>
-
-    <p>将解压修改后的zookeeper-3.4.3文件夹分别拷贝到Master、Slave1、Slave2的相同zookeeper安装路径下。注意：myid文件的内容不是一样的，各服务器中分别是对应zoo.cfg中的设置。</p>
-  </li>
-  <li>
-    <p>启动zookeeper
- Zookeeper的启动与hadoop不一样，需要每个节点都执行，分别进入3个节点的zookeeper-3.4.3目录，启动zookeeper：</p>
-
-    <pre><code> bin/zkServer.sh start  注意：此时如果报错先不理会，需要继续在另两台服务器中执行相同操作。 
-</code></pre>
-  </li>
-  <li>
-    <p>检查zookeeper是否配置成功
- 待3台服务器均启动后，如果过程正确的话zookeeper应该已经自动选好leader，进入每台服务器的zookeeper-3.4.3目录，执行以下操作查看zookeeper启动状态：</p>
-
-    <pre><code> bin/zkServer.sh status  如果出现以下代码表示安装成功了。
-
- [java] view plaincopy
- JMX enabled by default  
- Using config: /home/hadoop/zookeeper-3.4.3/bin/../conf/zoo.cfg  
- Mode: follower	//或者有且只有一个leader
-</code></pre>
-  </li>
-</ol>
-
-<h2 id="zookeeper">2 - 解读zookeeper的配置项</h2>
-<p>zookeeper的默认配置文件为zookeeper/conf/zoo_sample.cfg，需要将其修改为zoo.cfg。其中各配置项的含义，解释如下：</p>
-
-<ol>
-  <li>
-    <p>tickTime：CS通信心跳数</p>
-
-    <p>Zookeeper 服务器之间或客户端与服务器之间维持心跳的时间间隔，也就是每个 tickTime 时间就会发送一个心跳。tickTime以毫秒为单位。
- 1.tickTime=2000  </p>
-  </li>
-  <li>
-    <p>initLimit：LF初始通信时限</p>
-
-    <p>集群中的follower服务器(F)与leader服务器(L)之间初始连接时能容忍的最多心跳数（tickTime的数量）。
- 1.initLimit=5  </p>
-  </li>
-  <li>
-    <p>syncLimit：LF同步通信时限</p>
-
-    <p>集群中的follower服务器与leader服务器之间请求和应答之间能容忍的最多心跳数（tickTime的数量）。
- 1.syncLimit=2  
- </p>
-  </li>
-  <li>
-    <p>dataDir：数据文件目录</p>
-
-    <p>Zookeeper保存数据的目录，默认情况下，Zookeeper将写数据的日志文件也保存在这个目录里。
- 1.dataDir=/home/michael/opt/zookeeper/data  </p>
-  </li>
-  <li>
-    <p>dataLogDir：日志文件目录</p>
-
-    <p>Zookeeper保存日志文件的目录。
- 1.dataLogDir=/home/michael/opt/zookeeper/log  </p>
-  </li>
-  <li>
-    <p>clientPort：客户端连接端口</p>
-
-    <p>客户端连接 Zookeeper 服务器的端口，Zookeeper 会监听这个端口，接受客户端的访问请求。
- 1.clientPort=2333  </p>
-  </li>
-  <li>
-    <p>服务器名称与地址：集群信息（服务器编号，服务器地址，LF通信端口，选举端口）</p>
-
-    <p>这个配置项的书写格式比较特殊，规则如下：
- 1.server.N=YYY:A:B  </p>
-
-    <p>其中N表示服务器编号，YYY表示服务器的IP地址，A为LF通信端口，表示该服务器与集群中的leader交换的信息的端口。B为选举端口，表示选举新leader时服务器间相互通信的端口（当leader挂掉时，其余服务器会相互通信，选择出新的leader）。一般来说，集群中每个服务器的A端口都是一样，每个服务器的B端口也是一样。但是当所采用的为伪集群时，IP地址都一样，只能时A端口和B端口不一样。
- 如：</p>
-
-    <pre><code> 1.server.0=192.168.6.23:2008:6008  
- 2.server.1=192.168.6.24:2008:6008  
- 3.server.2=192.168.6.25:2008:6008  
- 4.server.3=192.168.6.26:2008:6008  
-</code></pre>
-  </li>
-</ol>
-
-      <div class="readall"><a href="/blog/2014/10/09/zookeeper-install.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <p>Linux 学习笔记5 shell输入输出<br />
+shell脚本中几种读入数据方式：标准输入(缺省为键盘)，指定一个文件作为输入<br />
+输出：标准输出(终端屏幕)，指定输出到一个文件  </p>
+
+<p>echo<br />
+echo命令可以显示文本行或是变量 或者把字符串输入到文件 一般形式为：
+echo string<br />
+常见功能：<br />
+\c 不换行 <br />
+\t 跳格<br />
+\n 换行<br />
+初涉shell的用户常常会遇到的一个问题就是如何把双引号包含到echo命令的字符串中。<br />
+引号是一个特殊字符，所以必须要使用反斜杠\来使shell忽略它的特殊含义。假设你希望使用echo命令输出这样的字符串：”/dev/rmt0”，那么我们只要在引号前面加上反斜杠\即可   </p>
+
+<p>read <br />
+可以使用read语句从键盘或文件的某一行文本中读入信息，并将其赋给一个变量。如果只指定了一个变量，那么read将会把所有的输入赋给该变量，直至遇到第一个文件结束符或回车。<br />
+它的一般形式为：<br />
+read varible1 varible2 …  </p>
+
+
+      <div class="readall"><a href="/blog/2015/01/23/Linux-point5.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

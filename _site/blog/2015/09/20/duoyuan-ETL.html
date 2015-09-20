@@ -1,0 +1,145 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="多源ETL考虑, willgo, Will.Quan">
+  <title>多源ETL考虑 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2015/09/20/duoyuan-ETL.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+
+    <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2015/09/20/duoyuan-ETL.html">多源ETL考虑</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2015年09月20日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
+  </p>
+</header>
+<div class="post-main">
+<p>ETL解决问题：<br />
+1.数据分散问题<br />
+2.数据不清洁问题<br />
+3.对数据格式不统一  </p>
+
+<p>ETL 过程模型<br />
+1. 元数据库<br />
+ 元数据（metadata）是定义和描述其它数据的数据    关于数据内容、质量、状况和其他特性的信息，在整个数据抽取转换加载过程中起到基础的作用。元数据使用户可以掌握数据的历史情况，如数据从哪里来，流通时间多长，更新频率是多大，数据元素的含义是什么，对它已经进行了哪些计算、转换和筛选等等。<br />
+    元数据具有下列属性：<br />
+（1）描述性，元数据是描述数据的数据，这是元数据的最本质的特征。<br />
+（2）动态性，元数据不是静止不变的，它随着所描述对象的变化而变化。<br />
+（3）多样性，元数据的类型多样。<br />
+（4）复杂性，一方面元数据既可以是集合概念也可以是个体概念，元数据中还可以包括其它的元数据；另一方面对不同的描述对象，有些元数据项是必须有的，而有些却不一定强求，即强制性的元数据与选择性的元数据共存。<br />
+（5）多层次性，这是由元数据所描述对象的多层次和元数据使用对象的多层次性决定的。<br />
+（6）支撑性，元数据相对描述对象而言处于次要的地位，但又是必不可少的，起支撑的作用。<br />
+    元数据库是以一定的组织方式存储在一起的相关的元数据集合。  </p>
+
+<p>元数据可以应该包括下列7个组件。 <br />
+    （1）环境状况组件。环境状况组件主要是用于监控网络和源数据的状况，它包括：网络状态，各种源数据状态，最佳抽取时间。网络状态和各种源数据状态的数据可以通过定时对网络状况和源数据状况探测自动获取。通过对这两组数据的历史记录分析可以生成最佳抽取时间。<br />
+    （2）基本组件。基本组件包括数据源数据库表结构、数据源数据库表属性、数据仓库表结构、数据仓库表属性，等等。基本构件和其它元数据最大的区别在于它是具有版本标识的数据，具有版本标识的数据在很长的一段时间内可以跟踪数据的变化情况。基本构件主要是对源数据的特征进行描述，它包括：可以提供源数据的数据库名，数据库编号，这些数据库的表，表的编号，表中的属性，属性的编号，以及可以提供源数据的文件系统的文件类型、分隔符、转换为数据库系统中目标表的表名等。<br />
+    （3）数据状态组件。数据状态组件用于标识数据仓库中的数据是“活性”的还是“惰性”的。由于数据仓库中的数据都是基于共享设计的，因而当将数据仓库中的数据作为源数据进行抽取和转换时，其中的某些数据可能包括一些误导信息，因而对于这些表就需要数据状态字段对它进行控制。 <br />
+    （4）存取模式组件。存取模式组件是用于确定异构的源数据什么时候将什么数据迁移到数据仓库中，它包括：存取数据的类型、总数以及频率等。在并行环境下，它可以确定如何物理地分离数据，这样可以极大地提高数据传送的效率。 <br />
+    （5）数据质量要求组件。数据质量规则定义了源数据中的质量要求，它包括了数据源的编号、错误类型编号、可能的修改规则编号等。 <br />
+    （6）映射规则组件。映射规则定义了数据由数据源到数据仓库映射的规则，它包括：源字段的编号；简单的属性到属性的映射；字段类型的转换；多个源表到一个目标表之间复杂的转换；命名的改变；关键字的改变；等等。 <br />
+    （7）抽取日志组件。抽取日志组件记录了对数据仓库中的数据进行的每次操作的时间、操作方式、操作过程以及结果。这些信息对于数据仓库的维护非常有用，拥有这些信息可以对ETL过程中的每一步进行监控。 <br />
+ </p>
+
+<ol>
+  <li>
+    <p>数据预抽取<br />
+    按照元数据定义的内容、频率和规则，将保存在有关数据源中的数据抽取出来，存放到另外的数据库中，并将预抽取操作记录在元数据库中。</p>
+  </li>
+  <li>
+    <p>数据质量检验 <br />
+    数据质量是数据使用的适合性。数据质量要求是关于数据明示的、通常隐含的或必须履行的需求或期望。
+    数据质量检验是依据元数据中定义的各数据质量要求，通过判断，对数据与质量要求的符合性进行评价，并将数据质量检验操作记录在元数据库中。
+    数据质量主要有两个方面的问题：一个是单数据源数据质量问题，另一个是多数据源的数据交互集成时的数据质量问题。</p>
+  </li>
+</ol>
+
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2015/09/20/data-store-platform.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;数据平台拓展</a>
+
+
+<a class="pagination-item older" href="/blog/2015/09/20/guanjianjiagouceng.html">大数据处理的关键架构层&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="多源ETL考虑" data-thread-key="/blog/2015/09/20/duoyuan-ETL" data-url="index.html/blog/2015/09/20/duoyuan-ETL.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

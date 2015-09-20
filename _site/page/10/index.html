@@ -64,47 +64,253 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Java-class-loader.html">Java class loader</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/Redis-Java.html">Redis Java简单操作</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#java">java</a>
+        <a class="post-category" href="/page/category.html#nosql">nosql</a>
       </p>
     </header>
     <div class="post-main">
-      <p><strong>java classloader 结构：</strong></p>
+      <pre><code>import java.util.ArrayList;
+import java.util.List;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.ShardedJedis;
+import redis.clients.jedis.ShardedJedisPool;
 
-<ol>
-  <li>Bootstrap classloader(启动类加载器)
-主要负责jdk_home/lib目录下的核心API或-Xbootclasspath选项指定的jar包的装入工作</li>
-  <li>Extension Classloader(扩展类加载器)
-负责jdk_home/lib/ext目录下的jar包或者-Djava.ext.dirs指定目录下的jar包装入工作
-3.System classloader(系统类加载器)
-负责Java -classpath/-Djava.class.path所指定的类与jar包的装入</li>
-  <li>User Custom classloader（用户自定义类加载器（java.lang.ClassLoader的子类））
-以上每一个classloader都会维护一份自己的名称空间，同一个名称空间不能出现两个同名的类。
-为了实现Java安全沙箱模型顶层的类加载器安全机制，Java默认采用 双亲委派的加载链 结构</li>
-</ol>
+/**
+* redis的Java客户端Jedis测试验证
+*
+* @author
+*/
+public class Redis {
+// 非切片客户端链接
+private Jedis jedis;
+// 非切片链接池
+private JedisPool jedisPool;
+// 切片客户端链接
+private ShardedJedis shardedJedis;
+// 切片链接池
+private ShardedJedisPool shardedJedisPool;
+// 构造函数
+public Redis() {
+initialPool();
+initialShardedPool();
+shardedJedis = shardedJedisPool.getResource();
+jedis = jedisPool.getResource();
+}
 
-<p>在jvm启动时就会构建bootstrap classloader 负责Java平台核心库</p>
+private void initialPool() {
+// 池基本配置
+JedisPoolConfig config = new JedisPoolConfig();
+config.setMaxActive(20);
+config.setMaxIdle(5);
+config.setMaxWait(1000l);
+config.setTestOnBorrow(false);
+jedisPool = new JedisPool(config, "localhost", 6379);
+}
 
-<p><strong>每个ClassLoader加载Class的过程是：</strong></p>
+// 初始化切片池
+private void initialShardedPool() {
+// 池基本配置
+JedisPoolConfig config = new JedisPoolConfig();
+config.setMaxActive(20);
+config.setMaxIdle(5);
+config.setMaxWait(1000l);
+config.setTestOnBorrow(false);
+// slave链接
+List&lt;JedisShardInfo&gt; shards = new ArrayList&lt;JedisShardInfo&gt;();
+shards.add(new JedisShardInfo("localhost", 6379, "master"));
+// 构造池
+shardedJedisPool = new ShardedJedisPool(config, shards);
+}
 
-<ol>
-  <li>检测此Class是否载入过（即在cache中是否有此Class），如果有到8,如果没有到2</li>
-  <li>如果parent classloader不存在（没有parent，那parent一定是bootstrap classloader了），到4</li>
-  <li>请求parent classloader载入，如果成功到8，不成功到5</li>
-  <li>请求jvm从bootstrap classloader中载入，如果成功到8</li>
-  <li>寻找Class文件（从与此classloader相关的类路径中寻找）。如果找不到则到7.</li>
-  <li>从文件中载入Class，到8.</li>
-  <li>抛出ClassNotFoundException.</li>
-  <li>返回Class.</li>
-</ol>
+public void show() {
+// key检测
+testKey();
+// string检测
+testString();
+// list检测
+testList();
+// set检测
+testSet();
+// sortedSet检测
+testSortedSet();
+// hash检测
+testHash();
+shardedJedisPool.returnResource(shardedJedis);
+}
 
+private void testKey() {
+System.out.println("=============key==========================");
+// 清空数据
+System.out.println(jedis.flushDB());
+System.out.println(jedis.echo("foo"));
+// 判断key否存在
+System.out.println(shardedJedis.exists("foo"));
+shardedJedis.set("key", "values");
+System.out.println(shardedJedis.exists("key"));
+}
 
-      <div class="readall"><a href="/blog/2014/09/27/Java-class-loader.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+private void testString() {
+System.out.println("=============String========================");
+// 清空数据
+System.out.println(jedis.flushDB());
+// 存储数据
+shardedJedis.set("foo", "bar");
+System.out.println(shardedJedis.get("foo"));
+// 若key不存在，则存储
+shardedJedis.setnx("foo", "foo not exits");
+System.out.println(shardedJedis.get("foo"));
+// 覆盖数据
+shardedJedis.set("foo", "foo update");
+System.out.println(shardedJedis.get("foo"));
+// 追加数据
+shardedJedis.append("foo", " hello, world");
+System.out.println(shardedJedis.get("foo"));
+// 设置key的有效期，并存储数据
+shardedJedis.setex("foo", 2, "foo not exits");
+System.out.println(shardedJedis.get("foo"));
+try {
+Thread.sleep(3000);
+} catch (InterruptedException e) {
+}
+System.out.println(shardedJedis.get("foo"));
+// 获取并更改数据
+shardedJedis.set("foo", "foo update");
+System.out.println(shardedJedis.getSet("foo", "foo modify"));
+// 截取value的值
+System.out.println(shardedJedis.getrange("foo", 1, 3));
+System.out.println(jedis.mset("mset1", "mvalue1", "mset2", "mvalue2", "mset3", "mvalue3", "mset4", "mvalue4"));
+System.out.println(jedis.mget("mset1", "mset2", "mset3", "mset4"));
+System.out.println(jedis.del(new String[] {
+"foo", "foo1", "foo3"
+}));
+}
+
+private void testList() {
+System.out.println("=============list==========================");
+// 清空数据
+System.out.println(jedis.flushDB());
+// 添加数据
+shardedJedis.lpush("lists", "vector");
+shardedJedis.lpush("lists", "ArrayList");
+shardedJedis.lpush("lists", "LinkedList");
+// 数组长度
+System.out.println(shardedJedis.llen("lists"));
+// 排序
+System.out.println(shardedJedis.sort("lists"));
+// 字串
+System.out.println(shardedJedis.lrange("lists", 0, 3));
+// 修改列表中单个值
+shardedJedis.lset("lists", 0, "hello list!");
+// 获取列表指定下标的值
+System.out.println(shardedJedis.lindex("lists", 1));
+// 删除列表指定下标的值
+System.out.println(shardedJedis.lrem("lists", 1, "vector"));
+// 删除区间以外的数据
+System.out.println(shardedJedis.ltrim("lists", 0, 1));
+// 列表出栈
+System.out.println(shardedJedis.lpop("lists"));
+// 整个列表值
+System.out.println(shardedJedis.lrange("lists", 0, -1));
+
+}
+
+private void testSet() {
+System.out.println("=============set==========================");
+// 清空数据
+System.out.println(jedis.flushDB());
+// 添加数据
+shardedJedis.sadd("sets", "HashSet");
+shardedJedis.sadd("sets", "SortedSet");
+shardedJedis.sadd("sets", "TreeSet");
+// 判断value是否在列表中
+System.out.println(shardedJedis.sismember("sets", "TreeSet"));;
+// 整个列表值
+System.out.println(shardedJedis.smembers("sets"));
+// 删除指定元素
+System.out.println(shardedJedis.srem("sets", "SortedSet"));
+// 出栈
+System.out.println(shardedJedis.spop("sets"));
+System.out.println(shardedJedis.smembers("sets"));
+//
+shardedJedis.sadd("sets1", "HashSet1");
+shardedJedis.sadd("sets1", "SortedSet1");
+shardedJedis.sadd("sets1", "TreeSet");
+shardedJedis.sadd("sets2", "HashSet2");
+shardedJedis.sadd("sets2", "SortedSet1");
+shardedJedis.sadd("sets2", "TreeSet1");
+// 交集
+System.out.println(jedis.sinter("sets1", "sets2"));
+// 并集
+System.out.println(jedis.sunion("sets1", "sets2"));
+// 差集
+System.out.println(jedis.sdiff("sets1", "sets2"));
+}
+
+private void testSortedSet() {
+System.out.println("=============zset==========================");
+// 清空数据
+System.out.println(jedis.flushDB());
+// 添加数据
+shardedJedis.zadd("zset", 10.1, "hello");
+shardedJedis.zadd("zset", 10.0, ":");
+shardedJedis.zadd("zset", 9.0, "zset");
+shardedJedis.zadd("zset", 11.0, "zset!");
+// 元素个数
+System.out.println(shardedJedis.zcard("zset"));
+// 元素下标
+System.out.println(shardedJedis.zscore("zset", "zset"));
+// 集合子集
+System.out.println(shardedJedis.zrange("zset", 0, -1));
+// 删除元素
+System.out.println(shardedJedis.zrem("zset", "zset!"));
+System.out.println(shardedJedis.zcount("zset", 9.5, 10.5));
+// 整个集合值
+System.out.println(shardedJedis.zrange("zset", 0, -1));
+}
+
+private void testHash() {
+System.out.println("=============hash==========================");
+// 清空数据
+System.out.println(jedis.flushDB());
+//添加数据
+shardedJedis.hset("hashs", "entryKey", "entryValue");
+shardedJedis.hset("hashs", "entryKey1", "entryValue1");
+shardedJedis.hset("hashs", "entryKey2", "entryValue2");
+// 判断某个值是否存在
+System.out.println(shardedJedis.hexists("hashs", "entryKey"));
+// 获取指定的值
+System.out.println(shardedJedis.hget("hashs", "entryKey"));
+// 批量获取指定的值
+System.out.println(shardedJedis.hmget("hashs", "entryKey", "entryKey1"));
+// 删除指定的值
+System.out.println(shardedJedis.hdel("hashs", "entryKey"));
+// 为key中的域 field 的值加上增量 increment
+System.out.println(shardedJedis.hincrBy("hashs", "entryKey", 123l));
+// 获取所有的keys
+System.out.println(shardedJedis.hkeys("hashs"));
+// 获取所有的values
+System.out.println(shardedJedis.hvals("hashs"));
+}
+
+/**
+* @param args
+*/
+public static void main(String[] args){
+new Redis().show();
+}
+
+}
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/Redis-Java.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -112,108 +318,477 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Java-Serialization.html">Java Serialization</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/Page-Block.html">Page Block</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#java">java</a>
+        <a class="post-category" href="/page/category.html#f2e">f2e</a>
       </p>
     </header>
     <div class="post-main">
-      <p>目的：</p>
-
-<p>保存对象的状态，并且可以把保存的对象状态再读取出来进行恢复。</p>
-
-<p>场景：</p>
+      <p>页面block划分</p>
 
 <ol>
-  <li>需要把内存中对象状态保存到一个文件中或者数据库中时</li>
-  <li>需要用套接字在网络上传送对象时</li>
-  <li>需要通过RMI传输对象时
-特点：</li>
-  <li>序列化时 只对对象的状态进行保存 而不管对象的方法</li>
-  <li>当一个父类实现序列化，子类自动实现序列化 无须显式实现Serializable借口</li>
-  <li>当一个对象的实例变量引用其他对象，序列化该对象时也会把引用对象进行序列化</li>
-  <li>并非所有对象都可以序列化：
-socket/thread</li>
+  <li>场景分析
+一个网站整体布局以及风格一般会保持一致，整个网站各个页面有很多共同的地方，例如整站导航，友情链接等等。我们会看到很多类似下面的页面：</li>
 </ol>
 
-<p>Serialization 是一种将对象以一连串的字节描述的过程，deserialization 将这些字节重构成一个对象的过程。Java序列化API提供一种处理对象序列化的标准机制。</p>
+<p><img src="/image/page-block.png" alt="" /></p>
 
-<h2 id="section">进阶问题：</h2>
+<p>如上图我们会发现整个网站中绝大多数页面都会有上面的Header，Left 和footer 这几个部分。这些相同部分无论是前端展示还是后台数据支持都几乎是一致的。如果按照传统开发方式我们开发可能会这样：</p>
 
-<p><strong>序列化ID的问题</strong></p>
+<p>（现在有a,b,c三个页面，这三个页面都有上图中left这一部分）首先前端我们可以选择直接code复制或是独立left部分的code在各个要用的地方引用。后台根据request获取数据返回这样的操作同样也是和前端类似的处理方式。</p>
 
-<p>serialVersionID即 序列化的版本号，是为了保证不同版本之间的兼容性。向前兼容以及向后兼容。
-两种生成方式：</p>
+<pre><code>a页面前端：
+
+&lt;div&gt;header page&lt;/div&gt;
+
+。。。。。。
+
+。。。。。。
+
+&lt;div&gt;left page&lt;/div&gt;
+
+。。。。。。
+
+。。。。。。
+
+&lt;div&gt;footer page&lt;/div&gt;
+
+a页面后台：
+
+Aaction{
+
+getDataForHeader(...);
+
+。。。。。。
+
+。。。。。。
+
+getDataForLeft(...);
+
+。。。。。。
+
+。。。。。。
+
+getDataForFooter(...);
+
+。。。。。。
+
+。。。。。。
+
+getDataForASelf(...);
+
+}
+</code></pre>
+
+<p>b,c页面的开发与上面雷同，&lt;div&gt;left page&lt;/div&gt;，getDataForLeft(…)这样的代码会在每个页面前后台都会出现。这样我们就会发现left这个区块，其实它是一个内聚型的独立部分（展现+数据），它不需要依赖于所在页面的其它部分，这里我称之为block。</p>
+
+<p>对于这样的场景我们为了提高开发效率提高代码复用性，block我们应该将其与其他部分独立，如将这个页面分为Header，Left，Footer，Main这么几个block，每个block负责自己的展示以及数据的获取最后输出最终的展示html代码，这样他们就完全独立于所在页面，在其他有用到header，left，footer的页面直接在调用对应的block。另外页面分为很多块，其中有些是很少发生变化有些是经常更新的，其实在每次页面request的中，其实是有很多没有必要的后台处理。当这个页面PV量达到一定量时，这样的开销会变得很可观。这时我们可以将这样很少发生变化的block最后输出的html存放在缓存中（如memcache）,从而减少后台处理开销提高网站性能。</p>
+
+<p>实现技术选择：springMVC + freemarker.</p>
 
 <ol>
-  <li>使用默认的1L</li>
-  <li>根据类名 接口名 成员方法以及属性来生成</li>
+  <li>技术介绍</li>
 </ol>
 
-<p>如果一个类实现了序列化 但没有显示的申明序列化版本号  在程序编译的时候会自动生成一个版本号。存储在文件中，如果类有改动版本号也会随之改变。 在反序列化的时候JVM会将文件中的ID与本地相应实体类的ID比较  两者一致才能够序列化成功。否则会抛InvalidClassException异常。</p>
+<p>FreeMarker
+What:
+<img src="/image/FreeMarker.jpg" alt="" /></p>
 
-<p>静态化变量的序列化</p>
+<p>Template engine：一个基于Java的模板引擎。
+可应用于任何文本类型输出(更多的是用于web应用)
+开源项目</p>
 
-<pre><code>                    //初始时staticVar为5
-                    ObjectOutputStream out = new ObjectOutputStream(
-                                    new FileOutputStream("result.obj"));
-                    out.writeObject(new Test());
-                    out.close();
+<p>Why：</p>
 
-                    //序列化后修改为10
-                    Test.staticVar = 10;
+<p>使用template engine来代替JSP, 设计将变得简单，语法更简单，出错信息更易读，工具也更用户化。
+template优势（也即jsp的不足）</p>
 
-                    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
-                                    "result.obj"));
-                    Test t = (Test) oin.readObject();
-                    oin.close();
-                    //再读取，通过t.staticVar打印新的值
-                    System.out.println(t.staticVar); 以上代码的输出结果为10.。。因为序列化并不保存静态化变量。
+<ol>
+  <li>使前台脱离Java代码</li>
+  <li>减少工作量，template更加简洁</li>
+  <li>出错信息更加精准
+ JSP常有一些让人头疼的出错信息。因为页面首先被转换成为一个servlet然后才进行编译。即使有好的 JSP 工具可以相对增加找到出错位置的可能性，那也是不是一件容易的事儿。
+ 由于template engine可以在template文件中直接产生而没有任何戏剧性的向代码转化，所以可以非常容易地给出适当的出错报告。</li>
+  <li>不依赖编译器
+JSP需要一个置放在webserver中的编译器。但这样的编译器并不能在所有平台上顺利工作(用 C++写成的) 也不利于建立纯Java 的web服务器。</li>
+  <li>减少空间的浪费
+JSP消耗了额外的内存和硬盘空间。对服务器上每30K的JSP文件，必须要有相应的大于30K的类文件产生。实际上使得硬盘空间加倍。考虑到JSP文件随时可以很容易地通过 ＜%@ include＞包含一个大的数据文件。同时，每一个JSP的类文件数据必须加载到服务器的内存中，这意味着服务器的内存必须永远地将整个JSP文档树保存下去。对template engines由于没有产生第二个文件，所以节省了空间。Template engines还为程序员提供对templates</li>
+</ol>
+
+<p>在内存中进行缓存的完全控制。</p>
+
+<ol>
+  <li>利于实现页面block划分，实现页面的静态化。</li>
+</ol>
+
+<p>spring MVC
+what：</p>
+
+<p>Spring MVC框架是有一个MVC框架，通过实现Model-View-Controller模式来很好地将数据、业务与展现进行分离。Spring MVC的设计是围绕DispatcherServlet展开的，DispatcherServlet负责将请求派发到特定的handler。通过可配置的handler mappings、view resolution、locale以及theme resolution来处理请求并且转到对应的视图。</p>
+
+<p>Why：</p>
+
+<p>学习难度小于, 小于Struts2.
+易于开发性能优秀的程序。
+灵活性强，强大扩展性。</p>
+
+<ol>
+  <li>实例</li>
+</ol>
+
+<p>requirement</p>
+
+<pre><code>功能：实现用户登录显示用户信息
+要求：使用freemarker替代jsp,作为view层组件
+页面划分为Header，Left，Footer，Main三个block，block间相互独立
+模板文件存放在数据库
+具备较高的扩展性
+易维护
+实现技术：springMVC，freemarker, mybatis
 </code></pre>
 
-<p><strong>父类的序列化</strong></p>
+<p>impletement</p>
 
-<p>一个子类实现了Serializable接口  它的父类没有实现Serializable接口   序列化该子类对象然后反序列化输出父类定义的某变量的数值  该数值与序列化时的数值不同</p>
+<p>程序结构图：
+ <img src="/image/page-block-impl.png" alt="" /></p>
 
-<p>在父类没有实现Serializable接口时  JVM将不会序列化父类对象  而一个Java对象的构造必须有父类对象 所以在反序列化时 只能调用父类的无参构造器作为默认的父对象  所以这是可以在父类的无参构造器中对变量进行初始化 否则父类变量都是默认的值</p>
+<p>建立如下工程目录：</p>
 
-<p><strong>Transient关键字</strong></p>
+<p><img src="/image/page-block-project.png" alt="" /></p>
 
-<p>Transient关键字的作用是控制变量的序列化，在变量申明前加上次关键字可以阻止该变量被序列化</p>
+<p>web.xml：(配置springMVC)</p>
 
-<p><strong>序列化存储规则</strong></p>
+<pre><code>&lt;context-param&gt;
 
-<pre><code> ObjectOutputStream out = new ObjectOutputStream(
-                                    new FileOutputStream("result.obj"));
-    Test test = new Test();
-    //试图将对象两次写入文件
-    out.writeObject(test);
-    out.flush();
-    System.out.println(new File("result.obj").length());
-    out.writeObject(test);
-    out.close();
-    System.out.println(new File("result.obj").length());
+&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
 
-    ObjectInputStream oin = new ObjectInputStream(new FileInputStream(
-                    "result.obj"));
-    //从文件依次读出两个文件
-    Test t1 = (Test) oin.readObject();
-    Test t2 = (Test) oin.readObject();
-    oin.close();
-    //判断两个引用是否指向同一个对象
-    System.out.println(t1 == t2);
+&lt;param-value&gt;classpath:*Context.xml&lt;/param-value&gt;
+
+&lt;/context-param&gt;
+
+&lt;listener&gt;
+
+&lt;display-name&gt;contextLoaderListener&lt;/display-name&gt;
+
+&lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener
+
+&lt;/listener-class&gt;
+
+&lt;/listener&gt;
+
+&lt;listener&gt;
+
+&lt;listener-class&gt;org.springframework.web.context.request.
+
+RequestContextListener
+
+&lt;/listener-class&gt;
+
+&lt;/listener&gt;
+
+&lt;servlet&gt;
+
+&lt;servlet-name&gt;springmvc&lt;/servlet-name&gt;
+
+&lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet
+
+&lt;/servlet-class&gt;
+
+&lt;init-param&gt;
+
+&lt;description&gt;mvc.xml&lt;/description&gt;
+
+&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+
+&lt;param-value&gt;classpath:test-mvc.xml&lt;/param-value&gt;
+
+&lt;/init-param&gt;
+
+&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+
+&lt;/servlet&gt;
+
+&lt;servlet-mapping&gt;
+
+&lt;servlet-name&gt;springmvc&lt;/servlet-name&gt;
+
+&lt;url-pattern&gt;/&lt;/url-pattern&gt;
+
+&lt;/servlet-mapping&gt;
+
+test-mvc.xml：
+&lt;mvc:annotation-driven/&gt;
+
+&lt;!-- 静态的资源文件不要spring的过滤 --&gt;
+
+&lt;mvc:resources mapping="/img/**" location="/img/" /&gt;
+
+&lt;context:component-scan base-package="com.**.controller" /&gt;
+
+&lt;bean id="viewResolver"
+
+class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewRes olver"&gt;
+
+&lt;property name="cache" value="true" /&gt;
+
+&lt;property name="prefix" value="" /&gt;
+
+&lt;property name="suffix" value=".ftl" /&gt;
+
+&lt;property name="contentType" value="text/html;charset=UTF-8" /&gt;
+
+&lt;property name="requestContextAttribute" value="request" /&gt;
+
+&lt;!-- 使用这些宏，必须设置FreeMarkerViewResolver的exposeMacroHelpers属性为true：
+
+在所有需要使用&lt;@spring.bind&gt;和&lt;@spring.bindEscaped&gt;的FreeMarker模板的
+
+顶部增加以下一行：&lt;#import "/spring.ftl" as spring /&gt;
+
+这一行会在模板中导入Spring的FreeMarker宏。
+
+--&gt;
+
+&lt;property name="exposeSpringMacroHelpers" value="true" /&gt;
+
+&lt;!-- 将请求和会话属性作为变量暴露给FreeMarker模板使用 --&gt;
+
+&lt;property name="exposeRequestAttributes" value="true" /&gt;
+
+&lt;property name="exposeSessionAttributes" value="true" /&gt;
+
+&lt;/bean&gt;
+
+在resource中的applicationContext.xml
+中配置freemarker和页面所需要的各个block，具体配置如下：
+&lt;!-- freemarker 配置 --&gt;
+
+&lt;bean id="freemarkerConfig"
+
+class="org.springframework.web.servlet.view.freemarker.
+
+FreeMarkerConfigurer"&gt;
+
+&lt;property name="templateLoaderPath" value="/WEB-INF/" /&gt;
+
+&lt;property name="freemarkerSettings"&gt;
+
+&lt;props&gt;
+
+&lt;prop key="template_update_delay"&gt;0&lt;/prop&gt;
+
+&lt;prop key="default_encoding"&gt;UTF-8&lt;/prop&gt;
+
+&lt;prop key="number_format"&gt;0.##########&lt;/prop&gt;
+
+&lt;prop key="datetime_format"&gt;yyyy-MM-dd HH:mm:ss&lt;/prop&gt;
+
+&lt;prop key="classic_compatible"&gt;true&lt;/prop&gt;
+
+&lt;prop key="template_exception_handler"&gt;ignore&lt;/prop&gt;
+
+&lt;/props&gt;
+
+&lt;/property&gt;
+
+&lt;/bean&gt;
+
+&lt;!-- 配置各个block,每个block包含对应的ftl模板文件在数据库对应的名字
+
+和freemarkerConfig对象以及其他所需属性 --&gt;
+
+&lt;beanid="baseBlack"abstract="true"&gt;
+
+&lt;property name="freemarkerConfig" ref="freemarkerConfig"/&gt;
+
+&lt;/bean&gt;
+
+&lt;bean id="blockManager" class="com.au.common.BlockManager"
+
+factory-method="getInstance" /&gt;
+
+&lt;bean id="headBlock" class="com.au.cms.block.HeadBlock" parent="baseBlack"&gt;
+
+&lt;property name="template" value="headBlock"&gt;&lt;/property&gt;
+
+&lt;/bean&gt;
+
+&lt;bean id="middleBlock" class="com.au.cms.block.MiddleBlock" parent="baseBlack"&gt;
+
+&lt;property name="template" value="middleBlock"&gt;&lt;/property&gt;
+
+&lt;property name="userDao" ref="userDao"/&gt;
+
+&lt;/bean&gt;
+
+&lt;bean id="footBlock" class="com.au.cms.block.FootBlock" parent="baseBlack"&gt;
+
+&lt;property name="template" value="footBlock"&gt;&lt;/property&gt;
+
+&lt;/bean&gt;
 </code></pre>
 
-<p>同一对象两次写入文件，打印出写入一次对象后的存储大小和写入两次后的存储大小，然后从文件中反序列化出两个对象，比较这两个对象是否为同一对象。一般的思维是，两次写入对象，文件大小会变为两倍的大小，反序列化时，由于从文件读取，生成了两个对象，判断相等时应该是输入 false 才对，最后却为TRUE。</p>
+<p>主要类实现</p>
 
-<p>因为：Java 序列化机制为了节省磁盘空间，具有特定的存储规则，当写入文件的为同一对象时，并不会再将对象的内容进行存储，而只是再次存储一份引用，上面增加的 5 字节的存储空间就是新增引用和一些控制信息的空间。反序列化时，恢复引用关系，使得清单 3 中的 t1 和 t2 指向唯一的对象，二者相等，输出 true。该存储规则极大的节省了存储空间。</p>
+<p>Controller类：</p>
+
+<pre><code>	@Autowired
+	
+	private BlockManager blockManager;
+	
+	@RequestMapping(value = "welcome", method=RequestMethod.GET)
+	
+	public ModelAndView getFirstPage(HttpServletRequest request) {
+	
+	ModelAndView mvc = new ModelAndView("layout/welcome");
+	
+	return mvc;
+	
+	}
+</code></pre>
+
+<p>BlockManager实现一个自定函数用于调用对应的Block并包含show方法如下：</p>
+
+<pre><code>publicclass BlockManager implements TemplateMethodModel {
+
+@SuppressWarnings("rawtypes")
+
+@Override
+
+public Object exec(List args) throws TemplateModelException {
+
+String blockId = args.get(0).toString();
+
+ApplicationContext context = ApplicationContextUtil.getApplicationContext();
+
+HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+
+.getRequest();
+
+if (context.containsBean(blockId)) {
+
+Block block = (Block) context.getBean(blockId);
+
+return block.execute(request);
+
+}
+
+return"";
+
+}
+
+}
+
+AbstractBlock（impletement Block 接口）：
+
+protected String template;
+
+protected FreeMarkerConfigurationFactory freemarkerConfig;
+
+publicvoid setTemplate(String template) {
+
+this.template = template;
+
+}
+
+publicvoid setFreemarkerConfig(FreeMarkerConfigurationFactory freemarkerConfig) {
+
+this.freemarkerConfig = freemarkerConfig;
+
+}
+
+abstractprotected Map&lt;String, Object&gt; preExecute(HttpServletRequest request);
+
+@Override
+
+public String execute(HttpServletRequest request) {
+
+Map&lt;String, Object&gt; map = preExecute(request);
+
+String templateByUser = (String)map.get("BLOCK_TEMPLATE_FILE");
+
+String content = "";
+
+if (templateByUser != null &amp;&amp; !templateByUser.trim().equals("")) {
+
+content = TemplateUtil.process(map, freemarkerConfig, templateByUser);
+
+}
+
+if (templateByUser != null &amp;&amp; templateByUser.trim().equals("")) {
+
+return"";
+
+}
+
+if (templateByUser == null) {
+
+content = TemplateUtil.process(map, freemarkerConfig, template);
+
+}
+
+return postExecute(content);
+
+}
+
+protected String postExecute(String content) {
+
+return content;
+
+}
+
+MiddleBlock（继承AbstractBlock，实现preExcute方法，获取数据）：
+
+@Override
+
+protected Map&lt;String, Object&gt; preExecute(HttpServletRequest request) {
+
+String name = request.getParameter("name");
+
+User user = userDao.getUserByName(name);
+
+Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+
+map.put("user", user);
+
+return map;
+
+}
+
+TemplateDataMerge（从数据库取出模板文件merge数据）
+
+Configuration conf = ((FreeMarkerConfigurer) freemarkerConfig).getConfiguration();
+
+FtlSourceDao ftlSourceDao = (FtlSourceDao) ApplicationContextUtil.getApplicationContext().getBean("ftlSourceDao");
+
+FtlSource ftl = ftlSourceDao.getFtlSourceByName(ftlName);
+
+Reader reader = new StringReader(ftl.getFtlSource());
+
+Template template = new Template(ftlName, reader, conf, "UTF-8");
+
+writer = new StringWriter();
+
+template.process(map, writer);
+
+String rs = writer.toString();
+</code></pre>
+
+<p>至此程序的主要逻辑已经清楚，其他代码如model,service,dao等就不一一附上。如需要可联系我们</p>
+
+<p>4.测试
+访问项目结果如下</p>
+
+<p><img src="/image/page-block-res.png" alt="" /></p>
+
+<p>完。。。</p>
 
 
-      <div class="readall"><a href="/blog/2014/09/27/Java-Serialization.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/Page-Block.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -221,283 +796,101 @@ socket/thread</li>
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Java-File.html">Java File</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/Nginx.html">初始Nginx</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#java">java</a>
+        <a class="post-category" href="/page/category.html#ws">ws</a>
       </p>
     </header>
     <div class="post-main">
-      <p>/**
- * @author Toby 通用工具类
- */
-public class Utils {</p>
+      <p>Nginx 是一个轻量级，以占用系统资源少，运行效率而成为web服务器的后起之秀，国内现在很多大型网站都以使用nginx。
+直接php+mysql这是Linux web服务器的黄金组合。今天我们一来学如何在ubuntu 12.04 中架设lnmp。</p>
 
-<pre><code>/**
- * @param args
- * @throws Exception
- * @throws IOException
- */
-public static void main(String[] args) throws IOException, Exception {
-    // TODO Auto-generated method stub
-    // File file = new File("D:/user/mms.xml");
-    // System.out.println(file.renameTo(new File("D:/user/mms5.xml")));
-
-    // 1
-    // compress("D:/user/test", "D:/user/test.zip");
-
-    /*
-     * String fileName = "D:/user/88.zip"; try {
-     * System.out.println(encryptBASE64(readFileToBytes(fileName))); } catch
-     * (Exception e) { // TODO Auto-generated catch block
-     * e.printStackTrace(); }
-     */
-
-    /*
-     * String mi
-     * ="UEsDBBQACAA";
-     * RandomAccessFile inOut = new RandomAccessFile(
-     * "D:/user/sample.","rw"); inOut.write(decryptBASE64(mi));
-     * inOut.close();
-     */
-
-    // System.out.println(new String(decryptBASE64("5rWL6K+V"),"utf-8"));
-    // 2
-    // String xml =
-    // createXML("1828","qww","123456","10658103619033","15918542546",encryptBASE64("两款茶饮润肺护肤防过敏".getBytes()),encryptBASE64(readFileToBytes("D:/user/test.zip")));
-    // System.out.println(xml);
-    /*
-     * String xml = "&lt;?xml version=\"1.0\" encoding=\"UTF-8\"
-     * standalone=\"yes\"?&gt;&lt;TaskDataTransfer4ERsp
-     * xmlns=\"http://www.aspirehld.com/iecp/TaskDataTransfer4ERsp\"&gt;&lt;ResultCode&gt;2000&lt;/ResultCode&gt;&lt;TaskId&gt;&lt;/TaskId&gt;&lt;ResultMSG&gt;没有获得IP鉴权!&lt;/ResultMSG&gt;&lt;/TaskDataTransfer4ERsp&gt;";
-     * 
-     * Document doc = DocumentHelper.parseText(xml); // 将字符串转为XML Element
-     * rootElt = doc.getRootElement(); // 获取根节点
-     * 
-     * String resultCode = rootElt.element("ResultCode").getTextTrim();
-     * String TaskId = rootElt.element("TaskId").getTextTrim(); String
-     * ResultMSG = rootElt.element("ResultMSG").getTextTrim();
-     * System.out.println(" "+resultCode+" "+TaskId+" "+ResultMSG);
-     */
-
-}
-
-/**
- * BASE64解密
- * 
- * @param key
- * @return
- * @throws Exception
- */
-public static byte[] decryptBASE64(String key) throws Exception {
-    return (new BASE64Decoder()).decodeBuffer(key);
-}
-
-/**
- * BASE64加密
- * 
- * @param key
- * @return
- * @throws Exception
- */
-public static String encryptBASE64(byte[] key) throws Exception {
-    return (new BASE64Encoder()).encodeBuffer(key);
-}
-
-/**
- * 获取路径下所有文件名
- * 
- * @param path
- * @return
- */
-public static String[] getFile(String path) {
-    File file = new File(path);
-    String[] name = file.list();
-    return name;
-}
-
-/**
- * 
- * @param sourceDirPath
- * @param targetDirPath
- * @throws IOException
- */
-public static void copyDir(String sourceDirPath, String targetDirPath) throws IOException {
-    // 创建目标文件夹
-    (new File(targetDirPath)).mkdirs();
-    // 获取源文件夹当前下的文件或目录
-    File[] file = (new File(sourceDirPath)).listFiles();
-    for (int i = 0; i &lt; file.length; i++) {
-        if (file[i].isFile()) {
-            // 复制文件
-            String type = file[i].getName().substring(file[i].getName().lastIndexOf(".") + 1);
-
-            if (type.equalsIgnoreCase("txt"))
-                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()), MTOServerConstants.CODE_UTF_8,
-                        MTOServerConstants.CODE_GBK);
-            else
-                FileUtil.copyFile(file[i], new File(targetDirPath + file[i].getName()));
-        }
-        if (file[i].isDirectory()) {
-            // 复制目录
-            String sourceDir = sourceDirPath + File.separator + file[i].getName();
-            String targetDir = targetDirPath + File.separator + file[i].getName();
-            FileUtil.copyDirectiory(sourceDir, targetDir);
-        }
-    }
-}
-
-/**
- * 读取文件中内容
- * 
- * @param path
- * @return
- * @throws IOException
- */
-public static String readFileToString(String path) throws IOException {
-    String resultStr = null;
-    FileInputStream fis = null;
-    try {
-        fis = new FileInputStream(path);
-        byte[] inBuf = new byte[2000];
-        int len = inBuf.length;
-        int off = 0;
-        int ret = 0;
-        while ((ret = fis.read(inBuf, off, len)) &gt; 0) {
-            off += ret;
-            len -= ret;
-        }
-        resultStr = new String(new String(inBuf, 0, off, MTOServerConstants.CODE_GBK).getBytes());
-    } finally {
-        if (fis != null)
-            fis.close();
-    }
-    return resultStr;
-}
-
-/**
- * 文件转成字节数组
- * 
- * @param path
- * @return
- * @throws IOException
- */
-public static byte[] readFileToBytes(String path) throws IOException {
-    byte[] b = null;
-    InputStream is = null;
-    File f = new File(path);
-    try {
-        is = new FileInputStream(f);
-        b = new byte[(int) f.length()];
-        is.read(b);
-    } finally {
-        if (is != null)
-            is.close();
-    }
-    return b;
-}
-
-/**
- * 将byte写入文件中
- * 
- * @param fileByte
- * @param filePath
- * @throws IOException
- */
-public static void byteToFile(byte[] fileByte, String filePath) throws IOException {
-    OutputStream os = null;
-    try {
-        os = new FileOutputStream(new File(filePath));
-        os.write(fileByte);
-        os.flush();
-    } finally {
-        if (os != null)
-            os.close();
-    }
-}
-
-/**
- * 将目录文件打包成zip
- * 
- * @param srcPathName
- * @param zipFilePath
- * @return 成功打包true 失败false
- */
-public static boolean compress(String srcPathName, String zipFilePath) {
-    if (strIsNull(srcPathName) || strIsNull(zipFilePath))
-        return false;
-
-    File zipFile = new File(zipFilePath);
-    File srcdir = new File(srcPathName);
-    if (!srcdir.exists())
-        return false;
-    Project prj = new Project();
-    Zip zip = new Zip();
-    zip.setProject(prj);
-    zip.setDestFile(zipFile);
-    FileSet fileSet = new FileSet();
-    fileSet.setProject(prj);
-    fileSet.setDir(srcdir);
-    zip.addFileset(fileSet);
-    zip.execute();
-    return zipFile.exists();
-}
-
-/**
- * 判空字串
- * 
- * @param str
- * @return 为空true
- */
-public static boolean strIsNull(String str) {
-    return str == null || str.equals("");
-}
-
-/**
- * 折分数组
- * 
- * @param ary
- * @param subSize
- * @return
- */
-public static List&lt;List&lt;Object&gt;&gt; splitAry(Object[] ary, int subSize) {
-    int count = ary.length % subSize == 0 ? ary.length / subSize : ary.length / subSize + 1;
-
-    List&lt;List&lt;Object&gt;&gt; subAryList = new ArrayList&lt;List&lt;Object&gt;&gt;();
-
-    for (int i = 0; i &lt; count; i++) {
-        int index = i * subSize;
-
-        List&lt;Object&gt; list = new ArrayList&lt;Object&gt;();
-        int j = 0;
-        while (j &lt; subSize &amp;&amp; index &lt; ary.length) {
-            list.add(ary[index++]);
-            j++;
-        }
-
-        subAryList.add(list);
-    }
-
-    return subAryList;
-}
-
-/**
- * @param mobile
- * @return
- */
-public static String ArrayToString(Object[] mobile) {
-    String destId = "";
-    for (Object phone : mobile) {
-        destId += " " + (String) phone;
-    }
-    return destId.trim();
-} }
+<pre><code>1. 使用官方PPA安装 Nginx 最新版本，使用以下命令：
+sudo add-apt-repository ppa:nginx/stable
+sudo apt-get update
+sudo apt-get install nginx
 </code></pre>
 
-      <div class="readall"><a href="/blog/2014/09/27/Java-File.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<p>Nginx相关控制命令：
+启动 Nginx：</p>
+
+<pre><code>sudo /etc/init.d/nginx start
+</code></pre>
+
+<p>浏览器浏览运行情况输入：http://localhost ;如果现实”Welcome to nginx!”，表明你的 Nginx 服务器安装成功！</p>
+
+<pre><code>关闭 Nginx：sudo /etc/init.d/nginx stop;
+重启 nginx：sudo /etc/init.d/nginx restart;
+</code></pre>
+
+<ol>
+  <li>
+    <p>安装 PHP，输入以下命令：</p>
+
+    <pre><code> sudo apt-get install php5-cli php5-cgi php5-fpm php5-mcrypt php5-mysql
+</code></pre>
+  </li>
+</ol>
+
+<p>以用户rob在本机localhost的9100端口下运行一个PHP FastCGI进程，输入以下命令</p>
+
+<pre><code>/usr/bin/spawn-fcgi -a 127.0.0.1 -p 9100 -u rob -g rob -f /usr/bin/php5-cgi -P /var/run/fastcgi-php.pid 加入开机运行，以免每次开机运行此命令。
+
+vi /etc/rc.local 在最后一行加入下面语句（在exit前面）。
+
+[...]
+/usr/bin/spawn-fcgi -a 127.0.0.1 -p 9100 -u rob -g rob -f /usr/bin/php5-cgi -P /var/run/fastcgi-php.pid
+[...]
+</code></pre>
+
+<p>配置Nginx站点，设置：</p>
+
+<pre><code>sudo vi /etc/nginx/sites-available/default
+</code></pre>
+
+<p>修改 “index” 为：“index index.html index.htm index.php;”
+删除以下内容：</p>
+
+<pre><code>location ~ \.php$ {
+fastcgi_pass 127.0.0.1:9000;
+fastcgi_index index.php;
+include fastcgi_params;
+} 测试，创建网站目录
+
+sudo mkdir /var/www/
+</code></pre>
+
+<p>建立一个虚拟站点：</p>
+
+<pre><code>sudo vi /etc/nginx/sites-available/default
+</code></pre>
+
+<p>修改root目录: “root /var/www;”
+建立一个测试页面：</p>
+
+<pre><code>sudo vi /var/www/test.php
+</code></pre>
+
+<p>在测试页面test.php中加入以下代码:</p>
+
+<pre><code>&lt;?php phpinfo();?&gt; 重启nginx
+
+sudo /etc/init.d/nginx restart
+</code></pre>
+
+<p>浏览器输入以下地址，看看有没有安装成功！</p>
+
+<p>http://localhost/test.php
+3.安装 MySQL 数据库：</p>
+
+<pre><code>sudo apt-get install mysql-server
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/Nginx.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -505,7 +898,7 @@ public static String ArrayToString(Object[] mobile) {
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/InputFormat.html">InputFormat实现流程</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/Mysql-outputformat.html">Mysql outputformat简单实现</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
@@ -515,55 +908,226 @@ public static String ArrayToString(Object[] mobile) {
       </p>
     </header>
     <div class="post-main">
-      <p>自定义InputFormat类步骤：</p>
+      <p>================================OutputFormat=========</p>
 
-<ol>
-  <li>
-    <p>继承InputFormat抽象类，InputFormat&lt;K, V&gt;</p>
-  </li>
-  <li>
-    <p>根据具体需求逻辑，实现自定义key,value.
-自定义key,value类，需要实现WritableComparable接口，
-实现其中的readFields, write, compareTo 方法
-readFields，write 分别实现对读写的序列化和反序列化
-注：对于实现类的属性，在实现readFields和write方法是必须保持顺序一致。
-compareTo方法，根据具体逻辑实现对实现对象的比较，用于map/reduce过程中的排序。</p>
-  </li>
-  <li>
-    <p>在继承InputFormat抽象类后，需要实现其中的两个抽象方法。</p>
+<pre><code>import java.io.IOException;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.List;
 
-    <pre><code> List&lt;InputSplit&gt; getSplits(JobContext context)
- RecordReader&lt;K,V&gt; createRecordReader(InputSplit split, TaskAttemptContext context )  3.1
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.OutputCommitter;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+import com.augmentum.rob.input.Person;
+
+public class MySqlOutputFormat extends OutputFormat&lt;NullWritable, Person&gt; {
+
+@Override
+public RecordWriter&lt;NullWritable, Person&gt; getRecordWriter(
+TaskAttemptContext context) throws IOException,
+InterruptedException {
+MysqlRecordWriter mysqlRecordWriter = null;
+try {
+String connString = "jdbc:mysql://172.20.29.29:3306/MapReduceInputTest";
+Class.forName("com.mysql.jdbc.Driver");
+Connection connection = java.sql.DriverManager.getConnection(
+connString + "?useUnicode=true&amp;characterEncoding=utf8",
+"admin", "admin");
+Statement statement = connection.createStatement();
+mysqlRecordWriter = new MysqlRecordWriter(connection, statement);
+
+} catch (Exception ex) {
+throw new IOException(ex.getMessage());
+}
+
+return mysqlRecordWriter;
+}
+
+@Override
+public void checkOutputSpecs(JobContext context) throws IOException,
+InterruptedException {
+// TODO Auto-generated method stub
+// 判断输出表是否设置
+
+// 判断输出表是否存在
+
+}
+
+@Override
+public OutputCommitter getOutputCommitter(TaskAttemptContext context)
+throws IOException, InterruptedException {
+return new FileOutputCommitter(
+FileOutputFormat.getOutputPath(context),
+context);
+}
+
+}
 </code></pre>
 
-    <p>List<inputsplit> getSplits(JobContext context)：
- 在该方法中我们需要实现对待处理文件按需求进行分割，方法返回值List的大小即为map的个数。
- 若需要我们自定义我们的分割方法我们需要需要继承InputSplit抽象类，该抽象类中拥有</inputsplit></p>
+<p>==========================RecordWriter=====================</p>
 
-    <pre><code> long getLength()        返回split的大小
- String[] getLocations() 返回获取数据的位置。
- 注：在继承InputSplit类时，必须实现Writable接口，否则此split无法在hadoop中传递。
- 实现Writable接口： 需要实现其中的 readFields，write 分别实现对读写的序列化和反序列化
+<pre><code>import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.util.StringUtils;
+
+import com.augmentum.rob.input.Person;
+public class MysqlRecordWriter extends RecordWriter&lt;NullWritable, Person&gt;{
+
+private Connection connection;
+private Statement statement;
+private static final Log LOG = LogFactory.getLog(MysqlRecordWriter.class);
+
+public MysqlRecordWriter() throws SQLException {}
+
+public MysqlRecordWriter(Connection connection, Statement statement) throws SQLException {
+this.connection = connection;
+this.statement = statement;
+this.connection.setAutoCommit(false);
+}
+
+public Connection getConnection() {
+return connection;
+}
+
+public Statement getStatement() {
+return statement;
+}
+
+@Override
+public void write(NullWritable key, Person person) throws IOException, InterruptedException {
+String sql = "INSERT person2(name, age) VALUES('"+person.getName()+"', "+person.getAge()+")";
+//可以根据key和value情况写多条INSERT SQL
+// List&lt;String&gt; sqlList = buildInsertSql();
+try {
+// if (sqlList != null &amp;&amp; sqlList.size() &gt; 0) {
+// for (String sql : sqlList) {
+// statement.addBatch(sql);
+// }
+// }
+statement.addBatch(sql);
+} catch (SQLException e) {
+e.printStackTrace();
+}
+}
+
+// //更具逻辑具体实现插入sql。
+// public abstract List&lt;String&gt; buildInsertSql();
+
+@Override
+public void close(TaskAttemptContext context) throws IOException, InterruptedException {
+try {
+statement.executeBatch();
+connection.commit();
+} catch (SQLException e) {
+try {
+connection.rollback();
+}
+catch (SQLException ex) {
+LOG.warn(StringUtils.stringifyException(ex));
+}
+throw new IOException(e.getMessage());
+} finally {
+try {
+statement.close();
+connection.close();
+}
+catch (SQLException ex) {
+throw new IOException(ex.getMessage());
+}
+}
+
+}
+
+}
 </code></pre>
 
-    <p>3.2</p>
+<p>======================================================================================================</p>
 
-    <p>RecordReader&lt;K,V&gt; createRecordReader(InputSplit split, TaskAttemptContext context )
- 在该方法中我们需要实现根据split对数据的读取，返回值RecordReader&lt;K, V&gt; 即map的输入键值。
- 由此我们需要继承RecodReader&lt;K, V&gt;抽象类，来实现我们的读取逻辑。
- 该抽象类的中方法：</p>
+<pre><code>import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
-    <pre><code> abstract void initialize(InputSplit split, TaskAttemptContext context ) ：初始化方法，一般在此读取数据
- abstract boolean nextKeyValue()     ：返回是否还有下一个键值对，并对其赋值。
- abstract KEYIN getCurrentKey()      ：Get the current key
- abstract  VALUEIN getCurrentValue() ：Get the current value.
- abstract float getProgress()        ：获取处理进度
- abstract void close()               ：结束方法， 销毁资源之类的操作
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
+import org.apache.hadoop.mapreduce.lib.db.DBOutputFormat;
+import org.apache.hadoop.mapreduce.lib.db.DBWritable;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class RobOut&lt;K extends DBWritable, V&gt; extends DBOutputFormat&lt;K, V&gt;{
+
+/** {@inheritDoc} */
+public RecordWriter&lt;K, V&gt; getRecordWriter(TaskAttemptContext context)
+throws IOException {
+DBConfiguration dbConf = new DBConfiguration(context.getConfiguration());
+
+String tableName = dbConf.getOutputTableName();
+String[] fieldNames = dbConf.getOutputFieldNames();
+
+if(fieldNames == null) {
+fieldNames = new String[dbConf.getOutputFieldCount()];
+}
+
+try {
+Connection connection = dbConf.getConnection();
+PreparedStatement statement = null;
+
+statement = connection.prepareStatement(
+constructQuery(tableName, fieldNames));
+return new DBRecordWriter(connection, statement);
+} catch (Exception ex) {
+throw new IOException(ex.getMessage());
+}
+}
+
+/**
+* Set the {@link Path} of the output directory for the map-reduce job.
+*
+* @param job The job to modify
+* @param outputDir the {@link Path} of the output directory for
+* the map-reduce job.
+*/
+public static void setOutputTable(Job job, String tableName) {
+job.getConfiguration().set("output.mysql.table" + tableName, tableName);
+}
+
+/**
+* Get the {@link Path} to the output directory for the map-reduce job.
+*
+* @return the {@link Path} to the output directory for the map-reduce job.
+* @see FileOutputFormat#getWorkOutputPath(TaskInputOutputContext)
+*/
+public static Path getOutputTable(JobContext job) {
+String name = job.getConfiguration().get("mapred.output.table");
+return name == null ? null: new Path(name);
+}
+
+}
 </code></pre>
-  </li>
-</ol>
 
-      <div class="readall"><a href="/blog/2014/09/27/InputFormat.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/Mysql-outputformat.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -571,234 +1135,95 @@ compareTo方法，根据具体逻辑实现对实现对象的比较，用于map/r
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Hadoop.html">单节点伪分布式Hadoop搭建</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/Mongodb-java.html">Mongodb java简单操作</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#"></a>
+        <a class="post-category" href="/page/category.html#nosql">nosql</a>
       </p>
     </header>
     <div class="post-main">
-      <p>单节点伪分布式Hadoop配置</p>
+      <pre><code>import java.net.UnknownHostException;
+import java.util.Set;
 
-<p>第一步： 安装JDK</p>
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
-<p>因为 Hadoop 运行必须安装 JDK 环境，因此在安装好 Linux 后进入系统的第一步 便是安装 JDK ，安装过程和在 Windows 环境中的安装步骤很类似，首先去 Oracle 官网 去下载安装包，然后直接进行解压。我自己解压在路径 /usr/jvm 下面，假如你的安装包现在已经下载在 jvm 文件夹下面，然后 按 Ctrl+Alt+t 进去命令行，然后输入</p>
+public class Mongodb {
 
-<pre><code>cd  /usr/jvm
+/**
+* @author gaogao
+* @param args
+* @throws MongoException
+* @throws UnknownHostException
+*/
+public static void main(String[] args) throws UnknownHostException,
+MongoException {
+// 连接本地数据库
+Mongo m = new Mongo();
+// 创建名为new_test_db的数据库
+DB db = m.getDB("new_test_db");
+// 获取new_test_db中的集合（类似于获取关系数据库中的表）
+Set&lt;String&gt; cols = db.getCollectionNames();
+// 打印出new_test_db中的集合，这里应当为null
+for (String s : cols) {
+System.out.println(s);
+}
+// 创建一个叫做"new_test_col"的集合
+DBCollection collection = db.getCollection("new_test_col");
+// 初始化一个基本DB对象，最终插入数据库的就是这个DB对象
+BasicDBObject obj = new BasicDBObject();
+// 放入几个键值对
+obj.put("from", "搞搞");
+obj.put("to", "宝宝");
+obj.put("subject", "狗子爱宝子");
+// 插入对象
+collection.insert(obj);
+// 查看一条记录，findOne()=find().limit(1);
+DBObject dbobj = collection.findOne();
+// 打印出刚才插入的数据
+System.out.println(dbobj);
+System.out.println("==================================================");
+// 现在我们来插入9条{ranking:i}的数据
+for (int i = 0; i &lt; 9; i++) {
+collection.insert(new BasicDBObject().append("ranking", i));
+}
+// 打印集合中的数据总数，这里应当输出10
+System.out.println(collection.getCount());
+// 下面我们来遍历集合，find()方法返回的是一个游标(cursor)，这里的概念和关系数据库很相似
+DBCursor cursor = collection.find();
+// 然后我们使用这个游标来遍历集合
+while (cursor.hasNext()) {
+System.out.println(cursor.next());
+}
+// 下面来看一些略复杂一点的查询技巧，第一个，简单的条件查询，查询ranking为1的记录
+BasicDBObject query = new BasicDBObject();
+query.put("ranking", 1);
+cursor = collection.find(query);
+while (cursor.hasNext()) {
+System.out.println(cursor.next());
+}
+// 下面是更复杂的条件查询，查询ranking大于5小于9的记录
+query = new BasicDBObject();
+query.put("ranking", new BasicDBObject("$gt", 5).append("$lt", 9));
+cursor = collection.find(query);
+while (cursor.hasNext()) {
+System.out.println(cursor.next());
+}
+// 最后删除我们的测试数据库
+m.dropDatabase("new_test_db");
+}
+}
 </code></pre>
 
-<p>进入到jvm文件夹下面，然后再输入如下命令进行解压：</p>
-
-<pre><code>sudo tar  -zxvf  jdk-7u40-linux-i586.tar.gz
-</code></pre>
-
-<p>第二步： 配置环境变量</p>
-
-<p>解压结束以后，像在 Windows 系统中一样，需要配置环境变量，在 Ubuntu 中设置 环境变量的过程为打开文件 /etc/profile ，因为权限的问题，因此在命令行需要输入 的是</p>
-
-<pre><code>sudo gedit /etc/profile
-</code></pre>
-
-<p>然后在根据提示输入用户密码即可，然后在文件最下面添加如下：</p>
-
-<pre><code>export JAVA_HOME=/usr/jvm/jdk1.7.0_40
-
-export CLASSPATH=".:$JAVA_HOME/lib:$JAVA_HOME/jre/lib$CLASSPATH"
-
-export PATH="$JAVA_HOME/bin:$JAVA_HOME/jre/bin:/usr/hadoop/hadoop-1.2.1/bin:$PATH"
-</code></pre>
-
-<p>上面这三个以单词 export 开始的三个语句就类似于我们在 Windows 中的环境变量中设置一样，而且在这个里面和 Windows 中不同的是，在 Windows 中使用 “；” 号来表示分隔，但是在 Ubuntu 中是以 “：” 号来表示分隔。还需要注意的是，上面的路径都是我自己配置的时候的路径，因为我的 JDK 解压在 /usr/jvm 中，所以我的 JAVA_HOME 设置的是那个路径，而且如果安装的 JDK 版本不同那么后面的也不一样。同理在 CLASSPATH 路径中也是因为我自己的安装路径进行设置的，因此在配置过程中需要读者注意。在 PATH 路径中最后面还将 Hadoop 的路径也添加了进去，因此在读者安装了 Hadoop 后也将这个路径添加进环境变量 PATH 中去。</p>
-
-<p>在配置完环境变量后，我们来将我们安装的 JDK 设置为 Ubuntu 系统默认的 JDK ，因为之前系统里面自带 openjdk ，在命令行里面输入如下：</p>
-
-<pre><code>sudo update-alternatives  --install  /usr/bin/java  java  /usr/jvm/jdk1.7.0_40/bin/java 300
-
-sudo update-alternatives  --install  /usr/bin/javac  javac  /usr/jvm/jdk1.7.0_40/bin/javac 300
-
-sudo update-alternatives  --config  java
-</code></pre>
-
-<p>然后我们就可以在命令行输入 java -version 来进行察看 JDK 是否已经配置好了。</p>
-
-<p>第三步： 安装Hadoop  </p>
-
-<p>我们可以去 Hadoop 官网上去下载安装包，我自己下载使用的是 hadoop-1.2.1.tar.gz ，然后当安装包下载结束后，将安装包解压到指定位置，我将安装包解压到了 /usr/hadoop 目录下面。</p>
-
-<p>具体步骤是，像解压 JDK 一样，首先加入下载的 Hadoop 安装包在 /usr/hadoop 文件夹下面。然后在命令行下进入 /usr/hadoop 文件，类似于上面的。然后输入解压命令如下</p>
-
-<pre><code>sudo  tar  -zxvf  hadoop-1.2.1.tar.gz  
-</code></pre>
-
-<p>后面的 Hadoop 安装包名称具体看你下载的版本，我下载的是1.2.1版本的。 为了以后操作 /usr/hadoop 文件夹里面的文件方便，我们设置一下文件夹的权限，在命令行输入如下</p>
-
-<pre><code>sudo  chown  -hR  long  /usr/hadoop
-</code></pre>
-
-<p>注意：在上面的命令中，long是我自己此时登陆的用户名，因此你需要将那个改成你自己的用户名。</p>
-
-<p>第四步： 配置Hadoop环境变量</p>
-
-<p>在上面解压完 Hadoop 以后，现在我们来设置环境变量，其实在上面刚才我们配置 JDK 环境变量的时候，已经在 PATH 路径后面添加了 Hadoop 安装目录的 bin 目录的路径，所以那个就代表环境变量已经设置好了，但是读者一定要注意，不要 Copy ，要明确自己的 Hadoop 安装路径来进行配置。</p>
-
-<p>第五步： 设置SSH（安全外壳协议）</p>
-
-<p>推荐安装 OpenSSH ， Hadoop 需要通过 SSH 来启动 Slave 列表中各台主机的守护进程，因此 SSH 是必需安装的。虽然我们现在搭建的是一个伪分布式的平台，但是 Hadoop 没有区分开集群式和伪分布式，对于伪分布式， Hadoop 会采用与集群相同的处理方式，即按次序启动文件 conf/slaves 中记载的主机进程，只不过在伪分布式中 Salve 为 localhost 而已，所以对于伪分布式， SSH 是必须的。</p>
-
-<p>配置过程（首先确保连接上网络）：</p>
-
-<p>① 安装SSH，在命令行输入如下</p>
-
-<pre><code>sudo  apt-get install openssh-server
-</code></pre>
-
-<p>② 配置可以免密码登陆本机</p>
-
-<p>在命令行输入（注意其中的ssh前面还有一个 “ . ” 不要遗漏）</p>
-
-<pre><code>ssh-keygen  -t  dsa -P '' -f  ~/.ssh/id_dsa 
-</code></pre>
-
-<p>（解释一下上面这条命令， ssh-keygen  代表生成密钥； -t  表示指定生成的密钥 类型； dsa  是 dsa 密钥认证的意思； -P  用于提供密语（接着后面是两个单引号， 不要打错）； -f  表示指定生成密钥文件）</p>
-
-<p>这条命令完成后，会在当前文件夹下面的 .ssh 文件夹下创建 id_dsa 和 id_dsa.pub 两个文件，这是 SSH 的一对私钥和公钥，把 id_dsa.pub （公钥）追加到授权的 key 中去，输入如下命令：</p>
-
-<pre><code>cat  ~/.ssh/id_dsa.pub  &gt;&gt;  ~/.ssh/authorized_keys
-</code></pre>
-
-<p>至此，免密码登陆本机已经配置完毕。</p>
-
-<p>说明：一般来说，安装SSH时会自动在当前用户下创建.ssh这个隐藏文件夹，一般不会直接看到，除非安装好了以后，在命令行使用命令ls才会看到。</p>
-
-<p>③ 输入 ssh  localhost ，显示登陆成功信息。</p>
-
-<p>第六步： 配置Hadoop伪分布式模式</p>
-
-<p>现在进入到安装 Hadoop 的文件夹，找到里面的 conf 文件夹，点击进去。</p>
-
-<p>配置 hadoop 环境文件 hadoop-env.sh</p>
-
-<p>打开文件，找到某行有 ”# export JAVA_HOME = …”  字样的地方，去掉 “#” ，然后在等号后面填写你自己的 JDK 路径，比如像我自己的 JDK 路径，那就改为了 如下所示</p>
-
-<pre><code>“export  JAVA_HOME=/usr/jvm/jdk1.7.0_40”
-</code></pre>
-
-<p>配置 Hadoop 的核心文件 core-site.xml</p>
-
-<p>打开文件，会发现标签 <configuration></configuration> 中是空的，在空的地方添加如下配置</p>
-
-<pre><code>&lt;property&gt;
-
-            &lt;name&gt;fs.default.name&lt;/name&gt;
-
-            &lt;value&gt;hdfs://localhost:9000&lt;/value&gt;
-
-     &lt;/property&gt;
-
-
-
-     &lt;property&gt;
-
-             &lt;name&gt;dfs.replication&lt;/name&gt;
-
-             &lt;value&gt;1&lt;/value&gt;
-
-     &lt;/property&gt;
-
-
-
-     &lt;property&gt;
-
-              &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
-
-              &lt;value&gt;/home/long/tmp&lt;/value&gt;
-
-     &lt;/property&gt;
-</code></pre>
-
-<p>（注意：在最后一个value值中，上面是long，是因为那是我的用户名，所以你需要将那个修改为你自己的用户名）</p>
-
-<p>配置 Hadoop 中 MapReduce 的配置文件 mapred-site.xml</p>
-
-<p>打开文件，会发现标签 <configuration></configuration> 中是空的，在空的地方添加如下配置</p>
-
-<pre><code>&lt;property&gt;
-
-     &lt;name&gt;mapred.job.tracker&lt;/name&gt;
-
-     &lt;value&gt;localhost:9001&lt;/value&gt;
-
-&lt;/property&gt;
-</code></pre>
-
-<p>第七步： 格式化Hadoop文件系统HDFS并启动Hadoop</p>
-
-<p>首次运行 hadoop 必须进行格式化 Hadoop 文件系统，以后运行即可跳过。打开命令行，进入安装了 Hadoop 的文件路径下，然后在命令行输入</p>
-
-<pre><code>bin/hadoop  namenode -format
-</code></pre>
-
-<p>格式化文件系统，然后启动 Hadoop ，在命令行里面输入
-	bin/start-all.sh</p>
-
-<p>验证是否正常启动，在命令行里面输入 jps ，然后回车，如果在命令行里面出现如下类似画面（因为前面的数字可以不同）</p>
-
-<pre><code>3235 NameNode
-
-4113 Jps
-
-3819 JobTracker
-
-4059 TaskTracker
-
-3721 SecondaryNameNode
-
-3487 DataNode
-</code></pre>
-
-<p>则说明已经正常启动。如果以后需要关闭 Hadoop 的话，在 Hadoop 安装的文件夹路径下面在命令行输入</p>
-
-<pre><code>bin/stop-all.sh
-</code></pre>
-
-<p>来关闭 Hadoop 。</p>
-
-<p>第八步： 跑一个Hadoop中自带的WordCount程序，来体验一把</p>
-
-<p>步骤如下（我在自己平台上的，读者可仿照实验）：</p>
-
-<p>1)  准备一个文本文件</p>
-
-<p>首先我在桌面，新建了一个空白文档 test ，在里面输入一段话，或是几一些什么 单 词什么的，保存。</p>
-
-<p>2)  将文本文件上传到 dfs 文件系统中的 input 目录下，打开命令行，进入到安装 hadoop 的文件夹下，然后输入如下</p>
-
-<pre><code>bin/hadoop  dfs  -copyFromLocal  /home/long/桌面/test  input
-</code></pre>
-
-<p>（注：如果 dfs 中不包含 input 目录的话就会自动创建一个）</p>
-
-<p>3)  然后在命令行中输入如下命令，执行 WordCount 程序</p>
-
- 	 bin/hadoop  jar  hadoop-examples-1.2.1.jar  wordcount  input  output
-
-<p>（注：因为这个程序是 Hadoop 安装包里面自带的，就在 hadoop-examples-1.2.1.jar 中，后面的数字因为版本号的不同而不同，后面的 input 代表输入文件夹， output 代表输出文件夹 ， 系统输出时会自动创建）</p>
-
-<p>读者如果这个执行成功了，就会发现有很多输出信息，从屏幕上显示，当程序运行结束后。</p>
-
-<p>4)  察看结果 在命令行里面输入</p>
-
-<pre><code>bin/hadoop  dfs  -cat  output/part-r-00000
-</code></pre>
-
-<p>现在你就可以看见自己刚才输入文本里面的单词计数了。</p>
-
-<p>至此，伪分布式搭建结束!</p>
-
-      <div class="readall"><a href="/blog/2014/09/27/Hadoop.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/Mongodb-java.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -806,39 +1231,196 @@ sudo update-alternatives  --config  java
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/HDFS.html">HDFS超租约异常</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/Module.html">Module</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+        <a class="post-category" href="/page/category.html#f2e">f2e</a>
       </p>
     </header>
     <div class="post-main">
-      <p>HDFS超租约异常总结（org.apache.hadoop.hdfs.server.namenode.LeaseExpiredException）
-http://www.cnblogs.com/wangxiaowei/p/3317479.html</p>
+      <p>Module模式是JavaScript编程中一个非常通用的模式，一般情况下，大家都知道基本用法，本文尝试着给大家更多该模式的高级使用方式。</p>
 
-<p>hbase.regionserver.lease.period 客户端租期超时阀值；scan量大时可以考虑增大；否则”Lease Exception: lease -70000000000000001 does not exist”</p>
+<p>首先我们来看看Module模式的基本特征：</p>
 
-<p>这个log通常出现在regionserver挂掉之前。通常regionserver因为某种原因从zookeeper上掉线，需要flush以及删除region对应的WAL，而如果接管的regionserver在此之前已经读取完成WAL并且删除的话，那么就会出现如上文件已经不存在的错误</p>
+<p>模块化，可重用
+封装了变量和function，和全局的namaspace不接触，松耦合
+只暴露可用public的方法，其它私有方法全部隐藏
+关于Module模式，最早是由YUI的成员EricMiraglia在4年前提出了这个概念，
+我们将从一个简单的例子来解释一下基本的用法。</p>
 
-<p><strong>解决办法，调整xcievers参数</strong></p>
+<p>基本用法
+先看一下最简单的一个实现，代码如下：</p>
 
-<pre><code>默认是4096，改为8192，hdfs-site.xml
-&lt;property&gt;
-&lt;name&gt;dfs.datanode.max.xcievers&amp;lt;/name&gt;
-&lt;value&gt;8192&amp;lt;/value&gt;
-&lt;/property&gt;
-dfs.datanode.max.xcievers 参数说明 一个 Hadoop HDFS Datanode 有一个同时处理文件的上限. 这个参数叫 xcievers (Hadoop的作者把这个单词拼错了). 在你加载之前，先确认下你有没有配置这个文件conf/hdfs-site.xml里面的xceivers参数，至少要有4096:
+<pre><code>var Calculator = function (eq) {
+//这里可以声明私有成员
+var eqCtl = document.getElementById(eq);
+return {
+// 暴露公开的成员
+add: function (x, y) {
+var val = x + y;
+eqCtl.innerHTML = val;
+}
+};
+}; 我们可以通过如下的方式来调用：
 
-&lt;property&gt;
-&lt;name&gt;dfs.datanode.max.xcievers&amp;lt;/name&gt;
-&lt;value&gt;4096&lt;/value&gt;
-&lt;/property&gt;
+var calculator = new Calculator('eq');
+calculator.add(2, 2); 大家可能看到了，每次用的时候都要new一下，也就是说每个实例在内存里都是一份copy， 如果你不需要传参数或者没有一些特殊苛刻的要求的话，我们可以在最后一个}后面加上一个括号，来达到自执行的目的， 这样该实例在内存中只会存在一份copy，不过在展示他的优点之前，我们还是先来看看这个模式的基本使用方法吧。
 </code></pre>
 
-      <div class="readall"><a href="/blog/2014/09/27/HDFS.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<p>匿名闭包</p>
+
+<p>匿名闭包是让一切成为可能的基础，而这也是JavaScript最好的特性，
+我们来创建一个最简单的闭包函数，函数内部的代码一直存在于闭包内，在整个运行周期内，
+该闭包都保证了内部的代码处于私有状态。</p>
+
+<p>(function () {
+// … 所有的变量和function都在这里声明，并且作用域也只能在这个匿名闭包里
+// … 但是这里的代码依然可以访问外部全局的对象
+}());
+注意，匿名函数后面的括号，这是JavaScript语言所要求的，因为如果你不声明的话，
+JavaScript解释器默认是声明一个function函数，有括号，就是创建一个函数表达式，也就是自执行，
+用的时候不用和上面那样在new了，当然你也可以这样来声明：
+(function () {/* 内部代码 */})();
+不过我们推荐使用第一种方式，关于函数自执行，我后面会有专门一篇文章进行详解，这里就不多说了。</p>
+
+<p>引用全局变量
+JavaScript有一个特性叫做隐式全局变量，不管一个变量有没有用过，
+JavaScript解释器反向遍历作用域链来查找整个变量的var声明，如果没有找到var，解释器则假定该变量是全局变量，
+如果该变量用于了赋值操作的话，之前如果不存在的话，解释器则会自动创建它，
+这就是说在匿名闭包里使用或创建全局变量非常容易，
+不过比较困难的是，代码比较难管理，尤其是阅读代码的人看着很多区分哪些变量是全局的，哪些是局部的。</p>
+
+<p>不过，好在在匿名函数里我们可以提供一个比较简单的替代方案，
+我们可以将全局变量当成一个参数传入到匿名函数然后使用，相比隐式全局变量，它又清晰又快，我们来看一个例子：</p>
+
+<p>(function ($, YAHOO) {
+// 这里，我们的代码就可以使用全局的jQuery对象了，YAHOO也是一样
+} (jQuery, YAHOO));</p>
+
+<p>现在很多类库里都有这种使用方式，比如jQuery源码。
+不过，有时候可能不仅仅要使用全局变量，而是也想声明全局变量，如何做呢？
+我们可以通过匿名函数的返回值来返回这个全局变量，这也就是一个基本的Module模式，来看一个完整的代码：</p>
+
+<pre><code>var blogModule = (function () {
+var my = {},privateName = "博客园";
+function privateAddTopic(data) {
+// 这里是内部处理代码
+}
+my.Name = privateName;
+my.AddTopic = function (data) {
+privateAddTopic(data);
+};
+
+    return my;
+} ()); 上面的代码声明了一个全局变量blogModule，并且带有2个可访问的属性：blogModule.AddTopic和blogModule.Name， 除此之外，其它代码都在匿名函数的闭包里保持着私有状态。同时根据上面传入全局变量的例子， 我们也可以很方便地传入其它的全局变量。
+</code></pre>
+
+<p>高级用法
+上面的内容对大多数用户已经很足够了，但我们还可以基于此模式延伸出更强大，易于扩展的结构，
+让我们一个一个来看。</p>
+
+<p>扩展</p>
+
+<p>Module模式的一个限制就是所有的代码都要写在一个文件，但是在一些大型项目里，
+将一个功能分离成多个文件是非常重要的，因为可以多人合作易于开发。再回头看看上面的全局参数导入例子，
+我们能否把blogModule自身传进去呢？答案是肯定的，我们先将blogModule传进去，添加一个函数属性，
+然后再返回就达到了我们所说的目的，上代码：</p>
+
+<pre><code>var blogModule = (function (my) {
+my.AddPhoto = function () {
+//添加内部代码
+};
+return my;
+} (blogModule)); 这段代码，看起来是不是有C#里扩展方法的感觉？有点类似，但本质不一样哦。同时尽管var不是必须的， 但为了确保一致，我们再次使用了它，代码执行以后，blogModule下的AddPhoto就可以使用了， 同时匿名函数内部的代码也依然保证了私密性和内部状态。
+</code></pre>
+
+<p>松耦合扩展</p>
+
+<p>上面的代码尽管可以执行，但是必须先声明blogModule，然后再执行上面的扩展代码，也就是说步骤不能乱，
+怎么解决这个问题呢？我们来回想一下，我们平时声明变量的都是都是这样的：</p>
+
+<pre><code>var cnblogs = cnblogs || {} ; 这是确保cnblogs对象，在存在的时候直接用，不存在的时候直接赋值为{}， 我们来看看如何利用这个特性来实现Module模式的任意加载顺序：
+
+var blogModule = (function (my) {
+// 添加一些功能
+return my;
+} (blogModule || {})); 通过这样的代码，每个单独分离的文件都保证这个结构，那么我们就可以实现任意顺序的加载， 所以，这个时候的var就是必须要声明的，因为不声明，其它文件读取不到哦。
+</code></pre>
+
+<p>紧耦合扩展</p>
+
+<p>虽然松耦合扩展很牛叉了，但是可能也会存在一些限制，比如你没办法重写你的一些属性或者函数，
+也不能在初始化的时候就是用Module的属性。
+紧耦合扩展限制了加载顺序，但是提供了我们重载的机会，看如下例子：</p>
+
+<pre><code>var blogModule = (function (my) {
+var oldAddPhotoMethod = my.AddPhoto;
+my.AddPhoto = function () {
+// 重载方法，依然可通过oldAddPhotoMethod调用旧的方法
+};
+return my;
+} (blogModule)); 通过这种方式，我们达到了重载的目的，当然如果你想在继续在内部使用原有的属性， 你可以调用oldAddPhotoMethod来用。
+</code></pre>
+
+<p>克隆与继承</p>
+
+<pre><code>var blogModule = (function (old) {
+var my = {}, key;
+for (key in old) {
+if (old.hasOwnProperty(key)) {
+my[key] = old[key];
+}
+}
+var oldAddPhotoMethod = old.AddPhoto;
+my.AddPhoto = function () {
+// 克隆以后，进行了重写，当然也可以继续调用oldAddPhotoMethod
+};
+return my;
+} (blogModule)); 这种方式灵活是灵活，但是也需要花费灵活的代价， 其实该对象的属性对象或function根本没有被复制，只是对同一个对象多了一种引用而已， 所以如果老对象去改变它，那克隆以后的对象所拥有的属性或function函数也会被改变， 解决这个问题，我们就得是用递归，但递归对function函数的赋值也不好用， 所以我们在递归的时候eval相应的function。不管怎么样，我还是把这一个方式放在这个帖子里了， 大家使用的时候注意一下就行了。
+</code></pre>
+
+<p>跨文件共享私有对象</p>
+
+<p>通过上面的例子，我们知道，如果一个module分割到多个文件的话，每个文件需要保证一样的结构，
+也就是说每个文件匿名函数里的私有对象都不能交叉访问，那如果我们非要使用，那怎么办呢？ 我们先看一段代码：</p>
+
+<pre><code>var blogModule = (function (my) {
+var _private = my._private = my._private || {},
+_seal = my._seal = my._seal || function () {
+delete my._private;
+delete my._seal;
+delete my._unseal;
+},_unseal = my._unseal = my._unseal || function () {
+my._private = _private;
+my._seal = _seal;
+my._unseal = _unseal;
+};
+return my;
+} (blogModule || {})); 任何文件都可以对他们的局部变量_private设属性， 并且设置对其他的文件也立即生效。一旦这个模块加载结束， 应用会调用 blogModule._seal()"上锁"，这会阻止外部接入内部的_private。 如果这个模块需要再次增生，应用的生命周期内，任何文件都可以调用_unseal() ”开锁”， 然后再加载新文件。加载后再次调用 _seal()”上锁”。
+</code></pre>
+
+<p>子模块</p>
+
+<p>最后一个也是最简单的使用方式，那就是创建子模块</p>
+
+<pre><code>blogModule.CommentSubModule = (function () {
+var my = {};
+// ...
+return my;
+} ()); 尽管非常简单，我还是把它放进来了，因为我想说明的是子模块也具有一般模块所有的高级使用方式， 也就是说你可以对任意子模块再次使用上面的一些应用方法。
+</code></pre>
+
+<p>总结</p>
+
+<p>上面的大部分方式都可以互相组合使用的，一般来说如果要设计系统，可能会用到松耦合扩展，
+私有状态和子模块这样的方式。另外，我这里没有提到性能问题，
+但我认为Module模式效率高，代码少，加载速度快。使用松耦合扩展允许并行加载，
+这更可以提升下载速度。不过初始化时间可能要慢一些，但是为了使用好的模式，这是值得的。</p>
+
+      <div class="readall"><a href="/blog/2014/09/27/Module.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

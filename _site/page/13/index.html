@@ -1,0 +1,528 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="Will go, Just do it., willgo, 最好的从未错过, Will.Quan">
+  <title>Will go, Just do it.</title>
+  <link rel="canonical" href="index.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+
+    <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
+    
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/DB-Index.html">DB Index</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#db">db</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>理解索引结构     </p>
+
+<p>实际上，可以把索引理解为一种特殊的目录。微软的SQL SERVER提供了两种索引：聚集索引（clustered index，也称聚类索引、簇集索引）和非聚集索引（nonclustered index，也称非聚类索引、非簇集索引）。下面，我们举例来说明一下聚集索引和非聚集索引的区别： </p>
+
+<p>其实，我们的汉语字典的正文本身就是一个聚集索引。比如，我们要查”安”字，就会很自然地翻开字典的前几页，因为”安”的拼音是”an”，而按照拼音排序汉字的字典是以英文字母”a”开头并以”z”结尾的，那么”安”字就自然地排在字典的前部。如果您翻完了所有以”a”开头的部分仍然找不到这个字，那么就说明您的字典中没有这个字；同样的，如果查”张”字，那您也会将您的字典翻到最后部分，因为”张”的拼音是”zhang”。也就是说，字典的正文部分本身就是一个目录，您不需要再去查其他目录来找到您需要找的内容。  </p>
+
+<p>我们把这种正文内容本身就是一种按照一定规则排列的目录称为”聚集索引”。      </p>
+
+<p>如果您认识某个字，您可以快速地从自动中查到这个字。但您也可能会遇到您不认识的字，不知道它的发音，这时候，您就不能按照刚才的方法找到您要查的字，而需要去根据”偏旁部首”查到您要找的字，然后根据这个字后的页码直接翻到某页来找到您要找的字。但您结合”部首目录”和”检字表”而查到的字的排序并不是真正的正文的排序方法，比如您查”张”字，我们可以看到在查部首之后的检字表中”张”的页码是672页，检字表中”张”的上面是”驰”字，但页码却是63页，”张”的下面是”弩”字，页面是390页。很显然，这些字并不是真正的分别位于”张”字的上下方，现在您看到的连续的”驰、张、弩”三字实际上就是他们在非聚集索引中的排序，是字典正文中的字在非聚集索引中的映射。我们可以通过这种方式来找到您所需要的字，但它需要两个过程，先找到目录中的结果，然后再翻到您所需要的页码。 </p>
+
+<p>我们把这种目录纯粹是目录，正文纯粹是正文的排序方式称为”非聚集索引”。 </p>
+
+<p>何时使用聚集索引或非聚集索引    <br />
+下面的表总结了何时使用聚集索引或非聚集索引（很重要）。   </p>
+
+<pre><code>	动作描述        使用聚集索引 使用非聚集索引     
+	列经常被分组排序      应        应     
+	返回某范围内的数据          应      不应        
+	一个或极少不同值           不应     不应     
+	小数目的不同值                应     不应     
+	大数目的不同值              不应    应     
+	频繁更新的列                 不应   应     
+	外键列                  应 应     
+	主键列               应   应     
+	频繁修改索引列       不应      应        
+</code></pre>
+
+<p>几种常见的MySQL索引类型。</p>
+
+<ol>
+  <li>
+    <p>普通型索引
+ 这是最基本的索引类型，而且它没有唯一性之类的限制。普通索引可以通过以下几种方式创建： </p>
+  </li>
+  <li>创建索引，例如CREATE INDEX 索引的名字 ON tablename (列名1，列名2,…); </li>
+  <li>修改表，例如ALTER TABLE tablename ADD INDEX 索引的名字 (列名1，列名2,…); </li>
+  <li>创建表的时候指定索引，例如CREATE TABLE tablename ( […], INDEX 索引的名字 (列名1，列名
+2,…) );</li>
+  <li>
+    <p>唯一索引
+   这种索引和前面的“普通索引”基本相同，但有一个区别：索引列的所有值都只能出现一次，即必须唯一。唯一性索引可以用以下几种方式创建： </p>
+  </li>
+  <li>创建索引，例如CREATE UNIQUE INDEX 索引的名字 ON tablename (列的列表); </li>
+  <li>修改表，例如ALTER TABLE tablename ADD UNIQUE 索引的名字 (列的列表); </li>
+  <li>
+    <p>创建表的时候指定索引，例如CREATE TABLE tablename ( […], UNIQUE 索引的名字 (列的列
+     表) );</p>
+  </li>
+  <li>
+    <p>主键</p>
+
+    <p>主键是一种唯一性索引，但它必须指定为“PRIMARY KEY”。如果你曾经用过AUTO_INCREMENT类型的列，你可能已经熟悉主键之类的概念了。主键一般在创建表的时候指定，例如“CREATE TABLE tablename ( […], PRIMARY KEY (列的列表) ); ”。但是，我们也可以通过修改表的方式加入主键，例如“ALTER TABLE tablename ADD PRIMARY KEY (列的列表); ”。每个表只能有一个主键。 （主键相当于聚合索引，是查找最快的索引）</p>
+  </li>
+  <li>
+    <p>单列索引和多列索引</p>
+
+    <p>索引可以是单列索引，也可以是多列索引。
+ 1. 单列索引就是常用的一个列字段的索引，常见的索引。
+ 2. 多列索引就是含有多个列字段的索引</p>
+
+    <pre><code> 	 alter table student add index sy(name,age，score);
+ 	 索引sy就为多列索引，多列索引在以下几中情况下才能有效：
+ 	 select * from student where name='jia' and age&gt;='12' //where条件中含有索引的首列字段和
+		   第二个字段
+ 	 select * from student where name='jia' //where条件中只含有首列字段
+ 	 select * from student where name='jia' and score&lt;60//where条件中含有首列字段和第三个字
+		  段
+		 总结：多列索引只有在where条件中含有索引中的首列字段时才有效
+</code></pre>
+  </li>
+  <li>
+    <p>选择索引列</p>
+
+    <p>应该怎样选择索引列，首先要看查询条件，一般将查询条件中的列作为索引</p>
+  </li>
+</ol>
+
+<p><strong>联合索引使用结论:</strong></p>
+
+<ol>
+  <li>查询条件中出现联合索引第一列,或者全部,则能利用联合索引.</li>
+  <li>条件列中只要条件相连在一起,以本文例子来说就是:
+last_name=’1′ and first_name=’1′与first_name=’1′ and last_name=’1′
+,无论前后,都会利用上联合索引.</li>
+  <li>查询条件中没有出现联合索引的第一列,而出现联合索引的第二列,或者第三列,都不会利用联合索引查询.</li>
+</ol>
+
+<p><strong>单一列索引的应用结论:</strong></p>
+
+<p>只要条件列中出现索引列,无论在什么位置,都能利用索引查询.</p>
+
+<p><strong>两者的共同点:</strong></p>
+
+<ol>
+  <li>要想利用索引,都要符合SARG标准.</li>
+  <li>都是为了提高查询速度.</li>
+  <li>都需要额外的系统开销,磁盘空间.</li>
+</ol>
+
+<p>补充说明: stmtText信息来产生,在查询语句前面加上:SET STATISTICS PROFILE on.可以通过运行它,来观察你的查询是否合理,这样才能真正做到优化.</p>
+
+<p><strong>主旨:讨论什么情况下能利用上索引.</strong></p>
+
+<p>索引:创建索引可以根据查询业务的不同分为两种:单一列的索引,联合索引. 顾名思义,单一列索引就是指在表的某一列上创建索引,联合索引是在多个列上联合创建索引.</p>
+
+<p>优缺点比较:</p>
+
+<ol>
+  <li>索引所占用空间:单一列索引相对要小.</li>
+  <li>索引创建时间:单一列索引相对短.</li>
+  <li>索引对insert,update,delete的影响程序:单一列索引要相对低.</li>
+  <li>在多条件查询时,联合索引效率要高.</li>
+</ol>
+
+<p>索引的使用范围:单一列索引可以出现在where 条件中的任何位置,而联合索引需要按一定的顺序来写. </p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/DB-Index.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/AMD--CMD.html">AMD & CMD</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#不懂">不懂</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>http://blog.csdn.net/dojotoolkit/article/details/7820321</p>
+
+<p><strong>AMD</strong></p>
+
+<p>随着web应用不断发展和对JavaScript依赖的进一步加深，
+出现了使用模块（Modules）来组织代码和依赖性。模块使得我们创建明确清晰的组件和接口，
+这些组件和接口能够很容易的加载并连接到其依赖组件。 AMD模块系统提供了使用JavaScript模块来构建Web应用的完美方式，
+并且这种方式具有形式简单，异步加载和广泛采用的特点。</p>
+
+<p>异步模块定义（AMD）格式是一套API，它用于定义可重用的并能在多种框架使用的模块。
+开发AMD是为了提供一种定义模块的方式，这种方式可以使用原生的浏览器脚本元素机制来实现模块的异步加载。
+AMD API由2009年Dojo 社区的讨论中产生，然后移动到讨论CommonJS如何更好的为浏览器适应CommonJS模块格式（被NodeJS使用）。
+CommonJS已经发展成为单独的一个标准并有其专门的社区。AMD已经广泛普及，形成了众多模块加载实现并被广泛使用。在SitePen公司，
+我们广泛的使用Dojo的AMD机制工作，为其提供支持，并积极的建设这一机制。</p>
+
+<p>CMD Common Module Definition</p>
+
+<p>在CMD规范里面，一个模块就是一个Javascript文件</p>
+
+<pre><code>define(factory); define是全局函数，来定义模块 仅接收一个factory参数，可以是函数，对象，字符串等类型
+</code></pre>
+
+<ol>
+  <li>
+    <p>factory为对象、字符串等非函数类型时候，表示模块的接口是该对象、字符串等值
+Js代码</p>
+
+    <pre><code> define({
+ "foo":"bar"
+ }); 通过字符串定义模版模块 Js代码
+
+ define('I am a template.My name is .');
+</code></pre>
+  </li>
+  <li>
+    <p>factory为函数时候，表示模块的构造方法。
+执行该方法，可以得到模块向外提供的接口。默认3个参数：require 、 exports 、 module
+Js代码</p>
+
+    <pre><code> define(function(require,exports,module){
+ //...
+ });
+ require --------- 是一个方法，用来获取其他模块提供的接口。 Js代码
+</code></pre>
+
+    <p>define(function(require){
+ var a = require(‘./a’);
+ a.doSomething;
+ });
+require接受模块标识作为唯一参数，模块标识书写需要遵循一些规范。</p>
+
+    <p>require.async
+———- 可以用来异步加载模块，并在加载完成后执行指定的回调。
+Js代码</p>
+
+    <pre><code> define(function(require,exports,module){
+ //异步加载b
+ require.async('./b',function(b){
+ b.doSomething;
+ });
+ //异步加载多个模块
+ require.async(['./c','./d'],function(c,d){
+ //
+ ........
+ })
+ });
+ require.resolve --------- 使用模块系统内部的路径解析机制来返回模块的路径。该函数不会加载模块，只返回解析后的绝对路径。 Js代码
+</code></pre>
+
+    <p>define(function(require,exports){
+ console.log(require.resolve(‘./b’));
+ //../b.js
+ });
+ require.cache
+———- 可以查看模块系统加载过的所有模块。
+某些情况下，需要重新加载某个模块，可以得到该模块的url，然后通过delete require.cache[url] 来将其信息删除。
+exports
+——– 是一个对象，用来向外提供模块接口。
+Js代码</p>
+
+    <pre><code> define(function(require,exports){
+ exports.foo = "bar";
+ exports.doSomething = function(){
+ ...............
+ }
+ }); 除了给exports对象增加成员，还可以以return的方式直接向外提供接口。 Js代码
+
+ define(function(require,exports,module){
+ return {
+ fool: "bar",
+ doSomething:function(){
+ .............
+ }
+ };
+ }); 当然如果只是返回一个对象，可以直接： Js代码
+
+ define({
+ foo: "bar",
+ doSomething:function(){}
+ });
+</code></pre>
+  </li>
+</ol>
+
+<p>注释：在factory里面给exports重新赋值是没有意义的，因为exports仅仅是module.exports的一个引用，直接给exports重新赋值并不会修改module.exports的值。
+错误的例子：</p>
+
+<p>Js代码</p>
+
+<pre><code>	define(function(require,exports,module){
+	exports = {
+	foo: "bar",
+	doSomething:function(){}
+	}
+	}); 正确的应该是：
+</code></pre>
+
+<p>Js代码</p>
+
+<pre><code>	define(function(require,exports,module){
+	module.exports = {
+	foo: "bar",
+	doSomething:function(){}
+	}
+	}); module module 是一个对象，存储了与当前模块关联的一些属性和方法。 module.id ---------- 模块标识 Js代码
+
+	define(function(require,exports,module){
+	console.log(require(module.id) === exports); // true
+	});
+	module.uri
+	------------ 根据模块系统的路径解析规则得到的模块绝对路径
+	module.dependencies
+	------------ 是一个数组，标识当前模块的依赖列表
+	module.parent
+	------------ 指向初始化调用当前模块的模块。可以得到模块初始化的callstack
+	module.factory
+	------------ 指向define(factory)中的factory参数
+	module.status
+	------------ 当前模块的状态，是一个数值
+	module.exports ------------ 当前模块对外提供的接口 传给factory构造方法的exports参数是module.exports对象的一个引用。 比如当模块的接口是某一个类的实例时候，需要通过module.exports来实现 Js代码
+
+	define(function(require,exports,module){
+	console.log(module.exports === exports); // true
+	module.exports = new SomeClass();
+	console.log(module.exports === exports); //false
+	});
+	module.require 在module环境中运行require，一般用于插件开发
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/09/27/AMD--CMD.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/06/08/HBasesession.html">HBase第一次session记录</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年06月08日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <ol>
+  <li>数据本地化(Data Localization)
+数据存在当前JVM 或是当前磁盘</li>
+  <li>HBase的架构 实现数据与操作的分离，没有本地数据。
+其数据存放于hadoop上，所以集群能具有很强的健壮性：
+hase写过程：先写Hlog</li>
+  <li>HBase的没有指定master，在哪台机器上启动HBase集群，该台机就是master。</li>
+  <li>rowkey是数据的一部分，其必须人工指定。
+column family 在定义表时需指明。</li>
+  <li>HBase没有database的概念。</li>
+  <li>
+    <p>HBase表结构：</p>
+
+    <pre><code> table
+ |-column family
+ |-column
+ |-cell
+ |-timestamp
+ |-value
+</code></pre>
+  </li>
+  <li>HBase最佳实践：column family 不应超过两个，因为一个column family 对应一个store，flush和compaction的触发的基本单位都是Region级别，所以当一个column family有大量的数据的时候会触发整个region里面的其他column family的memstore（其实这些memstore可能仅有少量的数据，还不需要flush的）也发生flush动作；另外compaction触发的条件是当store file的个数（不是总的store file的大小）达到一定数量的时候会发生，而flush产生的大量store file通常会导致compaction，flush/compaction会发生很多IO相关的负载，这对Hbase的整体性能有很大影响。</li>
+  <li>一个table对应一个或多个region，在map/reduce 中对应一个map
+一个column family 对应一个store。 store 中含一个menstore 和多个fileStore
+当menstore 存储到达一定阀值就生成一个filestore， fileStore存放在hdfs上，
+当fileStore 数量到达一定阀值就将其合并成一个大的file。</li>
+  <li>qualifier对应column</li>
+  <li>在插入rowkey时，不考虑region的大小及状态，只是根据它的access 编码排序，找到对应的startkey，endkey,确定插入的位置。</li>
+  <li>HBase两张管理表：+
+.META.:管理用户region，它可以有多个region。
+ROOT: 管理.META.的region，它只有一个region。
+所以读写数据的流程为：
+client–&gt;ROOT–&gt;META–&gt;regionserver
+在数据的读写过程中client不会与master产生关系
+master只是负责管理表结构。</li>
+  <li>利用backup-master机制，解决master单点的问题。</li>
+  <li>region在存储的数据到达一定阀值后将split，split的同时更形.META.和ROOT表的相关数据。
+split region的过程不需要master的参与，master只负责将split后新的region分配到对应的regionserver。</li>
+  <li>HBase的数据安全机制之一：在插入数据时先写Hlog然后在写到内存。
+一个regionserver中只有一个Hlog， Hlog中只记录内存中存放的数据。
+当机器挂掉后，master会根据Hlog中region将其分割，然后分配到不同的机器加载，做数据恢复。</li>
+</ol>
+
+      <div class="readall"><a href="/blog/2014/06/08/HBasesession.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/05/21/HashMap-equalshashCode.html">HashMap equals&hashCode</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年05月21日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>HashMap源码中获取value的实现方法如下：</p>
+
+<pre><code>public V get(Object key) {
+if (key == null)
+return getForNullKey();
+int hash = hash(key.hashCode());
+for (Entry&lt;K,V&gt; e = table[indexFor(hash, table.length)];
+e != null;
+e = e.next) {
+Object k;
+if (e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k)))
+return e.value;
+}
+return null;
+}
+</code></pre>
+
+<p>遍历HashMap的内部维护的Entry数组，找到匹配的目标Entry并返回其value即可。 匹配的标准是：
+Entry的hash值是否与参数key的hash值相等。 (这要求我们必须正确实现作为key的对象的hashCode()方法)
+Entry的key是否与参数key为同一对象，或者Entry的key”等于”参数key。 (注意是否”等于”， 是通过调用参数key的equals()方法来完成的， 这要求我们必须正确实现作为key的对象的equals()方法)</p>
+
+<p>So, 我们在自定义map的key的时候，需要实现equals和hashCode两个方法，hashCode可偷懒直接返回一个数字。。。</p>
+
+<p>关于HashCode的官方文档定义：
+hashcode方法返回该对象的哈希码值。支持该方法是为哈希表提供一些优点，例如，java.util.Hashtable 提供的哈希表。</p>
+
+<p>hashCode 的常规协定是：</p>
+
+<p>在 Java 应用程序执行期间，在同一对象上多次调用 hashCode 方法时，必须一致地返回相同的整数，前提是对象上 equals 比较中所用的信息没有被修改。从某一应用程序的一次执行到同一应用程序的另一次执行，该整数无需保持一致。</p>
+
+<p>如果根据 equals(Object) 方法，两个对象是相等的，那么在两个对象中的每个对象上调用 hashCode 方法都必须生成相同的整数结果。
+以下情况不 是必需的：如果根据 equals(java.lang.Object) 方法，两个对象不相等，那么在两个对象中的任一对象上调用 hashCode 方法必定会生成不同的整数结果。但是，程序员应该知道，为不相等的对象生成不同整数结果可以提高哈希表的性能。</p>
+
+<p>实际上，由 Object 类定义的 hashCode 方法确实会针对不同的对象返回不同的整数。（这一般是通过将该对象的内部地址转换成一个整数来实现的，但是 JavaTM 编程语言不需要这种实现技巧。）
+当equals方法被重写时，通常有必要重写 hashCode 方法，以维护 hashCode 方法的常规协定，该协定声明相等对象必须具有相等的哈希码。</p>
+
+<p>综上：</p>
+
+<ol>
+  <li>hashCode的存在主要是用于查找的快捷性，如Hashtable，HashMap等，hashCode是用来在散列存储结构中确定对象的存储地址的；</li>
+  <li>如果两个对象相同，就是适用于equals(java.lang.Object) 方法，那么这两个对象的hashCode一定要相同；</li>
+  <li>如果对象的equals方法被重写，那么对象的hashCode也尽量重写，并且产生hashCode使用的对象，一定要和equals方法中使用的一致，否则就会违反上面提到的第2点；</li>
+  <li>两个对象的hashCode相同，并不一定表示两个对象就相同，也就是不一定适用于equals(java.lang.Object) 方法，只能够说明这两个对象在散列存储结构中，如Hashtable，他们“存放在同一个篮子里”。</li>
+</ol>
+
+<p>hashCode用于查找使用的，equals是用于比较两个对象的是否相等的。</p>
+
+<ol>
+  <li>
+    <p>hashcode是用来查找的，
+例如内存中有这样的位置
+0 1 2 3 4 5 6 7
+一个类，这个类有个字段叫ID,我要把这个类存放在以上8个位置之一，如果不用hashcode而任意存放，那么当查找时就需要到这八个位置里挨个去找，或者用二分法一类的算法。
+但如果用hashcode那就会使效率提高很多。
+我们这个类中有个字段叫ID,那么我们就定义我们的hashcode为ID％8，然后把我们的类存放在取得得余数那个位置。比如我们的ID为9，9除8的余数为1，那么我们就把该类存在1这个位置，如果ID是13，求得的余数是5，那么我们就把该类放在5这个位置。这样，以后在查找该类时就可以通过ID除 8求余数直接找到存放的位置了。</p>
+  </li>
+  <li>
+    <p>但是如果两个类有相同的hashcode怎么办那（我们假设上面的类的ID不是唯一的），例如9除以8和17除以8的余数都是1，那么这是不是合法的，回答是：可以这样。那么如何判断呢？在这个时候就需要定义 equals了。
+也就是说，我们先通过 hashcode来判断两个类是否存放某个桶里，但这个桶里可能有很多类，那么我们就需要再通过 equals 来在这个桶里找到我们要的类。
+那么。重写了equals()，为什么还要重写hashCode()呢？
+在一个桶里找东西，先要找到这个桶，通过重写hashcode()来找到桶，equals()比较</p>
+  </li>
+</ol>
+
+      <div class="readall"><a href="/blog/2014/05/21/HashMap-equalshashCode.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="pagination">
+  
+  
+  <a class="pagination-item newer" href="/page/12"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;上一页</a>
+  
+    
+  
+  <span class="pagination-item older">下一页&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></span>
+  
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

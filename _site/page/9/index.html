@@ -64,7 +64,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Mysql-outputformat.html">Mysql outputformat简单实现</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/hbaseenable.html">hbase表无法enable</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
@@ -74,226 +74,24 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
       </p>
     </header>
     <div class="post-main">
-      <p>================================OutputFormat=========</p>
+      <p>在enable表时，发现耗时很长都未结束，就ctrl+c退出hbase shell，再进入继续enable表，但此时出现如下错误：</p>
 
-<pre><code>import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.util.List;
-
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.OutputCommitter;
-import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.TaskInputOutputContext;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-
-import com.augmentum.rob.input.Person;
-
-public class MySqlOutputFormat extends OutputFormat&lt;NullWritable, Person&gt; {
-
-@Override
-public RecordWriter&lt;NullWritable, Person&gt; getRecordWriter(
-TaskAttemptContext context) throws IOException,
-InterruptedException {
-MysqlRecordWriter mysqlRecordWriter = null;
-try {
-String connString = "jdbc:mysql://172.20.29.29:3306/MapReduceInputTest";
-Class.forName("com.mysql.jdbc.Driver");
-Connection connection = java.sql.DriverManager.getConnection(
-connString + "?useUnicode=true&amp;characterEncoding=utf8",
-"admin", "admin");
-Statement statement = connection.createStatement();
-mysqlRecordWriter = new MysqlRecordWriter(connection, statement);
-
-} catch (Exception ex) {
-throw new IOException(ex.getMessage());
-}
-
-return mysqlRecordWriter;
-}
-
-@Override
-public void checkOutputSpecs(JobContext context) throws IOException,
-InterruptedException {
-// TODO Auto-generated method stub
-// 判断输出表是否设置
-
-// 判断输出表是否存在
-
-}
-
-@Override
-public OutputCommitter getOutputCommitter(TaskAttemptContext context)
-throws IOException, InterruptedException {
-return new FileOutputCommitter(
-FileOutputFormat.getOutputPath(context),
-context);
-}
-
-}
+<pre><code>ERROR: org.apache.hadoop.hbase.TableNotDisabledException:
 </code></pre>
 
-<p>==========================RecordWriter=====================</p>
+<p>错误说表未禁用，但进行disable表操作时，又出现如下错误：
+ERROR: org.apache.hadoop.hbase.TableNotEnabledException
+那肯定是刚才强行退出导致出问题了，根据大家的经验，指出这是因为zookeeper保持了要enable的这个表信息，只需要登录zk删除该记录就行。
+登录到zookeeper也有两种方式，一是到zk目录运行脚本连接，而是直接在hbase安装目录bin下运行：</p>
 
-<pre><code>import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
+<pre><code>hbase zkcli 之后就能连接上zookeeper了，跟着删除/hbase/table下对应的表项就行：
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.util.StringUtils;
+delete /hbase/table/user_video_recommend2 之后就可以成功的enable表了。 如果此时仍然失败，则可以运行一下命了修复META：
 
-import com.augmentum.rob.input.Person;
-public class MysqlRecordWriter extends RecordWriter&lt;NullWritable, Person&gt;{
-
-private Connection connection;
-private Statement statement;
-private static final Log LOG = LogFactory.getLog(MysqlRecordWriter.class);
-
-public MysqlRecordWriter() throws SQLException {}
-
-public MysqlRecordWriter(Connection connection, Statement statement) throws SQLException {
-this.connection = connection;
-this.statement = statement;
-this.connection.setAutoCommit(false);
-}
-
-public Connection getConnection() {
-return connection;
-}
-
-public Statement getStatement() {
-return statement;
-}
-
-@Override
-public void write(NullWritable key, Person person) throws IOException, InterruptedException {
-String sql = "INSERT person2(name, age) VALUES('"+person.getName()+"', "+person.getAge()+")";
-//可以根据key和value情况写多条INSERT SQL
-// List&lt;String&gt; sqlList = buildInsertSql();
-try {
-// if (sqlList != null &amp;&amp; sqlList.size() &gt; 0) {
-// for (String sql : sqlList) {
-// statement.addBatch(sql);
-// }
-// }
-statement.addBatch(sql);
-} catch (SQLException e) {
-e.printStackTrace();
-}
-}
-
-// //更具逻辑具体实现插入sql。
-// public abstract List&lt;String&gt; buildInsertSql();
-
-@Override
-public void close(TaskAttemptContext context) throws IOException, InterruptedException {
-try {
-statement.executeBatch();
-connection.commit();
-} catch (SQLException e) {
-try {
-connection.rollback();
-}
-catch (SQLException ex) {
-LOG.warn(StringUtils.stringifyException(ex));
-}
-throw new IOException(e.getMessage());
-} finally {
-try {
-statement.close();
-connection.close();
-}
-catch (SQLException ex) {
-throw new IOException(ex.getMessage());
-}
-}
-
-}
-
-}
+hbase hbck -fixMeta -fixAssignments
 </code></pre>
 
-<p>======================================================================================================</p>
-
-<pre><code>import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.TaskInputOutputContext;
-import org.apache.hadoop.mapreduce.lib.db.DBConfiguration;
-import org.apache.hadoop.mapreduce.lib.db.DBOutputFormat;
-import org.apache.hadoop.mapreduce.lib.db.DBWritable;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-
-public class RobOut&lt;K extends DBWritable, V&gt; extends DBOutputFormat&lt;K, V&gt;{
-
-/** {@inheritDoc} */
-public RecordWriter&lt;K, V&gt; getRecordWriter(TaskAttemptContext context)
-throws IOException {
-DBConfiguration dbConf = new DBConfiguration(context.getConfiguration());
-
-String tableName = dbConf.getOutputTableName();
-String[] fieldNames = dbConf.getOutputFieldNames();
-
-if(fieldNames == null) {
-fieldNames = new String[dbConf.getOutputFieldCount()];
-}
-
-try {
-Connection connection = dbConf.getConnection();
-PreparedStatement statement = null;
-
-statement = connection.prepareStatement(
-constructQuery(tableName, fieldNames));
-return new DBRecordWriter(connection, statement);
-} catch (Exception ex) {
-throw new IOException(ex.getMessage());
-}
-}
-
-/**
-* Set the {@link Path} of the output directory for the map-reduce job.
-*
-* @param job The job to modify
-* @param outputDir the {@link Path} of the output directory for
-* the map-reduce job.
-*/
-public static void setOutputTable(Job job, String tableName) {
-job.getConfiguration().set("output.mysql.table" + tableName, tableName);
-}
-
-/**
-* Get the {@link Path} to the output directory for the map-reduce job.
-*
-* @return the {@link Path} to the output directory for the map-reduce job.
-* @see FileOutputFormat#getWorkOutputPath(TaskInputOutputContext)
-*/
-public static Path getOutputTable(JobContext job) {
-String name = job.getConfiguration().get("mapred.output.table");
-return name == null ? null: new Path(name);
-}
-
-}
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/09/27/Mysql-outputformat.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/hbaseenable.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -301,300 +99,7 @@ return name == null ? null: new Path(name);
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Mongodb-java.html">Mongodb java简单操作</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#nosql">nosql</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <pre><code>import java.net.UnknownHostException;
-import java.util.Set;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
-
-public class Mongodb {
-
-/**
-* @author gaogao
-* @param args
-* @throws MongoException
-* @throws UnknownHostException
-*/
-public static void main(String[] args) throws UnknownHostException,
-MongoException {
-// 连接本地数据库
-Mongo m = new Mongo();
-// 创建名为new_test_db的数据库
-DB db = m.getDB("new_test_db");
-// 获取new_test_db中的集合（类似于获取关系数据库中的表）
-Set&lt;String&gt; cols = db.getCollectionNames();
-// 打印出new_test_db中的集合，这里应当为null
-for (String s : cols) {
-System.out.println(s);
-}
-// 创建一个叫做"new_test_col"的集合
-DBCollection collection = db.getCollection("new_test_col");
-// 初始化一个基本DB对象，最终插入数据库的就是这个DB对象
-BasicDBObject obj = new BasicDBObject();
-// 放入几个键值对
-obj.put("from", "搞搞");
-obj.put("to", "宝宝");
-obj.put("subject", "狗子爱宝子");
-// 插入对象
-collection.insert(obj);
-// 查看一条记录，findOne()=find().limit(1);
-DBObject dbobj = collection.findOne();
-// 打印出刚才插入的数据
-System.out.println(dbobj);
-System.out.println("==================================================");
-// 现在我们来插入9条{ranking:i}的数据
-for (int i = 0; i &lt; 9; i++) {
-collection.insert(new BasicDBObject().append("ranking", i));
-}
-// 打印集合中的数据总数，这里应当输出10
-System.out.println(collection.getCount());
-// 下面我们来遍历集合，find()方法返回的是一个游标(cursor)，这里的概念和关系数据库很相似
-DBCursor cursor = collection.find();
-// 然后我们使用这个游标来遍历集合
-while (cursor.hasNext()) {
-System.out.println(cursor.next());
-}
-// 下面来看一些略复杂一点的查询技巧，第一个，简单的条件查询，查询ranking为1的记录
-BasicDBObject query = new BasicDBObject();
-query.put("ranking", 1);
-cursor = collection.find(query);
-while (cursor.hasNext()) {
-System.out.println(cursor.next());
-}
-// 下面是更复杂的条件查询，查询ranking大于5小于9的记录
-query = new BasicDBObject();
-query.put("ranking", new BasicDBObject("$gt", 5).append("$lt", 9));
-cursor = collection.find(query);
-while (cursor.hasNext()) {
-System.out.println(cursor.next());
-}
-// 最后删除我们的测试数据库
-m.dropDatabase("new_test_db");
-}
-}
-</code></pre>
-
-      <div class="readall"><a href="/blog/2014/09/27/Mongodb-java.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Module.html">Module</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#f2e">f2e</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>Module模式是JavaScript编程中一个非常通用的模式，一般情况下，大家都知道基本用法，本文尝试着给大家更多该模式的高级使用方式。</p>
-
-<p>首先我们来看看Module模式的基本特征：</p>
-
-<p>模块化，可重用
-封装了变量和function，和全局的namaspace不接触，松耦合
-只暴露可用public的方法，其它私有方法全部隐藏
-关于Module模式，最早是由YUI的成员EricMiraglia在4年前提出了这个概念，
-我们将从一个简单的例子来解释一下基本的用法。</p>
-
-<p>基本用法
-先看一下最简单的一个实现，代码如下：</p>
-
-<pre><code>var Calculator = function (eq) {
-//这里可以声明私有成员
-var eqCtl = document.getElementById(eq);
-return {
-// 暴露公开的成员
-add: function (x, y) {
-var val = x + y;
-eqCtl.innerHTML = val;
-}
-};
-}; 我们可以通过如下的方式来调用：
-
-var calculator = new Calculator('eq');
-calculator.add(2, 2); 大家可能看到了，每次用的时候都要new一下，也就是说每个实例在内存里都是一份copy， 如果你不需要传参数或者没有一些特殊苛刻的要求的话，我们可以在最后一个}后面加上一个括号，来达到自执行的目的， 这样该实例在内存中只会存在一份copy，不过在展示他的优点之前，我们还是先来看看这个模式的基本使用方法吧。
-</code></pre>
-
-<p>匿名闭包</p>
-
-<p>匿名闭包是让一切成为可能的基础，而这也是JavaScript最好的特性，
-我们来创建一个最简单的闭包函数，函数内部的代码一直存在于闭包内，在整个运行周期内，
-该闭包都保证了内部的代码处于私有状态。</p>
-
-<p>(function () {
-// … 所有的变量和function都在这里声明，并且作用域也只能在这个匿名闭包里
-// … 但是这里的代码依然可以访问外部全局的对象
-}());
-注意，匿名函数后面的括号，这是JavaScript语言所要求的，因为如果你不声明的话，
-JavaScript解释器默认是声明一个function函数，有括号，就是创建一个函数表达式，也就是自执行，
-用的时候不用和上面那样在new了，当然你也可以这样来声明：
-(function () {/* 内部代码 */})();
-不过我们推荐使用第一种方式，关于函数自执行，我后面会有专门一篇文章进行详解，这里就不多说了。</p>
-
-<p>引用全局变量
-JavaScript有一个特性叫做隐式全局变量，不管一个变量有没有用过，
-JavaScript解释器反向遍历作用域链来查找整个变量的var声明，如果没有找到var，解释器则假定该变量是全局变量，
-如果该变量用于了赋值操作的话，之前如果不存在的话，解释器则会自动创建它，
-这就是说在匿名闭包里使用或创建全局变量非常容易，
-不过比较困难的是，代码比较难管理，尤其是阅读代码的人看着很多区分哪些变量是全局的，哪些是局部的。</p>
-
-<p>不过，好在在匿名函数里我们可以提供一个比较简单的替代方案，
-我们可以将全局变量当成一个参数传入到匿名函数然后使用，相比隐式全局变量，它又清晰又快，我们来看一个例子：</p>
-
-<p>(function ($, YAHOO) {
-// 这里，我们的代码就可以使用全局的jQuery对象了，YAHOO也是一样
-} (jQuery, YAHOO));</p>
-
-<p>现在很多类库里都有这种使用方式，比如jQuery源码。
-不过，有时候可能不仅仅要使用全局变量，而是也想声明全局变量，如何做呢？
-我们可以通过匿名函数的返回值来返回这个全局变量，这也就是一个基本的Module模式，来看一个完整的代码：</p>
-
-<pre><code>var blogModule = (function () {
-var my = {},privateName = "博客园";
-function privateAddTopic(data) {
-// 这里是内部处理代码
-}
-my.Name = privateName;
-my.AddTopic = function (data) {
-privateAddTopic(data);
-};
-
-    return my;
-} ()); 上面的代码声明了一个全局变量blogModule，并且带有2个可访问的属性：blogModule.AddTopic和blogModule.Name， 除此之外，其它代码都在匿名函数的闭包里保持着私有状态。同时根据上面传入全局变量的例子， 我们也可以很方便地传入其它的全局变量。
-</code></pre>
-
-<p>高级用法
-上面的内容对大多数用户已经很足够了，但我们还可以基于此模式延伸出更强大，易于扩展的结构，
-让我们一个一个来看。</p>
-
-<p>扩展</p>
-
-<p>Module模式的一个限制就是所有的代码都要写在一个文件，但是在一些大型项目里，
-将一个功能分离成多个文件是非常重要的，因为可以多人合作易于开发。再回头看看上面的全局参数导入例子，
-我们能否把blogModule自身传进去呢？答案是肯定的，我们先将blogModule传进去，添加一个函数属性，
-然后再返回就达到了我们所说的目的，上代码：</p>
-
-<pre><code>var blogModule = (function (my) {
-my.AddPhoto = function () {
-//添加内部代码
-};
-return my;
-} (blogModule)); 这段代码，看起来是不是有C#里扩展方法的感觉？有点类似，但本质不一样哦。同时尽管var不是必须的， 但为了确保一致，我们再次使用了它，代码执行以后，blogModule下的AddPhoto就可以使用了， 同时匿名函数内部的代码也依然保证了私密性和内部状态。
-</code></pre>
-
-<p>松耦合扩展</p>
-
-<p>上面的代码尽管可以执行，但是必须先声明blogModule，然后再执行上面的扩展代码，也就是说步骤不能乱，
-怎么解决这个问题呢？我们来回想一下，我们平时声明变量的都是都是这样的：</p>
-
-<pre><code>var cnblogs = cnblogs || {} ; 这是确保cnblogs对象，在存在的时候直接用，不存在的时候直接赋值为{}， 我们来看看如何利用这个特性来实现Module模式的任意加载顺序：
-
-var blogModule = (function (my) {
-// 添加一些功能
-return my;
-} (blogModule || {})); 通过这样的代码，每个单独分离的文件都保证这个结构，那么我们就可以实现任意顺序的加载， 所以，这个时候的var就是必须要声明的，因为不声明，其它文件读取不到哦。
-</code></pre>
-
-<p>紧耦合扩展</p>
-
-<p>虽然松耦合扩展很牛叉了，但是可能也会存在一些限制，比如你没办法重写你的一些属性或者函数，
-也不能在初始化的时候就是用Module的属性。
-紧耦合扩展限制了加载顺序，但是提供了我们重载的机会，看如下例子：</p>
-
-<pre><code>var blogModule = (function (my) {
-var oldAddPhotoMethod = my.AddPhoto;
-my.AddPhoto = function () {
-// 重载方法，依然可通过oldAddPhotoMethod调用旧的方法
-};
-return my;
-} (blogModule)); 通过这种方式，我们达到了重载的目的，当然如果你想在继续在内部使用原有的属性， 你可以调用oldAddPhotoMethod来用。
-</code></pre>
-
-<p>克隆与继承</p>
-
-<pre><code>var blogModule = (function (old) {
-var my = {}, key;
-for (key in old) {
-if (old.hasOwnProperty(key)) {
-my[key] = old[key];
-}
-}
-var oldAddPhotoMethod = old.AddPhoto;
-my.AddPhoto = function () {
-// 克隆以后，进行了重写，当然也可以继续调用oldAddPhotoMethod
-};
-return my;
-} (blogModule)); 这种方式灵活是灵活，但是也需要花费灵活的代价， 其实该对象的属性对象或function根本没有被复制，只是对同一个对象多了一种引用而已， 所以如果老对象去改变它，那克隆以后的对象所拥有的属性或function函数也会被改变， 解决这个问题，我们就得是用递归，但递归对function函数的赋值也不好用， 所以我们在递归的时候eval相应的function。不管怎么样，我还是把这一个方式放在这个帖子里了， 大家使用的时候注意一下就行了。
-</code></pre>
-
-<p>跨文件共享私有对象</p>
-
-<p>通过上面的例子，我们知道，如果一个module分割到多个文件的话，每个文件需要保证一样的结构，
-也就是说每个文件匿名函数里的私有对象都不能交叉访问，那如果我们非要使用，那怎么办呢？ 我们先看一段代码：</p>
-
-<pre><code>var blogModule = (function (my) {
-var _private = my._private = my._private || {},
-_seal = my._seal = my._seal || function () {
-delete my._private;
-delete my._seal;
-delete my._unseal;
-},_unseal = my._unseal = my._unseal || function () {
-my._private = _private;
-my._seal = _seal;
-my._unseal = _unseal;
-};
-return my;
-} (blogModule || {})); 任何文件都可以对他们的局部变量_private设属性， 并且设置对其他的文件也立即生效。一旦这个模块加载结束， 应用会调用 blogModule._seal()"上锁"，这会阻止外部接入内部的_private。 如果这个模块需要再次增生，应用的生命周期内，任何文件都可以调用_unseal() ”开锁”， 然后再加载新文件。加载后再次调用 _seal()”上锁”。
-</code></pre>
-
-<p>子模块</p>
-
-<p>最后一个也是最简单的使用方式，那就是创建子模块</p>
-
-<pre><code>blogModule.CommentSubModule = (function () {
-var my = {};
-// ...
-return my;
-} ()); 尽管非常简单，我还是把它放进来了，因为我想说明的是子模块也具有一般模块所有的高级使用方式， 也就是说你可以对任意子模块再次使用上面的一些应用方法。
-</code></pre>
-
-<p>总结</p>
-
-<p>上面的大部分方式都可以互相组合使用的，一般来说如果要设计系统，可能会用到松耦合扩展，
-私有状态和子模块这样的方式。另外，我这里没有提到性能问题，
-但我认为Module模式效率高，代码少，加载速度快。使用松耦合扩展允许并行加载，
-这更可以提升下载速度。不过初始化时间可能要慢一些，但是为了使用好的模式，这是值得的。</p>
-
-      <div class="readall"><a href="/blog/2014/09/27/Module.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/MapReduce.html">Map/Reduce第一次开发记录</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/hbase-time.html">hbase time集群时间不一致无法启动</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
@@ -604,69 +109,48 @@ return my;
       </p>
     </header>
     <div class="post-main">
-      <p>1.main()
-作用：配置job, 提交job
-main()运行于JobTracker</p>
+      <p>hbase 分布式时可能因为各个机器的时间不一致导致无法启动
+两种解决方案：</p>
 
 <ol>
   <li>
-    <p>map/reduce运行流程：</p>
+    <p>联网更新时间：</p>
 
-    <pre><code> map(k1, v1)--&gt;(k2, v2)--&gt;combiner(k2, v2)--&gt;(k3, v3)--&gt;reduce(k3, v3)--&gt;(k4, v4)
- InputFormat  程序逻辑          map的输出               combiner的输出  最终输出
-</code></pre>
-  </li>
-  <li>
-    <p>不要在map类中自己实现combiner或reduce的功能。可能导致内存不足。
-context.write();方法在当写入量超过一定值后，会写入文件。</p>
-  </li>
-  <li>
-    <p>setNumReduce() 设置reduce的个数，默认为1. 另外当map/reduce运行在本地时此方法的设置无效。
-对于reduce的个数一般由metadata来决定。</p>
-  </li>
-  <li>
-    <p>map/reduce 程序的运行方式：</p>
-
-    <p>a: 将写好的程序，打成jar包，将其和其依赖的jar包放置于 hadoop安装环境上 然后在hadoop上以 hadoop -jar /path/***.jar
- b：在eclipse中run
- c: 编写servlet, 在servlet 中调用a方法中的命令 运行程序。</p>
-  </li>
-  <li>
-    <p>Combiner</p>
-
-    <p>在map端实现对key的聚合，然后再有reduce从聚合以后的数据中获取，从而减少map于reduce之间的数据传输，提高程序效率。
- 另外使用Combiner,应考虑使用combiner对数据的聚合程度。如果聚合量太少，是没有必要的。</p>
-  </li>
-  <li>
-    <p>Partitioner  (shuffle)
- Partitioner 实现将map或是combiner的输出发送到对应的reduce的功能.
- 可以自定义实现。默认为HashPartitioner</p>
-  </li>
-  <li>
-    <p>configuration：作用：实现对job的配置
- 可以作为jobtracker,map,reduce之间的参数传递，configuration对象在设置后，在程序的任何地方都能获取。</p>
-  </li>
-  <li>
-    <p>在本地run map/redcue 程序时 需要修改源码中FileUtil类如下：</p>
-
-    <pre><code> private static void checkReturnValue(boolean rv, File p,
- FsPermission permission
- ) throws IOException {
- // if (!rv) {
- // throw new IOException("Failed to set permissions of path: " + p +
- // " to " +
- // String.format("%04o", permission.toShort()));
- // }
- }
+    <pre><code> sudo tzconfig， 如果命令不存在请使用 dpkg-reconfigure tzdata 然后按照提示选择 Asia对应的序号，选完后会显示一堆新的提示—输入城市名， 如Shanghai或Chongqing，最后再用 sudo date -s “” 来修改本地时间。 按照提示进行选择时区，然后： www.2cto.com sudo cp /usr/share/zoneinfo/Asia/ShangHai /etc/localtime 上面的命令是防止系统重启后时区改变。
 </code></pre>
   </li>
 </ol>
 
-<p>可以把这个类copy到你eclipse工程中的源程序中，包名和类名都不变。
-在eclipse中运行时将优先使用你copy过来修改的那个类。
-没有必要重新编译整个hadoop的类。</p>
+<p>网上同步时间</p>
 
-      <div class="readall"><a href="/blog/2014/09/27/MapReduce.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<ol>
+  <li>
+    <p>安装ntpdate工具</p>
+
+    <pre><code> # sudo apt-get install ntpdate
+</code></pre>
+  </li>
+  <li>
+    <p>设置系统时间与网络时间同步</p>
+
+    <pre><code> # ntpdate cn.pool.ntp.org
+</code></pre>
+  </li>
+  <li>
+    <p>将系统时间写入硬件时间</p>
+
+    <p># hwclock –systohc</p>
+  </li>
+  <li>
+    <p>修改hbase的时间检查， 其默认的时间为30000ms</p>
+
+    <pre><code> hbase.master.maxclockskew
+ 180000
+</code></pre>
+  </li>
+</ol>
+
+      <div class="readall"><a href="/blog/2014/09/27/hbase-time.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -674,223 +158,174 @@ context.write();方法在当写入量超过一定值后，会写入文件。</p>
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/MVC.html">MVC框架简单实现</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/hbase-import-export.html">hbase import export</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#f2e">f2e</a>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <p>MVC框架实现</p>
-
-<p>1.MVC（Model—View—Controler)介绍</p>
-
-<p>MVC模式最早由Trygve Reenskaug在1978年提出，是施乐帕罗奥多研究中心（Xerox PARC）在20世纪80年代为程序语言Smalltalk发明的一种软件设计模式。当前备受推崇的一种设计模式，更是web项目的标配。</p>
-
-<p>MVC强制将程序的input、process和output分割独立分别由对应的mvc组建负责。控制器接受用户的请求，调用相应的模型来进行业务处理，并返回数据给控制器。控制器调用相应的视图来显示处理的结果。并通过视图呈现给用户。</p>
-
-<p>优点：</p>
-
-<pre><code>MVC模式的目的是实现动态的程序设计开发，使得开发或维护过程中对程序的修改和扩展变得更加简单，
-程序的复用性变得更好。
-提高了程序的灵活性和可配置性。
-程序结构更加直观。
-各个组建对应功能明确，开发人员能够更好的发挥所长分工作业。
-</code></pre>
-
-<p>缺陷：</p>
-
-<pre><code>技术论坛里，时不时会有MVC已死的声音。现在如日中天的MVC是否真的廉颇老矣？这里摘取《Object Design: Roles, Responsibilities, and Collaborations》一书中对MVC集中式控制器总结了一下四大缺点：
-
-Control logic can get overly complex.
-
-控制器会变得复杂，很多人在Struts的Action控制器中写业务代码已经变得很常见。
-
-Controllers can become dependent on information holders' contents.
-
-控制器变得依赖信息数据中心或数据库了，控制器做很多事情。
-
-Objects can become coupled indirectly through the actions of their controller.
-
-对象将间接地通过控制器的action耦合在一起，一个对象在控制器中查询获得，然后复制给另外一个对象，这两个对象就耦合在一起。
-
-The only interesting work is done in the controller.
-
-唯一有趣的工作是做控制器，Responsibilities职责被吸进控制器对象，只将一些行为留给角色模型完成，重要的事情都集中在控制器中了。
-
-传说中的替代架构：DCI(Data Context Interactions)
-</code></pre>
-
-<ol>
+      <ol>
   <li>
-    <p>流行实现框架分析</p>
+    <p>导出HFlie
+使用org.apache.hadoop.hbase.mapreduce.Export类
+参数: MR配置参数 需导出的表 导出路径 时间戳版本（默认为1）时间戳起始结束时间 可加正则的RowFilter或PrefixFilter</p>
 
-    <p>闲话休多，好与坏都需要自己亲身去实践，需要透彻的了解这种设计。本篇文章旨在通过参考现今主流MVC框架的设计思路自己实现一个简单的mvc框架，从而更加深入透彻的理解与掌握MVC。</p>
+    <pre><code> Export [-D &lt;property=value&gt;]* &lt;tablename&gt; &lt;outputdir&gt; [&lt;versions&gt; [&lt;starttime&gt; [&lt;endtime&gt;]] [^[regex pattern] or [Prefix] to filter]]
+ Note: -D properties will be applied to the conf used.
+ For example:
+ -D mapred.output.compress=true
+ -D mapred.output.compression.codec=org.apache.hadoop.io.compress.GzipCodec
+ -D mapred.output.compression.type=BLOCK
+ Additionally, the following SCAN properties can be specified
+ to control/limit what is exported..
+ -D hbase.mapreduce.scan.column.family=&lt;familyName&gt;
+ -D hbase.mapreduce.include.deleted.rows=true
+ For performance consider the following properties:
+ -Dhbase.client.scanner.caching=100
+ -Dmapred.map.tasks.speculative.execution=false
+ -Dmapred.reduce.tasks.speculative.execution=false
+ 可直接运行也可以利用Driver如：
+ hbase org.apache.hadoop.hbase.mapreduce.Driver export &lt;hbase 表&gt; &lt;导出路径&gt;
+ hbase org.apache.hadoop.hbase.mapreduce.Driver export my_table /tmp/my_file
+</code></pre>
+  </li>
+  <li>
+    <p>导入HFlie</p>
 
-    <p>首先简单分析一下流行的MVC框架 如struts2 和 springmvc</p>
+    <pre><code> 使用org.apache.hadoop.hbase.mapreduce.Import类
+ 参数: Import [options] &lt;tablename&gt; &lt;inputdir&gt;
+ By default Import will load data directly into HBase. To instead generate
+ HFiles of data to prepare for a bulk data load, pass the option:
+ -Dimport.bulk.output=/path/for/output
+ For performance consider the following options:
+ -Dmapred.map.tasks.speculative.execution=false
+ -Dmapred.reduce.tasks.speculative.execution=false
+ 可直接运行也可以用Driver如：
+ hbase org.apache.hadoop.hbase.mapreduce.Driver import &lt;hbase 表&gt; &lt;导入路径&gt;
+ hbase org.apache.hadoop.hbase.mapreduce.Driver import my_table /tmp/my_file
+</code></pre>
+  </li>
+  <li>
+    <p>批量导入HFlie（导入到已存在的表）</p>
+
+    <pre><code> org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles
+ 参数: completebulkload &lt;/path/to/hfileoutputformat-output&gt; &lt;tablename&gt;
+ 可直接运行也可以用Driver如：
+ hbase org.apache.hadoop.hbase.mapreduce.Driver completebulkload &lt;导入路径&gt; &lt;hbase 表&gt;
+ hbase org.apache.hadoop.hbase.mapreduce.Driver completebulkload /tmp/my_file my_table
+</code></pre>
+
+    <p>后面几个工具MR没有测试：</p>
+  </li>
+  <li>
+    <p>导入TSV文件</p>
+
+    <pre><code> org.apache.hadoop.hbase.mapreduce.ImportTsv类
+ 参数: importtsv -Dimporttsv.columns=a,b,c &lt;tablename&gt; &lt;inputdir&gt;
+ 必须用-Dimporttsv.columns指定导入的TSV文件的列，列与列之间用逗号隔开
+ 一个列对应hbase的columnfamily，
+
+ By default importtsv will load data directly into HBase. To instead generate
+ HFiles of data to prepare for a bulk data load, pass the option:
+ -Dimporttsv.bulk.output=/path/for/output
+ Note: if you do not use this option, then the target table must already exist in HBase
+ Other options that may be specified with -D include:
+ -Dimporttsv.skip.bad.lines=false - fail if encountering an invalid line
+ '-Dimporttsv.separator=|' - eg separate on pipes instead of tabs
+ -Dimporttsv.timestamp=currentTimeAsLong - use the specified timestamp for the import
+ -Dimporttsv.mapper.class=my.Mapper - A user-defined Mapper to use instead of org.apache.hadoop.hbase.mapreduce.TsvImporterMapper
+ For performance consider the following options:
+ -Dmapred.map.tasks.speculative.execution=false
+ -Dmapred.reduce.tasks.speculative.execution=false
+ 可直接运行也可以用Driver如：
+ hbase org.apache.hadoop.hbase.mapreduce.Driver importtsv Dimporttsv.columns=name,age &lt;hbase 表&gt; &lt;导入路径&gt;
+ hbase org.apache.hadoop.hbase.mapreduce.Driver importtsv Dimporttsv.columns=name,age my_table /tmp/my_tsvFile
+</code></pre>
+  </li>
+  <li>
+    <p>表复制</p>
+
+    <p>org.apache.hadoop.hbase.mapreduce.CopyTable类</p>
+
+    <p>Usage: CopyTable [general options] [–starttime=X] [–endtime=Y] [–new.name=NEW] [–peer.adr=ADR] <tablename>
+ Options:
+ rs.class hbase.regionserver.class of the peer cluster
+ specify if different from current cluster
+ rs.impl hbase.regionserver.impl of the peer cluster
+ starttime beginning of the time range (unixtime in millis)
+ without endtime means from starttime to forever
+ endtime end of the time range. Ignored if no starttime specified.
+ versions number of cell versions to copy
+ new.name new table's name
+ peer.adr Address of the peer cluster given in the format
+ hbase.zookeeer.quorum:hbase.zookeeper.client.port:zookeeper.znode.parent
+ families comma-separated list of families to copy
+ To copy from cf1 to cf2, give sourceCfName:destCfName.
+ To keep the same name, just give "cfName"
+ all.cells also copy delete markers and deleted cells
+ Args:
+ tablename Name of the table to copy
+ Examples:
+ To copy 'TestTable' to a cluster that uses replication for a 1 hour window:
+ $ bin/hbase org.apache.hadoop.hbase.mapreduce.CopyTable
+ --starttime=1265875194289
+ --endtime=1265878794289
+ --peer.adr=server1,server2,server3:2181:/hbase
+ --families=myOldCf:myNewCf,cf2,cf3 TestTable
+ For performance consider the following general options:
+ -Dhbase.client.scanner.caching=100
+ -Dmapred.map.tasks.speculative.execution=false</tablename></p>
+  </li>
+  <li>
+    <p>Compares the data</p>
+
+    <p>org.apache.hadoop.hbase.mapreduce.replication.VerifyReplication类
+ Usage: verifyrep [–starttime=X] [–stoptime=Y] [–families=A] <peerid> <tablename>
+ Options:
+ starttime beginning of the time range
+ without endtime means from starttime to forever
+ stoptime end of the time range
+ families comma-separated list of families to copy
+ Args:
+ peerid Id of the peer used for verification, must match the one given for replication
+ tablename Name of the table to verify
+ Examples:
+ To verify the data replicated from TestTable for a 1 hour window with peer #5
+ $ bin/hbase org.apache.hadoop.hbase.mapreduce.replication.VerifyReplication --starttime=1265875194289 --stoptime=1265878794289 5 TestTable</tablename></peerid></p>
   </li>
 </ol>
 
-<p>Struts2
-请求流程：</p>
-
-<p><img src="/image/strus-workflow.png" alt="" /></p>
-
-<p>struts request 流程图
-上面这张图是官方给出的struts2.0请求处理流程图，struts2.0对一个请求的处理可以分为以下几个步骤：</p>
-
-<pre><code>客户端发送请求。
-
-请求先通过ActionContextCleanUp--&gt;FilterDispatcher。
-
-FilterDispatcher通过ActionMapper来决定这个Request需要调用哪个Action。
-
-如果ActionMapper决定调用某个Action，FilterDispatcher把请求的处理交给ActionProxy，这儿已经转到它的Delegate—Dispatcher来执行。
-
-ActionProxy根据ActionMapping和ConfigurationManager找到需要调用的Action类
-
-ActionProxy创建一个ActionInvocation的实例。
-
-ActionInvocation调用真正的Action，当然这涉及到相关拦截器的调用。
-
-Action执行完毕，ActionInvocation创建Result并返回，当然，如果要在返回之前做些什么，可以实现PreResultListener。添加PreResultListener可以在Interceptor中实现。
-</code></pre>
-
-<p>springmvc
-请求流程：<br />
-<img src="/image/Spring1.jpg" alt="" />)</p>
-
-<p>具体流程步骤如下：</p>
-
-<pre><code>1. 首先用户发送请求=&gt;DispatcherServlet，前端控制器收到请求后自己不进行处理，而是委托给其他的解析器进行处理，作为统一访问点，进行全局的流程控制。
-
-2. DispatcherServlet=&gt;HandlerMapping， HandlerMapping将会把请求映射为HandlerExecutionChain对象（包含一个Handler处理器（页面控制器）对象、多个HandlerInterceptor拦截器）对象，通过这种策略模式，很容易添加新的映射策略。
-
-3. DispatcherServlet=&gt;HandlerAdapter，HandlerAdapter将会把处理器包装为适配器，从而支持多种类型的处理器。
-
-4. HandlerAdapter=&gt;处理器功能处理方法的调用，HandlerAdapter将会根据适配的结果调用真正的处理器的功能处理方法，完成功能处理；并返回一个ModelAndView对象（包含模型数据、逻辑视图名）。
-
-5. ModelAndView的逻辑视图名=&gt; ViewResolver， ViewResolver将把逻辑视图名解析为具体的View。
-
-6. View=&gt;渲染，View会根据传进来的Model模型数据进行渲染，此处的Model实际是一个Map数据结构，因此很容易支持其他视图技术；
-
-7. 返回控制权给DispatcherServlet，由DispatcherServlet返回响应给用户，流程结束。
-</code></pre>
+<p>实例记录：</p>
 
 <ol>
-  <li>实现</li>
+  <li>Export Production HBase table as following:
+hbase org.apache.hadoop.hbase.mapreduce.Export ‘mytable’ /hbase_bak/mytable</li>
+  <li>
+    <p>Copy HDFS files to local:
+hadoop fs -copyToLocal /hbase_bak/mytable /home/user/hbase_bak/mytable</p>
+  </li>
+  <li>
+    <p>Copy the local files from production to production extension server</p>
+  </li>
+  <li>Copy local file to HDFS:
+hadoop fs -copyFromLocal /home/user/hbase_bak/mytable /hbase_bak/mytable</li>
+  <li>Create table in production extension
+create ‘mytable’, {NAME=&gt;’log’, VERSION=&gt; 1}</li>
+  <li>Import the HDFS files into HBase:
+hbase org.apache.hadoop.hbase.mapreduce.Import ‘mytable’ /hbase_bak/mytable</li>
+  <li>Verify the result:
+hbase shell
+count mytable</li>
 </ol>
 
-<p>经过对struts2和springmvc的分析，可以看出要实现mvc这样的表现层框架，总体上来说需要实现以下三点：</p>
-
-<p>URL到框架的映射。</p>
-
-<p>Http请求参数绑定。</p>
-
-<p>Http响应的生成和输出。</p>
-
-<p>将其具体到实现可以分为：</p>
-
-<p>配置元素的对象化（解析配置文件，初始化环境）。</p>
-
-<pre><code>publicvoid init() throws ServletException {
-
-super.init();
-
-try {
-
-actionConfigs = XMLUtil.parseConfig();
-
-} catch (Exception e) {
-
-e.printStackTrace();
-
-}
-
-}
-</code></pre>
-
-<ol>
-  <li>
-    <p>对Http请求进行初步处理，查找与之对应的处理类（方法）</p>
-
-    <pre><code> String handlerMappingClassName = handlerBeanConfigs.get(Constants.HAND LER_MAPPING).getClazz();
-	
- String actionName = ((HandlerMapping)
-	
- ReflectUtil.getInstance(handlerMappingClassName)).handlerMapping(req);
-</code></pre>
-  </li>
-  <li>
-    <p>调用相应的处理类（方法）完成业务逻辑对处理类（方法）</p>
-
-    <pre><code> ActionConfig actionConfig = actionConfigs.get(actionName);
-	
- String handlerAdapterClassName = handlerBeanConfigs.
-	
- get(Constants.HANDLER_ADAPTER).getClazz();
-	
- String result = ((HandlerAdapter)ReflectUtil.
-	
- getInstance(handlerAdapterClassName))
-	
- .handlerAdapter(req, actionConfig, actionName);
-</code></pre>
-  </li>
-  <li>
-    <p>根据处理类（方法）的调用结果，进行Http响应处理</p>
-
-    <pre><code> String handlerViewClassName = handlerBeanConfigs.
-	
- get(Constants.HANDLER_VIEW).getClazz();
-	
- ((HandlerView) ReflectUtil.getInstance(handlerViewClassName)).
-	
- handlerView(req, resp, actionConfig, result);
-</code></pre>
-  </li>
-</ol>
-
-<p>以上是整个框架处理的核心流程,核心流程的控制在DispatcherServlet类中完成。同时整个流程又分为以上的几个步骤，对于每个步骤的具体实现,采用开放接口的方式提供给框架使用者。可以实现其中的对应接口,并在配置文件中注册具体实现类。即可实现修改框架默认定制属于自己实现。</p>
-
-<p>具体提供以下三个接口分别对应上面2，3，4步的处理逻辑，分别为：</p>
-
-<p>HandlerMapping</p>
-
-<p>HandlerAdapter</p>
-
-<p>HandlerView</p>
-
-<p>扩展举例：实现定制Http请求进行初步处理，查找与之对应的处理类（方法）</p>
-
-<pre><code>publicclass HandlerURLMapping implements HandlerMapping {
-
-@Override
-
-public String handlerMapping(HttpServletRequest request) throws Exception {
-
-String contextPath = request.getContextPath();
-
-String uri = request.getRequestURI();
-
-String actionName = uri.substring(contextPath.length() + 1, uri.length());
-
-return actionName;
-
-}
-
-}
-</code></pre>
-
-<p>框架request请求执行逻辑图如下：</p>
-
-<p><img src="/image/my-mvc.png" alt="" /></p>
+<p>Find both the row count are same in production and production extension.</p>
 
 
-      <div class="readall"><a href="/blog/2014/09/27/MVC.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/09/27/hbase-import-export.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -898,64 +333,527 @@ return actionName;
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/Linux-SSH-.html">Linux SSH 登录</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/09/27/eclipse-hadoop-job.html">eclipse hadoop job</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
         2014年09月27日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#linux">linux</a>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <p>服务器IP地址为192.168.1.1，机器名：will_s
-客户端IP地址为172.16.16.1，机器名：will_c
-客户端用户will需要使用ssh无密码登录服务器的will帐户</p>
+      <p>使用EJob提交jar
+在run中添加：</p>
 
-<p>实现原理
-使用”公私钥”认证的方式来进行ssh登录.
-在客户端上创建一对公私钥 （公钥文件：~/.ssh/id_rsa.pub； 私钥文件：~/.ssh/id_rsa）
-然后把公钥放到服务器上（~/.ssh/authorized_keys）, 自己保留好私钥
-当ssh登录时,ssh程序会发送私钥去和服务器上的公钥做匹配.如果匹配成功就可以登录了</p>
+<pre><code>     conf.set("fs.default.name", "hdfs://192.168.241.7:9000");
+      conf.set("mapred.job.tracker", "192.168.241.7:9001");
+      Job job = new Job(conf, "....... my  job ......");
+      try {
+        File jarFile = EJob.createTempJar("bin");
+        ((JobConf) job.getConfiguration()).setJar(jarFile.toString());
+    } catch (IOException e) {
+        throw new IOException(e);
+    }
+</code></pre>
 
-<p>设置如下：</p>
+<p>修改hadoop的hdfs-site.xml 关闭权限校验</p>
+
+<pre><code> &lt;property&gt; 
+      &lt;name&gt;dfs.permissions&lt;/name&gt; 
+      &lt;value&gt;false&lt;/value&gt; 
+ &lt;/property&gt; 
+</code></pre>
+
+<p><strong>其他解决办法：</strong></p>
+
+<p>hdfs的权限判断十分简单，就是拿发出指令的user name和文件的user name 做比较</p>
+
+  	private void check(INode inode, FsAction access
+<pre><code>  ) throws AccessControlException {
+if (inode == null) {
+  return;
+}
+FsPermission mode = inode.getFsPermission();
+
+if (user.equals(inode.getUserName())) { //user class
+  if (mode.getUserAction().implies(access)) { return; }
+}
+else if (groups.contains(inode.getGroupName())) { //group class
+  if (mode.getGroupAction().implies(access)) { return; }
+}
+else { //other class
+  if (mode.getOtherAction().implies(access)) { return; }
+}
+throw new AccessControlException("Permission denied: user=" + user
+    + ", access=" + access + ", inode=" + inode);
+ 	 }
+}
+</code></pre>
+
+<p>在多用户提交任务时遇到Permission denied, 的原因和任务提交的过程有关。</p>
 
 <ol>
+  <li>首先提交任务的客户端会把任务相关文件打包放在hadoop.tmp.dir中，这是本地目录，需要通过本地系统权限验证。由于是临时目录直接设置成为777就行.</li>
   <li>
-    <p>以will用户登录客户机器并在客户端机器上执行”ssh-keygen -t rsa”
-(注：每次执行”ssh-keygen -t rsa”产生的私钥文件都会不同)</p>
+    <p>客户端会将任务文件打包写入hdfs的	</p>
 
-    <p>a）如果文件”~/.ssh/id_rsa”存在，会提示是否覆盖该文件，此时可选择”n”不覆盖该文件而使用已有的id_rsa文件；
- 如果选择”y”则会重新生成”~/.ssh/id_rsa”文件，接下来会提示输入passphrase，
- 回车确定使用空的passphrase，再次回车确认（这里也可以输出passphrase，相当于ssh时登录的密码）。
- 然后会重新生成”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件。</p>
+    <pre><code>mapreduce.jobtracker.staging.root.dir + "/" + user + "/.staging" 目录，需要经过hdfs权限验证。通常可以选择两种方法解决。
 
-    <p>b）如果”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件不存在则会自动创建新的”~/.ssh/id_rsa”文件和”~/.ssh/id_rsa.pub”文件，
- passphrase设置同上。</p>
-  </li>
-  <li>
-    <p>使用ssh will@192.168.1.1登录到服务器，编辑服务器上”~/.ssh/authorized_keys”文件，
-将客户端机器上的”~/.ssh/id_rsa.pub”文件内容追加到”~/.ssh/authorized_keys”文件中。
-（注：可以在客户端机器上使用以下命令来实现：</p>
-
-    <pre><code> cat ~/.ssh/id_rsa.pub | ssh will@192.168.1.1 "cat - &gt;&gt; ~/.ssh/authorized_keys" 此时会要求输入will用户在服务器上的登录密码，输入后即会将客户端机器上的"~/.ssh/id_rsa.pub"文件内容追加到服务器上的 "~/.ssh/authorized_keys"文件中） 如果是首次连接服务器会出现以下的提示，确认连接并输入密码后其他直接回车确定。
+1) 保持mapreduce.jobtracker.staging.root.dir为默认，将此目录chmod 777
+2) 在hdfs的/user目录下建立用户目录，并且chown为该用户，相当于在hdfs下创建一个用户。
+然后设置mapreduce.jobtracker.staging.root.dir为/user,  这是官方推荐的，可以看到这个属性的描述是这样写的：
+The root of the staging area for users' job files In practice, this should be the directory where users' home directories are located (usually /user)。
+3）有人说可以在启动任务时加入hadoop.job.ugi属性指定用户和群组。 我验证这样不行。看源码里也是直接获取
+ugi = UserGroupInformation.getCurrentUser();不过看hdfs权限策略这操行应该可以设置。
 </code></pre>
-  </li>
-  <li>
-    <p>如果在第1步中使用了空的passphrase，则可以跳过第4步，此时在客户端即可以使用”ssh zhaoy@192.168.1.1”即可无密码登录到服务器；
-如果第一步中设置了passphrase，则继续执行以下步骤。</p>
-  </li>
-  <li>
-    <p>如果第1步中设置了passphrase，则此时需要输入该passphrase登录服务器。
-此时前面我们把输入密码变成了输入passphrase，这没有带来任何方便。
-但是我们可以通过ssh-agent来帮助我们自动输入passphrase(只是看起来像是自动输入而已)，
-我们只要在第一次登录时输入一次passphrase, 以后的工作就可以交给ssh-agent。在客户端机器上执行命令ssh-add，
-这里会提示输入一次passphrase。输入第一步中设置的passphrase之后会修改”~/.ssh/id_rsa”文件。
-再在客户端执行”ssh will@192.168.1.1”即可无密码登录到服务器端。</p>
   </li>
 </ol>
 
-      <div class="readall"><a href="/blog/2014/09/27/Linux-SSH-.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+
+      <div class="readall"><a href="/blog/2014/09/27/eclipse-hadoop-job.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/arraylistarraylink.html">arraylist&arraylink</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p><strong>区别</strong>：</p>
+
+<ol>
+  <li>
+    <p>array 在定义的时候必须实例化(至少申明大小)，arraylist则可以只是申明</p>
+
+    <ul>
+      <li>int[] array = new array[3]</li>
+      <li>int[] array = {1,2,3}</li>
+      <li>ArrayList arrayList;</li>
+      <li>int[] array;则不合法</li>
+    </ul>
+  </li>
+  <li>
+    <p>Array只能存储同构对象，ArrayList则可以存储异构对象，当然object[]和使用泛型的arraylist不适用此条。</p>
+  </li>
+  <li>
+    <p>在CRL的托管方式不一样
+ Array是连续存储，Arraylist则不一定是连续存储</p>
+  </li>
+  <li>Array的大小是定义的时候指定的，Arraylist则可以动态扩容</li>
+  <li>Array不能随意添加或删除其中的项，ArrayList则可以随意添加删除</li>
+</ol>
+
+<p><strong>相似</strong>：</p>
+
+<ol>
+  <li>都具有索引，即可以通过索引来直接添加和修改任意项</li>
+  <li>所创建的对象都托管在堆中</li>
+  <li>都能够对自身进行枚举（因为实现了IEnumerable接口）</li>
+</ol>
+
+<p><strong>ArrayList 源码摘要：</strong></p>
+
+<pre><code>1. public class ArrayList&lt;E&gt; extends AbstractList&lt;E&gt;  
+2.         implements List&lt;E&gt;, RandomAccess, Cloneable, java.io.Serializable  
+3. {  
+4.     ......  
+5.   
+6.     /** 
+7.      * The array buffer into which the elements of the ArrayList are stored. 
+8.      * The capacity of the ArrayList is the length of this array buffer. 
+9.      */  
+10.     private transient E[] elementData;  
+11.   
+12.   
+13.     /** 
+14.      * The size of the ArrayList (the number of elements it contains). 
+15.      * 
+16.      * @serial 
+17.      */  
+18.     private int size;  
+19.    ......  
+20. }  
+21. 
+</code></pre>
+
+<p>底层两个属性一个object[] 一个size</p>
+
+<ol>
+  <li>ArrayList底层通过object[] 复制的方式（System.arraycopy()）来处理数组的增长</li>
+  <li>当ArrayList 的容量不足时，其扩充容量的方式：先将容量扩充至当前容量的1.5倍，若还不够，则将容量扩充至当前需要的数量。</li>
+</ol>
+
+<p><strong>ArrayList与Vector的区别</strong></p>
+
+<p>1） vector 是线程同步 的，所以它也是线程安全 的，而arraylist 是线程异步 的，是不安全的 。如果不考虑到线程的安全因素，一般用 arraylist效率比较高。</p>
+
+<p>2） 如果集合中的元素的数目大于目前集合数组的长度时，vector 增长率为目前数组长度的100%, 而arraylist 增长率为目前数组长度的50% .如果在集合中使用数据量比较大的数据，用vector有一定的优势。</p>
+
+<p>3） 如果查找一个指定位置的数据 ，vector和arraylist使用的时间是相同 的，都是O(1) ,这个时候使用vector和arraylist都可以。</p>
+
+<p>而如果移动一个指定位置的数据花费的时间为O(n-i)n为总长度 ，这个时候就应该考虑到使用linklist ,因为它移动一个指定位置的数据所花费的时间为0(1),而查询一个指定位置的数据时花费的时间为0(i)。</p>
+
+<p><strong>ArrayList和LinkedList的大致区别：</strong></p>
+
+<ol>
+  <li>ArrayList是实现了基于动态数组的数据结构，LinkedList基于链表的数据结构。</li>
+  <li>对于随机访问get和set，ArrayList觉得优于LinkedList，因为LinkedList要移动指针。</li>
+  <li>对于新增和删除操作add和remove，LinedList比较占优势，因为ArrayList要移动数据。 </li>
+</ol>
+
+<p><strong>ArrayList和LinkedList在性能上各有优缺点，都有各自所适用的地方，总的说来可以描述如下：</strong></p>
+
+<ol>
+  <li>对ArrayList和LinkedList而言，在列表末尾增加一个元素所花的开销都是固定的。对ArrayList而言，主要是在内部数组中增加一项，指向所添加的元素，偶尔可能会导致对数组重新进行分配；而对LinkedList而言，这个开销是统一的，分配一个内部Entry对象。</li>
+  <li>在ArrayList的中间插入或删除一个元素意味着这个列表中剩余的元素都会被移动；而在LinkedList的中间插入或删除一个元素的开销是固定的。</li>
+  <li>LinkedList不支持高效的随机元素访问。</li>
+  <li>ArrayList的空间浪费主要体现在在list列表的结尾预留一定的容量空间，而LinkedList的空间花费则体现在它的每一个元素都需要消耗相当的空间</li>
+</ol>
+
+<p>可以这样说：当操作是在一列数据的后面添加数据而不是在前面或中间,并且需要随机地访问其中的元素时,使用ArrayList会提供比较好的性能；当你的操作是在一列数据的前面或中间添加或删除数据,并且按照顺序访问其中的元素时,就应该使用LinkedList了。</p>
+
+
+      <div class="readall"><a href="/blog/2014/09/27/arraylistarraylink.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/09/27/RegEx.html">RegEx</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年09月27日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#java">java</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>From: http://www.oschina.net/question/12_9507</p>
+
+<p>元字符
+现在你已经知道几个很有用的元字符了，如\b,.,*，还有\d. 正则表达式里还有更多的元字符，比如\s匹配任意的空白 符，包括空格，制表符(Tab)，换行符，中文全角空格等。\w匹配字母或数字或下划线或汉字等。</p>
+
+<p>对中文/汉字的特殊处理是由.Net提供的正则表达式引擎支持的，其它环境下的具体情况请查看 相关文档。</p>
+
+<p>下面来看看更多的例子：</p>
+
+<p>\ba\w<em>\b匹配以字母a开头的单词——先是某个单词开始处(\b)，然后是字 母a,然后是任意数量的字母或数字(\w</em>)， 最后是单词结束处(\b)。</p>
+
+<p>好吧，现在我们说说正则表达式里的单词是什么意思吧：就是不少于一个的连续的\w。不错，这与学习英文时要背的成千上万个同名的东西的确关系不大 :)</p>
+
+<p>\d+匹配1个或更多连续的数字。 这里的+是和<em>类似的元字符，不同的是</em>匹配重复任意次(可能是0次)，而+则匹配重复1次或更多次。</p>
+
+<p>\b\w{6}\b 匹配刚好6个字符的 单词。</p>
+
+<p>表1.常用的元字符
+代码	说明
+.	匹配除换行符以外的任意字符
+\w	匹配字母或数字或下划线或汉字
+\s	匹配任意的空白符
+\d	匹配数字
+\b	匹配单词的开始或结束
+^	匹配字符串的开始
+$	匹配字符串的结束
+正则表达式引擎通常会提供一个“测试指定的字符串是否匹配一个正则表达式”的方法，如JavaScript里的 RegExp.test()方法或.NET里的Regex.IsMatch()方法。这里的匹配是指是字符串里有没有符合表达式规则的部分。如果不使用^和$的话，对于\d{5,12}而言，使用这样的方法就只能保证字符串里包含5到 12连续位数字，而不是整个字符串就是5到12位数字。</p>
+
+<p>元字符^（和数字6在同一个键位上的符号）和$都 匹配一个位置，这和\b有点类似。^匹配你 要用来查找的字符串的开头，$匹配结尾。这两个代码在验证输入的内容时非常有用，比如一个网站如果 要求你填写的QQ号必须为5位到12位数字时，可以使用：^\d{5,12}$。</p>
+
+<p>这里的{5,12}和前面介绍过的{2}是 类似的，只不过{2}匹配只能不多不少重复2次，{5,12}则是重复的次数不能少于5次，不能多于12次， 否则都不匹配。</p>
+
+<p>因为使用了^和$，所以输入 的整个字符串都要用来和\d{5,12}来匹配，也就是说整个输入必须是5到12个数字，因此如果输入的QQ号能匹配这个正则表达式的话，那就符合要求了。</p>
+
+<p>和忽略大小写的选项类似，有些正则表达式处理工具还有一个处理多行的选项。如果选中了这个选项，^和$的意义就变成了匹配行的开始处和结束处。</p>
+
+<p>字符转义
+如果你想查找元字符本身的话，比如你查找.,或者*,就出现了问题：你没办法指定它们，因为它们会被解释成别的意思。这时你就得使用\来取消这些字符的特殊意义。因此，你应该使用.和*。当然，要查找\本身，你也得用\.</p>
+
+<p>例如：deerchao.net匹配deerchao.net，C:\Windows匹配C:\Windows。</p>
+
+<p>重复
+你已经看过了前面的<em>,+,{2},{5,12}这几个匹配重复的方式了。下面是 正则表达式中所有的限定符(指定数量的代码，例如</em>,{5,12}等)：</p>
+
+<p>表2.常用的限定符
+代码/语法	说明
+*	重复零次或更多次
++	重复一次或更多次
+?	重复零次或一次
+{n}	重复n次
+{n,}	重复n次或更多次
+{n,m}	重复n到m次
+下面是一些使用重复的例子：</p>
+
+<p>Windows\d+匹配Windows 后面跟1个或更多数字</p>
+
+<p>^\w+匹配一行的第一个单词(或整个字 符串的第一个单词，具体匹配哪个意思得看选项设置)</p>
+
+<p>字符类
+要想查找数字，字母或数字，空白是很简单的，因为已经有了对应这些字符集合的元字符，但是如果你想匹配没有预定义元字符的字符集合(比如元 音字母a,e,i,o,u),应该怎么办？</p>
+
+<p>很简单，你只需要在方括号里列出它们就行了，像[aeiou]就匹配任何一个英文元音字母，[.?!]匹配标点符号(.或?或!)。</p>
+
+<p>我们也可以轻松地指定一个字符范围，像[0-9]代 表的含意与\d就是完全一致的：一位数字； 同理[a-z0-9A-Z_]也完全等同于\w（如 果只考虑英文的话）。</p>
+
+<p>下面是一个更复杂的表达式：(?0\d{2}[) -]?\d{8}。</p>
+
+<p>“(”和“)”也是元字符，后面的分组节里会提 到，所以在这里需要使用转义。</p>
+
+<p>这个表达式可以匹配几种格式的电话号码，像(010)88886666，或022-22334455， 或02912345678等。我们对它进行一些分析吧：首先是一个转义字符(,它能出现0次或1次(?),然后是一个0，后面跟着2个数字(\d{2})，然后是)或-或空格中 的一个，它出现1次或不出现(?)，最后是8个数字(\d{8})。</p>
+
+<p>分枝条件
+不幸的是，刚才那个表达式也能匹配010)12345678或(022-87654321这样的“不正确”的格式。要解决这个问题，我们需要用到分枝条件。正则表达式里的分枝条件指的是有几种规则，如 果满足其中任意一种规则都应该当成匹配，具体方法是用|把不同的规则分隔开。听不明白？没关系，看 例子：</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>0\d{2}-\d{8}</td>
+      <td>0\d{3}-\d{7}这个表达式能匹配两种以连字号分隔的电话号码：一种是三位区号，8位本地号(如010-12345678)，一种是4位区号，7位本地号 (0376-2233445)。</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <td>(0\d{2})[- ]?\d{8}</td>
+      <td>0\d{2}[- ]?\d{8}这 个表达式匹配3位区号的电话号码，其中区号可以用小括号括起来，也可以不用，区号与本地号间可以用连字号或空格间 隔，也可以没有间隔。你可以试试用分枝条件把这个表达式扩展成也支持4位区号的。</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <td>\d{5}-\d{4}</td>
+      <td>\d{5}这个表达式用于匹配美国的邮政编码。美国邮编 的规则是5位数字，或者用连字号间隔的9位数字。之所以要给出这个例子是因为它能说明一个问题：使用分枝条件时，要注意各个条件的顺序。 如果你把它改成\d{5}</td>
+      <td>\d{5}-\d{4}的话，那么就只会匹配5位的邮编(以及9位邮 编的前5位)。原因是匹配分枝条件时，将会从左到右地测试每个条件，如果满足了某个分枝的话，就不会去再管其它的条件了。</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>分组
+我们已经提到了怎么重复单个字符（直接在字符后面加上限定符就行了）；但如果想要重复多个字符又该怎么办？你可以用小括号来指定子表达式(也叫做分组)，然后你就可以指定这个子表达 式的重复次数了，你也可以对子表达式进行其它一些操作(后面会有介绍)。</p>
+
+<p>(\d{1,3}.){3}\d{1,3}是一个简单的IP地址匹配表达式。要理解这个表达式，请按下列顺序分析它：\d{1,3}匹 配1到3位的数字，(\d{1,3}.){3}匹 配三位数字加上一个英文句号(这个整体也就是这个分组)重 复3次，最后再加上一个一到三位的数字(\d{1,3})。</p>
+
+<p>IP地址中每个数字都不能大于255，大家千万不要被《24》第三季的编剧给忽悠了……</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>不幸的是，它也将匹配256.300.888.999这种不可能存在的IP地 址。如果能使用算术比较的话，或许能简单地解决这个问题，但是正则表达式中并不提供关于数学的任何功能，所以只能使用冗长的分组，选择，字符类来描述一个 正确的IP地址：((2[0-4]\d</td>
+      <td>25[0-5]</td>
+      <td>[01]?\d\d?).){3}(2[0-4]\d</td>
+      <td>25[0-5]</td>
+      <td>[01]?\d\d?)。</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <td>理解这个表达式的关键是理解2[0-4]\d</td>
+      <td>25[0-5]</td>
+      <td>[01]?\d\d?， 这里我就不细说了，你自己应该能分析得出来它的意义。</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>反义
+有时需要查找不属于某个能简单定义的字符类的字符。比如想查找除了数字以外，其它任意字符都行的情况，这时需要用到反义：</p>
+
+<p>表3.常用的反义代码
+代码/语法	说明
+\W	匹配任意不是字母，数字，下划线，汉字的字符
+\S	匹配任意不是空白符的字符
+\D	匹配任意非数字的字符
+\B	匹配不是单词开头或结束的位置
+[^x]	匹配除了x以外的任意字符
+[^aeiou]	匹配除了aeiou这几个字母以外的任意字符
+例子：\S+匹配不包含空白符的字符串。</p>
+
+<p>&lt;a[^&gt;]+&gt;匹配用 尖括号括起来的以a开头的字符串。</p>
+
+<p>后向引用
+使用小括号指定一个子表达式后，匹配这个子表达式的文本(也就是此分组捕获的内容)可以在表达式或其它 程序中作进一步的处理。默认情况下，每个分组会自动拥有一个组号，规则是：从左向右，以分组的左括 号为标志，第一个出现的分组的组号为1，第二个为2，以此类推。</p>
+
+<p>呃……其实,组号分配还不像我刚说得那么简单：</p>
+
+<p>分组0对应整个正则表达式
+实际上组号分配过程是要从左向右扫描两遍的：第一遍只给未命名组分配，第二遍只给命名组分配－－因此所有命名组的组号都大于未命名的组 号
+你可以使用(?:exp)这样的语法来剥夺一个分组对组号分配的参与权．
+后向引用用于重复搜索前面某个分组匹配的文本。例如，\1代表分组1匹配的文本。难以理解？请看示例：</p>
+
+<p>\b(\w+)\b\s+\1\b可以用来匹配重复的单词，像go go, 或者kitty kitty。这个表达式首先是一个单词， 也就是单词开始处和结束处之间的多于一个的字母或数字(\b(\w+)\b)， 这个单词会被捕获到编号为1的分组中，然后是1个或几个空白符(\s+)，最后是分组1中捕获的内容（也就是前面匹配的那个单词）(\1)。</p>
+
+<p>你也可以自己指定子表达式的组名。要指定一个子表达式的组名，请使用这样的语法：(?<word>\w+)(或者把尖括号换成'也 行：(?'Word'\w+)),这样就把\w+的 组名指定为Word了。要反向引用这个分组捕获的 内容，你可以使用\k<word>,所以上一个例子也可以写成这样：\b(?<word>\w+)\b\s+\k<word>\b。</word></word></word></word></p>
+
+<p>使用小括号的时候，还有很多特定用途的语法。下面列出了最常用的一些：</p>
+
+<p>表4.常用分组语法
+分类	代码/语法	说明
+捕获	(exp)	匹配exp,并捕获文本到自动命名的组里
+(?<name>exp)	匹配exp,并捕获文本到名称为name的组里，也可以写成 (?'name'exp)
+(?:exp)	匹配exp,不捕获匹配的文本，也不给此分组分配组号
+零宽断言	(?=exp)	匹配exp前面的位置
+(?&lt;=exp)	匹配exp后面的位置
+(?!exp)	匹配后面跟的不是exp的位置
+(?&lt;!exp)	匹配前面不是exp的位置
+注释	(?#comment)	这种类型的分组不对正则表达式的处理产生任何影响，用于提供注释让人阅 读
+我们已经讨论了前两种语法。第三个(?:exp)不会改变正则表达式的处理方式，只 是这样的组匹配的内容不会像前两种那样被捕获到某个组里面，也不会拥有组号。“我为什么会想要这样 做？”——好问题，你觉得为什么呢？</name></p>
+
+<p>零宽断言
+地球人，是不是觉得这些术语名称太复杂，太难记了？我也有同感。知道有这么一种东西就行了，它叫什么，随它去 吧！人若无名，便可专心练剑；物若无名，便可随意取舍……</p>
+
+<p>接下来的四个用于查找在某些内容(但并不包括这些内容)之前或之后的东西，也就是说它们像\b,^,$那样用于指定一个位置，这个位置应该满足一定的 条件(即断言)，因此它们也被称为零宽断言。最好还是拿例子来说明吧：</p>
+
+<p>断言用来声明一个应该为真的事实。正则表达式中只有当断言为真时才会继续进行匹配。</p>
+
+<p>(?=exp)也叫零宽度正预测先行断言， 它断言自身出现的位置的后面能匹配表达式exp。比如\b\w+(?=ing\b)， 匹配以ing结尾的单词的前面部分(除了ing以外的部分)，如查找I’m singing while you’re dancing.时，它会匹配sing和danc。</p>
+
+<p>(?&lt;=exp)也叫零宽度正回顾后 发断言，它断言自身出现的位置的前面能匹配表达式exp。比如(?&lt;=\bre)\w+\b会匹配以re开头的单词的后半部 分(除了re以外的部分)，例如在查找reading a book时，它匹配ading。</p>
+
+<p>假如你想要给一个很长的数字中每三位间加一个逗号(当然是从右边加起了)，你可以这样查找需要在前面和里面添加逗号的部分：((?&lt;=\d)\d{3})+\b，用它对1234567890进 行查找时结果是234567890。</p>
+
+<p>下面这个例子同时使用了这两种断言：(?&lt;=\s)\d+(?=\s)匹配以空白符间隔的数字(再次强调，不包括这些空白符)。</p>
+
+<p>负向零宽断言
+前面我们提到过怎么查找不是某个字符或不在某个字符类里的字符的方法(反义)。但是如果我们只是想要确 保某个字符没有出现，但并不想去匹配它时怎么办？例如，如果我们想查找这样的单词–它里面出现了字母q,但是q后面跟的不是字母u, 我们可以尝试这样：</p>
+
+<p>\b\w<em>q[^u]\w</em>\b匹配包含后 面不是字母u的字母q的单词。但是如果多做测试(或者你思维足够敏锐，直接就观察出来了)，你会发现，如果q出现在单词 的结尾的话，像Iraq,Benq，这个表达式就会出错。这是因为[^u]总要匹配一个字符，所以如果q是单词的最后一个字符的话，后面的[^u]将 会匹配q后面的单词分隔符(可能是空格，或者是句号或其它的什么)，后面的\w<em>\b将会匹配下一 个单词，于是\b\w</em>q[^u]\w<em>\b就能匹配整个Iraq fighting。负向零宽断言能解决这 样的问题，因为它只匹配一个位置，并不消费任何字符。现在，我们可以这样来解决这个问题：\b\w</em>q(?!u)\w*\b。</p>
+
+<p>零宽度负预测先行断言(?!exp)，断言此位置的后面不能匹配表达式exp。例如：\d{3}(?!\d)匹 配三位数字，而且这三位数字的后面不能是数字；\b((?!abc)\w)+\b匹 配不包含连续字符串abc的单词。</p>
+
+<p>同理，我们可以用(?&lt;!exp),零 宽度负回顾后发断言来断言此位置的前面不能匹配表达式exp：(?&lt;![a-z])\d{7}匹配前面不是小写字母的七位数 字。</p>
+
+<p>请详细分析表达式(?&lt;=&lt;(\w+)&gt;).*(?=&lt;\/\1&gt;)， 这个表达式最能表现零宽断言的真正用途。</p>
+
+<p>一个更复杂的例子：(?&lt;=&lt;(\w+)&gt;).*(?=&lt;\/\1&gt;)匹 配不包含属性的简单HTML标签内里的内容。(&lt;?(\w+)&gt;)指 定了这样的前缀：被尖括号括起来的单词(比 如可能是<b>)，然后是.*(任意的字符串),最后是一个后缀(?=&lt;\/\1&gt;)。注意后缀里的\/，它用到了前面提过的字符转义；\1则是一个反向 引用，引用的正是捕获的第一组，前面的(\w+)匹 配的内容，这样如果前缀实际上是<b>的话，后缀就是</b>了。整个表达式匹配的是<b>和</b> 之间的内容(再次提醒，不包括前缀和后缀本身)。</b></p>
+
+<p>注释
+小括号的另一种用途是通过语法(?#comment)来包含注释。例如：2[0-4]\d(?#200-249)|25<a href="?#250-255">0-5</a>|[01]?\d\d?(?#0-199)。</p>
+
+<p>要包含注释的话，最好是启用“忽略模式里的空白符”选项，这样在编写表达式时能任意的添加空格，Tab，换行，而实际使用时这些都将被忽 略。启用这个选项后，在#后面到这一行结束的所有文本都将被当成注释忽略掉。例如，我们可以前面的一个表达式写成这样：</p>
+
+<pre><code>  (?&lt;=    # 断言要匹配的文本的前缀
+  &lt;(\w+)&gt; # 查找尖括号括起来的字母或数字(即HTML/XML标签)
+  )       # 前缀结束
+  .*      # 匹配任意文本
+  (?=     # 断言要匹配的文本的后缀
+  &lt;\/\1&gt;  # 查找尖括号括起来的内容：前面是一个"/"，后面是先前捕获的标签
+  )       # 后缀结束 贪婪与懒惰 当正则表达式中包含能接受重复的限定符时，通常的行为是（在使整个表达式能得到匹配的前提下）匹配尽可能多的 字符。以这个表达式为例：a.*b，它将会匹配最长的以 a开始，以b结束的字符串。如果用它来搜索aabab的话，它会匹配整个字符串aabab。这被称为贪婪匹配。
+</code></pre>
+
+<p>有时，我们更需要懒惰匹配，也就是匹配尽可能少的 字符。前面给出的限定符都可以被转化为懒惰匹配模式，只要在它后面加上一个问号?。这样.*?就意味着匹配任意数量的重复，但是在能使整个匹配成功的前提 下使用最少的重复。现在看看懒惰版的例子吧：</p>
+
+<p>a.*?b匹配最短的，以a开始，以b结 束的字符串。如果把它应用于aabab的话，它会匹配aab（第一到第三个字符）和ab（第四到第五个字符）。</p>
+
+<p>为什么第一个匹配是aab（第一到第三个字符）而不是ab（第二到第三个字符）？简单地说，因为正则表达式有另 一条规则，比懒惰／贪婪规则的优先级更高：最先开始的匹配拥有最高的优先权——The match that begins earliest wins。</p>
+
+<p>表5.懒惰限定符
+代码/语法	说明
+*?	重复任意次，但尽可能少重复
++?	重复1次或更多次，但尽可能少重复
+??	重复0次或1次，但尽可能少重复
+{n,m}?	重复n到m次，但尽可能少重复
+{n,}?	重复n次以上，但尽可能少重复
+处理选项
+在C#中，你可以使用Regex(String, RegexOptions)构造函数来设置正则表达式的处理选项。 如：Regex regex = new Regex(@”\ba\w{6}\b”, RegexOptions.IgnoreCase);</p>
+
+<p>上面介绍了几个选项如忽略大小写，处理多行等，这些选项能用来改变处理正则表达式的方式。下面是.Net中常用的正则表达式选项：</p>
+
+<p>表6.常用的处理选项
+名称	说明
+IgnoreCase(忽略大小写)	匹配时不区分大小写。
+Multiline(多行模式)	更改^和$的 含义，使它们分别在任意一行的行首和行尾匹配，而不仅仅在整个字符串的开头和结尾匹配。(在此模式下,$的 精确含意是:匹配\n之前的位置以及字符串结束前的位置.)
+Singleline(单行模式)	更改.的含义，使它与每一个字符匹配（包括换行 符\n）。
+IgnorePatternWhitespace(忽略空白)	忽略表达式中的非转义空白并启用由#标记的注释。
+ExplicitCapture(显式捕获)	仅捕获已被显式命名的组。
+一个经常被问到的问题是：是不是只能同时使用多行模式和单行模式中的一种？答案是：不是。这两个选项之间没有任何关系，除了它们的名字比较 相似（以至于让人感到疑惑）以外。</p>
+
+<p>平衡组/递归匹配
+这里介绍的平衡组语法是由.Net Framework支持的；其它语言／库不一定支持这种功能，或者支持此功能但需要使用不同的语法。</p>
+
+<p>有时我们需要匹配像( 100 * ( 50 + 15 ) )这样的可嵌套的层次性结构， 这时简单地使用(.+)则只会匹配到最左边的左括号和最右边的右括号之间的内容(这里我们讨论 的是贪婪模式，懒惰模式也有下面的问题)。假如原来的字符串里的左括号和右括号出现的次数不相等，比如( 5 / ( 3 + 2 ) ) )，那我们的匹配结果里两者的个数也不会相等。有没有办法在这样的字符串里匹配到最长的，配对的括号之间的 内容呢？</p>
+
+<p>为了避免(和(把你的大脑 彻底搞糊涂，我们还是用尖括号代替圆括号吧。现在我们的问题变成了如何把xx &lt;aa <bbb> <bbb> aa&gt; yy这样的字符串里，最长的配对的尖括号内的内容捕获出来？</bbb></bbb></p>
+
+<p>这里需要用到以下的语法构造：</p>
+
+<p>(?’group’) 把捕获的内容命名为group,并压入堆栈(Stack)
+(?’-group’) 从堆栈上弹出最后压入堆栈的名为group的捕获内容，如果堆栈本来为空，则本分组的匹配失败
+(?(group)yes|no) 如果堆栈上存在以名为group的捕获内容的话，继续匹配yes部分的表达式，否则继续匹配no部分
+(?!) 零宽负向先行断言，由于没有后缀表达式，试图匹配总是失败
+如果你不是一个程序员（或者你自称程序员但是不知道堆栈是什么东西），你就这样理解上面的三种语法吧：第一个就 是在黑板上写一个”group”，第二个就是从黑板上擦掉一个”group”，第三个就是看黑板上写的还有没有”group”，如果有就继续匹配yes部 分，否则就匹配no部分。</p>
+
+<p>我们需要做的是每碰到了左括号，就在压入一个”Open”,每碰到一个右括号，就弹出一个，到了最后就看看堆栈是否为空－－如果不为空那就 证明左括号比右括号多，那匹配就应该失败。正则表达式引擎会进行回溯(放弃最前面或最后面的一些字符)，尽量使整个表达式得到匹配。</p>
+
+<p>&lt;                         #最外层的左括号
+    [^&lt;&gt;]*                #最外层的左括号后面的不是括号的内容
+    (
+        (
+            (?’Open’&lt;)    #碰到了左括号，在黑板上写一个”Open”
+            [^&lt;&gt;]*       #匹配左括号后面的不是括号的内容
+        )+
+        (
+            (?’-Open’&gt;)   #碰到了右括号，擦掉一个”Open”
+            [^&lt;&gt;]*        #匹配右括号后面不是括号的内容
+        )+
+    )*
+    (?(Open)(?!))         #在遇到最外层的右括号前面，判断黑板上还有没有没擦掉的”Open”；如果还有，则匹配失败</p>
+
+<blockquote>
+  <pre><code>                    #最外层的右括号 平衡组的一个最常见的应用就是匹配HTML,下面这个例子可以匹配嵌套的&lt;div&gt;标签：&lt;div[^&gt;]*&gt;[^&lt;&gt;]*(((?'Open'&lt;div[^&gt;]*&gt;)[^&lt;&gt;]*)+((?'-Open'&lt;/div&gt;)[^&lt;&gt;]*)+)*(?(Open)(?!))&lt;/div&gt;.
+</code></pre>
+</blockquote>
+
+<p>还有些什么东西没提到
+上边已经描述了构造正则表达式的大量元素，但是还有很多没有提到的东西。下面是一些未提到的元素的列表，包含语法和简单的说明。你可以在网 上找到更详细的参考资料来学习它们–当你需要用到它们的时候。如果你安装了MSDN Library,你也可以在里面找到.net下正则表达式详细的文档。</p>
+
+<p>这里的介绍很简略，如果你需要更详细的信息，而又没有在电脑上安装MSDN Library,可以查看关于正则表达式语言元素 的MSDN在线文档。</p>
+
+<p>表7.尚未详细讨论的语法
+代码/语法	说明
+\a	报警字符(打印它的效果是电脑嘀一声)
+\b	通常是单词分界位置，但如果在字符类里使用代表退格
+\t	制表符，Tab
+\r	回车
+\v	竖向制表符
+\f	换页符
+\n	换行符
+\e	Escape
+\0nn	ASCII代码中八进制代码为nn的字符
+\xnn	ASCII代码中十六进制代码为nn的字符
+\unnnn	Unicode代码中十六进制代码为nnnn的字符
+\cN	ASCII控制字符。比如\cC代表Ctrl+C
+\A	字符串开头(类似^，但不受处理多行选项的影响)
+\Z	字符串结尾或行尾(不受处理多行选项的影响)
+\z	字符串结尾(类似$，但不受处理多行选项的影响)
+\G	当前搜索的开头
+\p{name}	Unicode中命名为name的字符类，例如\p{IsGreek}
+(?&gt;exp)	贪婪子表达式
+(?<x>-<y>exp)	平衡组
+(?im-nsx:exp)	在子表达式exp中改变处理选项
+(?im-nsx)	为表达式后面的部分改变处理选项
+(?(exp)yes|no)	把exp当作零宽正向先行断言，如果在这个位置能匹配，使用yes作为 此组的表达式；否则使用no
+(?(exp)yes)	同上，只是使用空表达式作为no
+(?(name)yes|no)	如果命名为name的组捕获到了内容，使用yes作为表达式；否则使用 no
+(?(name)yes)	同上，只是使用空表达式作为no</y></x></p>
+
+      <div class="readall"><a href="/blog/2014/09/27/RegEx.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

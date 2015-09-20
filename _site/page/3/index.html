@@ -64,107 +64,155 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/02/01/HBase-desgin-optimal.html">HBase设计优化</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/05/16/DB-yanjin.html">DB演进理解</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2015年02月01日
+        2015年05月16日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+        <a class="post-category" href="/page/category.html#db">db</a>
       </p>
     </header>
     <div class="post-main">
-      <h2 id="hbase">HBase设计优化</h2>
-<p>一、Table<br />
-1. 创建表时预分区<br />
-Hbase在创建表时默认只有一个region，这样的话在大量数据导入时会频繁发生region的split，从而导致region 暂停对外服务。同时大量client向同一个region server写数据也会导致集群负载不均衡，影响导入数据。 <br />
-一种可以加快批量写入速度的方法是通过预先创建一些空的regions，这样当数据写入HBase时，会按照region分区情况，在集群内做数据的负载均衡。 <br />
-参考：http://hbase.apache.org/book.html#precreate.regions<br />
-简单实现：  </p>
+      <h2 id="db">DB演进理解</h2>
 
-<pre><code>public static byte[][] getHexSplits(String startKey, String endKey, int numRegions) {
-  byte[][] splits = new byte[numRegions-1][];
-  BigInteger lowestKey = new BigInteger(startKey, 16);
-  BigInteger highestKey = new BigInteger(endKey, 16);
-  BigInteger range = highestKey.subtract(lowestKey);
-  BigInteger regionIncrement = range.divide(BigInteger.valueOf(numRegions));
-  lowestKey = lowestKey.add(regionIncrement);
-  for(int i=0; i &lt; numRegions-1;i++) {
-    BigInteger key = lowestKey.add(regionIncrement.multiply(BigInteger.valueOf(i)));
-    byte[] b = String.format("%016x", key).getBytes();
-    splits[i] = b;
-  }
-  return splits;
-}
+<ol>
+  <li>
+    <p>RDBMS<br />
+这是最熟悉的数据存储方式，一般情况下数据存储在一台机器上，这种形式方便提供完善ACID特性和丰富查询模型。这就是传统的关系型数据库的基础模式，但是面对现如今越来越大的数据量，这种模式的扩展变得难以满足。实践证明通过增加节点这种简单廉价的扩展方式是可行的。RDBMS的横向扩展主要有主从复制（Master-slave）、分表、分区等。 <br />
+横向扩展RDBMS – Master/Slave <br />
+利用数据库的复制或镜像功能，同时在多台数据库上保存相同的数据，从而将读操作和写操作分开，写操作集中在一台主数据库上，读操作集中在多台从数据库上。<br />
+问题：<br />
+读写同步需要一定的时间，导致关键的读取有出错风险；<br />
+主节点将数据复制到从节点，数据量很大是可能造成问题，  </p>
+
+    <p>横向扩展RDBMS - Sharding <br />
+ 在满足ACID特性的数据库中进行扩展是非常难的。基于这个原因，对数据进行扩展，这个数据库本身就必须拥有简单的模型，将数据分割为N片，然后在单独的片中执行查询。数据分割的单元被称为“shard”。将N片数据分配个M个DBMS进行操作。DBMS并不会去管理数据片，程序开发负责数据片的处理。
+ 不同的分片方法有：<br />
+ - 垂直分区（Vertical Partitioning）：将不需要进行联合查询的数据表分散到不同的数据库服务器上。<br />
+ - 水平分区(sharding) 将同一个表的记录拆分到不同的表甚至是服务器上，这往往需要一个稳定的算法来保证读取时能正确从不同的服务器上取得数据。如Range-Based Partitioning, Key or Hash-Based partitioning等。<br />
+ 优点与不足<br />
+ - 对读取和写入都有很好的扩展<br />
+ - 不透明，程序需要识别分区 <br />
+ - 不再有跨分区的关系/joins <br />
+ - 参照完整性损失  </p>
+
+    <p>其他RDBMS扩展方法 <br />
+ Multi-Master replication：所有成员都响应客户端数据查询。多主复制系统负责将任意成员做出的数据更新传播给组内其他成员，并解决不同成员间并发修改可能带来的冲突。<br />
+ INSERT only, not UPDATES/DELETES：数据进行版本化处理。<br />
+ No JOINs, thereby reducing query time：Join的开销很大,而且频繁访问会使开销随着时间逐渐增加。<br />
+ 非规范化（Denormalization）可以降低数据仓库的复杂性，以提高效率和改善性能。<br />
+ In-memory databases：磁盘数据库解决的是大容量存储和数据分析问题，内存数据库解决的是实时处理和高并发问题。主流常规的RDBMS更多的是磁盘密集型，而不是内存密集型。  </p>
+
+    <p>ACID Transactions<br />
+ 一个完善的数据库系统都是希望支持“ACID transactions,”其包括:<br />
+ Atomic : Either the whole process is done or none is.（原子性）<br />
+ Consistent : Database constraints are preserved.（一致性）<br />
+ Isolated : It appears to the user as if only one process executes at a time.（隔离性）<br />
+ Durable : Effects of a process do not get lost if the system crashes.（持久性）  </p>
+  </li>
+  <li>
+    <p>NoSQL  </p>
+  </li>
+</ol>
+
+<p>NoSQL现在被理解为 Not Only SQL 的缩写，是对非关系型的数据库管理系统的统称
+NoSQL 与 RDBMS 不同点，<br />
+-不使用SQL作为查询语言。<br />
+-不需要固定的表模式(table schema)。<br />
+- 放宽一个或多个 ACID 属性（CAP定理）  </p>
+
+<p>补充：CAP理论<br />
+CAP理论是数据系统设计的基本理论，目前几乎所有的数据系统的设计都遵循了这个理论。CAP理论指出，分布式系统只能满足以下三项中的两项而不可能满足全部三项，<br />
+一致性（Consistency)（所有节点在同一时间具有相同的数据）<br />
+可用性（Availability）（保证每个请求不管成功或者失败都有响应）<br />
+分区容忍性（Partition tolerance）（系统中任意信息的丢失或失败不会影响系统的继续运作） </p>
+
+<p>一致性有两种类型：<br />
+- strong consistency – ACID(Atomicity Consistency Isolation Durability)：对于关系型数据库，要求更新过的数据能被后续所有的访问都看到，这是强一致性。<br />
+- weak consistency – BASE(Basically Available Soft-state Eventual consistency )
+– Basically Available - system seems to work all the time (基本可用)<br />
+– Soft State - it doesn’t have to be consistent all the time （不要求所有时间都一致）<br />
+– Eventually Consistent - becomes consistent at some later time （最终一致性）  </p>
+
+<p>对于分布式数据系统(scale out)，分区容忍性是基本要求，否则就失去了价值。因此只能在一致性和可用性上做取舍，如何处理这种取舍正是目前NoSQL数据库的核心焦点。牺牲一致性而换取高可用性。当然，牺牲一致性，只是不再要求关系数据库中的强一致性，而是只要系统能达到最终一致性即可。通常是通过数据的多份异步复制来实现系统的高可用和数据的最终一致性的。  </p>
+
+<p>NoSQL 的两种主要实现方式<br />
+1.Key/Value<br />
+Amazon S3 (Dynamo)<br />
+Voldemort <br />
+Scalaris <br />
+Memcached (in-memory key/value store)<br />
+Redis <br />
+2. 弱模式型（column-based, document-based or graph-based.）<br />
+Cassandra (column-based)<br />
+CouchDB (document-based)<br />
+MongoDB(document-based) <br />
+Neo4J (graph-based)<br />
+HBase (column-based)   </p>
+
+<p>K/V模式<br />
+优点:<br />
+very fast<br />
+very scalable<br />
+simple model<br />
+able to distribute horizontally<br />
+劣势: <br />
+ many data structures (objects) can’t be easily modeled as key value pairs （需要多余转换）<br />
+Schema-Less 模式<br />
+优点<br />
+Schema-less data model is richer than key/value pairs
+eventual consistency<br />
+many are distributed<br />
+still provide excellent performance and scalability<br />
+劣势<br />
+typically no ACID transactions or joins  </p>
+
+<ol>
+  <li>HBase  </li>
+</ol>
+
+<p>HBase is an open-source, distributed, column-oriented database built on top of HDFS (or KFS) based on BigTable! <br />
+按照CAP理论，HBase属于C+P类型的系统。HBase是强一致性的（仅支持单行事务）。每一行由单个区域服务器（region server）host，行锁（row locks）和多版本并发控制(multiversion concurrency control)的组合被用来保证行的一致性。<br />
+查找:<br />
+快速定位使用row key + column family + column + timestamp.<br />
+按范围查找：start row key – end row key.<br />
+全表扫描<br />
+交互方式<br />
+- Java, REST, or Thrift APIs.<br />
+- Scripting via JRuby.  </p>
+
+<p>HBase 一些特性  </p>
+
+<pre><code>- No real indexes（row key 即数据的索引）  
+- Automatic partitioning（region自动split）  
+- Scale linearly and automatically with new nodes（扩展容易 节点添加方便）  
+- Commodity hardware（廉价硬件）  
+- Fault tolerance(较强的容错性)  
+- Batch processing(批处理能力优秀)  
 </code></pre>
 
 <ol>
-  <li>Row key<br />
-Row key 即为Hbase数据的天然索引，通过Row key可以实现：<br />
-通过单个row key访问：即按照某个row key键值进行get操作；<br />
-通过row key的range进行scan：即通过设置startRowKey和endRowKey，在这个范围内进行扫描；  </li>
+  <li>
+    <p>Hive    </p>
+
+    <ul>
+      <li>Provide higher-level language (HQL, like SQL) to facilitate large-data processing</li>
+      <li>Higher-level language “compiles down” to Hadoop Map/Reduce jobs</li>
+    </ul>
+  </li>
+  <li>
+    <p>Hive + HBase  </p>
+
+    <p>Reasons to use Hive on HBase:<br />
+ A lot of data sitting in HBase due to its usage in a real-time environment, but never used for analysis<br />
+ Give access to data in HBase usually only queried through MapReduce to people that don’t code (business analysts)<br />
+ When needing a more flexible storage solution, so that rows can be updated live by either a Hive job or an application and can be seen immediately to the other</p>
+  </li>
 </ol>
 
-<p>row key可以是任意字符串，最大长度64KB，因为row key在数据中是冗余存在的所以设计row key时也要考虑数据的冗余尤其是海量数据时如果row key设计过长可能导致数据成倍增长，实际应用中一般为10~100bytes，存为byte[]字节数组， 一般设计成定长的 。<br />
-row key是按照字典序存储，因此，设计row key时，也需要考虑这个问题。同时需要注意避免数据热点问题等<br />
-3. Column Family<br />
-不要在一张表里定义太多的 column family 。目前Hbase并不能很好的处理超过2~3个column family的表。因为某个column family在flush的时候，它邻近的column family也会因关联效应被触发flush，最终导致系统产生更多的I/O。（未经验证，不是很理解）。.<br />
-4. In Memory<br />
-创建表的时候，可以通过HColumnDescriptor.setInMemory(true)将表放到RegionServer的缓存中，保证在读取的时候被cache命中。<br />
-5. Max Version<br />
-创建表的时候，可以通过HColumnDescriptor.setMaxVersions(int maxVersions)设置表中数据的最大版本，如果只需要保存最新版本的数据，那么可以设置setMaxVersions(1)。<br />
-6. Time To Live<br />
-创建表的时候，可以通过HColumnDescriptor.setTimeToLive(int timeToLive)设置表中数据的存储生命期，过期数据将自动被删除，例如如果只需要存储最近两天的数据，那么可以设置setTimeToLive(2 * 24 * 60 * 60)。<br />
-7. Compact &amp; Split<br />
-在HBase中，数据在更新时首先写入WAL 日志(HLog)（如果数据安全不是很重要可以关闭先写日志的功能：putrow.setWriteToWAL(false);）和内存(MemStore)中，MemStore中的数据是排序的，当MemStore累计到一定阈值时，就会创建一个新的MemStore，并且将老的MemStore添加到flush队列，由单独的线程flush到磁盘上，成为一个StoreFile。于此同时， 系统会在zookeeper中记录一个redo point，表示这个时刻之前的变更已经持久化了 (minor compact) 。 <br />
-StoreFile是只读的，一旦创建后就不可以再修改。因此Hbase的更新其实是不断追加的操作。当一个Store中的StoreFile达到一定的阈值后，就会进行一次合并 (major compact) ，将对同一个key的修改合并到一起，形成一个大的StoreFile，当StoreFile的大小达到一定阈值后，又会对 StoreFile进行分割 (split) ，等分为两个StoreFile。 由于对表的更新是不断追加的，处理读请求时，需要访问Store中全部的StoreFile和MemStore，将它们按照row key进行合并，由于StoreFile和MemStore都是经过排序的，并且StoreFile带有内存中索引，通常合并过程还是比较快的。  </p>
 
-<p>二、Hbase client HTable<br />
-写：<br />
-1. Auto Flush<br />
-通过调用HTable.setAutoFlush(false)方法可以将HTable写客户端的自动flush关闭，这样可以批量写入数据到HBase，而不是有一条put就执行一次更新，只有当put填满客户端写缓存时，才实际向HBase服务端发起写请求。默认情况下auto flush是开启的。<br />
-2. Write Buffer<br />
-通过调用HTable.setWriteBufferSize(writeBufferSize)方法可以设置HTable客户端的写buffer大小，如果新设置的buffer小于当前写buffer中的数据时，buffer将会被flush到服务端。其中，writeBufferSize的单位是byte字节数，可以根据实际写入数据量的多少来设置该值。<br />
-3. WAL Flag<br />
-在HBae中，客户端向集群中的RegionServer提交数据时（Put/Delete操作），首先会先写WAL（Write Ahead Log）日志（即HLog，一个RegionServer上的所有Region共享一个HLog），只有当WAL日志写成功后，再接着写MemStore，然后客户端被通知提交数据成功；如果写WAL日志失败，客户端则被通知提交失败。这样做的好处是可以做到RegionServer宕机后的数据恢复。因此，对于相对不太重要的数据，可以在Put/Delete操作时，通过调用Put.setWriteToWAL(false)或Delete.setWriteToWAL(false)函数，放弃写WAL日志，从而提高数据写入的性能。<br />
-4. 批量写<br />
-通过调用HTable.put(Put)方法可以将一个指定的row key记录写入HBase，同样HBase提供了另一个方法：通过调用HTable.put(List<put>)方法可以将指定的row key列表，批量写入多行记录，这样做的好处是批量执行，只需要一次网络I/O开销，这对于对数据实时性要求高，网络传输RTT高的情景下可能带来明显的性能提升。  
-读：  
-1. Scanner Caching  
-通过调用HTable.setScannerCaching(int scannerCaching)可以设置HBase scanner一次从服务端抓取的数据条数，默认情况下一次一条。通过将此值设置成一个合理的值，可以减少scan过程中next()的时间开销，代价是scanner需要通过客户端的内存来维持这些被cache的行记录。  
-2. Scan Attribute Selection  
-scan时指定需要的Column Family，可以减少网络传输数据量，否则默认scan操作会返回整行所有Column Family的数据  
-3. Close ResultScanner   
-通过scan取完数据后，记得要关闭ResultScanner  
-4. 批量读  
-通过调用HTable.get(Get)方法可以根据一个指定的row key获取一行记录，同样HBase提供了另一个方法：通过调用HTable.get(List)方法可以根据一个指定的row key列表，批量获取多行记录，这样做的好处是批量执行，只需要一次网络I/O开销，这对于对数据实时性要求高而且网络传输RTT高的情景下可能带来明显的性能提升。  
-5. Blockcache  
-HBase上Regionserver的内存分为两个部分，一部分作为Memstore，主要用来写；另外一部分作为BlockCache，主要用于读。  
-写请求会先写入Memstore，Regionserver会给每个region提供一个Memstore，当Memstore满64MB以后，会启动 flush刷新到磁盘。当Memstore的总大小超过限制时（heapsize * hbase.regionserver.global.memstore.upperLimit * 0.9），会强行启动flush进程，从最大的Memstore开始flush直到低于限制。  
-读请求先到Memstore中查数据，查不到就到BlockCache中查，再查不到就会到磁盘上读，并把读的结果放入BlockCache。由于BlockCache采用的是LRU策略，因此BlockCache达到上限(heapsize * hfile.block.cache.size * 0.85)后，会启动淘汰机制，淘汰掉最老的一批数据。  
-一个Regionserver上有一个BlockCache和N个Memstore，它们的大小之和不能大于等于heapsize * 0.8，否则HBase不能启动。默认BlockCache为0.2，而Memstore为0.4。对于注重读响应时间的系统，可以将 BlockCache设大些，比如设置BlockCache=0.4，Memstore=0.39，以加大缓存的命中率。  </put></p>
-
-<p>服务端计算<br />
-Coprocessor运行于HBase RegionServer服务端，各个Regions保持对与其相关的coprocessor实现类的引用，coprocessor类可以通过RegionServer上classpath中的本地jar或HDFS的classloader进行加载。<br />
-目前，已提供有几种coprocessor：<br />
-Coprocessor：提供对于region管理的钩子，例如region的open/close/split/flush/compact等； 
-RegionObserver：提供用于从客户端监控表相关操作的钩子，例如表的get/put/scan/delete等； 
-Endpoint：提供可以在region上执行任意函数的命令触发器。  </p>
-
-<p>写端计算（不了解）<br />
-	计数<br />
-HBase本身可以看作是一个可以水平扩展的Key-Value存储系统，但是其本身的计算能力有限  （Coprocessor可以提供一定的服务端计算），因此，使用HBase时，往往需要从写端或者读端进行计算，然后将最终的计算结果返回给调用者。举两个简单的例子：<br />
-PV计算：通过在HBase写端内存中，累加计数，维护PV值的更新，同时为了做到持久化，定期（如1秒）将PV计算结果同步到HBase中，这样查询端最多会有1秒钟的延迟，能看到秒级延迟的PV结果。 <br />
-分钟PV计算：与上面提到的PV计算方法相结合，每分钟将当前的累计PV值，按照rowkey + minute作为新的rowkey写入HBase中，然后在查询端通过scan得到当天各个分钟以前的累计PV值，然后顺次将前后两分钟的累计PV值相减，就得到了当前一分钟内的PV值，从而最终也就得到当天各个分钟内的PV值。 <br />
-	去重<br />
-对于UV的计算，就是个去重计算的例子。分两种情况：<br />
-如果内存可以容纳，那么可以在Hash表中维护所有已经存在的UV标识，每当新来一个标识时，通过快速查找Hash确定是否是一个新的UV，若是则UV值加1，否则UV值不变。另外，为了做到持久化或提供给查询接口使用，可以定期（如1秒）将UV计算结果同步到HBase中。   <br />
-如果内存不能容纳，可以考虑采用Bloom Filter来实现，从而尽可能的减少内存的占用情况。除了UV的计算外，判断URL是否存在也是个典型的应用场景。 <br />
-	读端计算<br />
-如果对于响应时间要求比较苛刻的情况（如单次http请求要在毫秒级时间内返回），个人觉得读端不宜做过多复杂的计算逻辑，尽量做到读端功能单一化：即从HBase RegionServer读到数据（scan或get方式）后，按照数据格式进行简单的拼接，直接返回给前端使用。当然，如果对于响应时间要求一般，或者业务特点需要，也可以在读端进行一些计算逻辑。  </p>
-
-
-      <div class="readall"><a href="/blog/2015/02/01/HBase-desgin-optimal.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/05/16/DB-yanjin.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -172,80 +220,137 @@ PV计算：通过在HBase写端内存中，累加计数，维护PV值的更新�
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/02/01/HBase-config-optimal.html">HBase配置优化</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/05/16/CDH-install-question.html">CDH 安装问题</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2015年02月01日
+        2015年05月16日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <h2 id="hbase">HBase配置优化</h2>
-<p>zookeeper.session.timeout<br />
-默认值：3分钟（180000ms）<br />
-说明：RegionServer与Zookeeper间的连接超时时间。当超时时间到后，ReigonServer会被Zookeeper从集群清单中移除，HMaster收到移除通知后，会对这台server负责的regions重新balance，让其他存活的RegionServer接管.<br />
-调优：<br />
-这个timeout决定了RegionServer是否能够及时的failover。设置成1分钟或更低，可以减少因等待超时而被延长的failover时间。但是，对于一些Online应用，RegionServer从宕机到恢复时间本身就很短的（网络闪断，crash等故障，运维可快速介入），如果调低timeout时间，反而会得不偿失。因为当ReigonServer被正式从RS集群中移除时，HMaster就开始做balance了（让其他RS根据故障机器记录的WAL日志进行恢复）。当故障的RS在人工介入恢复后，这个balance动作是毫无意义的，反而会使负载不均匀，给RS带来更多负担。另外这个值太小也可能因为集群节点间时间误差造成region server 被下线。<br />
-hbase.regionserver.handler.count<br />
-默认值：10<br />
-说明：RegionServer的请求处理IO线程数。<br />
-调优：<br />
-这个参数的调优与内存息息相关。<br />
-较少的IO线程，适用于处理单次请求内存消耗较高的Big PUT场景（大容量单次PUT或设置了较大cache的scan，均属于Big PUT）或ReigonServer的内存比较紧张的场景。<br />
-较多的IO线程，适用于单次请求内存消耗低，TPS要求非常高的场景。设置该值的时候，以监控内存为主要参考。<br />
-另外如果大量的请求都落在一个region上，会导致充满memstore触发flush导致的读写锁会影响全局TPS，不是IO线程数越高越好。<br />
-hbase.hregion.max.filesize<br />
-默认值：256M<br />
-说明：在当前ReigonServer上单个Reigon的最大存储空间，单个Region超过该值时，这个Region会被自动split成更小的region。<br />
-调优：<br />
-小region对split和compaction友好，因为拆分region或compact小region里的storefile速度很快，内存占用低。缺点是split和compaction会很频繁，会导致集群响应时间波动很大。<br />
-一般512以下的都算小region。<br />
-大region，则不太适合经常split和compaction，因为做一次compact和split会产生较长时间的停顿，对应用的读写性能冲击非常大。此外，大region意味着较大的storefile，compaction时对内存也是一个挑战。<br />
-当然，大region也有其用武之地。如果你的应用场景中，某个时间点的访问量较低，那么在此时做compact和split，既能顺利完成split和compaction，又能保证绝大多数时间平稳的读写性能。
-既然split和compaction如此影响性能，有没有办法去掉？<br />
-compaction是无法避免的，split倒是可以从自动调整为手动。 <br />
-只要通过将这个参数值调大到某个很难达到的值，比如100G，就可以间接禁用自动split（RegionServer不会对未到达100G的region做split）。<br />
-再配合RegionSplitter这个工具，在需要split时，手动split。<br />
-手动split在灵活性和稳定性上比起自动split要高很多，相反，管理成本增加不多，比较推荐online实时系统使用。内存方面，小region在设置memstore的大小值上比较灵活，大region则过大过小都不行，过大会导致flush时app的IO wait增高，过小则因store file过多影响读性能。<br />
-hbase.regionserver.global.memstore.upperLimit/lowerLimit<br />
-默认值：0.4/0.35<br />
-upperlimit说明：hbase.hregion.memstore.flush.size 这个参数的作用是当单个Region内所有的memstore大小总和超过指定值时，flush该region的所有memstore。RegionServer的flush是通过将请求添加一个队列，模拟生产消费模式来异步处理的。如果当队列来不及消费，产生大量积压请求时，可能会导致内存陡增，最坏的情况是触发OOM。<br />
-这个参数的作用是防止内存占用过大，当ReigonServer内所有region的memstores所占用内存总和达到heap的40%时，HBase会强制block所有的更新并flush这些region以释放所有memstore占用的内存。<br />
-lowerLimit说明： 同upperLimit，只不过lowerLimit在所有region的memstores所占用内存达到Heap的35%时，不flush所有的memstore。它会找一个memstore内存占用最大的region，做个别flush，此时写更新还是会被block。lowerLimit算是一个在所有region强制flush导致性能降低前的补救措施。在日志中，表现为 “** Flush thread woke up with memory above low water.”
-调优：这是一个Heap内存保护参数，默认值已经能适用大多数场景。<br />
-参数调整会影响读写，如果写的压力大导致经常超过这个阀值，则调小读缓存  hfile.block.cache.size增大该阀值，或者Heap余量较多时，不修改读缓存大小。<br />
-如果在高压情况下，也没超过这个阀值，那么建议你适当调小这个阀值再做压测，确保触发次数不要太多，然后还有较多Heap余量的时候，调大hfile.block.cache.size提高读性能。<br />
-还有一种可能性是 hbase.hregion.memstore.flush.size保持不变，但RS维护了过多的region，要知道 region数量直接影响占用内存的大小。<br />
-hfile.block.cache.size<br />
-默认值：0.2<br />
-说明：storefile的读缓存占用Heap的大小百分比，0.2表示20%。该值直接影响数据读的性能。
-调优：当然是越大越好，如果写比读少很多，开到0.4-0.5也没问题。如果读写较均衡，0.3左右。如果写比读多，果断默认吧。设置这个值的时候，你同时要参考 hbase.regionserver.global.memstore.upperLimit ，该值是memstore占heap的最大百分比，两个参数一个影响读，一个影响写。如果两值加起来超过80-90%，会有OOM的风险，谨慎设置。<br />
-hbase.hstore.blockingStoreFiles<br />
-默认值：7<br />
-说明：在flush时，当一个region中的Store（Coulmn Family）内有超过7个storefile时，则block所有的写请求进行compaction，以减少storefile数量。<br />
-调优：block写请求会严重影响当前regionServer的响应时间，但过多的storefile也会影响读性能。从实际应用来看，为了获取较平滑的响应时间，可将值设为无限大。如果能容忍响应时间出现较大的波峰波谷，那么默认或根据自身场景调整即可。  <br />
-hbase.hregion.memstore.block.multiplier  <br />
-默认值：2  <br />
-说明：当一个region里的memstore占用内存大小超过hbase.hregion.memstore.flush.size两倍的大小时，block该region的所有请求，进行flush，释放内存。<br />
-虽然我们设置了region所占用的memstores总内存大小，比如64M，但想象一下，在最后63.9M的时候，我Put了一个200M的数据，此时memstore的大小会瞬间暴涨到超过预期的  hbase.hregion.memstore.flush.size的几倍。这个参数的作用是当memstore的大小增至超过hbase.hregion.memstore.flush.size 2倍时，block所有请求，遏制风险进一步扩大。<br />
-调优： 这个参数的默认值还是比较靠谱的。如果你预估你的正常应用场景（不包括异常）不会出现突发写或写的量可控，那么保持默认值即可。如果正常情况下，你的写请求量就会经常暴长到正常的几倍，那么你应该调大这个倍数并调整其他参数值，比如hfile.block.cache.size和hbase.regionserver.global.memstore.upperLimit/lowerLimit，以预留更多内存，防止HBase server OOM。<br />
-hbase.hregion.memstore.mslab.enabled<br />
-默认值：true<br />
-说明：减少因内存碎片导致的Full GC，提高整体性能。  </p>
+      <p><em>CDH5安装参照：http://www.tuicool.com/articles/ENjmeaY</em><br />
+Q1:安装过程中提示找不到MySQL 驱动jar包<br />
+	：在/usr/shar/java 中添加mysql-connector-java-5.1.30-bin.jar<br />
+Q2：安装hive提示找不到MySQL驱动jar包<br />
+：在/opt/cloudera/parcels/CDH-5.1.3-1.cdh5.1.3.p0.12/lib/hive/lib/ 中添加 mysql-connector-java-5.1.30-bin.jar<br />
+Q3: cloudera-server 或cloudera-agent  status 提示服务已经停止，pid仍然存在<br />
+	：查看对应的log 可能是端口占用或是数据库连接问题<br />
+Q4:MR2和HDFS安装好后 web ui无法访问，查看对应端口已经处于listen状态，<br />
+	：分别在对应的配置中的端口和地址选项中将“将 ResourceManager 绑定到通配符地址”项， 勾选上<br />
+没有这个选项的可以在高级设置中在XML文件中添加<br />
+Q5：jdk版本不对应<br />
+	： CDH默认获取的jdk 位于：/usr/java   可将需要的jdk 拷贝到这个目录中。  </p>
 
-<p>其他<br />
-启用LZO压缩<br />
-LZO对比Hbase默认的GZip，前者性能较高，后者压缩比较高，<br />
-批量导入<br />
-在批量导入数据到Hbase前，你可以通过预先创建regions，来平衡数据的负载。<br />
-HBase使用CMS GC。默认触发GC的时机是当年老代内存达到90%的时候，这个百分比由   -XX:CMSInitiatingOccupancyFraction=N 这个参数来设置。concurrent mode failed发生在这样一个场景：<br />
-当年老代内存达到90%的时候，CMS开始进行并发垃圾收集，于此同时，新生代还在迅速不断地晋升对象到年老代。当年老代CMS还未完成并发标记时，年老代满了，悲剧就发生了。CMS因为没内存可用不得不暂停mark，并触发一次stop the world（挂起所有jvm线程），然后采用单线程拷贝方式清理所有垃圾对象。这个过程会非常漫长。为了避免出现concurrent mode failed，建议让GC在未到90%时，就触发。<br />
-通过设置 -XX:CMSInitiatingOccupancyFraction=N<br />
-这个百分比， 可以简单的这么计算。如果你的 hfile.block.cache.size   和 hbase.regionserver.global.memstore.upperLimit 加起来有60%（默认），那么你可以设置 70-80，一般高10%左右差不多。  </p>
+<p>Q6  sqoop导入数据时：User does not belong to hive<br />
+	I had same issue with permissions -&gt; chgrp: changing ownership of ‘/user/hive/warehouse/test/_log24310.txt’: User does not belong to hive.
+1.Added the existing user named cloudera to existing group named hive with command: usermod -a -G hive cloudera 
+2.Restarted the system 
+3.Used Load Command and after that did a select * from table_name -&gt; No data was getting displayed. 
+4.Executed select count(*) from table_name and a MapReduce job got started. 
+5.Executed select * from table and now results was returned correctly. 
+6.Opened a impala shell using impala-shell command. 
+7.Executed a select * from table_name and no results was getting returned. 
+8.Executed command invalidate metadata in the impala-shell 
+9.Executed command refresh table_name 
+10.Executed command show tables 
+11.Executed command select * from table_name and now results are getting displayed both in the impala-shell and hive shell. 
+  可以不必理会</p>
 
-      <div class="readall"><a href="/blog/2015/02/01/HBase-config-optimal.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+<p>Q6：spark 安装不上<br />
+	未解决，网上有对应bug</p>
+
+<p>整个安装过程中遇到各种问题，主要解决得途径还是查看对应的log文件对应解决：<br />
+/var/log/hadoop*<br />
+/var/log/cloudera*<br />
+/opt/cm-5.1.3/log  </p>
+
+<h6 id="about">===========================about==================================================================================================================================</h6>
+<p>问题导读  </p>
+
+<pre><code>1.CM的安装目录在什么位置？  
+2.hadoop配置文件在什么位置？  
+3.Cloudera manager运行所需要的信息存在什么位置？  
+4.CM结构和功能是什么？  
+1. 相关目录  
+/var/log/cloudera-scm-installer : 安装日志目录。  
+/var/log/* : 相关日志文件（相关服务的及CM的）。  
+/usr/share/cmf/ : 程序安装目录。  
+/usr/lib64/cmf/ : Agent程序代码。  
+/var/lib/cloudera-scm-server-db/data : 内嵌数据库目录。  
+/usr/bin/postgres : 内嵌数据库程序。  
+/etc/cloudera-scm-agent/ : agent的配置目录。  
+/etc/cloudera-scm-server/ : server的配置目录。  
+/opt/cloudera/parcels/ : Hadoop相关服务安装目录。  
+/opt/cloudera/parcel-repo/ : 下载的服务软件包数据，数据格式为parcels。  
+/opt/cloudera/parcel-cache/ : 下载的服务软件包缓存数据。  
+/etc/hadoop/* : 客户端配置文件目录。  
+</code></pre>
+
+<ol>
+  <li>配置    </li>
+</ol>
+
+<p>Hadoop配置文件<br />
+配置文件放置于/var/run/cloudera-scm-agent/process/目录下。如：/var/run/cloudera-scm-agent/process/193-hdfs-NAMENODE/core-site.xml。这些配置文件是通过Cloudera Manager启动相应服务（如HDFS）时生成的，内容从数据库中获得（即通过界面配置的参数）。<br />
+在CM界面上更改配置是不会立即反映到配置文件中，这些信息会存储于数据库中，等下次重启服务时才会生成配置文件。且每次启动时都会产生新的配置文件。<br />
+CM Server主要数据库为scm基中放置配置的数据表为configs。里面包含了服务的配置信息，每一次配置的更改会把当前页面的所有配置内容添加到数据库中，以此保存配置修改历史。<br />
+scm数据库被配置成只能从localhost访问，如果需要从外部连接此数据库，修改vim /var/lib/cloudera-scm-server-db/data/pg_hba.conf文件,之后重启数据库。运行数据库的用户为cloudera-scm。  </p>
+
+<p>查看配置内容<br />
+1.直接查询scm数据库的configs数据表的内容。  <br />
+2.访问REST API： http://hostname:7180/api/v4/cm/deployment，返回JSON格式部署配置信息。  </p>
+
+<p>配置生成方式<br />
+CM为每个服务进程生成独立的配置目录（文件）。所有配置统一在服务端查询数据库生成（因为scm数据库只能在localhost下访问）生成配置文件，再由agent通过网络下载包含配置文件的zip包到本地解压到指定的目录。  </p>
+
+<p>配置修改<br />
+CM对于需要修改的配置预先定义，对于没有预先定义的配置,则通过在高级配置项中使用xml配置片段的方式进行配置。而对于/etc/hadoop/下的配置文件是客户端的配置，可以在CM通过部署客户端生成客户端配置。  </p>
+
+<ol>
+  <li>数据库<br />
+Cloudera manager主要的数据库为scm,存储Cloudera manager运行所需要的信息：配置，主机，用户等。  </li>
+  <li>CM结构 </li>
+</ol>
+
+<p>CM分为Server与Agent两部分及数据库（自带更改过的嵌入Postgresql）。它主要做三件事件：</p>
+
+<pre><code>1.管理监控集群主机。
+2.统一管理配置。
+3.管理维护Hadoop平台系统。
+实现采用C/S结构，Agent为客户端负责执行服务端发来的命令，执行方式一般为使用python调用相应的服务shell脚本。Server端为Java REST服务，提供REST API，Web管理端通过REST API调用Server端功能，Web界面使用富客户端技术（Knockout）。
+1.Server端主体使用Java实现。
+2.Agent端主体使用Python, 服务的启动通过调用相应的shell脚本进行启动，如果启动失败会重复4次调用启动脚本。
+3.Agent与Server保持心跳，使用Thrift RPC框架。
+</code></pre>
+
+<ol>
+  <li>升级  </li>
+</ol>
+
+<p>在CM中可以通过界面向导升级相关服务。升级过程为三步：</p>
+
+<pre><code>1.下载服务软件包。
+2.把所下载的服务软件包分发到集群中受管的机器上。
+3.安装服务软件包，使用软链接的方式把服务程序目录链接到新安装的软件包目录上。
+</code></pre>
+
+<ol>
+  <li>卸载  </li>
+</ol>
+
+<p>sudo /usr/share/cmf/uninstall-scm-express.sh, 然后删除/var/lib/cloudera-scm-server-db/目录，不然下次安装可能不成功。</p>
+
+<ol>
+  <li>
+    <p>开启postgresql远程访问  </p>
+
+    <p>CM内嵌数据库被配置成只能从localhost访问，如果需要从外部查看数据，数据修改vim /var/lib/cloudera-scm-server-db/data/pg_hba.conf文件,之后重启数据库。运行数据库的用户为cloudera-scm。</p>
+  </li>
+</ol>
+
+      <div class="readall"><a href="/blog/2015/05/16/CDH-install-question.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -253,231 +358,205 @@ HBase使用CMS GC。默认触发GC的时机是当年老代内存达到90%的时�
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point5.html">Linux 学习笔记5 shell输入输出</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point9.html">Linux学习笔记9-AWK</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2015年01月23日
+        2015年02月01日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#linux">linux</a>
       </p>
     </header>
     <div class="post-main">
-      <p>Linux 学习笔记5 shell输入输出<br />
-shell脚本中几种读入数据方式：标准输入(缺省为键盘)，指定一个文件作为输入<br />
-输出：标准输出(终端屏幕)，指定输出到一个文件  </p>
+      <h2 id="linux9-awk">Linux学习笔记9-AWK</h2>
+<p>AWK是所有shell过滤工具中最难掌握的，不知道为什么，也许是其复杂的语法或含义不明确的错误提示信息。在学习awk语言过程中，就会慢慢掌握诸如Bailing out 和awk:cmd.Line:等错误信息。可以说awk是一种自解释的编程语言，之所以要在shell中使用awk是因为awk本身是学习的好例子，但结合awk与其他工具诸如grep和sed，将会使shell编程更加
+容易。<br />
+调用：<br />
+有三种方式调用awk，第一种是命令行方式，如：<br />
+awk [-F field-separator] ‘awk命令’ input-file(s)<br />
+[-F域分隔符]是可选的，因为awk使用空格作为缺省的域分隔符，因此如果
+要浏览域间有空格的文本，不必指定这个选项，但如果要浏览诸如passwd文件，此文件各域以冒号作为分隔符，则必须指明- F选项<br />
+awk -F:’awk命令’ input-file<br />
+第二种方法是将所有awk命令插入一个文件，并使awk程序可执行，然后用awk命令解释器作为脚本的首行，以便通过键入脚本名称来调用它<br />
+awk -f awk-script-file input-files<br />
+第三种方式是将所有的awk命令插入一个单独文件. -f选项指明在文件awk_scriptfile中的awk脚本，inputfile(s)是使用awk进行浏览的文件
+名。  </p>
 
-<p>echo<br />
-echo命令可以显示文本行或是变量 或者把字符串输入到文件 一般形式为：
-echo string<br />
-常见功能：<br />
-\c 不换行 <br />
-\t 跳格<br />
-\n 换行<br />
-初涉shell的用户常常会遇到的一个问题就是如何把双引号包含到echo命令的字符串中。<br />
-引号是一个特殊字符，所以必须要使用反斜杠\来使shell忽略它的特殊含义。假设你希望使用echo命令输出这样的字符串：”/dev/rmt0”，那么我们只要在引号前面加上反斜杠\即可   </p>
+<p>awk脚本<br />
+在命令中调用awk时，awk脚本由各种操作和模式组成。<br />
+如果设置了-F选项，则awk每次读一条记录或一行，并使用指定的分隔符分隔指定域，但如果未设置-F选项，awk假定空格为域分隔符，并保持这个设置直到发现一新行。当新行出现时，awk命令获悉已读完整条记录，然后在下一个记录启动读命令，这个读进程将持续到文件尾或文件不再存在。</p>
 
-<p>read <br />
-可以使用read语句从键盘或文件的某一行文本中读入信息，并将其赋给一个变量。如果只指定了一个变量，那么read将会把所有的输入赋给该变量，直至遇到第一个文件结束符或回车。<br />
+
+      <div class="readall"><a href="/blog/2015/02/01/Linux-point9.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point8.html">Linux学习笔记8-grep 家族</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="linux8-grep-">Linux学习笔记8-grep 家族</h2>
+<p>grep（全局正则表达式版本）允许对文本文件进行模式查找。如果找到匹配模式，grep打印包含模式的所有行。grep支持基本正则表达式，也支持其扩展集   <br />
+grep一般格式为：<br />
+grep [选项]基本正则表达式[文件]<br />
+这里基本正则表达式可为字符串。  </p>
+
+<p>在grep命令中输入字符串参数时，最好将其用双引号括起来。例如：“mystring”。这样做有两个原因，
+一是以防被误解为shell命令，<br />
+二是可以用来查找多个单词组成的字符串，例如：  <br />
+“jet plane”，如果不用双引号将其括起来，那么单词plane将被误认为是一个文件，查询结果将返回“文件不存在”的错误信息。<br />
+在调用变量时，也应该使用双引号，诸如： grep “MYVAR”文件名，如果不这样，将没有返回结果。<br />
+在调用模式匹配时，应使用单引号。  </p>
+
+<p>常用的grep选项有：<br />
+-c 只输出匹配行的计数。<br />
+-i 不区分大小写（只适用于单字符）。<br />
+-h 查询多文件时不显示文件名。<br />
+-l 查询多文件时只输出包含匹配字符的文件名。<br />
+-n 显示匹配行及行号。<br />
+-s 不显示不存在或无匹配文本的错误信息。<br />
+-v 显示不包含匹配文本的所有行。  </p>
+
+<p>grep “will”*.doc 在当前目录下所有.doc文件中查找”will”字符串。  </p>
+
+<p>精确匹配：<br />
+grep “will<tab>"*.doc 在当前目录下所有.doc文件精确匹配"will"   还可以写为：grep "will\&gt;"*.doc  
+大小写敏感：  
+缺省情况下， grep是大小写敏感的，如要查询大小写不敏感字符串，必须使用- i开关。  </tab></p>
+
+
+      <div class="readall"><a href="/blog/2015/02/01/Linux-point8.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point7.html">Linux学习笔记7-正则表达式介绍</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="linux7-">Linux学习笔记7-正则表达式介绍</h2>
+<p>当从一个文件或命令输出中抽取或过滤文本时，可以使用正则表达式(RE)，正则表达式是一些特殊或不很特殊的字符串模式的集合。<br />
+为了抽取或获得信息，我们给出抽取操作应遵守的一些规则。这些规则由一些特殊字符或进行模式匹配操作时使用的元字符组成。也可以使用规则字符作为模式中的一部分进行搜寻。<br />
+例如，A将查询A，x将查找字母x  <br />
+基本元字符<br />
+^ 只只匹配行首<br />
+$ 只只匹配行尾<br />
+* 只一个单字符后紧跟*，匹配0个或多个此单字符<br />
+[ ] 只匹配[ ]内字符。可以是一个单字符，也可以是字符序列。可以使用-表示[ ]内字符序列范围，如用[1-5]代替[12345]<br />
+\ 只用来屏蔽一个元字符的特殊含义。因为有时在shell中一些元字符有
+特殊含义。\可以使其失去应有意义<br />
+. 只匹配任意单字符<br />
+pattern{n} 只用来匹配前面pattern出现次数。n为次数<br />
+pattern{n,} m 只含义同上，但次数最少为n<br />
+pattern{n,m} 只含义同上，但pattern出现次数在n与m之间  </p>
+
+<p>1.使用句点匹配单字符<br />
+句点”.”可以匹配任意单字符。例如，如果要匹配一个字符串，以beg开头，中间夹一个任意字符，那么可以表示为beg.n，”.”可以匹配字符串头，也可以是中间任意字符。<br />
+在ls -l命令中，可以匹配一定权限：<br />
+…x..x ..x  : 匹配用户本身，用户组及其他组成员的执行权限。<br />
+“.”允许匹配ASCII集中任意字符，或为字母，或为数字。<br />
+2.在行首以^匹配字符串或字符序列<br />
+^只允许在一行的开始匹配字符或单词。例如，使用ls -l命令，并匹配目录。之所以可以这样做是因为ls -l命令结果每行第一个字符是d，即代表一个目录。  <br />
+^…4XC….  <br />
+以上模式表示，在每行开始，匹配任意3个字符，后跟4XC，最后为任意4个字符。^在正则表达式中使用频繁，因为大量的抽取操作通常在行首.<br />
+3.在行尾以$匹配字符串或字符  <br />
+$与^正相反，它在行尾匹配字符串或字符， $符号放在匹配单词后。假定要匹配以单词test结尾的所有行，操作为：<br />
+test$<br />
+^$<br />
+具体分析为匹配行首，又匹配行尾，中间没有任何模式，因此为空行。<br />
+如果只返回包含一个字符的行，操作如下：<br />
+^.$<br />
+4.使用<em>匹配字符串中的单字符或其重复序列  <br />
+使用此特殊字符匹配任意字符或字符串的重复多次表达式。例如：<br />
+compu</em>t<br />
+将匹配字符u一次或多次：<br />
+compuut 
+compuuut<br />
+compuuuuut<br />
+5.使用\屏蔽一个特殊字符的含义  <br />
+有时需要查找一些字符或字符串，而它们包含了系统指定为特殊字符的一个字符。什么是特殊字符？一般意义上讲，下列字符可以认为是特殊字符：<br />
+$ . ‘ “ * || ^ [] 0 \ + ?<br />
+假定要匹配包含字符“ .”的各行而“，”代表匹配任意单字符的特殊字符，因此需要屏蔽其含义。操作如下：<br />
+.
+6.使用[]匹配一个范围或集合  <br />
+使用[ ]匹配特定字符串或字符串集，可以用逗号将括弧内要匹配的不同字符串分开，但并不强制要求这样做（一些系统提倡在复杂的表达式中使用逗号），这样做可以增加模式的可读性。<br />
+使用”-“表示一个字符串范围，表明字符串范围从”-“左边字符开始，到”-“右边字符结束。<br />
+如果熟知一个字符串匹配操作，应经常使用[]模式。<br />
+假定要匹配任意一个数字，可以使用：<br />
+[0123456789]<br />
+然而，通过使用“-”符号可以简化操作：<br />
+[0-9]<br />
+7.使用{}匹配模式结果出现的次数<br />
+使用*可匹配所有匹配结果任意次，但如果只要指定次数，就应使用\ { \ }，此模式有三种形式，即：<br />
+pattern{n} 匹配模式出现n次。<br />
+pattern{n,} 匹配模式出现最少n次。<br />
+pattern{n,m} 匹配模式出现n到m次之间，n , m为0 -255中任意整数。
+请看第一个例子，匹配字母A出现两次，并以B结尾，操作如下：<br />
+A{2}B<br />
+匹配值为AAB<br />
+匹配A至少4次，使用：<br />
+A{4,} B<br />
+可以得结果AAAAB或AAAAAAAB，但不能为AAAB。  </p>
+
+      <div class="readall"><a href="/blog/2015/02/01/Linux-point7.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point6.html">Linux学习笔记6-命令执行顺序</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="linux6-">Linux学习笔记6-命令执行顺序</h2>
+<p>场景：执行某个命令的时候，有时需要依赖于前一个命令是否执行成功。例如，假设你希望<br />
+将一个目录中的文件全部拷贝到另外一个目录中后，然后删除源目录中的全部文件。在删除之前，你希望能够确信拷贝成功，否则就有可能丢失所有的文件。  <br />
+1.&amp;&amp;<br />
+&amp;&amp;的一般形式：<br />
+命令1 &amp;&amp; 命令2<br />
+以上表示：命令1返回真(返回0，成功执行)后，命令2才能被执行<br />
+如：mv /apps/bin /apps/dev/bin &amp;&amp; rm -r /apps/bin<br />
+2.||  <br />
+||一般形式：<br />
+命令1||命令2<br />
+以上表示：命令1未执行成功，那么就执行命令2。<br />
+3.()和{}<br />
+如果希望把几个命令合在一起执行，shell提供了两种方法。既可以在当前shell也可以在子shell中执行一组命令。<br />
+为了在当前shell中执行一组命令，可以用命令分隔符隔开每一个命令，并把所有的命令<br />
+用圆括号()括起来。<br />
 它的一般形式为：<br />
-read varible1 varible2 …  </p>
+(命令1;命令2;. . .)<br />
+如果使用{}来代替()，那么相应的命令将在子shell而不是当前shell中作为一个整体被执行，只有在{}中所有命令的输出作为一个整体被重定向时，其中的命令才被放到子shell中执行，否则在当前shell执行。它的一般形式为：  <br />
+{命令1;命令2;. . . }  </p>
 
-
-      <div class="readall"><a href="/blog/2015/01/23/Linux-point5.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point4.html">Linux 学习笔记4 特殊字符</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年01月23日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#linux">linux</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h1 id="linux-4-">Linux 学习笔记4 特殊字符</h1>
-<ul>
-  <li>
-    <p>匹配文件名中任何字符包括空字符<br />
-? 匹配任何单字符<br />
-[…]匹配[]中包含的任何字符<br />
-[!…] 匹配[]中非感叹号!只好的字符  </p>
-  </li>
-  <li>
-    <p>使用 * 可以匹配文件名中任何字符串 如 ls ./<em>.txt 列出当前文件夹中txt文件  ls ./will</em>.txt 列出当前文件夹中以will开头的txt文件  </p>
-  </li>
-</ul>
-
-<p>?<br />
-ls ??R* : 列出文件名以任意两个字符开头，接着是R，后面跟任何字符的文件<br />
-ls conf.??.log :列出文件名以conf开头、中间是任意两个字符、最后以.log结尾的文件  </p>
-
-<p>[…]和[!…]<br />
-使用[…]可以用来匹配方括号[ ]中的任何字符。在这一方法中，还可以使用一个横杠-来连接两个字母或数字，以此来表示一个范围。在下面的例子中，列出了以i或o开头的文件名<br />
-ls [io]*<br />
-ls log.[0-9]* :匹配所有以log.开头、后面跟随一个数字、然后可以是任意字符串的文件名<br />
-ls LPS??[!0-9]* :列出了所有以L P S开头、中间可以是任何两个字符，后面跟随一个非数字字符、然后是任意字符串的文件名：<br />
-ls [A-Z]* ：列出所有以大写字母开头的文件名  </p>
-
-      <div class="readall"><a href="/blog/2015/01/23/Linux-point4.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point3.html">Linux学习笔记3 后台执行命令</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年01月23日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#"></a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>Linux学习笔记3 后台执行命令
-• 设置crontab文件，并用它来提交作业。<br />
-• 使用at命令来提交作业。<br />
-• 在后台提交作业。<br />
-• 使用nohup命令提交作业。  </p>
-
-<p>cron： 系统组要的调度进程，无需人工干预的情况下执行作业，用户在crontab中提交编辑相应的作业。 每一个用户都可以保存一个crontab文件来保存调度信息系统管理员可以通过cron.deny和cron.allow来禁止或允许用户拥有自己的crontab文件  <br />
-crontab脚本格式为：<br />
-分 时 日 月 星期 要运行的命令<br />
-在每一个域中我们可以使用- ， * 这些标示符<br />
--表示一个区间段，如希望周一到周五运行： 分 时 日 月 1-5 命令<br />
-，则是列举，如希望周一和周五运行： 分 时 日 月 1,5 命令<br />
-* 则是没有限制 如希望不限制是周几： 分 时 日 月 * 命令  </p>
-
-<p>注： crontab运行时并不知道用户的运行环境， 所以用户在提交crontab任务时需要给出脚本的绝对路径以及相应的环境变量   </p>
-
-<p>crontab命令的形式：<br />
-crontab [-u user] -e -l -r <br />
--u 用户名<br />
--e 编辑<br />
--l 列出<br />
--r 删除<br />
-使用当前用户登录则不需要-u 选项   </p>
-
-<p>创建：<br />
-向cron进程提交一个crontab文件之前，首先要做的一件事情就是设置环境变量EDITOR。cron进程根据它来确定使用哪个编辑器编辑向cron进程提交一个crontab文件之前，首先要做的一件事情就是设置环境变量文件。9 9 %的UNIX和LINUX用户都使用vi，如果你也是这样，那么你就编辑$HOME目录下的.profile文件，在其中加入这样<br />
-一行： <br />
-EDITOR=vi; export EDITOR<br />
-然后保存并退出。<br />
-不妨创建一个名为<user>cron的文件，其中<user>是用户名，例如，davecron。在该文件中加入如下的内容。  
-0,15,45 16-08 * * * /bin/echo 'date' &gt; /dev/console
-保存并退出。确信前面5个域用空格分隔。  
-在上面的例子中，系统将每隔1 5分钟向控制台输出一次当前时间。如果系统崩溃或挂起，从最后所显示的时间就可以一眼看出系统是什么时间停止工作的。在有些系统中，用tty1来表示控制台，可以根据实际情况对上面的例子进行相应的修改。
-为了提交你刚刚创建的向cron进程提交一个crontab文件之前，首先要做的一件事情就是设置环境变量文件，可以把这个新创建的文件作为cron命令的参数：
-$ crontab davecron  
-现在该文件已经提交给cron进程，它将每隔15分钟运行一次。同时，新创建文件的一个副本已经被放在/var/spool/cron目录中，文件名就是用户名（即，dave)</user></user></p>
-
-<p>备份：crontab -l &gt; /$HOME/mycron
-at命令：
-at命令允许用户向cron守护进程提交作业，使其在稍后的时间运行。这里稍后的时间可能是指10 min以后，也可能是指几天以后。如果你希望在一个月或更长的时间以后运行，最好还是使用crontab文件。
-一旦一个作业被提交,at命令将会保留所有当前的环境变量，包括路径，不象crontab只提供缺省的环境。该作业的所有输出都将以电子邮件的形式发送给用户，除非你对其输出进行了重定向，绝大多数情况下是重定向到某个文件中。
-和crontab一样，根用户可以通过/etc目录下的at.allow和at.deny文件来控制哪些用户可以
-使用at命令，哪些用户不行。不过一般来说，对a t命令的使用不如对cron tab的使用限制那么严格。
-a t命令的基本形式为：
-at [-f script] [-m -l -r] [time] [date]
-其中，
--f script 是所要提交的脚本或命令。
--l 列出当前所有等待运行的作业。atq命令具有相同的作用。
--r 清除作业。为了清除某个作业，还要提供相应的作业标识（ ID）；有些UNIX变体只
-接受atrm作为清除命令。
--m 作业完成后给用户发邮件。
-time at命令的时间格式非常灵活；可以是H、HH . HHMM、HH:MM或H:M，其中H和M
-分别是小时和分钟。还可以使用a.m.或p.m.。
-date 日期格式可以是月份数或日期数，而且at命令还能够识别诸如today、tomorrow这样的词。</p>
-
-<p>&amp;命令
-当在前台运行某个作业时，终端被该作业占据；而在后台运行作业时，它不会占据终端。可以使用&amp;命令把作业放到后台执行。
-该命令的一般形式为：
-命令&amp;
-不过，作业在后台运行一样会将结果输出到屏幕上，干扰你的工作。如果放在后台运行的作业会产生大量的输出，最好使用下面的方法把它的输出重定向到某个文件中：
-command &gt;out.file 2&gt;&amp;1 &amp;
-在上面的例子中，所有的标准输出和错误输出都将被重定向到一个叫做out.file 的文件中。
-当你成功地提交进程以后，就会显示出一个进程号，可以用它来监控该进程，或杀死它。
-如：
-运行一个find命令，查找名为“srm.conf”的文件，并把所有标准输出和错误输
-出重定向到一个叫作find.dt的文件中：
-find /etc -name “srm.conf” -print &gt;find.dt 2&gt;&amp;1 &amp;</p>
-
-<p>nohup命令<br />
-如果你正在运行一个进程，而且你觉得在退出帐户时该进程还不会结束，那么可以使用nohup命令。该命令可以在你退出帐户之后继续运行相应的进程。Nohup就是不挂起的意思(no hang up)。 
-该命令的一般形式为：<br />
-nohup command &amp;<br />
-使用nohup命令提交作业，在缺省情况下该作业的所有输出都被重定向到一个名为nohup.out的文件中，除非另外指定了输出文件：<br />
-nohup command &gt; myout.file 2&gt;&amp;1<br />
-在上面的例子中，输出被重定向到myout.file文件中。   </p>
-
-
-      <div class="readall"><a href="/blog/2015/01/23/Linux-point3.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point2.html">Linux学习笔记2-find和xargs</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年01月23日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#linux">linux</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>Linux学习笔记2-find和xargs<br />
-Find命令的一般形式为：<br />
-find pathname -options [-print -exec -ok]<br />
-pathname find命令所查找的目录路径。例如用.来表示当前目录，用/来表示系统根目录。<br />
--print find命令将匹配的文件输出到标准输出。<br />
--exec find命令对匹配的文件执行该参数所给出的shell命令。相应命令的形式为’comm -and’{} \;，注意{ }和\；之间的空格。<br />
--ok 和-exec的作用相同，只不过以一种更为安全的模式来执行该参数所给出的shell命令,在执行每一个命令之前，都会给出提示，让用户来确定是否执行。   </p>
-
-<p>find命令选项<br />
-find命令有很多选项或表达式，每一个选项前面跟随一个横杠-。让我们先来看一下该命令的主要选项，然后再给出一些例子。<br />
--name 按照文件名查找文件。<br />
--perm 按照文件权限来查找文件。 <br />
--prune 使用这一选项可以使find命令不在当前指定的目录中查找，如果同时使用了
-- depth选项，那么- prune选项将被find命令忽略。<br />
--user 按照文件属主来查找文件。<br />
--group 按照文件所属的组来查找文件。<br />
--mtime -n +n 按照文件的更改时间来查找文件， 
-- n表示文件更改时间距现在n天以内，+ n
-表示文件更改时间距现在n天以前。
-Find命令还有-atime和-ctime选项，但它们都和-mtime选项
-相似，所以我们在这里只介绍-mtime选项。
--nogroup 查找无有效所属组的文件，即该文件所属的组在/etc/groups中不存在。<br />
--nouser 查找无有效属主的文件，即该文件的属主在/etc/passwd中不存在。<br />
--newer file1 !file2 查找更改时间比文件file1新但比文件file2旧的文件。<br />
--type 查找某一类型的文件，诸如：<br />
-b - 块设备文件。<br />
-d - 目录。<br />
-c - 字符设备文件。<br />
-p - 管道文件。<br />
-l - 符号链接文件。<br />
-f - 普通文件。<br />
--size n[c] 查找文件长度为n块的文件，带有c时表示文件长度以字节计。
--depth 在查找文件时，首先查找当前目录中的文件，然后再在其子目录中查找。<br />
--fstype 查找位于某一类型文件系统中的文件，这些文件系统类型通常可以在配置文件, /etc/fstab中找到，该配置文件中包含了本系统中有关文件系统的信息。
--mount 在查找文件时不跨越文件系统mount点。<br />
--follow 如果find命令遇到符号链接文件，就跟踪至链接所指向的文件。<br />
--cpio 对匹配的文件使用cpio命令，将这些文件备份到磁带设备中。 </p>
-
-
-      <div class="readall"><a href="/blog/2015/01/23/Linux-point2.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/02/01/Linux-point6.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

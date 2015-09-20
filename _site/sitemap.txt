@@ -1,4 +1,5 @@
 
+index.html/page/13/index.html
 index.html/page/12/index.html
 index.html/page/11/index.html
 index.html/page/10/index.html
@@ -14,6 +15,7 @@ index.html/page/timing.html
 index.html/life/think-in-yesterday.html
 index.html/page/test.html
 index.html/sitemap.txt
+index.html/life/sawadika.html
 index.html/life/sanya.html
 index.html/page/read.html
 index.html/page/life.html
@@ -30,6 +32,15 @@ index.html/life/best-me.html
 index.html/page/about.html
 index.html/404.html
 
+index.html/blog/2015/09/20/sqoopmimashuruwenti.html
+index.html/blog/2015/09/20/nosql-onhadoop.html
+index.html/blog/2015/09/20/jvm-zaixuexi.html
+index.html/blog/2015/09/20/hdfs-fenceng.html
+index.html/blog/2015/09/20/guanjianjiagouceng.html
+index.html/blog/2015/09/20/duoyuan-ETL.html
+index.html/blog/2015/09/20/data-store-platform.html
+index.html/blog/2015/09/20/dashujupingtaisheji.html
+index.html/blog/2015/09/20/10-suanfa-biji.html
 index.html/blog/2015/05/16/sqoop-spacil-chart.html
 index.html/blog/2015/05/16/hive-datahouse.html
 index.html/blog/2015/05/16/MR-join.html

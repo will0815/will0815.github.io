@@ -64,248 +64,41 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/10/09/Tuning-Hadoop.html">Tuning Hadoop</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point4.html">Linux 学习笔记4 特殊字符</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年10月09日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h2 id="hadoop">Hadoop集群性能调优</h2>
-
-<p><strong>mapred-site.xml</strong></p>
-
-<ol>
-  <li>
-    <p>mapred.child.java.opts</p>
-
-    <p>配置每个map或reduce使用的内存数量。默认的是200M。网友推荐：如果内存是8G，CPU有8个核，那么就设置成1G就可以了。实际上，在map和reduce的过程中对内存的消耗并不大，但是如果配置的太小，则有可能出现”无可分配内存”的错误。对于Hadoop环境独占的机器可以考虑：总内存 / (Map/Reduce 并发数) * 80%</p>
-  </li>
-  <li>
-    <p>dfs.block.size </p>
-
-    <p>生的map来综合考量的。一般来说，文件大，集群数量少，还是建议将block size设置大一些的好。</p>
-  </li>
-  <li>
-    <p>mapred.compress.map.output </p>
-
-    <p>几乎所有会产生大量map output的hadoop作业，都能够通过将中间文件用Lzo进行压缩来提升性能。尽管lzo会使得cpu的load有所增高，但是reduce在shuffle阶段的disk IO通常都能节省不少时间，对job的性能有好处。
- 当采用map中间结果压缩的情况下，用户还可以选择压缩时采用另外几种压缩格式进行压缩，现在hadoop支持的压缩格式 有：GzipCodec，LzoCodec，BZip2Codec，LzmaCodec等压缩格式。通常来说，想要达到比较平衡的cpu和磁盘压缩 比，LzoCodec比较适合。但也要取决于job的具体情况。</p>
-
-    <pre><code> &lt;property&gt;
-     &lt;name&gt;mapred.compress.map.output&lt;/name&gt;
-     &lt;value&gt;true&lt;/value&gt;
-   &lt;/property&gt;
- &lt;property&gt; 
-     &lt;name&gt;mapred.map.output.compression.codec&lt;/name&gt; 
-     &lt;value&gt;com.hadoop.compression.lzo.LzoCodec&lt;/value&gt; 
- &lt;/property&gt;  
-</code></pre>
-  </li>
-  <li>
-    <p>mapred.tasktracker.map.tasks.maximum</p>
-
-    <p>The maximum number of map tasks that will be run simultaneously by a task tracker.</p>
-
-    <p>一个tasktracker最多可以同时运行的map任务数量
- 默认值：2
- mapred.tasktracker.map.tasks.maximum = cpu数量
- Sanders: 应该设置成为等于或略小于CPU总核数
- cpu数量 = 服务器CPU总核数 / 每个CPU的核数
- 服务器CPU总核数 = more  /proc/cpuinfo | grep ‘processor’ | wc -l
- 每个CPU的核数 = more  /proc/cpuinfo | grep ‘cpu cores’</p>
-  </li>
-  <li>
-    <p>mapred.map.tasks</p>
-
-    <p>The default number of map tasks per job
- 一个Job会使用task tracker的map任务槽数量，这个值 ≤ mapred.tasktracker.map.tasks.maximum
- 默认值：2
- 优化值：
- CPU数量 （我们目前的实践值）
- (CPU数量 &gt; 2) ? (CPU数量 * 0.75) : 1  （mapr的官方建议）</p>
-  </li>
-  <li>
-    <p>io.sort.mb    </p>
-
-    <p>每一个map都会对应存在一个内存 buffer， map会将已经产生的部分结果先写入到该buffer中，这个buffer默认是100MB大小. 当map的产生数据非常大时，并且把io.sort.mb调 大，那么map在整个计算过程中spill的次数就势必会降低，map task对磁盘的操作就会变少，如果map tasks的瓶颈在磁盘上，这样调整就会大大提高map的计算性能。</p>
-  </li>
-  <li>io.sort.spill.percent  <br />
- 这个值就是上述buffer的阈值，默认是0.8，既80%，当buffer中的数据达到这个阈值，后台线程会起来对buffer中已有的数据进行排序，然后写入磁盘，此时map输出的数据继续往剩余的20% buffer写数据，如果buffer的剩余20%写满，排序还没结束，map task被block等待。</li>
-  <li>
-    <p>io.sort.factor   <br />
- 当一个map task执行完之后，本地磁盘上(mapred.local.dir)有若干个spill文件，map task最后做的一件事就是执行merge sort，把这些spill文件合成一个文件（partition），有时候我们会自定义partition函数，就是在这个时候被调用。</p>
-
-    <p>当map的中间结果非常大，调大io.sort.factor，有利于减少merge次数，进而减少 map对磁盘的读写频率，有可能达到优化作业的目的。</p>
-
-    <p>默认是10</p>
-  </li>
-</ol>
-
-<p><strong>Reducer</strong></p>
-
-<ol>
-  <li>
-    <p>mapred.tasktracker.reduce.tasks.maximum</p>
-
-    <p>The maximum number of reduce tasks that will be run simultaneously by a task tracker.
- 一个task tracker最多可以同时运行的reduce任务数量
- 默认值：2
- 优化值： (CPU数量 &gt; 2) ? (CPU数量 * 0.50): 1 （mapr的官方建议）</p>
-
-    <p>如果使用fair的调度模式，设置成相同，应该是可以的，但是如果是FIFO模式，我个人认为在map或是reduce阶段，CPU的核数没有得到充分的利用，有些可惜，所以，FIFO模式下，还是尽量配置的map并发数量多于redcue并发数量</p>
-  </li>
-  <li>
-    <p>mapred.reduce.tasks
- The default number of reduce tasks per job. Typically set to 99% of the cluster’s reduce capacity, so that if a node fails the reduces can  still be executed in a single wave.</p>
-
-    <pre><code> 一个Job会使用task tracker的reduce任务槽数量
- 默认值：1
- 优化值：
- 1.0.95 * mapred.tasktracker.tasks.maximum
- 理由：启用95%的reduce任务槽运行task, recude task运行一轮就可以完成。剩余5%的任务槽永远失败任务，重新执行
- 2.1.75 * mapred.tasktracker.tasks.maximum
- 理由：因为reduce task数量超过reduce槽数，所以需要两轮才能完成所有reduce task。具体快的原理还没有完全理解.  io.sort.mb/io.sort.factor/ io.sort.spill.percent  和Map类似
-</code></pre>
-  </li>
-  <li>
-    <p>mapred.reduce.parallel.copies    </p>
-
-    <p>Reduce copy数据的线程数量，默认值是5</p>
-
-    <p>Reduce task在做shuffle时，实际上就是从不同的已经完成的map上去下载属于自己这个reduce的部分数据，由于map通常有许多个，所以对一个reduce来说，下载也可以是并行的从多个map下载
- Reduce到每个完成的Map Task copy数据（通过RPC调用），默认同时启动5个线程到map节点取数据。这个配置还是很关键的，如果你的map输出数据很大，有时候会发现map早就100%了，reduce一直在1% 2%。。。。。。缓慢的变化，那就是copy数据太慢了，5个线程copy 10G的数据，确实会很慢，这时就要调整这个参数了，但是调整的太大，又会事倍功半，容易造成集群拥堵，所以 Job tuning的同时，也是个权衡的过程，你要熟悉你的数据</p>
-  </li>
-  <li>
-    <p>mapred.job.shuffle.input.buffer.percent</p>
-
-    <p>Reduce在shuffle阶段对下载来的map数据，并不是立刻就写入磁盘的，而是会先缓存在内存中，然后当使用内存达到一定量的时候才刷入磁盘。当指定了JVM的堆内存最大值以后，上面这个配置项就是Reduce用来存放从Map节点取过来的数据所用的内存占堆内存的比例，默认是70%</p>
-  </li>
-  <li>
-    <p>mapred.job.shuffle.merge.percent </p>
-
-    <p>同Map的io.sort.spill.percent 一样，当shuffle时不是等到buffer满后再在flush到磁盘，而是达到一定阈值后写入磁盘，其默认值是0.66</p>
-  </li>
-  <li>
-    <p>mapred.job.reduce.input.buffer.percent </p>
-
-    <p>当reduce task真正进入reduce函数的计算阶段的时候，在读取reduce需要的数据时需要多 少的内存百分比来作为reduce读已经sort好的数据的buffer百分比。默认情况下为0，也就是说，默认情况下，reduce是全部从磁盘开始读 处理数据。如果这个参数大于0，那么就会有一定量的数据被缓存在内存并输送给reduce，当reduce计算逻辑消耗内存很小时，可以分一部分内存用来 缓存数据</p>
-  </li>
-  <li>
-    <p>mapred.inmem.merge.threshold</p>
-
-    <p>从map节点取过来的文件个数，当达到这个个数之后，也进行merger sort，然后写到reduce节点的本地磁盘；mapred.job.shuffle.merge.percent优先判断.默认值1000，完全取决于map输出数据的大小
- 默认值1000</p>
-  </li>
-</ol>
-
-      <div class="readall"><a href="/blog/2014/10/09/Tuning-Hadoop.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/10/09/Holographic-user-portrait.html">Holographic user portrait</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年10月09日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p><strong>用户洞察的定义和目的</strong></p>
-
-<p>  标准的用户洞察包含三个步骤：用户的数据管理、用户的需求分析、分析以后建立用户洞察力的应用。</p>
-
-<p>  用户的数据包括：历史销售数据、用户评价数据、用户注册数据、用户保修数据、用户维修数据、用户社交数据。</p>
-
-<p>用户的需求分析即对用户信息的理解，并进行适应性的建模，通过动态的行为和价值分析，识别用户的行为、价值和需求。在用户数据管理与用户需求分析的基础上，策划、开发和提供蕴含用户实质需求的差异化产品、业务或营销方案，开展有针对性的营销和拓展市场。</p>
-
-<p>   因此用户洞察的目的就是通过已有的需求或者已经产生的交易行为记录，对这些用户进行分析，然后做精准营销或者挖掘潜在需求。</p>
-
-<p><img src="/image/user-holograph.png" alt="" /></p>
-
-<p><strong>用户画像模型分析</strong></p>
-
-<p>   用户画像是用户洞察中最为关键的环节，比如说他是谁，他的消费能力如何，他过往的消费历史是什么，他的购物习惯和社交偏好是什么。通过简单的方式或者是非常有限的数据，就能够找到这些内容。建立起丰富的画像标签体系，这个体系需要涵盖我们希望描绘用户的各个方面，原始数据可以动态获取，也可以基于原始数据集。 可以过曾经的行为推测出来他的标签或者是他的特征。举例来说：如果她叫翠花，那么她是女生；如果他是给丈母娘买的，那么猜测他是男生；如果她在2012年10月份买了一段奶粉，2013年2月买了二段奶粉，那么可以推测她有孩子，并且孩子已经两岁半了；如果他买了高端的A.O史密斯热水器，那么他的消费能力相对比较强；如果一位用户关注科技，比如说可穿戴设备，那么他一定是科技达人；如果他买了净水器，他可能对空气净化器有要求。通过这些历史数据、SNS数据或者行为数据，探究同一个客户有没有二次购买的可能、以及关联购买能力。</p>
-
-<p><strong>基于交易数据的用户洞察</strong></p>
-
-<p>  根据电商的交易数据对个人消费者用户进行分析，从消费内容的数据中洞悉该消费者的消费习惯和其他信息：根据用户消费能力级别数据可以了解消费者的消费能力；根据用户的购买次数分析其购物习惯，判定他是否是网购达人；根据用户的上网时间分布数据，分析消费者的职业、作息等信息；根据用户单次消费金额数据分析消费者的购买能力和收入状况等。例如，一名消费者在2013年12月份到2014年4月份有五次消费，从他这五次交易的数据里面可以看到：他买了两次手机，还买了豆浆机、电视机；第一次购买手机的时候花了四千块，但第二次购买手机的时候只花了1950元。可以看出他热爱生活，是一个十足的数码控，消费能力很强，网购习惯很明显。当然这些数据不一定很准，但是也不需要它很准。只要能够做出画像就足够了。</p>
-
-<p>   通过分析，认识了他，知道他叫什么，也知道他在哪里，然后进行的就是用户洞察力的行为应用：
-电话他、短信他、邮件他、私信他，用打折、促销、返券、送积分、给链接、门店地址等方式吸引他、勾引他，全方位地缠绕他。这种全方位的营销到底能不能产生消费不敢肯定，但是这样的促销行为对一部分人一定会产生影响。</p>
-
-<p> 基于论坛数据的用户洞察在对论坛的研究方面，提取了某消费者论坛的监测数据，样本量是24万的用
-户，其中签到的人达到了80万，购买信息数达到200万。对论坛用户年龄的分析，可以发现绝大部分都是85后和90后，这两部分用户占到70%以上，因此可以认定这是一个新型的消费领域。从学历方面来分析这些用户，80%以上的用户为专科以上学历，这些人渴望成功，渴望归属和友情，他们勇敢、时尚，但是消费能力不够。</p>
-
-<p>   在这个论坛用户结构中，普通人占到50%多，而骨灰级的粉丝占到40.3%，粉丝如何运营就是目前面临的最大问题。现在很多企业在做社会化的营销，在做粉丝运营，但是坦率来讲，做的都不是特别理想。目前家电行业都在向互联网思维转变，在产品和技术方面，企业并没有多大的问题，如果说企业还有哪些欠缺的话，应该就是思维上的转变、专业人才的培育与经验的积累。</p>
-
-<p>   在粉丝运营中，找准时间可以让营销事半功倍。之前所有电商网站购销行为，基本上都是在晚上11点到12点。但是论坛则不一样，如果企业有官网或者是官微，那么可以发现粉丝活跃时间是在午休时间，如果要做活动宣传、广告或者品牌推广，午休时间是个好选择。如果是做抢购、秒杀、团购、促销的活动，最好放在晚上。</p>
-
-<p><strong>基于社会化用户的深度挖掘成为企业关注重点</strong></p>
-
-<p>   如果只是基于在现有数据的条件下，进行深入挖掘以及用户分析，可能还远远不够，这时需要建立一个目标交互引流的分析模型，这个模型通过对线上用户精确的界定抓取，用于企业的用户运营、品牌分析。随着互联网和社会化的发展，企业需要对线上用户进行精确的分析和洞察。</p>
-
-<p>   具体如何操作？首先要分析在互联网的行为下，用户对产品和品牌究竟有什么样的看法和观点，即满意度如何；还有产品是否迭代，原因是什么，企业的痛点又在哪里，有没有可能推送新的迭代创意或者是颠覆性的想法。通过这些方面，进行社会化的数据抓取，得到标准化的期望值，进行简单的画像，然后再进行分析，抽取相关的报表报告，提供给企业进行产品的设计和创意的输出。</p>
-
-<p><strong>构建基于社会化大数据的用户洞察和交互体系</strong></p>
-
-<p>   总结前面的分析，可以看出基于大数据的用户洞察和交互体系可以归纳为：基于营销为目的：分析用户的历史销售记录，基于用户群体，获取SNS的数据，处理清洗SNS数据，挖掘用户潜在需求，针对潜在客户进行精准的个性化、差异化营销和推荐，形成销售业绩。
-   基于洞察为目的：通过社会化媒体和电商平台找到关键的用户意见领袖和SNS用户，对他们细分得到相关的群体，通过社会化运营，可以对他进行调研，广告推送，或者搭建新一代用户调研系统，未来这将是能够解决产品跟进、快速升级的好平台。</p>
-
-      <div class="readall"><a href="/blog/2014/10/09/Holographic-user-portrait.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/ubuntueclipse.html">ubuntu下eclipse菜单栏无法展开</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
+        2015年01月23日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#linux">linux</a>
       </p>
     </header>
     <div class="post-main">
-      <p>因为ubuntu13下菜单栏被代理到状态栏下，下载安装eclipse3.8，打开后菜单栏点击无法打开，网上认为可能是unity的bug</p>
+      <h1 id="linux-4-">Linux 学习笔记4 特殊字符</h1>
+<ul>
+  <li>
+    <p>匹配文件名中任何字符包括空字符<br />
+? 匹配任何单字符<br />
+[…]匹配[]中包含的任何字符<br />
+[!…] 匹配[]中非感叹号!只好的字符  </p>
+  </li>
+  <li>
+    <p>使用 * 可以匹配文件名中任何字符串 如 ls ./<em>.txt 列出当前文件夹中txt文件  ls ./will</em>.txt 列出当前文件夹中以will开头的txt文件  </p>
+  </li>
+</ul>
 
-<p>解决办法去掉eclipse的菜单代理：</p>
+<p>?<br />
+ls ??R* : 列出文件名以任意两个字符开头，接着是R，后面跟任何字符的文件<br />
+ls conf.??.log :列出文件名以conf开头、中间是任意两个字符、最后以.log结尾的文件  </p>
 
-<p>1.在终端中进入快捷方式的目录，然后运行</p>
+<p>[…]和[!…]<br />
+使用[…]可以用来匹配方括号[ ]中的任何字符。在这一方法中，还可以使用一个横杠-来连接两个字母或数字，以此来表示一个范围。在下面的例子中，列出了以i或o开头的文件名<br />
+ls [io]*<br />
+ls log.[0-9]* :匹配所有以log.开头、后面跟随一个数字、然后可以是任意字符串的文件名<br />
+ls LPS??[!0-9]* :列出了所有以L P S开头、中间可以是任何两个字符，后面跟随一个非数字字符、然后是任意字符串的文件名：<br />
+ls [A-Z]* ：列出所有以大写字母开头的文件名  </p>
 
-<p>sudo gedit eclipse.desktop</p>
-
-<p>2.修改Exec的值，将原有的Exec=eclipse修改为：</p>
-
-<p>Exec=env UBUNTU_MENUPROXY=0  eclipse</p>
-
-<p>——问题解决</p>
-
-<p>顺带学习ubuntu 程序快捷方式</p>
-
-<p>进入 /usr/share/applications 目录下，这里有所有程序的图形化的快捷方式，
-你可以直接复制到桌面，即可</p>
-
-<p>搜索ls <em>程序名</em></p>
-
-<p>方法一：进入 /usr/share/applications 目录下，这里有所有程序的图形化的快捷方式，你可以直接复制到桌面，即可</p>
-
-<p>方法二：使用命令的方式： gnome-desktop-item-edit</p>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/ubuntueclipse.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2015/01/23/Linux-point4.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -313,116 +106,298 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/sqoop.html">sqoop安装</a></h1>
+      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point3.html">Linux学习笔记3 后台执行命令</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年09月27日
+        2015年01月23日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#"></a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>Linux学习笔记3 后台执行命令
+• 设置crontab文件，并用它来提交作业。<br />
+• 使用at命令来提交作业。<br />
+• 在后台提交作业。<br />
+• 使用nohup命令提交作业。  </p>
+
+<p>cron： 系统组要的调度进程，无需人工干预的情况下执行作业，用户在crontab中提交编辑相应的作业。 每一个用户都可以保存一个crontab文件来保存调度信息系统管理员可以通过cron.deny和cron.allow来禁止或允许用户拥有自己的crontab文件  <br />
+crontab脚本格式为：<br />
+分 时 日 月 星期 要运行的命令<br />
+在每一个域中我们可以使用- ， * 这些标示符<br />
+-表示一个区间段，如希望周一到周五运行： 分 时 日 月 1-5 命令<br />
+，则是列举，如希望周一和周五运行： 分 时 日 月 1,5 命令<br />
+* 则是没有限制 如希望不限制是周几： 分 时 日 月 * 命令  </p>
+
+<p>注： crontab运行时并不知道用户的运行环境， 所以用户在提交crontab任务时需要给出脚本的绝对路径以及相应的环境变量   </p>
+
+<p>crontab命令的形式：<br />
+crontab [-u user] -e -l -r <br />
+-u 用户名<br />
+-e 编辑<br />
+-l 列出<br />
+-r 删除<br />
+使用当前用户登录则不需要-u 选项   </p>
+
+<p>创建：<br />
+向cron进程提交一个crontab文件之前，首先要做的一件事情就是设置环境变量EDITOR。cron进程根据它来确定使用哪个编辑器编辑向cron进程提交一个crontab文件之前，首先要做的一件事情就是设置环境变量文件。9 9 %的UNIX和LINUX用户都使用vi，如果你也是这样，那么你就编辑$HOME目录下的.profile文件，在其中加入这样<br />
+一行： <br />
+EDITOR=vi; export EDITOR<br />
+然后保存并退出。<br />
+不妨创建一个名为<user>cron的文件，其中<user>是用户名，例如，davecron。在该文件中加入如下的内容。  
+0,15,45 16-08 * * * /bin/echo 'date' &gt; /dev/console
+保存并退出。确信前面5个域用空格分隔。  
+在上面的例子中，系统将每隔1 5分钟向控制台输出一次当前时间。如果系统崩溃或挂起，从最后所显示的时间就可以一眼看出系统是什么时间停止工作的。在有些系统中，用tty1来表示控制台，可以根据实际情况对上面的例子进行相应的修改。
+为了提交你刚刚创建的向cron进程提交一个crontab文件之前，首先要做的一件事情就是设置环境变量文件，可以把这个新创建的文件作为cron命令的参数：
+$ crontab davecron  
+现在该文件已经提交给cron进程，它将每隔15分钟运行一次。同时，新创建文件的一个副本已经被放在/var/spool/cron目录中，文件名就是用户名（即，dave)</user></user></p>
+
+<p>备份：crontab -l &gt; /$HOME/mycron
+at命令：
+at命令允许用户向cron守护进程提交作业，使其在稍后的时间运行。这里稍后的时间可能是指10 min以后，也可能是指几天以后。如果你希望在一个月或更长的时间以后运行，最好还是使用crontab文件。
+一旦一个作业被提交,at命令将会保留所有当前的环境变量，包括路径，不象crontab只提供缺省的环境。该作业的所有输出都将以电子邮件的形式发送给用户，除非你对其输出进行了重定向，绝大多数情况下是重定向到某个文件中。
+和crontab一样，根用户可以通过/etc目录下的at.allow和at.deny文件来控制哪些用户可以
+使用at命令，哪些用户不行。不过一般来说，对a t命令的使用不如对cron tab的使用限制那么严格。
+a t命令的基本形式为：
+at [-f script] [-m -l -r] [time] [date]
+其中，
+-f script 是所要提交的脚本或命令。
+-l 列出当前所有等待运行的作业。atq命令具有相同的作用。
+-r 清除作业。为了清除某个作业，还要提供相应的作业标识（ ID）；有些UNIX变体只
+接受atrm作为清除命令。
+-m 作业完成后给用户发邮件。
+time at命令的时间格式非常灵活；可以是H、HH . HHMM、HH:MM或H:M，其中H和M
+分别是小时和分钟。还可以使用a.m.或p.m.。
+date 日期格式可以是月份数或日期数，而且at命令还能够识别诸如today、tomorrow这样的词。</p>
+
+<p>&amp;命令
+当在前台运行某个作业时，终端被该作业占据；而在后台运行作业时，它不会占据终端。可以使用&amp;命令把作业放到后台执行。
+该命令的一般形式为：
+命令&amp;
+不过，作业在后台运行一样会将结果输出到屏幕上，干扰你的工作。如果放在后台运行的作业会产生大量的输出，最好使用下面的方法把它的输出重定向到某个文件中：
+command &gt;out.file 2&gt;&amp;1 &amp;
+在上面的例子中，所有的标准输出和错误输出都将被重定向到一个叫做out.file 的文件中。
+当你成功地提交进程以后，就会显示出一个进程号，可以用它来监控该进程，或杀死它。
+如：
+运行一个find命令，查找名为“srm.conf”的文件，并把所有标准输出和错误输
+出重定向到一个叫作find.dt的文件中：
+find /etc -name “srm.conf” -print &gt;find.dt 2&gt;&amp;1 &amp;</p>
+
+<p>nohup命令<br />
+如果你正在运行一个进程，而且你觉得在退出帐户时该进程还不会结束，那么可以使用nohup命令。该命令可以在你退出帐户之后继续运行相应的进程。Nohup就是不挂起的意思(no hang up)。 
+该命令的一般形式为：<br />
+nohup command &amp;<br />
+使用nohup命令提交作业，在缺省情况下该作业的所有输出都被重定向到一个名为nohup.out的文件中，除非另外指定了输出文件：<br />
+nohup command &gt; myout.file 2&gt;&amp;1<br />
+在上面的例子中，输出被重定向到myout.file文件中。   </p>
+
+
+      <div class="readall"><a href="/blog/2015/01/23/Linux-point3.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point2.html">Linux学习笔记2-find和xargs</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年01月23日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>Linux学习笔记2-find和xargs<br />
+Find命令的一般形式为：<br />
+find pathname -options [-print -exec -ok]<br />
+pathname find命令所查找的目录路径。例如用.来表示当前目录，用/来表示系统根目录。<br />
+-print find命令将匹配的文件输出到标准输出。<br />
+-exec find命令对匹配的文件执行该参数所给出的shell命令。相应命令的形式为’comm -and’{} \;，注意{ }和\；之间的空格。<br />
+-ok 和-exec的作用相同，只不过以一种更为安全的模式来执行该参数所给出的shell命令,在执行每一个命令之前，都会给出提示，让用户来确定是否执行。   </p>
+
+<p>find命令选项<br />
+find命令有很多选项或表达式，每一个选项前面跟随一个横杠-。让我们先来看一下该命令的主要选项，然后再给出一些例子。<br />
+-name 按照文件名查找文件。<br />
+-perm 按照文件权限来查找文件。 <br />
+-prune 使用这一选项可以使find命令不在当前指定的目录中查找，如果同时使用了
+- depth选项，那么- prune选项将被find命令忽略。<br />
+-user 按照文件属主来查找文件。<br />
+-group 按照文件所属的组来查找文件。<br />
+-mtime -n +n 按照文件的更改时间来查找文件， 
+- n表示文件更改时间距现在n天以内，+ n
+表示文件更改时间距现在n天以前。
+Find命令还有-atime和-ctime选项，但它们都和-mtime选项
+相似，所以我们在这里只介绍-mtime选项。
+-nogroup 查找无有效所属组的文件，即该文件所属的组在/etc/groups中不存在。<br />
+-nouser 查找无有效属主的文件，即该文件的属主在/etc/passwd中不存在。<br />
+-newer file1 !file2 查找更改时间比文件file1新但比文件file2旧的文件。<br />
+-type 查找某一类型的文件，诸如：<br />
+b - 块设备文件。<br />
+d - 目录。<br />
+c - 字符设备文件。<br />
+p - 管道文件。<br />
+l - 符号链接文件。<br />
+f - 普通文件。<br />
+-size n[c] 查找文件长度为n块的文件，带有c时表示文件长度以字节计。
+-depth 在查找文件时，首先查找当前目录中的文件，然后再在其子目录中查找。<br />
+-fstype 查找位于某一类型文件系统中的文件，这些文件系统类型通常可以在配置文件, /etc/fstab中找到，该配置文件中包含了本系统中有关文件系统的信息。
+-mount 在查找文件时不跨越文件系统mount点。<br />
+-follow 如果find命令遇到符号链接文件，就跟踪至链接所指向的文件。<br />
+-cpio 对匹配的文件使用cpio命令，将这些文件备份到磁带设备中。 </p>
+
+
+      <div class="readall"><a href="/blog/2015/01/23/Linux-point2.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point1.html">Linux学习笔记1-文件安全与权限</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年01月23日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h1 id="section">文件安全与权限</h1>
+<p>包含内容：<br />
+• 文件和目录的权限。<br />
+• setuid。<br />
+• chown和chgrp。<br />
+• umask。<br />
+• 符号链接。  </p>
+
+<p>创建文件时系统保存文件的有关信息包括：<br />
+1、长度<br />
+2、类型<br />
+3、位置<br />
+4、所属用户以及哪些用户可以访问<br />
+5、i节点<br />
+6、修改时间 （-rwxr-xr-x：分别表示文件所有者、同组、以及其他用户对该文件的权限）  </p>
+
+<p>文件类型: 如上权限位-rwxr-xr-x 其中最前面的横杠即表示该文件的类型（这里为普通文件）<br />
+文件类型分为：<br />
+d 目录<br />
+l 符号链接。<br />
+s 套接字文件<br />
+b 块设备文件<br />
+c 字符设备文件<br />
+p 命名管道文件  </p>
+
+<p><strong>更改文件权限位命令：chmod</strong> 
+chmod [who] operator [permission] filename<br />
+who:<br />
+u 文件所有者<br />
+g 同组用户<br />
+o 其他用户<br />
+a 所有用户<br />
+operator：<br />
++ 增加权限<br />
+- 取消权限<br />
+= 设定权限<br />
+permission：<br />
+r 读<br />
+w 写<br />
+x 执行<br />
+s 文件所有者和组set-ID<br />
+t 粘性位*<br />
+l 给文件加锁 是其他用户无法访问<br />
+u  </p>
+
+<p>chmod命令的绝对模式<br />
+chmod [mode] file<br />
+如： chmod -R 755 myfile<br />
+755 分别对应文件所有者、同组、以及其他用户对该文件的权限<br />
+7：rwx(4+2+1)<br />
+5: rx(4+1)<br />
+-R 表示如果是目录及将对应操作应用于每一个子目录及文件  </p>
+
+<p>目录与文件<br />
+目录权限中<br />
+r：列出目录内容<br />
+w: 创建文件<br />
+x: 搜索和访问<br />
+如果一个目录只有执行（x）权限，但目录中有个可执行程序，只要用户知道它的路径仍然可以执行，此时用户不能进入目录但可以执行其中的程序
+目录的权限将会覆盖目录中文件的权限   </p>
+
+<p>chown和chgrp<br />
+当你创建一个文件时，你就是该文件的属主。一旦你拥有某个文件，就可以改变它的所<br />
+有权，把它的所有权交给另外一个/etc/passwd文件中存在的合法用户。可以使用用户名或用<br />
+户ID号来完成这一操作。在改变一个文件的所有权时，相应的suid也将被清除，这是出于安<br />
+全性的考虑。只有文件的属主和系统管理员可以改变文件的所有权。一旦将文件的所有权交<br />
+给另外一个用户，就无法再重新收回它的所有权。如果真的需要这样做，那么就只有求助于<br />
+系统管理员了。<br />
+chown命令的一般形式为：<br />
+chmod -R -h owner file<br />
+-R选项意味着对所有子目录下的文件也都进行同样的操作。-h选项意味着在改变符号链<br />
+接文件的属主时不影响该链接所指向的目标文件。<br />
+chgrp与chown类似  </p>
+
+<p>umask<br />
+umask命令确定创建文件的缺省模式。系统管理员必须要为你设置一个合理的umask值，以确保你创建的<br />
+文件具有所希望的缺省权限，防止其他非同组用户对你的文件具有写权限。
+在已经登录之后，可以按照个人的偏好使用umask命令来改变文件创建的缺省权限。相应<br />
+的改变直到退出该shell或使用另外的umask命令之前一直有效。
+一般来说,umask命令是在/etc/profile文件中设置的，每个用户在登录时都会引用这个文件，所以如果希望改变所有用户的umask，可以在该文件中加入相应的条目。如果希望永久性地设置自己的umask值，那么就把它放在自己$HOME目录下的.profile文件中。  </p>
+
+<p>符号链接<br />
+两种不同类型的链接：软链接（指向文件的指针)/硬链接<br />
+软链接可以理解为windows中的快捷方式 <br />
+该命令的一般形式为： <br />
+ln [-s] source_path target_path <br />
+其中的路径可以是目录也可以是文件。    </p>
+
+
+      <div class="readall"><a href="/blog/2015/01/23/Linux-point1.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/11/30/collaborative-filtering-algorithm.html">协同过滤简解</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年11月30日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
         <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <p>1、下载sqoop压缩包，并解压</p>
+      <h2 id="section">协同过滤算法</h2>
+<p><strong>Collaborative Filtering</strong><br />
+基于一组兴趣相同的用户进行推荐。协同过滤基于这样的假设：为用户找到他真正感兴趣的内容的好方法是，首先找他与他兴趣相似的用户，然后将这些用户感兴趣的内容推荐给此用户</p>
 
-<p>压缩包分别是：sqoop-1.2.0-CDH3B4.tar.gz，hadoop-0.20.2-CDH3B4.tar.gz， Mysql JDBC驱动包mysql-connector-java-5.1.10-bin.jar</p>
+<p>协同过滤技术可以分为三类：<br />
+基于用户（User-based）的协同过滤；<br />
+基于项目（Item-based）的协同过滤；<br />
+基于模型（Model-based）的协同过滤</p>
 
-<pre><code>[root@node1 ~]# ll
-drwxr-xr-x 15 root  root      4096 Feb 22  2011 hadoop-0.20.2-CDH3B4
--rw-r--r--  1 root  root    724225 Sep 15 06:46 mysql-connector-java-5.1.10-bin.jar
-drwxr-xr-x 11 root  root      4096 Feb 22  2011 sqoop-1.2.0-CDH3B4
-</code></pre>
+<p>步骤一，收集可以代表用户兴趣的信息。<br />
+如传统的打分的方式，豆瓣上的“我来评价”之类也是这种方法。这种方式被称为“显式评分”方法。其缺点是，收集数据比较困难，用户通常并不愿意费力气为你贡献这种数据。这导致这种系统通常更多出现在实验室或者论文里面。在实际的商业系统中，即使使用了这种方法，也多会被包装为一种更加有好如游戏方式。<br />
+另外一种被认为更有效的方法是“隐式评分”方法。这种方法不需要用户直接输入评价数据，而是根据用户的行为特征由系统代替用户完成评价。一种研究得比较多的方法是 Web Mining 。电子商务网站在隐式评分的数据获取上有先天的优势，用户购买的商品记录是非常有用的数据。</p>
 
-<p>2、将sqoop-1.2.0-CDH3B4拷贝到/home/hadoop目录下，并将Mysql JDBC驱动包和hadoop-0.20.2-CDH3B4下的hadoop-core-0.20.2-CDH3B4.jar至sqoop-1.2.0-CDH3B4/lib下，最后修改一下属主。</p>
+<p>步骤二，最近邻搜索。<br />
+协同过滤的出发点是与你兴趣相同的一组用户，术语叫做“最近邻”。最近邻搜索的核心是计算两个用户的相似度。例如用户A和用户B，首先需要获取用户A和用户B所有的评分项，然后选择一个合适的相似度计算方法，基于评分项数据，计算得到用户A和用户B的相似度数值。<br />
+目前使用比较多的相似度算法包括，皮尔森相关系数（Person Correlation Coefficient）、余弦相似性（Cosine-based Similarity）以及调整余弦相似性（Adjusted Consine Similarity）</p>
 
-<pre><code>[root@node1 ~]# cp mysql-connector-java-5.1.10-bin.jar sqoop-1.2.0-CDH3B4/lib
-[root@node1 ~]# cp hadoop-0.20.2-CDH3B4/hadoop-core-0.20.2-CDH3B4.jar sqoop-1.2.0-CDH3B4/lib
-[root@node1 ~]# chown -R hadoop:hadoop sqoop-1.2.0-CDH3B4
-[root@node1 ~]# mv sqoop-1.2.0-CDH3B4 /home/hadoop
-[root@node1 ~]# ll /home/hadoop
-total 35748
--rw-rw-r--  1 hadoop hadoop      343 Sep 15 05:13 derby.log
-drwxr-xr-x 13 hadoop hadoop     4096 Sep 14 16:16 hadoop-0.20.2
-drwxr-xr-x  9 hadoop hadoop     4096 Sep 14 20:21 hive-0.10.0
--rw-r--r--  1 hadoop hadoop 36524032 Sep 14 20:20 hive-0.10.0.tar.gz
-drwxr-xr-x  8 hadoop hadoop     4096 Sep 25  2012 jdk1.7
-drwxr-xr-x 12 hadoop hadoop     4096 Sep 15 00:25 mahout-distribution-0.7
-drwxrwxr-x  5 hadoop hadoop     4096 Sep 15 05:13 metastore_db
--rw-rw-r--  1 hadoop hadoop      406 Sep 14 16:02 scp.sh
-drwxr-xr-x 11 hadoop hadoop     4096 Feb 22  2011 sqoop-1.2.0-CDH3B4
-drwxrwxr-x  3 hadoop hadoop     4096 Sep 14 16:17 temp
-drwxrwxr-x  3 hadoop hadoop     4096 Sep 14 15:59 user
-</code></pre>
+<p>步骤三，生成推荐结果。<br />
+有了最近邻集合，就可以对目标用户的兴趣进行预测，生成推荐结果。通常根据推荐目的的不同，可以进行多种形式的推荐。最常见的推荐结果有两种，Top-N 推荐和关联推荐。<br />
+Top-N 推荐，这里的 Top-N 和一般网站（比如 digg）上见到的“最热门”列表是不同的。热门列表是基于全部数据集产生的，它对每个人都是一样的；Top-N 推荐是针对单个用户产生的，它对每个人是不一样的：通过对你的最近邻用户进行统计，选择出现频率最高且在你的评分项目中不存在的项目作为推荐结果。豆瓣上的“排行”栏目，应该是传统的“热门”列表，不是 Top-N 推荐。<br />
+关联推荐，也称为基于关联规则的推荐。与传统关联规则针对全部数据进行挖掘不同的是，此方法仅对最近邻用户的购买记录进行关联规则挖掘。如果你曾经购买过关联规则左边的商品，而没有购买过关联规则右边的商品，那么就把右边的这个商品推荐给你。它最突出的优点就是，可以帮助你发现你感兴趣的而以前却从来没有注意过的商品。在 Amazon 介绍书的详细信息的页面上，可以看到这种推荐的一个实际应用。例如在《The Search》的页面上，Amazon 给我的推荐是，</p>
 
-<p>3、配置configure-sqoop，注释掉对于HBase和ZooKeeper的检查</p>
-
-<pre><code>[root@node1 bin]# pwd
-/home/hadoop/sqoop-1.2.0-CDH3B4/bin
-[root@node1 bin]# vi configure-sqoop 
-
-#!/bin/bash
-#
-# Licensed to Cloudera, Inc. under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-.
-.
-.
-# Check: If we can't find our dependencies, give up here.
-if [ ! -d "${HADOOP_HOME}" ]; then
-  	echo "Error: $HADOOP_HOME does not exist!"
-  	echo 'Please set $HADOOP_HOME to the root of your Hadoop installation.'
-  	exit 1
-fi
-#if [ ! -d "${HBASE_HOME}" ]; then
-#  echo "Error: $HBASE_HOME does not exist!"
-#  echo 'Please set $HBASE_HOME to the root of your HBase installation.'
-#  exit 1
-#fi
-#if [ ! -d "${ZOOKEEPER_HOME}" ]; then
-#  echo "Error: $ZOOKEEPER_HOME does not exist!"
-#  echo 'Please set $ZOOKEEPER_HOME to the root of your ZooKeeper installation.'
-#  exit 1
-#fi
-</code></pre>
-
-<p>4、修改/etc/profile和.bash_profile文件，添加Hadoop_Home,调整PATH
-	[hadoop@node1 ~]$ vi .bash_profile </p>
-
-<pre><code># .bash_profile
-
-# Get the aliases and functions
-if [ -f ~/.bashrc ]; then
-        . ~/.bashrc
-fi
-
-# User specific environment and startup programs
-
-HADOOP_HOME=/home/hadoop/hadoop-0.20.2
-PATH=$HADOOP_HOME/bin:$PATH:$HOME/bin
-export HIVE_HOME=/home/hadoop/hive-0.10.0
-export MAHOUT_HOME=/home/hadoop/mahout-distribution-0.7
-export PATH HADOOP_HOME
-</code></pre>
-
-<p>三、测试Sqoop</p>
-
-<ol>
-  <li>
-    <p>查看mysql中的数据库：</p>
-
-    <pre><code> [hadoop@node1 bin]$ ./sqoop list-databases --connect jdbc:mysql://192.168.1.152:3306/ --username sqoop --password sqoop
-</code></pre>
-  </li>
-  <li>
-    <p>将mysql的表导入到hive中：</p>
-
-    <pre><code> [hadoop@node1 bin]$ ./sqoop import --connect jdbc:mysql://192.168.1.152:3306/sqoop --username sqoop --password sqoop --table test --hive-import -m 1
-</code></pre>
-  </li>
-</ol>
-
-      <div class="readall"><a href="/blog/2014/09/27/sqoop.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/11/30/collaborative-filtering-algorithm.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>
@@ -430,302 +405,63 @@ export PATH HADOOP_HOME
 <div class="posts">
   <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/sql-frist-day.html">sql frist day</a></h1>
+      <h1 class="post-title"><a href="/blog/2014/11/30/clustering-algorithm.html">聚类以及增量聚类的简单理解</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
-        2014年09月27日
+        2014年11月30日
         <i class="space"></i>
         <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#db">db</a>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
       </p>
     </header>
     <div class="post-main">
-      <p>计算周月的第一天， 以星期天为一周的开始</p>
+      <h2 id="section">聚类以及增量聚类的简单理解</h2>
+<p>K-Means聚类基本步骤如下：   </p>
 
-<pre><code>	SELECT LAST_DAY('2013-2-1');
-	SELECT concat(date_format(LAST_DAY('2013-02-01'),'%Y-%m-'),'01');
-	select DATE_SUB('2014-03-08',INTERVAL (WEEKDAY('2014-03-08')+1)%7 DAY);
-	select DATE_SUB('2014-03-08',INTERVAL ((WEEKDAY('2014-03-08')+1)%7)-6 DAY);
+<pre><code>Step1: 确定K值以及初始化聚类中心，选取K个初始凝聚点，做为欲形成的中心（最简单的方法就是K的值自己确定，但必须小于数据集个数，然后从数据集中选取K个数据做为初始聚类中心）；  
+Step2: 计算每个数据到K个初始凝聚点的距离，将每个数据和最近的凝聚点分到一组，形成K个初始分类；  
+Step3: 计算初始分类的重心（或均值），做为新的凝聚点，重新计算每个数据到分类重心（或均值）的距离，将每个数据和最近的凝聚点分为一组；
+Step4: 重复进行Step2和Step3，直到分类的重心或均值没有明显变化为止。
 </code></pre>
 
-      <div class="readall"><a href="/blog/2014/09/27/sql-frist-day.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
+<p>Canopy算法流程  </p>
 
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/mysql-session.html">mysql 性能session</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#db">db</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>mysql</p>
-
-<p>主从：</p>
-
-<p>外围app只能从主数据库中写入数据，从从数据库中读取数据，从而减小数据压力</p>
-
-<ol>
-  <li>
-    <p>要实现主从数据库之间的同步复制，需要用户授权，使得从数据库可以登录主数据库并拷贝数据
-grant all “.” to rob@172.20.29.29 identified by “123”</p>
-  </li>
-  <li>
-    <p>bin_log 日志(保存数据库的增删改数据操作，用作数据恢复)</p>
-
-    <p>A:binlog日志打开方法</p>
-
-    <pre><code> 在my.cnf这个文件中加一行（Windows为my.ini）。
-
-     #vi /etc/my.cnf
- [mysqld]
- log-bin=mysqlbin-log #添加这一行就ok了=号后面的名字自己定义吧
- 然后我们可以对数据库做简单的操作后到mysql数据文件所在的目录来看binlog文件。
+<pre><code>      （1）、将数据集向量化得到一个list后放入内存，选择两个距离阈值：T1和T2，其中T1 &gt; T2，对应上图，实线圈为T1，虚线圈为T2，T1和T2的值可以用交叉校验来确定；  
+      （2）、从list中任取一点P，用低计算成本方法快速计算点P与所有Canopy之间的距离（如果当前不存在Canopy，则把点P作为一个Canopy），如果点P与某个Canopy距离在T1以内，则将点P加入到这个Canopy；  
+      （3）、如果点P曾经与某个Canopy的距离在T2以内，则需要把点P从list中删除，这一步是认为点P此时与这个Canopy已经够近了，因此它不可以再做其它Canopy的中心了；  
+      （4）、重复步骤2、3，直到list为空结束。
 </code></pre>
 
-    <p>B:关于bin-log日志的相关命令：</p>
+<p>单机版Canopy算法：  </p>
 
-    <pre><code> 查看当前bin_log情况 show BINARY logs
- 查看当前bin_log情况 show master logs
- 查看log_bin相关配置 show variables like ‘%log_bin%’
- 切换bin_log日志（生成一个新的日志文件） flush logs
- 删除mysqlbin.000002之前的bin_log，并修改index中相关数据 PURGE BINARY LOGS TO ‘mysqlbin.000002′
- 删除2011-07-09 12:40:26之前的bin_log，并修改index中相关数据 PURGE BINARY LOGS BEFORE ’2011-07-09 12:40:26′
- 删除2011-07-09之前的bin_log，并修改index中相关数据 PURGE BINARY LOGS BEFORE ’2011-07-09′
- 设置bin_log过期日期 set global expire_logs_days=5;
- 重设bin_log日志，以前的所有日志将被删除并且重设index中的数据 reset master;
+<pre><code>      1、从PointList中取一个Point ，寻找已经建立好的Canopy 计算这个点于所有的Canopy的距离。如果和某一个Canopy的距离小于T1，则把这个点加到Canopy中，如果没有Canopy则选择这个点为一个Canopy的中心。  
+      2、如果这个店Point和某个Canopy的距离小于T2,则把这个点从PointList中删除（这个点以后做不了其他的Canopy的中心了）。  
+      3、循环直到所有的Point都被加入进来，然后计算各个Canopy的Center和Radius。
 </code></pre>
 
-    <p>C:利用bin-log日志恢复数据：</p>
+<p>MapReduce：</p>
 
-    <pre><code> mysqlbinlog --no-defaults --start-position="102" --stop-position="201" mysql_bin.000001 |mysql -uroot -p123456
- 亦可导出为sql文件，再导入至数据库中：
- mysqlbinlog --no-defaults --start-date="2012-10-15 16:30:00" --stop-date="2012-10-15 17:00:00" mysql_bin.000001 &gt;d:\1.sql
-</code></pre>
-  </li>
-  <li>
-    <p>mysql 数据备份
- mysqldump -uroot -p123456 test -l -F &gt; “/tmp/test.sql”
- 备份数据库两个主要方法是用 mysqldump 程序或直接拷贝数据库文件（如用 cp、cpio 或 tar 等）。每种方法都有其优缺点：</p>
-  </li>
-</ol>
-
-<p>mysqldump 与 MySQL 服务器协同操作。直接拷贝方法在服务器外部进行，并且你必须采取措施保证没有客户正在修改你将拷贝的表。</p>
-
-<p>如果你想用文件系统备份来备份数据库，也会发生同样的问题：如果数据库表在文件系统备份过程中被修改，
-进入备份的表文件主语不一致的状态，而对以后的恢复表将失去意义。文件系统备份与直接拷贝文件的区别是对后者你完全控制了
-备份过程，这样你能采取措施确保服务器让表不受干扰。
-mysqldump 比直接拷贝要慢些。
-mysqldump 生成能够移植到其它机器的文本文件，甚至那些有不同硬件结构的机器上。直接拷贝文件不能移植到其它机器上，
-除非你正在拷贝的表使用 MyISAM 存储格式。ISAM 表只能在相似的硬件结构的机器上拷贝。在 MySQL 3.23 中引入的 MyISAM 表
-存储格式解决了该问题，因为该格式是机器无关的，所以直接拷贝文件可以移植到具有不同硬件结构的机器上。只要满足两个条件
-：另一台机器必须也运行 MySQL 3.23 或以后版本，而且文件必须以 MyISAM 格式表示，而不是 ISAM 格式。</p>
-
-<p>1 使用 mysqldump 备份和拷贝数据库</p>
-
-<pre><code>当你使用 mysqldumo 程序产生数据库备份文件时，缺省地，文件内容包含创建正在倾倒的表的
-CREATE 语句和包含表中行数据的 INSERT 语句。换句话说，mysqldump 产生的输出可在以后用
-作 mysql 的输入来重建数据库。
-你可以将整个数据库倾倒进一个单独的文本文件中，如下：
-%mysqldump samp_db &gt;/usr/archives/mysql/samp_db.1999-10-02
+<pre><code>  1、把数据整理成SequcnceFile格式（Mahout-InputMapper）作为初始化文件PointFile  
+  2、CanopyMapper阶段本机聚成小的Canopy 中间文件写成SequenceFile 这一步的T1、T2 和Reduce的T1、T2可以是不同的（ index、Canpy）  
+  3、所有的Mapper阶段的输出到1个Reducer中 然后Reduce把Map阶段中的Center点再次做聚类算法。聚出全局的Canopy。同时计算每个Canopy的CenterPoint点。写到临时文件CenterPoint中。  
+  4、针对全集合PointFile在CenterPoint上的findClosestCanopy操作（通过传入的距离算法）。然后输出一个SequenceFile。     
 </code></pre>
 
-<ol>
-  <li>
-    <p>主从复制的配置</p>
+<p>基于距离-增量聚类的实现方式</p>
 
-    <pre><code> A:保证所有主从的server id 唯一
- B:主服务器只需要保证开启bin-log，并且配置server id
- C:从服务器需要配置：bin-log,server id, master-host,master-user,master-password,master-port
-</code></pre>
-  </li>
-  <li>
-    <p>分表， 分区</p>
+<pre><code>1.
+每增加一个数据，立即(或延迟)计算它与其他对象之间
+的相异度度量值，并将其插入到R2中；检查计算出相异度
+度量值，当d(id，j)&lt;δ时，如果id在R3中存在，则elements= 
+elements+1；否则在R3中插入一个新记录(id，1)。  
 
-    <pre><code> RANGE 分区：基于属于一个给定连续区间的列值，把多行分配给分区。
- LIST 分 区：类似于按RANGE分区，区别在于LIST分区是基于列值匹配一个离散值集合中的某个值来进行选择。
- HASH分区：基于用户定义的表达式的返 回值来进行选择的分区，该表达式使用将要插入到表中的这些行的列值进行计算。这个函数可以包含MySQL 中 有效的、产生非负整数值的任何表达式。
- KEY 分 区：类似于按HASH分区，区别在于KEY分区只支持计算一列或多列，且MySQL 服务器 提供其自身的哈希函数。必须有一列或多列包含整数值。
- CREATE TABLE employees (
- id INT NOT NULL,
- fname VARCHAR(30),
- lname VARCHAR(30),
- hired DATE NOT NULL DEFAULT '1970-01-01',
- separated DATE NOT NULL DEFAULT '9999-12-31',
- job_code INT NOT NULL,
- store_id INT NOT NULL
- )
- PARTITION BY RANGE (store_id) (
- PARTITION p0 VALUES LESS THAN (6),
- PARTITION p1 VALUES LESS THAN (11),
- PARTITION p2 VALUES LESS THAN (16),
- PARTITION p3 VALUES LESS THAN (21)
- )；
- CREATE TABLE employees (
- id INT NOT NULL,
- fname VARCHAR(30),
- lname VARCHAR(30),
- hired DATE NOT NULL DEFAULT '1970-01-01',
- separated DATE NOT NULL DEFAULT '9999-12-31',
- job_code INT,
- store_id INT
- )
- PARTITION BY LIST(store_id)
- PARTITION pNorth VALUES IN (3,5,6,9,17),
- PARTITION pEast VALUES IN (1,2,10,11,19,20),
- PARTITION pWest VALUES IN (4,12,13,14,18),
- PARTITION pCentral VALUES IN (7,8,15,16)
- )；
- CREATE TABLE employees (
- id INT NOT NULL,
- fname VARCHAR(30),
- lname VARCHAR(30),
- hired DATE NOT NULL DEFAULT '1970-01-01',
- separated DATE NOT NULL DEFAULT '9999-12-31',
- job_code INT,
- store_id INT
- )
- PARTITION BY HASH(store_id)
- PARTITIONS 4；
-</code></pre>
-  </li>
-  <li>
-    <p>sql 优化</p>
-
-    <pre><code> A：查看slow log
- B: 判断是否需要index
-	
- 优化目标
- 减少 IO 次数
- IO永远是数据库最容易瓶颈的地方，这是由数据库的职责所决定的，大部分数据库操作中超过90%的时间都是 IO 操作所占用的，
- 减少 IO 次数是 SQL 优化中需要第一优先考虑，当然，也是收效最明显的优化手段。
- 降低 CPU 计算
- 除了 IO 瓶颈之外，SQL优化中需要考虑的就是 CPU 运算量的优化了。order by, group by,distinct …
- 都是消耗 CPU 的大户（这些操作基本上都是 CPU 处理内存中的数据比较运算）。当我们的 IO 优化做到一定阶段之后，
- 降低 CPU 计算也就成为了我们 SQL 优化的重要目标
-	
- 优化方法
- 改变 SQL 执行计划
- 明确了优化目标之后，我们需要确定达到我们目标的方法。对于 SQL 语句来说，达到上述2个目标的方法其实只有一个，
- 那就是改变 SQL 的执行计划，让他尽量“少走弯路”，尽量通过各种“捷径”来找到我们需要的数据，
- 以达到 “减少 IO 次数” 和 “降低 CPU 计算” 的目标
-</code></pre>
-  </li>
-</ol>
-
-<p>常见误区</p>
-
-<pre><code>count(1)和count(primary_key) 优于 count(*)
-很多人为了统计记录条数，就使用 count(1) 和 count
-(primary_key) 而不是 count(*) ，他们认为这样性能更好，
-其实这是一个误区。对于有些场景，这样做可能性能会更差，应为数据库对 count(*) 计数操作做了一些特别的优化。
-count(column) 和 count(*) 是一样的
-这个误区甚至在很多的资深工程师或者是 DBA 中都普遍存在，很多人都会认为这是理所当然的。
-实际上，count(column) 和 count(*) 是一个完全不一样的操作，所代表的意义也完全不一样。
-count(column) 是表示结果集中有多少个column字段不为空的记录
-count(*) 是表示整个结果集有多少条记录
-select a,b from … 比 select a,b,c from … 可以让数据库访问更少的数据量
-这个误区主要存在于大量的开发人员中，主要原因是对数据库的存储原理不是太了解。
-实际上，大多数关系型数据库都是按照行（row）的方式存储，而数据存取操作都是以一个固定大小的IO单元
-（被称作 block 或者 page）为单位，一般为4KB，8KB… 大多数时候，每个IO单元中存储了多行，
-每行都是存储了该行的所有字段（lob等特殊类型字段除外）。
-所以，我们是取一个字段还是多个字段，实际上数据库在表中需要访问的数据量其实是一样的。
-当然，也有例外情况，那就是我们的这个查询在索引中就可以完成，也就是说当只取 a,b两个字段的时候，
-不需要回表，而c这个字段不在使用的索引中，需要回表取得其数据。在这样的情况下，二者的IO量会有较大差异。
-order by 一定需要排序操作
-我们知道索引数据实际上是有序的，如果我们的需要的数据和某个索引的顺序一致，而且我们的查询又通过这个索引来执行，
-那么数据库一般会省略排序操作，而直接将数据返回，因为数据库知道数据已经满足我们的排序需求了。
-实际上，利用索引来优化有排序需求的 SQL，是一个非常重要的优化手段
-延伸阅读：MySQL ORDER BY 的实现分析 ，MySQL 中 GROUP BY 基本实现原理 以及 MySQL DISTINCT 的基本实现原理
-执行计划中有 filesort 就会进行磁盘文件排序
-有这个误区其实并不能怪我们，而是因为 MySQL 开发者在用词方面的问题。
-filesort 是我们在使用 explain 命令查看一条 SQL 的执行计划的时候可能会看到在 “Extra” 一列显示的信息。
-实际上，只要一条 SQL 语句需要进行排序操作，都会显示“Using filesort”，这并不表示就会有文件排序操作。
-延伸阅读：理解 MySQL Explain 命令输出中的filesort，我在这里有更为详细的介绍
+2.
+数据的增加部分可以简单的加到原有聚类结果中,具体情况可以分两种: 
+(1)增加记录在原有聚类结果的某一类范围内(n维空间),这样这条记录的加入增加了这类的数据密度,因此可以直接把这条记录加入这一类当中. 
+(2)增加记录不在原来聚类结果的任何一类范围内,也就是相当于n维空间上的一个孤立的点,这种情况可暂把这条数据记录单独看成一类. 
 </code></pre>
 
-<p>基本原则</p>
-
-<p>尽量少 join</p>
-
-<p>MySQL 的优势在于简单，但这在某些方面其实也是其劣势。MySQL 优化器效率高，但是由于其统计信息的量有限，
-优化器工作过程出现偏差的可能性也就更多。对于复杂的多表 Join，一方面由于其优化器受限，
-再者在 Join 这方面所下的功夫还不够，所以性能表现离 Oracle 等关系型数据库前辈还是有一定距离。
-但如果是简单的单表查询，这一差距就会极小甚至在有些场景下要优于这些数据库前辈。</p>
-
-<p>尽量少排序</p>
-
-<p>排序操作会消耗较多的 CPU 资源，所以减少排序可以在缓存命中率高等 IO 能力足够的场景下会较大影响 SQL 的响应时间。
-对于MySQL来说，减少排序有多种办法，比如：
-上面误区中提到的通过利用索引来排序的方式进行优化
-减少参与排序的记录条数
-非必要不对数据进行排序
-…</p>
-
-<p>尽量避免 select *</p>
-
-<p>很多人看到这一点后觉得比较难理解，上面不是在误区中刚刚说 select 子句中字段的多少并不会影响到读取的数据吗？
-是的，大多数时候并不会影响到 IO 量，但是当我们还存在 order by 操作的时候，
-select 子句中的字段多少会在很大程度上影响到我们的排序效率，这一点可以通过我之前一篇介绍 MySQL ORDER BY
-的实现分析 的文章中有较为详细的介绍。
-此外，上面误区中不是也说了，只是大多数时候是不会影响到 IO 量，当我们的查询结果仅仅只需要在索引中就能找到的时候，
-还是会极大减少 IO 量的。</p>
-
-<p>尽量用 join 代替子查询</p>
-
-<p>虽然 Join 性能并不佳，但是和 MySQL 的子查询比起来还是有非常大的性能优势。
-MySQL 的子查询执行计划一直存在较大的问题，虽然这个问题已经存在多年，
-但是到目前已经发布的所有稳定版本中都普遍存在，一直没有太大改善。虽然官方也在很早就承认这一问题，
-并且承诺尽快解决，但是至少到目前为止我们还没有看到哪一个版本较好的解决了这一问题。</p>
-
-<p>尽量少 or</p>
-
-<p>当 where 子句中存在多个条件以“或”并存的时候，MySQL 的优化器并没有很好的解决其执行计划优化问题，
-再加上 MySQL 特有的 SQL 与 Storage 分层架构方式，造成了其性能比较低下，很多时候使用 union all
-或者是union（必要的时候）的方式来代替“or”会得到更好的效果。
-尽量用 union all 代替 union
-union 和 union all 的差异主要是前者需要将两个（或者多个）结果集合并后再进行唯一性过滤操作，
-这就会涉及到排序，增加大量的 CPU 运算，加大资源消耗及延迟。所以当我们可以确认不可能出现重复结果集或者
-不在乎重复结果集的时候，尽量使用 union all 而不是 union。</p>
-
-<p>尽量早过滤</p>
-
-<p>这一优化策略其实最常见于索引的优化设计中（将过滤性更好的字段放得更靠前）。
-在 SQL 编写中同样可以使用这一原则来优化一些 Join 的 SQL。比如我们在多个表进行分页数据查询的时候，
-我们最好是能够在一个表上先过滤好数据分好页，然后再用分好页的结果集与另外的表 Join，
-这样可以尽可能多的减少不必要的 IO 操作，大大节省 IO 操作所消耗的时间。</p>
-
-<p>避免类型转换</p>
-
-<p>这里所说的“类型转换”是指 where 子句中出现 column 字段的类型和传入的参数类型不一致的时候发生的类型转换：</p>
-
-<p>人为在column_name 上通过转换函数进行转换
-直接导致 MySQL（实际上其他数据库也会有同样的问题）无法使用索引，如果非要转换，应该在传入的参数上进行转换
-由数据库自己进行转换
-如果我们传入的数据类型和字段类型不一致，同时我们又没有做任何类型转换处理，MySQL
-可能会自己对我们的数据进行类型转换操作，也可能不进行处理而交由存储引擎去处理，这样一来，
-就会出现索引无法使用的情况而造成执行计划问题。
-优先优化高并发的 SQL，而不是执行频率低某些“大”SQL
-对于破坏性来说，高并发的 SQL 总是会比低频率的来得大，因为高并发的 SQL 一旦出现问题，
-甚至不会给我们任何喘息的机会就会将系统压跨。而对于一些虽然需要消耗大量 IO 而且响应很慢的 SQL，
-由于频率低，即使遇到，最多就是让整个系统响应慢一点，但至少可能撑一会儿，让我们有缓冲的机会。
-从全局出发优化，而不是片面调整
-SQL 优化不能是单独针对某一个进行，而应充分考虑系统中所有的 SQL，尤其是在通过调整索引优化 SQL
-的执行计划的时候，千万不能顾此失彼，因小失大。
-尽可能对每一条运行在数据库中的SQL进行 explain</p>
-
-<p>优化 SQL，需要做到心中有数，知道 SQL 的执行计划才能判断是否有优化余地，才能判断是否存在执行计划问题。
-在对数据库中运行的 SQL 进行了一段时间的优化之后，很明显的问题 SQL 可能已经很少了，大多都需要去发掘，
-这时候就需要进行大量的 explain 操作收集执行计划，并判断是否需要进行优化。</p>
-
-      <div class="readall"><a href="/blog/2014/09/27/mysql-session.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+      <div class="readall"><a href="/blog/2014/11/30/clustering-algorithm.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

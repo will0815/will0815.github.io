@@ -1,0 +1,318 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="C4.5+聚类+SVM+关联+EM+PageRank+迭代+kNN+NB+分类笔记, willgo, Will.Quan">
+  <title>C4.5+聚类+SVM+关联+EM+PageRank+迭代+kNN+NB+分类笔记 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2015/09/20/10-suanfa-biji.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+
+    <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2015/09/20/10-suanfa-biji.html">C4.5+聚类+SVM+关联+EM+PageRank+迭代+kNN+NB+分类笔记</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2015年09月20日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
+  </p>
+</header>
+<div class="post-main">
+<ol>
+  <li>
+    <p>C4.5算法<br />
+C4.5是做什么  <br />
+C4.5 以决策树的形式构建了一个分类器。<br />
+什么是分类器  <br />
+分类器是进行数据挖掘的一个工具，它处理大量需要进行分类的数据，并尝试预测新数据所属的类别。
+ru:假定一个包含很多病人信息的数据集。我们知道每个病人的各种信息，比如年龄、脉搏、血压、最大摄氧量、家族病史等。这些叫做数据属性。<br />
+现在：  <br />
+给定这些属性，我们想预测下病人是否会患癌症。病人可能会进入下面两个分类：会患癌症或者不会患癌症。算法负责告诉我们每个病人的分类。<br />
+做法：<br />
+用一个病人的数据属性集和对应病人的反馈类型，C4.5构建了一个基于新病人属性预测他们类型的决策树。<br />
+什么是决策树呢？  <br />
+决策树学习是创建一种类似与流程图的东西对新数据进行分类。  <br />
+基本原则：<br />
+流程图的每个环节都是一个关于属性值的问题，并根据这些数值，病人就被分类了。你可以找到很多决策树的例子。<br />
+这属于监督学习算法，因为训练数据是已经分好类的。使用分好类的病人数据，C4.5算法不需要自己学习病人是否会患癌症。  <br />
+C4.5算法和决策树系统区别  <br />
+首先，C4.5算法在生成信息树的时候使用了信息增益。  <br />
+其次，尽管其他系统也包含剪枝，C4.5使用了一个单向的剪枝过程来缓解过渡拟合。剪枝给结果带来了很多改进。 再次，C4.5算法既可以处理连续数据也可以处理离散数据。最后，不完全的数据用算法自有的方式进行了处理。  <br />
+决策树最好的卖点是他们方便于翻译和解释。他们速度也很快，是种比较流行的算法。输出的结果简单易懂。  </p>
+  </li>
+  <li>
+    <p>k 均值聚类算法<br />
+K-聚类算法从一个目标集中创建多个组，每个组的成员都是比较相似的。这是个想要探索一个数据集时比较流行的聚类分析技术。<br />
+什么是聚类分析<br />
+聚类分析属于设计构建组群的算法，这里的组成员相对于非组成员有更多的相似性。在聚类分析的世界里，类和组是相同的意思。<br />
+如：假设我们定义一个病人的数据集。在聚类分析里，这些病人可以叫做观察对象。我们知道每个病人的各类信息，比如年龄、血压、血型、最大含氧量和胆固醇含量等。这是一个表达病人特性的向量。<br />
+基本认为一个向量代表了我们所知道的病人情况的一列数据。这列数据也可以理解为多维空间的坐标。脉搏是一维坐标，血型是其他维度的坐标等等。  <br />
+Kmeans算法更深层次的这样处理问题： <br />
+1.k-means 算法在多维空间中挑选一些点代表每一个 k 类。他们叫做中心点。<br />
+2.每个病人会在这 k 个中心点中找到离自己最近的一个。我们希望病人最靠近的点不要是同一个中心点，所以他们在靠近他们最近的中心点周围形成一个类。<br />
+3.我们现在有 k 个类，并且现在每个病人都是一个类中的一员。 <br />
+4.之后k-means 算法根据它的类成员找到每个 k 聚类的中心<br />
+5.这个中心成为类新的中心点。<br />
+6.因为现在中心点在不同的位置上了，病人可能现在靠近了其他的中心点。换句话说，他们可能会修改自己的类成员身份。  <br />
+7.重复2-6步直到中心点不再改变，这样类成员也就稳定了。这也叫做收敛性。  <br />
+k-means 可以认为是非监督学习的类型。并不是指定分类的个数，也没有观察对象该属于那个类的任何信息   <br />
+k-means 关键卖点是它的简单。它的简易型意味着它通常要比其他的算法更快更有效，尤其是要大量数据集的情况下更是如此。 <br />
+改进：<br />
+k-means 可以对已经大量数据集进行预先聚类处理，然后在针对每个子类做成本更高点的聚类分析。k-means 也能用来快速的处理“K”和探索数据集中是否有被忽视的模式或关系。  <br />
+k means算法的两个关键弱点分别是它对异常值的敏感性和它对初始中心点选择的敏感性。</p>
+  </li>
+  <li>
+    <p>支持向量机<br />
+支持向量机（SVM）获取一个超平面将数据分成两类。除了不会使用决策树以外，SVM与 C4.5算法是执行相似的任务的。  <br />
+超平面（hyperplane）是个函数，类似于解析一条线的方程。实际上，对于只有两个属性的简单分类任务来说，超平面可以是一条线的。 <br />
+其实事实证明：
+SVM 可以使用一个小技巧，把你的数据提升到更高的维度去处理。一旦提升到更高的维度中，SVM算法会计算出把你的数据分离成两类的最好的超平面。  <br />
+简单的例子。我发现桌子上开始就有一堆红球和蓝球，如果这这些球没有过分的混合在一起，不用移动这些球，你可以拿一根棍子把它们分离开。
+当在桌上加一个新球时，通过已经知道的棍字的哪一边是哪个颜色的球，你就可以预测这个新球的颜色了。 <br />
+SVM 算法可以算出这个超平面的方程。
+如果事情变得更复杂该怎么办？当然了，事情通常都很复杂。如果球是混合在一起的，一根直棍就不能解决问题了。 <br />
+通过使用核函数（kernel），我们在高维空间也有很棒的操作方法。这张大纸依然叫做超平面，但是现在它对应的方程是描述一个平面而不是一条线了。<br />
+那么在桌上或者空中的球怎么用现实的数据解释呢？桌上的每个球都有自己的位置，我们可以用坐标来表示。打个比方，一个球可能是距离桌子左边缘20cm 距离底部边缘 50 cm，另一种描述这个球的方式是使用坐标(x,y)或者(20,50)表达。x和 y 是代表球的两个维度。<br />
+可以这样理解：如果我们有个病人的数据集，每个病人可以用很多指标来描述，比如脉搏，胆固醇水平，血压等。每个指标都代表一个维度。<br />
+基本上，SVM 把数据映射到一个更高维的空间然后找到一个能分类的超平面。 <br />
+类间间隔(margin)经常会和 SVM 联系起来，类间间隔是什么呢？它是超平面和各自类中离超平面最近的数据点间的距离。在球和桌面的例子中，棍子和最近的红球和蓝球间的距离就是类间间隔(margin)。 <br />
+SVM 的关键在于，它试图最大化这个类间间隔，使分类的超平面远离红球和蓝球。这样就能降低误分类的可能性。 <br />
+SVM 属于监督学习。因为开始需要使用一个数据集让 SVM学习这些数据中的类型。只有这样之后 SVM 才有能力对新数据进行分类。  </p>
+  </li>
+  <li>
+    <p>Apriori 关联算法<br />
+Apriori算法学习数据的关联规则(association rules)，适用于包含大量事务（transcation）的数据库。<br />
+什么是关联规则<br />
+关联规则学习是学习数据库中不同变量中的相互关系的一种数据挖掘技术。
+举个 Apriori 算法的例子：我们假设有一个充满超市交易数据的数据库，你可以把数据库想象成一个巨大的电子数据表，表里每一行是一个顾客的交易情况，每一列代表不用的货物项。<br />
+通过使用 Apriori 算法，我们就知道了同时被购买的货物项，这也叫做关联规则。它的强大之处在于，你能发现相比较其他货物来说，有一些货物更频繁的被同时购买—终极目的是让购物者买更多的东西。这些常被一起购买的货物项被称为项集（itemset）。 <br />
+如：“薯条+蘸酱”和“薯条+苏打水”的组合频繁的一起出现。这些组合被称为2-itemsets。在一个足够大的数据集中，就会很难“看到”这些关系了，尤其当还要处理3-itemset 或者更多项集的时候。这正是 Apriori 可以帮忙的地方！<br />
+基本的 Apriori 算法有三步：
+1.参与，扫描一遍整个数据库，计算1-itemsets 出现的频率。<br />
+2.剪枝，满足支持度和可信度的这些1-itemsets移动到下一轮流程，再寻找出现的2-itemsets。<br />
+3.重复，对于每种水平的项集 一直重复计算，知道我们之前定义的项集大小为止。 <br />
+Apriori 一般被认为是一种非监督的学习方法，因为它经常用来挖掘和发现有趣的模式和关系。  </p>
+  </li>
+  <li>
+    <p>EM 最大期望算法 Expectation Maximization<br />
+在数据挖掘领域，最大期望算法（Expectation-Maximization,EM） 一般作为聚类算法（类似 kmeans 算法）用来知识挖掘。<br />
+在统计学上，当估运算带有无法观测隐藏变量的统计模型参数时,EM 算法不断迭代和优化可以观测数据的似然估计值。 <br />
+统计模型？我把模型看做是描述观测数据是如何生成的。例如，一场考试的分数可能符合一种钟形曲线，因此这种分数分布符合钟形曲线（也称正态分布）的假设就是模型。<br />
+什么是分布？分布代表了对所有可测量结果的可能性。例如，一场考试的分数可能符合一个正态分布。这个正态分布代表了分数的所有可能性。换句话说，给定一个分数，你可以用这个分布来预计多少考试参与者可能会得到这个分数。<br />
+那么，你描述正态分布需要的所有东西就是这两个参数：<br />
+1.平均值<br />
+2.方差 <br />
+什么是似然性：<br />
+回到我们之前的钟形曲线例子，假设我们已经拿到很多的分数数据，并被告知分数符合一个钟形曲线。然而，我们并没有给到所有的分数，只是拿到了一个样本。
+可以这样做：<br />
+我们不知道所有分数的平均值或者方差，但是我们可以使用样本计算它们。似然性就是用估计的方差和平均值得到的钟形曲线在算出很多分数的概率。<br />
+换句话说，给定一系列可测定的结果，让我们来估算参数。再使用这些估算出的参数，得到结果的这个假设概率就被称为似然性。<br />
+算法的优势是：对于数据挖掘和聚类，观察到遗失的数据的这类数据点对我们来说很重要。我们不知道具体的类，因此这样处理丢失数据对使用 EM 算法做聚类的任务来说是很关键的。
+算法的精髓在于：<br />
+通过优化似然性，EM 生成了一个很棒的模型，这个模型可以对数据点指定类型标签—听起来像是聚类算法！ <br />
+EM 算法是怎么帮助实现聚类的呢？EM 算法以对模型参数的猜测开始。然后接下来它会进行一个循环的3步：   <br />
+1.E 过程：基于模型参数，它会针对每个数据点计算对聚类的分配概率。<br />
+2.M 过程：基于 E 过程的聚类分配，更新模型参数。<br />
+3.重复知道模型参数和聚类分配工作稳定（也可以称为收敛）。 <br />
+EM 是非监督学习算法。
+EM 算法的一个关键卖点就是它的实现直接。它不但可以优化模型参数，还可以反复的对丢失数据进行猜测。  <br />
+这使算法在聚类和产生带参数的模型上都表现出色。在得知聚类情况和模型参数的情况下，我们有可能解释清楚有相同属性的分类情况和新数据属于哪个类之中。 <br />
+EM算法弱点… <br />
+第一，EM 算法在早期迭代中都运行速度很快，但是越后面的迭代速度越慢。<br />
+第二，EM 算法并不能总是寻到最优参数，很容易陷入局部最优而不是找到全局最优解。   </p>
+  </li>
+  <li>
+    <p>PageRank算法
+PageRank是为了决定一些对象和同网络中的其他对象之间的相对重要程度而设计的连接分析算法(link analysis algorithm)。   <br />
+什么是连接分析算法？<br />
+它是一类针对网络的分析算法，探寻对象间的关系（也可成为连接）。<br />
+举个例子：最流行的 PageRank 算法是 Google 的搜索引擎。尽管他们的搜索引擎不止是依靠它，但  PageRank依然是 Google 用来测算网页重要度的手段之一。 <br />
+万维网上的网页都是互相链接的。如果 Rayli.net 链接到了 CNN 上的一个网页，CNN 网页就增加一个投票，表示 rayli.net 和 CNN 网页是关联的。 <br />
+反过来，来自rayli.net 网页的投票重要性也要根据 rayli.net 网的重要性和关联性来权衡。换句话说，任何给 rayli.net 投票的网页也能提升 rayli.net 网页的关联性。 <br />
+概括一下： <br />
+投票和关联性就是 PageRank 的概念。rayli.net 给CNN 投票增加了 CNN 的 Pagerank，rayli.net 的 PageRank级别同时也影响着它为 CNN 投票多大程度影响了CNN 的 PageRank。<br />
+这排名有点像一个网页流行度的竞争。我们的头脑中都有了一些这些网站的流行度和关联度的信息。
+PageRank只是一个特别讲究的方式来定义了这些而已。 <br />
+PageRank还有什么其他应用呢？ PageRank是专门为了万维网设计的。 <br />
+可以考虑一下，以核心功能的角度看，PageRank算法真的只是一个处理链接分析极度有效率的方法。处理的被链接的对象不止只是针对网页。  <br />
+给出PageRank 的三个实现：<br />
+1 C++ OpenSource PageRank Implementation<br />
+2 Python PageRank Implementation<br />
+3 igraph – The network analysis package (R)  </p>
+  </li>
+  <li>
+    <p>AdaBoost 迭代算法
+AdaBoost 是个构建分类器的提升算法。 <br />
+分类器拿走大量数据，并试图预测或者分类新数据元素的属于的类别。
+提升(boost) 指的什么？提升是个处理多个学习算法（比如决策树）并将他们合并联合起来的综合的学习算法。目的是将弱学习算法综合或形成一个组，把他们联合起来创造一个新的强学习器。 <br />
+强弱学习器之间有什么区别呢？弱学习分类器的准确性仅仅比猜测高一点。一个比较流行的弱分类器的例子就是只有一层的决策树。 <br />
+另一个，强学习分类器有更高的准确率，一个通用的强学习器的例子就是 SVM。 <br />
+举个 AdaBoost 算法的例子：我们开始有3个弱学习器，我们将在一个包含病人数据的数据训练集上对他们做10轮训练。数据集里包含了病人的医疗记录各个细节。 <br />
+问题来了，那我们怎么预测某个病人是否会得癌症呢？AdaBoost 是这样给出答案的： <br />
+第一轮，AdaBoost 拿走一些训练数据，然后测试每个学习器的准确率。最后的结果就是我们找到最好的那个学习器。另外，误分类的样本学习器给予一个比较高的权重，这样他们在下轮就有很高的概率被选中了。  <br />
+再补充一下，最好的那个学习器也要给根据它的准确率赋予一个权重，并将它加入到联合学习器中（这样现在就只有一个分类器了） <br />
+第二轮， AdaBoost 再次试图寻找最好的学习器。 <br />
+关键部分来了，病人数据样本的训练数据现在被有很高误分配率的权重影响着。换句话说，之前误分类的病人在这个样本里有很高的出现概率。 <br />
+为什么？
+这就像是在电子游戏中已经打到了第二级，但当你的角色死亡后却不必从头开始。而是你从第二级开始然后集中注意，尽力升到第三级。 <br />
+同样地，第一个学习者有可能对一些病人的分类是正确的，与其再度试图对他们分类，不如集中注意尽力处理被误分类的病人。   <br />
+最好的学习器也被再次赋予权重并加入到联合分类器中，误分类的病人也被赋予权重，这样他们就有比较大的可能性再次被选中，我们会进行过滤和重复。 <br />
+在10轮结束的时候，我们剩下了一个带着不同权重的已经训练过的联合学习分类器，之后重复训练之前回合中被误分类的数据。<br />
+算法灵活通用，AdaBoost 可以加入任何学习算法，并且它能处理多种数据。<br />
+AdaBoost 有很多程序实现和变体。给出一些： <br />
+▪ scikit-learn<br />
+▪ ICSIBoost<br />
+▪ gbm: Generalized Boosted Regression Models   </p>
+  </li>
+  <li>
+    <p>kNN：k最近邻算法<br />
+kNN，或 K 最近邻(k-Nearest Neighbors), 诗歌分类算法。然而，它和我们之前描述的分类器不同，因为它是个懒散学习法。<br />
+懒散学习法？  和存储训练数据的算法不同，懒散学习法在训练过程中不需要做许多处理。只有当新的未被分类的数据输入时，这类算法才会去做分类。 <br />
+但在另一方面，积极学习法则会在训练中建立一个分类模型，当新的未分类数据输入时，这类学习器会把新数据也提供给这个分类模型。 <br />
+那么 C4.5，SVM 和 AdaBoost 属于哪类呢？不像 kNN算法，他们都是积极学习算法。 <br />
+给出原因：<br />
+1 C4.5 在训练中建立了一个决策分类树模型。<br />
+2 SVM在训练中建立了一个超平面的分类模型。<br />
+3 AdaBoost在训练中建立了一个联合的分类模型。<br />
+那么 kNN 做了什么？ kNN 没有建立这样的分类模型，相反，它只是储存了一些分类好的训练数据。那么新的训练数据进入时，kNN 执行两个基本步骤：<br />
+1 首先，它观察最近的已经分类的训练数据点—也就是，k最临近点（k-nearest neighbors）<br />
+2 第二部，kNN使用新数据最近的邻近点的分类， 就对新数据分类得到了更好的结果了。 <br />
+你可能会怀疑…kNN 是怎么计算出最近的是什么？ 对于连续数据来说，kNN 使用一个像欧氏距离的距离测度，距离测度的选择大多取决于数据类型。有的甚至会根据训练数据学习出一种距离测度。关于 kNN 距离测度有更多的细节讨论和论文描述。 <br />
+对于离散数据，解决方法是可以把离散数据转化为连续数据。给出两个例子： <br />
+1 使用汉明距离（Hamming distance ）作为两个字符串紧密程度的测度。 <br />
+2 把离散数据转化为二进制表征。 <br />
+当临近的点是不同的类，kNN 怎么给新数据分类呢？当临近点都是同一类的时候，kNN 也就不费力气了。我们用直觉考虑，如果附近点都一致，那么新数据点就很可能落入这同一个类中了。 <br />
+当临近点不是同一类时，kNN 怎么决定分类情况的呢？<br />
+处理这种情况通常有两种办法：<br />
+1 通过这些临近点做个简单的多数投票法。哪个类有更多的票，新数据就属于那个类。<br />
+2 还是做个类似的投票，但是不同的是，要给那些离的更近的临近点更多的投票权重。这样做的一个简单方法是使用反距离(reciprocal distance). 比如，如果某个临近点距离5个单位，那么它的投票权重就是1/5.当临近点越来越远是，倒数距离就越来越小…这正是我们想要的。 <br />
+ kNN 算法提供了已经被分类好的数据集，所以它是个监督学习算法。 <br />
+我们需要注意的5点： <br />
+1 当试图在一个大数据集上计算最临近点时，kNN 算法可能会耗费高昂的计算成本。<br />
+2 噪声数据(Noisy data)可能会影响到 kNN 的分类。 <br />
+3 选择大范围的属性筛选(feature)会比小范围的筛选占有很多优势，所以属性筛选(feature)的规模非常重要。 <br />
+4 由于数据处理会出现延迟，kNN 相比积极分类器，一般需要更强大的存储需求。 <br />
+5 选择一个合适的距离测度对 kNN 的准确性来说至关重要。 <br />
+哪里用过这个方法？有很多现存的 kNN 实现手段：<br />
+▪ MATLAB k-nearest neighbor classification<br />
+▪ scikit-learn KNeighborsClassifier<br />
+▪ k-Nearest Neighbour Classification in R   </p>
+  </li>
+  <li>Naive Bayes 朴素贝叶斯算法 <br />
+朴素贝叶斯（Naive Bayes）并不只是一个算法，而是一系列分类算法，这些算法以一个共同的假设为前提：  <br />
+被分类的数据的每个属性与在这个类中它其他的属性是独立的。 <br />
+独立是什么意思呢？当一个属性值对另一个属性值不产生任何影响时，就称这两个属性是独立的。
+举个例子：
+比如说你有一个病人的数据集，包含了病人的脉搏，胆固醇水平，体重，身高和邮编这样的属性。如果这些属性值互相不产生影响，那么所有属性都是独立的。对于这个数据集来说，假定病人的身高和邮编相互独立，这是合理的。因为病人的身高和他们的邮编没有任何关系。但是我们不能停在这，其他的属性间是独立的么？ <br />
+很遗憾，答案是否定的。给出三个并不独立的属性关系： <br />
+▪ 如果身高增加，体重可能会增加。 <br />
+▪ 如果胆固醇水平增加，体重可能增加。<br />
+▪ 如果胆固醇水平增加，脉搏也可能会增加。<br />
+以我的经验来看，数据集的属性一般都不是独立的。<br />
+这样就和下面的问题联系起来了…<br />
+为什么要把算法称为朴素的(naive)呢？数据集中所有属性都是独立的这个假设正是我们称为朴素（naive）的原因—— 通常下例子中的所有属性并不是独立的。  <br />
+我们在深入研究一下..
+这个等式是什么意思？在属性1和属性2的条件下，等式计算出了A 类的概率。换句话说，如果算出属性1 和2，等式算出的数据属于 A 类的概率大小。
+等式这样写解释为：在属性1和属性2条件下，分类 A 的概率是一个分数。
+▪ 分数的分子是在分类 A条件下属性1的概率，乘以在分类 A 条件下属性2的概率，再乘以分类 A 的概率
+▪ 分数的分母是属性1的概率乘以属性2的概率。
+Naive Bayes 的实现可以从Orange, scikit-learn, Weka和 R 里面找到。
+最后，看一下第十种算法吧。  </li>
+  <li>CART 分类算法<br />
+CART 代表分类和回归树(classification and regression trees)。它是个决策树学习方法，同时输出分类和回归树。 像 C4.5一样，CART 是个分类器。 <br />
+分类树像决策树一样么？分类树是决策树的一种。分类树的输出是一个类。 <br />
+举个例子，根据一个病人的数据集、你可能会试图预测下病人是否会得癌症。这个分类或者是“会的癌症”或者是“不会得癌症”。 <br />
+那回归树是什么呢？和分类树预测分类不同，回归树预测一个数字或者连续数值，比如一个病人的住院时间或者一部智能手机的价格。<br />
+这么记比较简单：<br />
+分类树输出类、回归树输出数字。 <br />
+为了构造分类和回归树模型，需要给它提供被分类好的训练数据集，因此 CART 是个监督学习算法。
+为什么要使用 CART 呢？使用 C4.5的原因大部分也适用于 CART，因为它们都是决策树学习的方法。便于说明和解释这类的原因也适用于 CART。
+和 C4.5一样，它们的计算速度都很快，算法也都比较通用流行，并且输出结果也具有可读性。
+scikit-learn 在他们的决策树分类器部分实现了 CART 算法；R 语言的 tree package 也有 CART 的实现；Weka 和 MATLAB 也有CART的实现过程。</li>
+</ol>
+
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2015/05/16/sqoop-spacil-chart.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;sqoop 特殊字符导入问题</a>
+
+
+<a class="pagination-item older" href="/blog/2015/09/20/dashujupingtaisheji.html">基于Hadoop生态的企业数据中心考虑&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="C4.5+聚类+SVM+关联+EM+PageRank+迭代+kNN+NB+分类笔记" data-thread-key="/blog/2015/09/20/10-suanfa-biji" data-url="index.html/blog/2015/09/20/10-suanfa-biji.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>
