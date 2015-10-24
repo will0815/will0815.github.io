@@ -64,6 +64,45 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point6.html">Linux学习笔记6-命令执行顺序</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="linux6-">Linux学习笔记6-命令执行顺序</h2>
+<p>场景：执行某个命令的时候，有时需要依赖于前一个命令是否执行成功。例如，假设你希望<br />
+将一个目录中的文件全部拷贝到另外一个目录中后，然后删除源目录中的全部文件。在删除之前，你希望能够确信拷贝成功，否则就有可能丢失所有的文件。  <br />
+1.&amp;&amp;<br />
+&amp;&amp;的一般形式：<br />
+命令1 &amp;&amp; 命令2<br />
+以上表示：命令1返回真(返回0，成功执行)后，命令2才能被执行<br />
+如：mv /apps/bin /apps/dev/bin &amp;&amp; rm -r /apps/bin<br />
+2.||  <br />
+||一般形式：<br />
+命令1||命令2<br />
+以上表示：命令1未执行成功，那么就执行命令2。<br />
+3.()和{}<br />
+如果希望把几个命令合在一起执行，shell提供了两种方法。既可以在当前shell也可以在子shell中执行一组命令。<br />
+为了在当前shell中执行一组命令，可以用命令分隔符隔开每一个命令，并把所有的命令<br />
+用圆括号()括起来。<br />
+它的一般形式为：<br />
+(命令1;命令2;. . .)<br />
+如果使用{}来代替()，那么相应的命令将在子shell而不是当前shell中作为一个整体被执行，只有在{}中所有命令的输出作为一个整体被重定向时，其中的命令才被放到子shell中执行，否则在当前shell执行。它的一般形式为：  <br />
+{命令1;命令2;. . . }  </p>
+
+      <div class="readall"><a href="/blog/2015/02/01/Linux-point6.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
       <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point10.html">Linux学习笔记10-sed</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
@@ -486,44 +525,6 @@ HBase使用CMS GC。默认触发GC的时机是当年老代内存达到90%的时�
 这个百分比， 可以简单的这么计算。如果你的 hfile.block.cache.size   和 hbase.regionserver.global.memstore.upperLimit 加起来有60%（默认），那么你可以设置 70-80，一般高10%左右差不多。  </p>
 
       <div class="readall"><a href="/blog/2015/02/01/HBase-config-optimal.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point5.html">Linux 学习笔记5 shell输入输出</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年01月23日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#linux">linux</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>Linux 学习笔记5 shell输入输出<br />
-shell脚本中几种读入数据方式：标准输入(缺省为键盘)，指定一个文件作为输入<br />
-输出：标准输出(终端屏幕)，指定输出到一个文件  </p>
-
-<p>echo<br />
-echo命令可以显示文本行或是变量 或者把字符串输入到文件 一般形式为：
-echo string<br />
-常见功能：<br />
-\c 不换行 <br />
-\t 跳格<br />
-\n 换行<br />
-初涉shell的用户常常会遇到的一个问题就是如何把双引号包含到echo命令的字符串中。<br />
-引号是一个特殊字符，所以必须要使用反斜杠\来使shell忽略它的特殊含义。假设你希望使用echo命令输出这样的字符串：”/dev/rmt0”，那么我们只要在引号前面加上反斜杠\即可   </p>
-
-<p>read <br />
-可以使用read语句从键盘或文件的某一行文本中读入信息，并将其赋给一个变量。如果只指定了一个变量，那么read将会把所有的输入赋给该变量，直至遇到第一个文件结束符或回车。<br />
-它的一般形式为：<br />
-read varible1 varible2 …  </p>
-
-
-      <div class="readall"><a href="/blog/2015/01/23/Linux-point5.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

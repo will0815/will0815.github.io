@@ -64,6 +64,70 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/11/30/clustering-algorithm.html">聚类以及增量聚类的简单理解</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年11月30日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="section">聚类以及增量聚类的简单理解</h2>
+<p>K-Means聚类基本步骤如下：   </p>
+
+<pre><code>Step1: 确定K值以及初始化聚类中心，选取K个初始凝聚点，做为欲形成的中心（最简单的方法就是K的值自己确定，但必须小于数据集个数，然后从数据集中选取K个数据做为初始聚类中心）；  
+Step2: 计算每个数据到K个初始凝聚点的距离，将每个数据和最近的凝聚点分到一组，形成K个初始分类；  
+Step3: 计算初始分类的重心（或均值），做为新的凝聚点，重新计算每个数据到分类重心（或均值）的距离，将每个数据和最近的凝聚点分为一组；
+Step4: 重复进行Step2和Step3，直到分类的重心或均值没有明显变化为止。
+</code></pre>
+
+<p>Canopy算法流程  </p>
+
+<pre><code>      （1）、将数据集向量化得到一个list后放入内存，选择两个距离阈值：T1和T2，其中T1 &gt; T2，对应上图，实线圈为T1，虚线圈为T2，T1和T2的值可以用交叉校验来确定；  
+      （2）、从list中任取一点P，用低计算成本方法快速计算点P与所有Canopy之间的距离（如果当前不存在Canopy，则把点P作为一个Canopy），如果点P与某个Canopy距离在T1以内，则将点P加入到这个Canopy；  
+      （3）、如果点P曾经与某个Canopy的距离在T2以内，则需要把点P从list中删除，这一步是认为点P此时与这个Canopy已经够近了，因此它不可以再做其它Canopy的中心了；  
+      （4）、重复步骤2、3，直到list为空结束。
+</code></pre>
+
+<p>单机版Canopy算法：  </p>
+
+<pre><code>      1、从PointList中取一个Point ，寻找已经建立好的Canopy 计算这个点于所有的Canopy的距离。如果和某一个Canopy的距离小于T1，则把这个点加到Canopy中，如果没有Canopy则选择这个点为一个Canopy的中心。  
+      2、如果这个店Point和某个Canopy的距离小于T2,则把这个点从PointList中删除（这个点以后做不了其他的Canopy的中心了）。  
+      3、循环直到所有的Point都被加入进来，然后计算各个Canopy的Center和Radius。
+</code></pre>
+
+<p>MapReduce：</p>
+
+<pre><code>  1、把数据整理成SequcnceFile格式（Mahout-InputMapper）作为初始化文件PointFile  
+  2、CanopyMapper阶段本机聚成小的Canopy 中间文件写成SequenceFile 这一步的T1、T2 和Reduce的T1、T2可以是不同的（ index、Canpy）  
+  3、所有的Mapper阶段的输出到1个Reducer中 然后Reduce把Map阶段中的Center点再次做聚类算法。聚出全局的Canopy。同时计算每个Canopy的CenterPoint点。写到临时文件CenterPoint中。  
+  4、针对全集合PointFile在CenterPoint上的findClosestCanopy操作（通过传入的距离算法）。然后输出一个SequenceFile。     
+</code></pre>
+
+<p>基于距离-增量聚类的实现方式</p>
+
+<pre><code>1.
+每增加一个数据，立即(或延迟)计算它与其他对象之间
+的相异度度量值，并将其插入到R2中；检查计算出相异度
+度量值，当d(id，j)&lt;δ时，如果id在R3中存在，则elements= 
+elements+1；否则在R3中插入一个新记录(id，1)。  
+
+2.
+数据的增加部分可以简单的加到原有聚类结果中,具体情况可以分两种: 
+(1)增加记录在原有聚类结果的某一类范围内(n维空间),这样这条记录的加入增加了这类的数据密度,因此可以直接把这条记录加入这一类当中. 
+(2)增加记录不在原来聚类结果的任何一类范围内,也就是相当于n维空间上的一个孤立的点,这种情况可暂把这条数据记录单独看成一类. 
+</code></pre>
+
+      <div class="readall"><a href="/blog/2014/11/30/clustering-algorithm.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
       <h1 class="post-title"><a href="/blog/2014/11/04/mahout-xiangjie.html">mahout--初学</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
@@ -738,50 +802,6 @@ HBase的数据安全机制之一：在插入数据时先写Hlog然后在写到�
    基于洞察为目的：通过社会化媒体和电商平台找到关键的用户意见领袖和SNS用户，对他们细分得到相关的群体，通过社会化运营，可以对他进行调研，广告推送，或者搭建新一代用户调研系统，未来这将是能够解决产品跟进、快速升级的好平台。</p>
 
       <div class="readall"><a href="/blog/2014/10/09/Holographic-user-portrait.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/09/27/ubuntueclipse.html">ubuntu下eclipse菜单栏无法展开</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年09月27日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#linux">linux</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>因为ubuntu13下菜单栏被代理到状态栏下，下载安装eclipse3.8，打开后菜单栏点击无法打开，网上认为可能是unity的bug</p>
-
-<p>解决办法去掉eclipse的菜单代理：</p>
-
-<p>1.在终端中进入快捷方式的目录，然后运行</p>
-
-<p>sudo gedit eclipse.desktop</p>
-
-<p>2.修改Exec的值，将原有的Exec=eclipse修改为：</p>
-
-<p>Exec=env UBUNTU_MENUPROXY=0  eclipse</p>
-
-<p>——问题解决</p>
-
-<p>顺带学习ubuntu 程序快捷方式</p>
-
-<p>进入 /usr/share/applications 目录下，这里有所有程序的图形化的快捷方式，
-你可以直接复制到桌面，即可</p>
-
-<p>搜索ls <em>程序名</em></p>
-
-<p>方法一：进入 /usr/share/applications 目录下，这里有所有程序的图形化的快捷方式，你可以直接复制到桌面，即可</p>
-
-<p>方法二：使用命令的方式： gnome-desktop-item-edit</p>
-
-
-      <div class="readall"><a href="/blog/2014/09/27/ubuntueclipse.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

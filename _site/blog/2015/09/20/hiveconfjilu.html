@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta name="description" content="Will go, Just do it.">
   <meta name="author" content="Will.Quan">
-  <meta name="keywords" content="Will go, Just do it., willgo, 最好的从未错过, Will.Quan">
-  <title>Will go, Just do it.</title>
-  <link rel="canonical" href="index.html">
+  <meta name="keywords" content="Hive配置记录, willgo, Will.Quan">
+  <title>Hive配置记录 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2015/09/20/hiveconfjilu.html">
   <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="/res/css/public.css">
@@ -60,247 +60,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
             src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
             </script>
         </div>
-    
-<div class="posts">
-  <section class="post">
     <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/09/20/sqoopmimashuruwenti.html">Sqoop密码和SA用户问题记录</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年09月20日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>sqoop 定时job 运行时需要输入密码问题
-1.可以使用except 脚本，实现交互输入密码<br />
-2. 配置sqoop，将密码保存至sqoop的metadata中 <br />
-sqoop-site.xml：  </p>
-
-<pre><code>&lt;property&gt;  
-     &lt;name&gt;sqoop.metastore.client.record.password&lt;/name&gt;  
-     &lt;value&gt;true&lt;/value&gt;  
-     &lt;description&gt;If true, allow saved passwords in the metastore. &lt;/description&gt;
-&lt;/property&gt;  
-</code></pre>
-
-<ol>
-  <li>sqoop 出现Caused by: java.sql.SQLException: User not found: SA  错误  </li>
-</ol>
-
-<p>未知问题，看起来像是并发执行sqoop引起的问题  导致无法连接sqoop的metadata库<br />
-不知如何解决， 可以采取的办法<br />
-1.换个用户执行 貌似可以（。。。。。）<br />
-2.更改metadata数据库  如修改成MySQL   如下：  </p>
-
-<pre><code>&lt;property&gt;  
-    &lt;name&gt;sqoop.metastore.client.autoconnect.url&lt;/name&gt;  
-    &lt;value&gt;jdbc:mysql://192.168.117.7:3306/sqoop&lt;/value&gt;  
-&lt;/property&gt;  
-&lt;property&gt;  
-    &lt;name&gt;sqoop.metastore.client.autoconnect.username&lt;/name&gt;
-    &lt;value&gt;scm987&lt;/value&gt;  
-&lt;/property&gt;  
-&lt;property&gt;  
-    &lt;name&gt;sqoop.metastore.client.autoconnect.password&lt;/name&gt;
-    &lt;value&gt;scm258&lt;/value&gt;  
-&lt;/property&gt;  
-
-
-&lt;property&gt;
-     &lt;name&gt;sqoop.metastore.client.enable.autoconnect&lt;/name&gt;
-     &lt;value&gt;true&lt;/value&gt;
-&lt;/property&gt;
-</code></pre>
-
-      <div class="readall"><a href="/blog/2015/09/20/sqoopmimashuruwenti.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/09/20/nosql-onhadoop.html">Sql on hadoop 选择笔记</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年09月20日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#nosql">nosql</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>Hive展现出他强大的批处理能力 但在实时交互式查询时方面却难以满足，现在已经出现的低延时交互式处理方案已经有很多  如：Hive on Tez, Hive on Spark, Spark SQL, Impala等   </p>
-
-<p>Hive/Tez/Stinger <br />
-目前的主要推动者是hortonworks和Yahoo!。2015 Hadoop Summit(San Jose)上，Yahoo分享了他们目前生产环境中Hive on Tez的一些情况。显示和Hive 0.10(RCFile)相比，目前的Hive on Tez在1TB的数据量查询的加速比平均为6.2倍。目前的Hive on Tez已经是production-ready。Tez这个执行引擎和Spark比较类似，原来的MR只能执行Map和Reduce两种操作，现在的Tez可以把Job解析成DAG来执行。除此之外还有一些进一步优化Hive执行效率的工作，例如Vectorized Execution和ORCFile等。Dropbox也透露他们的Hive集群下一步的升级目标就是Hive on Tez。  </p>
-
-<p>Hive on Spark <br />
-目前的主要推动者是Cloudera，可以认为是Hive社区这边搞的”Spark SQL”。刚刚release了第一个使用版本，目前不能用于生产环境。Hive on Spark既能利用到现在广泛使用的Hive的前端，又能利用到广泛使用的Spark作为后端执行引擎。对于现在既部署了Hive，又部署了Spark的公司来说，节省了运维成本。    </p>
-
-<p>对于上面提到的Hive on Tez和Hive on Spark两种系统都具备的优点是： <br />
-1，现存的Hive jobs可以透明、无缝迁移到Hive on ***平台，可以利用Hive现有的ODBC/JDBC，metastore, hiveserver2, UDF，auditing, authorization, monitoring系统，不需要做任何更改和测试，迁移成本低。 <br />
-2，无论后端执行引擎是MapReduce也好，Tez也好，Spark也好，整个Hive SQL解析、生成执行计划、执行计划优化的过程都是非常类似的。而且大部分公司都积累了一定的Hive运维和使用经验，那么对于bug调试、性能调优等环节会比较熟悉，降低了运维成本。   </p>
-
-<p>Spark SQL <br />
-主要的推动者是Databricks。提到Spark SQL不得不提的就是Shark。Shark可以理解为Spark社区这边搞的一个”Hive on Spark”，把Hive的物理执行计划使用Spark计算引擎去执行。这里面会有一些问题，Hive社区那边没有把物理执行计划到执行引擎这个步骤抽象出公共API，所以Spark社区这边要自己维护一个Hive的分支，而且Hive的设计和发展不太会考虑到如何优化Spark的Job。但是前面提到的Hive on Spark却是和Hive一起发布的，是由Hive社区控制的。 <br />
-所以后来Spark社区就停止了Shark的开发转向Spark SQL（“坑了”一部分当时信任Shark的人）。  Spark SQL是把SQL解析成RDD的transformation和action，而且通过catalyst可以自由、灵活的选择最优执行方案。对数据库有深入研究的人就会知道，SQL执行计划的优化是一个非常重要的环节，  Spark SQL在这方面的优势非常明显，提供了一个非常灵活、可扩展的架构。但是Spark SQL是基于内存的，元数据放在内存里面，不适合作为数据仓库的一部分来使用。所以有了Spark SQL的HiveContext，就是兼容Hive的Spark SQL。它支持HiveQL, Hive Metastore, Hive SerDes and Hive UDFs以及JDBC driver。这样看起来很完美，但是实际上也有一些缺点：Spark SQL依赖于Hive的一个snapshot，所以它总是比Hive的发布晚一个版本，很多Hive新的feature和bug fix它就无法包括。而且目前看Spark社区在Spark的thriftserver方面的投入不是很大，所以感觉它不是特别想朝着这个方向发展。还有一个重要的缺点就是Spark SQL目前还不能通过分析SQL来预测这个查询需要多少资源从而申请对应的资源，所以在共享集群上无法高效地分配资源和调度任务。 <br />
-特别是目前Spark社区把Spark SQL朝向DataFrame发展，目标是提供一个类似R或者Pandas的接口，把这个作为主要的发展方向。DataFrame这个功能使得Spark成为机器学习和数据科学领域不可或缺的一个组件，但是在数据仓库（ETL，交互式分析，BI查询）领域感觉已经不打算作为他们主要的发展目标了。  </p>
-
-<p>Impala <br />
-主要的推动者是Cloudera，自从推出以来一直不温不火。Impala是一种MPP架构的执行引擎，查询速度非常快，是交互式BI查询最好的选择，即使是在并发性非常高的情况下也能保证查询延迟，所以在multi-tenant, shared clusters上表现比较好。Impala的另外一个重要的优点就是支持的SQL是在以上这些系统中是最标准的，也就是跟SQL99是最像的，所以对于传统企业来说可能是个不错的选择。  Impala的主要缺点是社区不活跃，由C++开发，可维护性差，目前系统稳定性还有待提高。  </p>
-
-<p>Presto<br />
-是Facebook开发的，目前也得到了Teradata的支持。目前Presto的主要使用者还是互联网公司，像Facebook，Netflix等。Presto的代码用了Dependency Injection, 比较难理解和debug。另外还有一些系统，像Apache Drill，Apache Tajo等，都是非常小众的系统了。   </p>
-
-<p>总的来说，目前来看Hive依然是批处理/ETL 类应用的首选。Hive on Spark能够降低Hive的延迟，但是还是达不到交互式BI查询的需求。目前交互式BI查询最好的选择是Impala。Spark SQL/DataFrame是Spark用户使用SQL或者DataFrame API构建Spark pipeline的一种选择，并不是一个通用的支持交互式查询的引擎，更多的会用在基于Spark的机器学习任务的数据处理和准备的环节。     </p>
-
-      <div class="readall"><a href="/blog/2015/09/20/nosql-onhadoop.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/09/20/jvm-zaixuexi.html">JVM笔记</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年09月20日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#java">java</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>JVM根据实现不同结构有所不同，大多数将内存分为：<br />
-Method Area                        方法区<br />
-Heap			                     堆
-Program Counter register               程序计数器<br />
-Java method stack                     Java方法栈 <br />
-native method stack                   本地方法栈 （Hot Spot 中将Java method和native合称为方法区）<br />
-direct memory                       直接内存区（此区域并不归JVM管理）    </p>
-
-<p>指令 数据 方法 实例 属性。。。<br />
-方法是指令操作码的一部分保存在stack中<br />
-方法内部变量作为指令的操作数部分，跟在指令的操作码之后，保存在Stack中（实际上是简单类型保存在Stack中，对象类型在Stack中保存地址，在Heap 中保存值）；指令操作码和指令操作数构成了完整的Java 指令。对象实例包括其属性值作为数据，保存在数据区Heap 中<br />
-非静态的对象属性作为对象实例的一部分保存在Heap 中，而对象实例必须通过Stack中保存的地址指针才能访问到。因此能否访问到对象实例以及它的非静态属性值完全取决于能否获得对象实例在Stack中的地址指针。   </p>
-
-<p>静态/非静态方法 <br />
-非静态方法有一个隐含的传入参数，该参数是JVM给它的，和我们怎么写代码无关，这个隐含的参数就是对象实例在Stack中的地址指针。So我们在调用前都要new,获得Stack中的地址指针。 <br />
-静态方法无此隐含参数，因此也不需要new对象，只要class文件被ClassLoader load进入JVM的Stack，该静态方法即可被调用。当然此时静态方法是存取不到Heap 中的对象属性的。   </p>
-
-<p>静/动态属性 <br />
-实例以及动态属性都是保存在Heap 中的， Heap 必须通过Stack中的地址指针才能够被指令（类的方法）访问到。 <br />
-静态属性是保存在Stack中的，而不同于动态属性保存在Heap 中。正因为都是在Stack中，而Stack中指令和数据都是定长的，因此很容易算出偏移量，也因此不管什么指令，都可以访问到类的静态属性。也正因为静态属性被保存在Stack中，所以具有了全局属性。 <br />
-在JVM中，静态属性保存在Stack指令内存区，动态属性保存在Heap数据内存区。   </p>
-
-<p>栈<br />
-Stack（栈）是JVM的内存指令区。Stack的速度很快，管理很简单，并且每次操作的数据或者指令字节长度是已知的。所以Java 基本数据类型，Java 指令代码，常量都保存在Stack中。<br />
-是 Java 程序的运行区，是在线程创建时创建，它的生命期是跟随线程的生命期，线程结束栈内存也就释放，对于栈来说不存在垃圾回收问题。<br />
-栈中数据都是以栈帧（stack frame）的形式存在，栈帧是一个内存块一个有关方法和运行期数据的数据集，遵循 先进后出原则（方法 A 被调用时就产生了一个栈帧 F1，并被压入到栈中，A 方法又调用了 B 方法，于是产生栈帧 F2 也被压入栈，执行完毕后，先弹出 F2栈帧，再弹出 F1 栈帧）
-栈帧中主要保存三类数据：<br />
-local variable 本地变量（输入参数和输出参数以及方法内的变量）<br />
-operand stack栈操作  （出栈进栈记录）<br />
-frame data栈帧数据   （类文件 方法等）  </p>
-
-<p>Heap<br />
-JVM的内存数据区 管理复杂，用于保存对象的实例 <br />
-Heap 中分配一定的内存来保存对象实例，实际上也只是保存对象实例的属性值，属性的类型和对象本身的类型标记等，并不保存对象的方法（方法是指令，保存在Stack中）,在Heap 中分配一定的内存保存对象实例和对象的序列化比较类似。而对象实例在Heap 中分配好以后，需要在Stack中保存一个4字节的Heap 内存地址，用来定位该对象实例在Heap 中的位置，便于找到该对象实例。   </p>
-
-<p>Java中堆是由所有的线程共享的一块内存区域。 <br />
-Heap 中分配一定的内存来保存对象实例，实际上也只是保存对象实例的属性值，属性的类型和对象本身的类型标记等，并不保存对象的方法（方法是指令，保存在Stack中）,在Heap 中分配一定的内存保存对象实例和对象的序列化比较类似。而对象实例在Heap 中分配好以后，需要在Stack中保存一个4字节的Heap 内存地址，用来定位该对象实例在Heap 中的位置，便于找到该对象实例。<br />
-Java中堆是由所有的线程共享的一块内存区域。   </p>
-
-<p>Perm <br />
-Perm代主要保存class,method,filed对象，这部门的空间一般不会溢出，除非一次性加载了很多的类，不过在涉及到热部署的应用服务器的时候，有时候会遇到java.lang.OutOfMemoryError : PermGen space 的错误，造成这个错误的很大原因就有可能是每次都重新部署，但是重新部署后，类的class没有被卸载掉，这样就造成了大量的class对象保存在了perm中，这种情况下，一般重新启动应用服务器可以解决问题。    </p>
-
-<p>Tenured <br />
-Tenured区主要保存生命周期长的对象，一般是一些老的对象，当一些对象在Young复制转移一定的次数以后，对象就会被转移到Tenured区，一般如果系统中用了application级别的缓存，缓存中的对象往往会被转移到这一区间。  </p>
-
-<p>Young<br />
-Young区被划分为三部分，Eden区和两个大小严格相同的Survivor区，其中Survivor区间中，某一时刻只有其中一个是被使用的，另外一个留做垃圾收集时复制对象用，在Young区间变满的时候，minor GC就会将存活的对象移到空闲的Survivor区间中，根据JVM的策略，在经过几次垃圾收集后，任然存活于Survivor的对象将被移动到Tenured区间。  </p>
-
-<p>The pc Register 程序计数器寄存器 <br />
-JVM支持多个线程同时运行。每个JVM都有自己的程序计数器。在任何一个点，每个JVM线程执行单个方法的代码，这个方法是线程的当前方法。如果方法不是native的，程序计数器寄存器包含了当前执行的JVM指令的地址，如果方法是 native的，程序计数器寄存器的值不会被定义。 JVM的程序计数器寄存器的宽度足够保证可以持有一个返回地址或者native的指针。  </p>
-
-<p>Method Area 方法区<br />
-Object Class Data(类定义数据) 是存储在方法区的。除此之外，常量、静态变量、JIT 编译后的代码也都在方法区。正因为方法区所存储的数据与堆有一种类比关系，所以它还被称为 Non-Heap。方法区也可以是内存不连续的区域组成的，并且可设置为固定大小，也可以设置为可扩展的，这点与堆一样。
-方法区内部有一个非常重要的区域，叫做运行时常量池（Runtime Constant Pool，简称 RCP）。在字节码文件中有常量池（Constant Pool Table），用于存储编译器产生的字面量和符号引用。每个字节码文件中的常量池在类被加载后，都会存储到方法区中。值得注意的是，运行时产生的新常量也可以被放入常量池中，比如 String 类中的 intern() 方法产生的常量。    </p>
-
-<p>内存分配：<br />
-1、对象优先在EDEN分配<br />
-2、大对象直接进入老年代 <br />
-3、长期存活的对象将进入老年代 <br />
-4、适龄对象也可能进入老年代：动态对象年龄判断<br />
-动态对象年龄判断：<br />
-虚拟机并不总是要求对象的年龄必须达到MaxTenuringThreshold才能晋升到老年代，当Survivor空间的相同年龄的所有对象大小总和大于Survivor空间的一半，年龄大于或等于该年龄的对象就可以直接进入老年代，无需等到MaxTenuringThreshold中指定的年龄  </p>
-
-<p>1、对象优先在Eden分配，这里大部分对象具有朝生夕灭的特征，Minor GC主要清理该处<br />
-2、大对象（占内存大）、老对象（使用频繁）<br />
-3、Survivor无法容纳的对象，将进入老年代，Full GC的主要清理该处  </p>
-
-<p>JVM的GC机制<br />
-第一个线程负责回收Heap的Young区<br />
-第二个线程在Heap不足时，遍历Heap，将Young 区升级为Older区<br />
-Older区的大小等于-Xmx减去-Xmn，不能将-Xms的值设的过大，因为第二个线程被迫运行会降低JVM的性能。 <br />
-堆内存GC<br />
-       JVM(采用分代回收的策略)，用较高的频率对年轻的对象(young generation)进行YGC，而对老对象(tenured generation)较少(tenured generation 满了后才进行)进行Full GC。这样就不需要每次GC都将内存中所有对象都检查一遍。<br />
-非堆内存不GC<br />
-      GC不会在主程序运行期对PermGen Space进行清理，所以如果你的应用中有很多CLASS(特别是动态生成类，当然permgen space存放的内容不仅限于类)的话,就很可能出现PermGen Space错误。<br />
-内存申请过程 <br />
-1.JVM会试图为相关Java对象在Eden中初始化一块内存区域；<br />
-2.当Eden空间足够时，内存申请结束。否则到下一步；<br />
-3.JVM试图释放在Eden中所有不活跃的对象（minor collection），释放后若Eden空间仍然不足以放入新对象，则试图将部分Eden中活跃对象放入Survivor区；<br />
-4.Survivor区被用来作为Eden及old的中间交换区域，当OLD区空间足够时，Survivor区的对象会被移到Old区，否则会被保留在Survivor区；<br />
-5.当old区空间不够时，JVM会在old区进行major collection；<br />
-6.完全垃圾收集后，若Survivor及old区仍然无法存放从Eden复制过来的部分对象，导致JVM无法在Eden区为新对象创建内存区域，则出现”Out of memory错误”；  </p>
-
-<p>对象衰老过程 <br />
-1.新创建的对象的内存都分配自eden。Minor collection的过程就是将eden和在用survivor space中的活对象copy到空闲survivor space中。对象在young generation里经历了一定次数(可以通过参数配置)的minor collection后，就会被移到old generation中，称为tenuring。<br />
-<img src="/image/jvm-memery.png" alt="" /></p>
-
-<p>类的加载方式 <br />
-1）：本地编译好的class中直接加载<br />
-2）：网络加载：java.net.URLClassLoader可以加载url指定的类<br />
-3）：从jar、zip等等压缩文件加载类，自动解析jar文件找到class文件去加载util类<br />
-4）：从java源代码文件动态编译成为class文件  </p>
-
-<p>类加载的时机<br />
-1. 类加载的 生命周期 ：加载（Loading）–&gt;验证（Verification）–&gt;准备（Preparation）–&gt;解析（Resolution）–&gt;初始化（Initialization）–&gt;使用（Using）–&gt;卸载（Unloading）<br />
-2. 加载：这有虚拟机自行决定。<br />
-3. 初始化阶段：<br />
-a) 遇到new、getstatic、putstatic、invokestatic这4个字节码指令时，如果类没有进行过初始化，出发初始化操作。 <br />
-b) 使用java.lang.reflect包的方法对类进行反射调用时。<br />
-c) 当初始化一个类的时候，如果发现其父类还没有执行初始化则进行初始化。<br />
-d) 虚拟机启动时用户需要指定一个需要执行的主类，虚拟机首先初始化这个主类。<br />
-注意：接口与类的初始化规则在第三点不同，接口不要气所有的父接口都进行初始化。   </p>
-
-<p>双亲委派机制 <br />
-JVM在加载类时默认采用的是 双亲委派 机制。通俗的讲，就是某个特定的类加载器在接到加载类的请求时，首先将加载任务委托给父类加载器，依次递归，如果父类加载器可以完成类加载任务，就成功返回；只有父类加载器无法完成此加载任务时，才自己去加载。   </p>
-
-      <div class="readall"><a href="/blog/2015/09/20/jvm-zaixuexi.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/09/20/hiveconfjilu.html">Hive配置记录</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年09月20日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#nosql">nosql</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>hive.fetch.task.conversion: <br />
+  <h1 class="post-title"><a href="/blog/2015/09/20/hiveconfjilu.html">Hive配置记录</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2015年09月20日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#nosql">nosql</a>	
+  </p>
+</header>
+<div class="post-main">
+<p>hive.fetch.task.conversion: <br />
 hive 0.10.0为了执行效率考虑，简单的查询，就是只是select，不带count,sum,group by这样的，都不走map/reduce，直接读取hdfs文件进行filter过滤。<br />
 这样做的好处就是不新开mr任务，执行效率要提高不少，但是不好的地方就是用户界面不友好，有时候数据量大还是要等很长时间，但是又没有任何返回。<br />
 在hive-site.xml里面有个配置参数叫 <br />
@@ -783,89 +554,26 @@ hive.test.mode.samplefreq：如果hive在测试模式运行，并且表未分桶
 hive.test.mode.nosamplelist：在测试模式运行时不进行抽样的表列表，默认是空；
 </code></pre>
 
-      <div class="readall"><a href="/blog/2015/09/20/hiveconfjilu.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
 </div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/09/20/hdfs-fenceng.html">HDFS 分层存储</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年09月20日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>Hadoop  <br />
-众所周知，商用硬件可以组装起来创建拥有大数据存储和计算能力的Hadoop集群。将数据拆分成多个部分，分别存储在每个单独的机器上，数据处理逻辑也在同样的机器上执行。   </p>
-
-<p>例如：一个1000个节点组成的Hadoop集群，单节点容量有20TB，最多可以存储20PB的数据。因此，所有的这些机器拥有足够的计算能力来履行Hadoop的口号：“take compute to data”。 <br />
-数据的温度 <br />
-集群中通常存储着各种不同类型的数据集，不同的团队不同的业务通过该集群可以共享地处理他们不同类型的工作任务。通过数据管道，每个数据集每时每刻都会得到增长。 <br />
-数据集有一个共同特点就是初始的使用量会很大。在此期间，数据集被认为是“热(HOT)”的。我们通过分析发现，随着时间的推移，使用率会有一定程度的下降，存储的数据每周仅仅就被访问几次，逐渐就变为“温(WARM)”数据。在此后90天中，当数据使用率跌至一个月几次时，它就被定义为“冷(COLD)”数据。<br />
-因此数据在最初几天被认为是“热”的，此后第一个月仍然保持为“温”的。在这期间，任务或应用会使用几次该数据。随着数据的使用率下降得更多，它就变“冷”了，在此后90天内或许只被使用寥寥几次。最终，当数据一年只有一两次使用频率、极少用到时，它的“温度”就是“冰冻”的了。   </p>
-
-<p>一般来讲，温度与每个数据集都紧密相关。在这个例子中，温度是与数据的年龄成反比的。一个特定数据集的温度也受其他因素影响的。你也可以通过算法决定数据集的温度。<br />
-HDFS的分层存储<br />
-HDFS从Hadoop2.3开始支持分层存储<br />
-它是如何工作的呢？ <br />
-正常情况下，一台机器添加到集群后，将会有指定的本地文件系统目录来存储这块副本。用来指定本地存储目录的参数是dfs.datanode.dir。另一层中，比如归档(ARCHIVE)层，可以使用名为StorageType的枚举来添加。为了表明这个本地目录属于归档层，该本地目录配置中会带有[ARCHIVE]的前缀。理论上，hadoop集群管理员可以定义多个层级。 <br />
-比如说：如果在一个已有1000个节点，其总存储容量为20PB的集群上，增加100个节点，其中每个节点有200TB的存储容量。相比已有的1000个节点，这些新增节点的计算能力就相对较差。接下来，我们在所有本地目录的配置中增加ARCHIVE的前缀。那么现在位于归档层的这100个节点将会有20PB的存储量。最后整个集群被划分为两层——磁盘(DISK)层和归档(ARCHIVE)层，每一层有20PB的容量，总容量为40PB。   </p>
-
-<p>基于温度将数据映射到存储层 <br />
-在这个例子中，我们将在拥有更强计算能力节点的DISK层存储高频率使用的“热(HOT)”数据。 <br />
-至于“温(WARM)”数据，我们将其大部分的副本存储在磁盘层。对于复制因子(replication factor)为3的数据，我们将在磁盘层存储其两个副本，在归档层存储一个副本。 <br />
-如果数据已经变“冷(COLD)”,那么我们至少将在磁盘层存储其每个块的一个副本。余下的副本都放入归档层。   </p>
-
-<p>当一个数据集为认为是“冰冻(FROZEN)”的,这就意味着它几乎已经不被使用，将其存储在具有大量CPU、能执行众多任务节点或容器的节点上是不明智的。我们会把它存储到一个具有最小计算能力的节点上。因此，所有处于“冰冻(FROZEN)”状态块的全部副本都可以被移动到归档层。 <br />
-跨层的数据流 <br />
-当数据第一次添加到集群中，它将被存储到默认的磁盘层。基于数据的温度，它的一个或多个副本将被移动到归档层。移动器就是用来把数据从一个层移动到另一层的。移动器的工作原理类似平衡器，除了它可以跨层地移动块的副本。移动器可接受一条HDFS路径，一个副本数目和目的地层信息。然后它将基于所述层的信息识别将要被移动的副本，并调度数据在源数据节点到目的数据节点的移动。<br />
-Hadoop 2.6中支持分层存储的变化 <br />
-Hadoop 2.6中有许多的改进使其能够进一步支持分层存储。你可以附加一个存储策略到某个目录来指明它是“热(HOT)”的,“温(WARM)”的,“冷(COLD)”的, 还是“冰冻(FROZEN)”的。存储策略定义了每一层可存储的副本数量。我可以改变目录的存储策略并启动该目录的移动器来使得策略生效。 <br />
-使用数据的应用 <br />
-基于数据的温度，数据的部分或者全部副本可能存储在任一层中。但对于通过HDFS来使用数据的应用而言，其位置是透明的。 <br />
-虽然“冰冻”数据的所有副本都在归档层，应用依然可以像访问HDFS的任何数据一样来访问它。由于归档层中的节点并没有计算能力，运行在磁盘层的映射(map)任务将从归档层的节点上读取数据，但这会导致增加应用的网络流量消耗。如果这种情况频繁地发生，你可以指定该数据为“温/冷”,并让移动器移回一个或多个副本到磁盘层。 <br />
-确定数据温度以及完成指定的副本移动至预先定义的分层存储可以全部自动化。 <br />
-总结 <br />
-无计算能力的存储比有计算能力的存储要便宜。我们可以依据数据的温度来确保具计算能力的存储能得到充分地使用。因为每一个分块的数据都会被复制多次（默认是3次），根据数据的温度，许多副本都会被移动到低成本的存储中。HDFS支持分层存储并提供必要的工具来进行跨层的数据移动。   </p>
-
-      <div class="readall"><a href="/blog/2015/09/20/hdfs-fenceng.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
 </div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/09/20/guanjianjiagouceng.html">大数据处理的关键架构层</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年09月20日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p><img src="/image/大数据处理的关键架构层.jpg" alt="" /></p>
-
-      <div class="readall"><a href="/blog/2015/09/20/guanjianjiagouceng.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
 <div class="pagination">
-  
-  <span class="pagination-item newer"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;上一页</span>
-    
-  
-  <a class="pagination-item older" href="/page/2">下一页&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
-  
+
+<a class="pagination-item newer" href="/blog/2015/09/20/hdfs-fenceng.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;HDFS 分层存储</a>
+
+
+<a class="pagination-item older" href="/blog/2015/09/20/jvm-zaixuexi.html">JVM笔记&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="Hive配置记录" data-thread-key="/blog/2015/09/20/hiveconfjilu" data-url="index.html/blog/2015/09/20/hiveconfjilu.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
 </div>
     <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
 </br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 

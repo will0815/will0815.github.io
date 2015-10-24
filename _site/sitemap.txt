@@ -35,6 +35,7 @@ index.html/404.html
 index.html/blog/2015/09/20/sqoopmimashuruwenti.html
 index.html/blog/2015/09/20/nosql-onhadoop.html
 index.html/blog/2015/09/20/jvm-zaixuexi.html
+index.html/blog/2015/09/20/hiveconfjilu.html
 index.html/blog/2015/09/20/hdfs-fenceng.html
 index.html/blog/2015/09/20/guanjianjiagouceng.html
 index.html/blog/2015/09/20/duoyuan-ETL.html
