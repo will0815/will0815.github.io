@@ -7,7 +7,7 @@ duoshuo: true
 share: true
 ---
 
-### 工作中日志收集以及分析  通过Flume+hive/impala实现 期间遇到一些问题  记录：
+### 工作中日志收集以及分析  通过Flume+hive/impala实现 期间遇到一些问题  记录：  
 ####  问题一：
 使用过程中时常会遇到.tmp文件无法找到的问题。  
 impala 查询时这个问题尤为严重。 hive查询时也会时常出现这个问题。
