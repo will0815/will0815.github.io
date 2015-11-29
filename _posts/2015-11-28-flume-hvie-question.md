@@ -33,7 +33,7 @@ impala 查询时这个问题尤为严重。 hive查询时也会时常出现这�
 Flume配置项：hdfs.inUsePrefix  
 另一种解决办法 重写hive的PathFilter  
 
-		package com.twitter.util;
+		package com.willgo.util;
 		
 		import java.io.IOException;
 		import java.util.ArrayList;
@@ -48,10 +48,11 @@ Flume配置项：hdfs.inUsePrefix
 		    }
 		}
 
-然后在hive-site.xml中加入：  
+hive-site.xml：  
+
 		<property>
 		    <name>mapred.input.pathFilter.class</name>
-		    <value>com.twitter.util.FileFilterExcludeTmpFiles</value>
+		    <value>com.willgo.util.FileFilterExcludeTmpFiles</value>
 		</property>
 
 
@@ -69,6 +70,7 @@ hdfs文件原则：
 基于以上两点  遇到的延时问题 基本上判断是第二点引起的。  
 ###### 处理办法：  
 调小Flume写入文件分割的阀值：hdfs.rollInterval。  
-现在是按小时分割，是否可以考虑按分钟分割，  
-这样又将产生大量小文件的问题，那么还可以考虑对以前的每天的小时文件合并为每天一个文件！   
+现在是按小时分割，是否可以考虑按分钟分割......  
+这样又将产生大量小文件的问题以及namenode压力问题，小文件可以采用线下合并以及使用归档的方式处理。
+
 
