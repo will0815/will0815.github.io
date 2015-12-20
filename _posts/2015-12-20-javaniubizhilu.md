@@ -3,6 +3,8 @@ layout: post
 title: 牛逼之路
 category: 不懂
 date: 2015-12-20
+duoshuo: true
+share: trueSSS
 ---
 
 <转自> [http://www.hollischuang.com/archives/489](http://www.hollischuang.com/archives/489)
