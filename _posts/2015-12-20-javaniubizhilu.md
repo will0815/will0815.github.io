@@ -9,11 +9,10 @@ share: trueSSS
 
 <转自> [http://www.hollischuang.com/archives/489](http://www.hollischuang.com/archives/489)
 
-# 一、基础篇
-
-## 1.1 JVM
-
-1.1.1. Java内存模型，Java内存管理，Java堆和栈，垃圾回收  
+#  一、基础篇   
+##  1.1 JVM  
+ 
+1.1.1. Java内存模型，Java内存管理，Java堆和栈，垃圾回收    
 
 	http://www.jcp.org/en/jsr/detail?id=133
 	http://ifeve.com/jmm-faq/
