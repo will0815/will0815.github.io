@@ -64,6 +64,210 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point2.html">Linux学习笔记2-find和xargs</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年01月23日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>Linux学习笔记2-find和xargs<br />
+Find命令的一般形式为：<br />
+find pathname -options [-print -exec -ok]<br />
+pathname find命令所查找的目录路径。例如用.来表示当前目录，用/来表示系统根目录。<br />
+-print find命令将匹配的文件输出到标准输出。<br />
+-exec find命令对匹配的文件执行该参数所给出的shell命令。相应命令的形式为’comm -and’{} \;，注意{ }和\；之间的空格。<br />
+-ok 和-exec的作用相同，只不过以一种更为安全的模式来执行该参数所给出的shell命令,在执行每一个命令之前，都会给出提示，让用户来确定是否执行。   </p>
+
+<p>find命令选项<br />
+find命令有很多选项或表达式，每一个选项前面跟随一个横杠-。让我们先来看一下该命令的主要选项，然后再给出一些例子。<br />
+-name 按照文件名查找文件。<br />
+-perm 按照文件权限来查找文件。 <br />
+-prune 使用这一选项可以使find命令不在当前指定的目录中查找，如果同时使用了
+- depth选项，那么- prune选项将被find命令忽略。<br />
+-user 按照文件属主来查找文件。<br />
+-group 按照文件所属的组来查找文件。<br />
+-mtime -n +n 按照文件的更改时间来查找文件， 
+- n表示文件更改时间距现在n天以内，+ n
+表示文件更改时间距现在n天以前。
+Find命令还有-atime和-ctime选项，但它们都和-mtime选项
+相似，所以我们在这里只介绍-mtime选项。
+-nogroup 查找无有效所属组的文件，即该文件所属的组在/etc/groups中不存在。<br />
+-nouser 查找无有效属主的文件，即该文件的属主在/etc/passwd中不存在。<br />
+-newer file1 !file2 查找更改时间比文件file1新但比文件file2旧的文件。<br />
+-type 查找某一类型的文件，诸如：<br />
+b - 块设备文件。<br />
+d - 目录。<br />
+c - 字符设备文件。<br />
+p - 管道文件。<br />
+l - 符号链接文件。<br />
+f - 普通文件。<br />
+-size n[c] 查找文件长度为n块的文件，带有c时表示文件长度以字节计。
+-depth 在查找文件时，首先查找当前目录中的文件，然后再在其子目录中查找。<br />
+-fstype 查找位于某一类型文件系统中的文件，这些文件系统类型通常可以在配置文件, /etc/fstab中找到，该配置文件中包含了本系统中有关文件系统的信息。
+-mount 在查找文件时不跨越文件系统mount点。<br />
+-follow 如果find命令遇到符号链接文件，就跟踪至链接所指向的文件。<br />
+-cpio 对匹配的文件使用cpio命令，将这些文件备份到磁带设备中。 </p>
+
+
+      <div class="readall"><a href="/blog/2015/01/23/Linux-point2.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/01/23/Linux-point1.html">Linux学习笔记1-文件安全与权限</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年01月23日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h1 id="section">文件安全与权限</h1>
+<p>包含内容：<br />
+• 文件和目录的权限。<br />
+• setuid。<br />
+• chown和chgrp。<br />
+• umask。<br />
+• 符号链接。  </p>
+
+<p>创建文件时系统保存文件的有关信息包括：<br />
+1、长度<br />
+2、类型<br />
+3、位置<br />
+4、所属用户以及哪些用户可以访问<br />
+5、i节点<br />
+6、修改时间 （-rwxr-xr-x：分别表示文件所有者、同组、以及其他用户对该文件的权限）  </p>
+
+<p>文件类型: 如上权限位-rwxr-xr-x 其中最前面的横杠即表示该文件的类型（这里为普通文件）<br />
+文件类型分为：<br />
+d 目录<br />
+l 符号链接。<br />
+s 套接字文件<br />
+b 块设备文件<br />
+c 字符设备文件<br />
+p 命名管道文件  </p>
+
+<p><strong>更改文件权限位命令：chmod</strong> 
+chmod [who] operator [permission] filename<br />
+who:<br />
+u 文件所有者<br />
+g 同组用户<br />
+o 其他用户<br />
+a 所有用户<br />
+operator：<br />
++ 增加权限<br />
+- 取消权限<br />
+= 设定权限<br />
+permission：<br />
+r 读<br />
+w 写<br />
+x 执行<br />
+s 文件所有者和组set-ID<br />
+t 粘性位*<br />
+l 给文件加锁 是其他用户无法访问<br />
+u  </p>
+
+<p>chmod命令的绝对模式<br />
+chmod [mode] file<br />
+如： chmod -R 755 myfile<br />
+755 分别对应文件所有者、同组、以及其他用户对该文件的权限<br />
+7：rwx(4+2+1)<br />
+5: rx(4+1)<br />
+-R 表示如果是目录及将对应操作应用于每一个子目录及文件  </p>
+
+<p>目录与文件<br />
+目录权限中<br />
+r：列出目录内容<br />
+w: 创建文件<br />
+x: 搜索和访问<br />
+如果一个目录只有执行（x）权限，但目录中有个可执行程序，只要用户知道它的路径仍然可以执行，此时用户不能进入目录但可以执行其中的程序
+目录的权限将会覆盖目录中文件的权限   </p>
+
+<p>chown和chgrp<br />
+当你创建一个文件时，你就是该文件的属主。一旦你拥有某个文件，就可以改变它的所<br />
+有权，把它的所有权交给另外一个/etc/passwd文件中存在的合法用户。可以使用用户名或用<br />
+户ID号来完成这一操作。在改变一个文件的所有权时，相应的suid也将被清除，这是出于安<br />
+全性的考虑。只有文件的属主和系统管理员可以改变文件的所有权。一旦将文件的所有权交<br />
+给另外一个用户，就无法再重新收回它的所有权。如果真的需要这样做，那么就只有求助于<br />
+系统管理员了。<br />
+chown命令的一般形式为：<br />
+chmod -R -h owner file<br />
+-R选项意味着对所有子目录下的文件也都进行同样的操作。-h选项意味着在改变符号链<br />
+接文件的属主时不影响该链接所指向的目标文件。<br />
+chgrp与chown类似  </p>
+
+<p>umask<br />
+umask命令确定创建文件的缺省模式。系统管理员必须要为你设置一个合理的umask值，以确保你创建的<br />
+文件具有所希望的缺省权限，防止其他非同组用户对你的文件具有写权限。
+在已经登录之后，可以按照个人的偏好使用umask命令来改变文件创建的缺省权限。相应<br />
+的改变直到退出该shell或使用另外的umask命令之前一直有效。
+一般来说,umask命令是在/etc/profile文件中设置的，每个用户在登录时都会引用这个文件，所以如果希望改变所有用户的umask，可以在该文件中加入相应的条目。如果希望永久性地设置自己的umask值，那么就把它放在自己$HOME目录下的.profile文件中。  </p>
+
+<p>符号链接<br />
+两种不同类型的链接：软链接（指向文件的指针)/硬链接<br />
+软链接可以理解为windows中的快捷方式 <br />
+该命令的一般形式为： <br />
+ln [-s] source_path target_path <br />
+其中的路径可以是目录也可以是文件。    </p>
+
+
+      <div class="readall"><a href="/blog/2015/01/23/Linux-point1.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2014/11/30/collaborative-filtering-algorithm.html">协同过滤简解</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2014年11月30日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="section">协同过滤算法</h2>
+<p><strong>Collaborative Filtering</strong><br />
+基于一组兴趣相同的用户进行推荐。协同过滤基于这样的假设：为用户找到他真正感兴趣的内容的好方法是，首先找他与他兴趣相似的用户，然后将这些用户感兴趣的内容推荐给此用户</p>
+
+<p>协同过滤技术可以分为三类：<br />
+基于用户（User-based）的协同过滤；<br />
+基于项目（Item-based）的协同过滤；<br />
+基于模型（Model-based）的协同过滤</p>
+
+<p>步骤一，收集可以代表用户兴趣的信息。<br />
+如传统的打分的方式，豆瓣上的“我来评价”之类也是这种方法。这种方式被称为“显式评分”方法。其缺点是，收集数据比较困难，用户通常并不愿意费力气为你贡献这种数据。这导致这种系统通常更多出现在实验室或者论文里面。在实际的商业系统中，即使使用了这种方法，也多会被包装为一种更加有好如游戏方式。<br />
+另外一种被认为更有效的方法是“隐式评分”方法。这种方法不需要用户直接输入评价数据，而是根据用户的行为特征由系统代替用户完成评价。一种研究得比较多的方法是 Web Mining 。电子商务网站在隐式评分的数据获取上有先天的优势，用户购买的商品记录是非常有用的数据。</p>
+
+<p>步骤二，最近邻搜索。<br />
+协同过滤的出发点是与你兴趣相同的一组用户，术语叫做“最近邻”。最近邻搜索的核心是计算两个用户的相似度。例如用户A和用户B，首先需要获取用户A和用户B所有的评分项，然后选择一个合适的相似度计算方法，基于评分项数据，计算得到用户A和用户B的相似度数值。<br />
+目前使用比较多的相似度算法包括，皮尔森相关系数（Person Correlation Coefficient）、余弦相似性（Cosine-based Similarity）以及调整余弦相似性（Adjusted Consine Similarity）</p>
+
+<p>步骤三，生成推荐结果。<br />
+有了最近邻集合，就可以对目标用户的兴趣进行预测，生成推荐结果。通常根据推荐目的的不同，可以进行多种形式的推荐。最常见的推荐结果有两种，Top-N 推荐和关联推荐。<br />
+Top-N 推荐，这里的 Top-N 和一般网站（比如 digg）上见到的“最热门”列表是不同的。热门列表是基于全部数据集产生的，它对每个人都是一样的；Top-N 推荐是针对单个用户产生的，它对每个人是不一样的：通过对你的最近邻用户进行统计，选择出现频率最高且在你的评分项目中不存在的项目作为推荐结果。豆瓣上的“排行”栏目，应该是传统的“热门”列表，不是 Top-N 推荐。<br />
+关联推荐，也称为基于关联规则的推荐。与传统关联规则针对全部数据进行挖掘不同的是，此方法仅对最近邻用户的购买记录进行关联规则挖掘。如果你曾经购买过关联规则左边的商品，而没有购买过关联规则右边的商品，那么就把右边的这个商品推荐给你。它最突出的优点就是，可以帮助你发现你感兴趣的而以前却从来没有注意过的商品。在 Amazon 介绍书的详细信息的页面上，可以看到这种推荐的一个实际应用。例如在《The Search》的页面上，Amazon 给我的推荐是，</p>
+
+      <div class="readall"><a href="/blog/2014/11/30/collaborative-filtering-algorithm.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
       <h1 class="post-title"><a href="/blog/2014/11/30/clustering-algorithm.html">聚类以及增量聚类的简单理解</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
@@ -473,335 +677,6 @@ HBase的数据安全机制之一：在插入数据时先写Hlog然后在写到�
 </code></pre>
 
       <div class="readall"><a href="/blog/2014/10/12/nosqlhbase.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/10/09/zookeeper-install.html">zookeeper install</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年10月09日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p><strong>Zookeeper集群安装配置</strong></p>
-
-<ol>
-  <li>
-    <p>修改zookeeper配置文件zoo.cfg</p>
-
-    <p>在Linux系统下解压zookeeper安装包zookeeper-3.4.3.tar.gz ，进入到conf目录，将zoo_sample.cfg拷贝一份命名为zoo.cfg（Zookeeper 在启动时会找这个文件作为默认配置文件），打开该文件进行修改为以下格式</p>
-
-    <pre><code> dataDir=/home/hadoop/temp/zookeeper/data
- server.23=192.168.6.23:2888:3888
- server.24=192.168.6.24:2888:3888
- server.25=192.168.6.25:2888:3888
-</code></pre>
-  </li>
-  <li>
-    <p>新建目录、新建并编辑myid文件
-（本次配置myid文件放在/home/hadoop/temp/zookeeper/data目录下）</p>
-
-    <pre><code> mkdir /home/hadoop/will/zookeeper/data	//dataDir目录
- vi /home/hadoop/temp/zookeeper/data/myid  注意myid文件中的内容为：Master中为0，Slave1中为1，Slave2中为2，分别与zoo.cfg中对应起来。
-</code></pre>
-  </li>
-  <li>
-    <p>同步安装包</p>
-
-    <p>将解压修改后的zookeeper-3.4.3文件夹分别拷贝到Master、Slave1、Slave2的相同zookeeper安装路径下。注意：myid文件的内容不是一样的，各服务器中分别是对应zoo.cfg中的设置。</p>
-  </li>
-  <li>
-    <p>启动zookeeper
- Zookeeper的启动与hadoop不一样，需要每个节点都执行，分别进入3个节点的zookeeper-3.4.3目录，启动zookeeper：</p>
-
-    <pre><code> bin/zkServer.sh start  注意：此时如果报错先不理会，需要继续在另两台服务器中执行相同操作。 
-</code></pre>
-  </li>
-  <li>
-    <p>检查zookeeper是否配置成功
- 待3台服务器均启动后，如果过程正确的话zookeeper应该已经自动选好leader，进入每台服务器的zookeeper-3.4.3目录，执行以下操作查看zookeeper启动状态：</p>
-
-    <pre><code> bin/zkServer.sh status  如果出现以下代码表示安装成功了。
-
- [java] view plaincopy
- JMX enabled by default  
- Using config: /home/hadoop/zookeeper-3.4.3/bin/../conf/zoo.cfg  
- Mode: follower	//或者有且只有一个leader
-</code></pre>
-  </li>
-</ol>
-
-<h2 id="zookeeper">2 - 解读zookeeper的配置项</h2>
-<p>zookeeper的默认配置文件为zookeeper/conf/zoo_sample.cfg，需要将其修改为zoo.cfg。其中各配置项的含义，解释如下：</p>
-
-<ol>
-  <li>
-    <p>tickTime：CS通信心跳数</p>
-
-    <p>Zookeeper 服务器之间或客户端与服务器之间维持心跳的时间间隔，也就是每个 tickTime 时间就会发送一个心跳。tickTime以毫秒为单位。
- 1.tickTime=2000  </p>
-  </li>
-  <li>
-    <p>initLimit：LF初始通信时限</p>
-
-    <p>集群中的follower服务器(F)与leader服务器(L)之间初始连接时能容忍的最多心跳数（tickTime的数量）。
- 1.initLimit=5  </p>
-  </li>
-  <li>
-    <p>syncLimit：LF同步通信时限</p>
-
-    <p>集群中的follower服务器与leader服务器之间请求和应答之间能容忍的最多心跳数（tickTime的数量）。
- 1.syncLimit=2  
- </p>
-  </li>
-  <li>
-    <p>dataDir：数据文件目录</p>
-
-    <p>Zookeeper保存数据的目录，默认情况下，Zookeeper将写数据的日志文件也保存在这个目录里。
- 1.dataDir=/home/michael/opt/zookeeper/data  </p>
-  </li>
-  <li>
-    <p>dataLogDir：日志文件目录</p>
-
-    <p>Zookeeper保存日志文件的目录。
- 1.dataLogDir=/home/michael/opt/zookeeper/log  </p>
-  </li>
-  <li>
-    <p>clientPort：客户端连接端口</p>
-
-    <p>客户端连接 Zookeeper 服务器的端口，Zookeeper 会监听这个端口，接受客户端的访问请求。
- 1.clientPort=2333  </p>
-  </li>
-  <li>
-    <p>服务器名称与地址：集群信息（服务器编号，服务器地址，LF通信端口，选举端口）</p>
-
-    <p>这个配置项的书写格式比较特殊，规则如下：
- 1.server.N=YYY:A:B  </p>
-
-    <p>其中N表示服务器编号，YYY表示服务器的IP地址，A为LF通信端口，表示该服务器与集群中的leader交换的信息的端口。B为选举端口，表示选举新leader时服务器间相互通信的端口（当leader挂掉时，其余服务器会相互通信，选择出新的leader）。一般来说，集群中每个服务器的A端口都是一样，每个服务器的B端口也是一样。但是当所采用的为伪集群时，IP地址都一样，只能时A端口和B端口不一样。
- 如：</p>
-
-    <pre><code> 1.server.0=192.168.6.23:2008:6008  
- 2.server.1=192.168.6.24:2008:6008  
- 3.server.2=192.168.6.25:2008:6008  
- 4.server.3=192.168.6.26:2008:6008  
-</code></pre>
-  </li>
-</ol>
-
-      <div class="readall"><a href="/blog/2014/10/09/zookeeper-install.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/10/09/Tuning-Hadoop.html">Tuning Hadoop</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年10月09日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h2 id="hadoop">Hadoop集群性能调优</h2>
-
-<p><strong>mapred-site.xml</strong></p>
-
-<ol>
-  <li>
-    <p>mapred.child.java.opts</p>
-
-    <p>配置每个map或reduce使用的内存数量。默认的是200M。网友推荐：如果内存是8G，CPU有8个核，那么就设置成1G就可以了。实际上，在map和reduce的过程中对内存的消耗并不大，但是如果配置的太小，则有可能出现”无可分配内存”的错误。对于Hadoop环境独占的机器可以考虑：总内存 / (Map/Reduce 并发数) * 80%</p>
-  </li>
-  <li>
-    <p>dfs.block.size </p>
-
-    <p>生的map来综合考量的。一般来说，文件大，集群数量少，还是建议将block size设置大一些的好。</p>
-  </li>
-  <li>
-    <p>mapred.compress.map.output </p>
-
-    <p>几乎所有会产生大量map output的hadoop作业，都能够通过将中间文件用Lzo进行压缩来提升性能。尽管lzo会使得cpu的load有所增高，但是reduce在shuffle阶段的disk IO通常都能节省不少时间，对job的性能有好处。
- 当采用map中间结果压缩的情况下，用户还可以选择压缩时采用另外几种压缩格式进行压缩，现在hadoop支持的压缩格式 有：GzipCodec，LzoCodec，BZip2Codec，LzmaCodec等压缩格式。通常来说，想要达到比较平衡的cpu和磁盘压缩 比，LzoCodec比较适合。但也要取决于job的具体情况。</p>
-
-    <pre><code> &lt;property&gt;
-     &lt;name&gt;mapred.compress.map.output&lt;/name&gt;
-     &lt;value&gt;true&lt;/value&gt;
-   &lt;/property&gt;
- &lt;property&gt; 
-     &lt;name&gt;mapred.map.output.compression.codec&lt;/name&gt; 
-     &lt;value&gt;com.hadoop.compression.lzo.LzoCodec&lt;/value&gt; 
- &lt;/property&gt;  
-</code></pre>
-  </li>
-  <li>
-    <p>mapred.tasktracker.map.tasks.maximum</p>
-
-    <p>The maximum number of map tasks that will be run simultaneously by a task tracker.</p>
-
-    <p>一个tasktracker最多可以同时运行的map任务数量
- 默认值：2
- mapred.tasktracker.map.tasks.maximum = cpu数量
- Sanders: 应该设置成为等于或略小于CPU总核数
- cpu数量 = 服务器CPU总核数 / 每个CPU的核数
- 服务器CPU总核数 = more  /proc/cpuinfo | grep ‘processor’ | wc -l
- 每个CPU的核数 = more  /proc/cpuinfo | grep ‘cpu cores’</p>
-  </li>
-  <li>
-    <p>mapred.map.tasks</p>
-
-    <p>The default number of map tasks per job
- 一个Job会使用task tracker的map任务槽数量，这个值 ≤ mapred.tasktracker.map.tasks.maximum
- 默认值：2
- 优化值：
- CPU数量 （我们目前的实践值）
- (CPU数量 &gt; 2) ? (CPU数量 * 0.75) : 1  （mapr的官方建议）</p>
-  </li>
-  <li>
-    <p>io.sort.mb    </p>
-
-    <p>每一个map都会对应存在一个内存 buffer， map会将已经产生的部分结果先写入到该buffer中，这个buffer默认是100MB大小. 当map的产生数据非常大时，并且把io.sort.mb调 大，那么map在整个计算过程中spill的次数就势必会降低，map task对磁盘的操作就会变少，如果map tasks的瓶颈在磁盘上，这样调整就会大大提高map的计算性能。</p>
-  </li>
-  <li>io.sort.spill.percent  <br />
- 这个值就是上述buffer的阈值，默认是0.8，既80%，当buffer中的数据达到这个阈值，后台线程会起来对buffer中已有的数据进行排序，然后写入磁盘，此时map输出的数据继续往剩余的20% buffer写数据，如果buffer的剩余20%写满，排序还没结束，map task被block等待。</li>
-  <li>
-    <p>io.sort.factor   <br />
- 当一个map task执行完之后，本地磁盘上(mapred.local.dir)有若干个spill文件，map task最后做的一件事就是执行merge sort，把这些spill文件合成一个文件（partition），有时候我们会自定义partition函数，就是在这个时候被调用。</p>
-
-    <p>当map的中间结果非常大，调大io.sort.factor，有利于减少merge次数，进而减少 map对磁盘的读写频率，有可能达到优化作业的目的。</p>
-
-    <p>默认是10</p>
-  </li>
-</ol>
-
-<p><strong>Reducer</strong></p>
-
-<ol>
-  <li>
-    <p>mapred.tasktracker.reduce.tasks.maximum</p>
-
-    <p>The maximum number of reduce tasks that will be run simultaneously by a task tracker.
- 一个task tracker最多可以同时运行的reduce任务数量
- 默认值：2
- 优化值： (CPU数量 &gt; 2) ? (CPU数量 * 0.50): 1 （mapr的官方建议）</p>
-
-    <p>如果使用fair的调度模式，设置成相同，应该是可以的，但是如果是FIFO模式，我个人认为在map或是reduce阶段，CPU的核数没有得到充分的利用，有些可惜，所以，FIFO模式下，还是尽量配置的map并发数量多于redcue并发数量</p>
-  </li>
-  <li>
-    <p>mapred.reduce.tasks
- The default number of reduce tasks per job. Typically set to 99% of the cluster’s reduce capacity, so that if a node fails the reduces can  still be executed in a single wave.</p>
-
-    <pre><code> 一个Job会使用task tracker的reduce任务槽数量
- 默认值：1
- 优化值：
- 1.0.95 * mapred.tasktracker.tasks.maximum
- 理由：启用95%的reduce任务槽运行task, recude task运行一轮就可以完成。剩余5%的任务槽永远失败任务，重新执行
- 2.1.75 * mapred.tasktracker.tasks.maximum
- 理由：因为reduce task数量超过reduce槽数，所以需要两轮才能完成所有reduce task。具体快的原理还没有完全理解.  io.sort.mb/io.sort.factor/ io.sort.spill.percent  和Map类似
-</code></pre>
-  </li>
-  <li>
-    <p>mapred.reduce.parallel.copies    </p>
-
-    <p>Reduce copy数据的线程数量，默认值是5</p>
-
-    <p>Reduce task在做shuffle时，实际上就是从不同的已经完成的map上去下载属于自己这个reduce的部分数据，由于map通常有许多个，所以对一个reduce来说，下载也可以是并行的从多个map下载
- Reduce到每个完成的Map Task copy数据（通过RPC调用），默认同时启动5个线程到map节点取数据。这个配置还是很关键的，如果你的map输出数据很大，有时候会发现map早就100%了，reduce一直在1% 2%。。。。。。缓慢的变化，那就是copy数据太慢了，5个线程copy 10G的数据，确实会很慢，这时就要调整这个参数了，但是调整的太大，又会事倍功半，容易造成集群拥堵，所以 Job tuning的同时，也是个权衡的过程，你要熟悉你的数据</p>
-  </li>
-  <li>
-    <p>mapred.job.shuffle.input.buffer.percent</p>
-
-    <p>Reduce在shuffle阶段对下载来的map数据，并不是立刻就写入磁盘的，而是会先缓存在内存中，然后当使用内存达到一定量的时候才刷入磁盘。当指定了JVM的堆内存最大值以后，上面这个配置项就是Reduce用来存放从Map节点取过来的数据所用的内存占堆内存的比例，默认是70%</p>
-  </li>
-  <li>
-    <p>mapred.job.shuffle.merge.percent </p>
-
-    <p>同Map的io.sort.spill.percent 一样，当shuffle时不是等到buffer满后再在flush到磁盘，而是达到一定阈值后写入磁盘，其默认值是0.66</p>
-  </li>
-  <li>
-    <p>mapred.job.reduce.input.buffer.percent </p>
-
-    <p>当reduce task真正进入reduce函数的计算阶段的时候，在读取reduce需要的数据时需要多 少的内存百分比来作为reduce读已经sort好的数据的buffer百分比。默认情况下为0，也就是说，默认情况下，reduce是全部从磁盘开始读 处理数据。如果这个参数大于0，那么就会有一定量的数据被缓存在内存并输送给reduce，当reduce计算逻辑消耗内存很小时，可以分一部分内存用来 缓存数据</p>
-  </li>
-  <li>
-    <p>mapred.inmem.merge.threshold</p>
-
-    <p>从map节点取过来的文件个数，当达到这个个数之后，也进行merger sort，然后写到reduce节点的本地磁盘；mapred.job.shuffle.merge.percent优先判断.默认值1000，完全取决于map输出数据的大小
- 默认值1000</p>
-  </li>
-</ol>
-
-      <div class="readall"><a href="/blog/2014/10/09/Tuning-Hadoop.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2014/10/09/Holographic-user-portrait.html">Holographic user portrait</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2014年10月09日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p><strong>用户洞察的定义和目的</strong></p>
-
-<p>  标准的用户洞察包含三个步骤：用户的数据管理、用户的需求分析、分析以后建立用户洞察力的应用。</p>
-
-<p>  用户的数据包括：历史销售数据、用户评价数据、用户注册数据、用户保修数据、用户维修数据、用户社交数据。</p>
-
-<p>用户的需求分析即对用户信息的理解，并进行适应性的建模，通过动态的行为和价值分析，识别用户的行为、价值和需求。在用户数据管理与用户需求分析的基础上，策划、开发和提供蕴含用户实质需求的差异化产品、业务或营销方案，开展有针对性的营销和拓展市场。</p>
-
-<p>   因此用户洞察的目的就是通过已有的需求或者已经产生的交易行为记录，对这些用户进行分析，然后做精准营销或者挖掘潜在需求。</p>
-
-<p><img src="/image/user-holograph.png" alt="" /></p>
-
-<p><strong>用户画像模型分析</strong></p>
-
-<p>   用户画像是用户洞察中最为关键的环节，比如说他是谁，他的消费能力如何，他过往的消费历史是什么，他的购物习惯和社交偏好是什么。通过简单的方式或者是非常有限的数据，就能够找到这些内容。建立起丰富的画像标签体系，这个体系需要涵盖我们希望描绘用户的各个方面，原始数据可以动态获取，也可以基于原始数据集。 可以过曾经的行为推测出来他的标签或者是他的特征。举例来说：如果她叫翠花，那么她是女生；如果他是给丈母娘买的，那么猜测他是男生；如果她在2012年10月份买了一段奶粉，2013年2月买了二段奶粉，那么可以推测她有孩子，并且孩子已经两岁半了；如果他买了高端的A.O史密斯热水器，那么他的消费能力相对比较强；如果一位用户关注科技，比如说可穿戴设备，那么他一定是科技达人；如果他买了净水器，他可能对空气净化器有要求。通过这些历史数据、SNS数据或者行为数据，探究同一个客户有没有二次购买的可能、以及关联购买能力。</p>
-
-<p><strong>基于交易数据的用户洞察</strong></p>
-
-<p>  根据电商的交易数据对个人消费者用户进行分析，从消费内容的数据中洞悉该消费者的消费习惯和其他信息：根据用户消费能力级别数据可以了解消费者的消费能力；根据用户的购买次数分析其购物习惯，判定他是否是网购达人；根据用户的上网时间分布数据，分析消费者的职业、作息等信息；根据用户单次消费金额数据分析消费者的购买能力和收入状况等。例如，一名消费者在2013年12月份到2014年4月份有五次消费，从他这五次交易的数据里面可以看到：他买了两次手机，还买了豆浆机、电视机；第一次购买手机的时候花了四千块，但第二次购买手机的时候只花了1950元。可以看出他热爱生活，是一个十足的数码控，消费能力很强，网购习惯很明显。当然这些数据不一定很准，但是也不需要它很准。只要能够做出画像就足够了。</p>
-
-<p>   通过分析，认识了他，知道他叫什么，也知道他在哪里，然后进行的就是用户洞察力的行为应用：
-电话他、短信他、邮件他、私信他，用打折、促销、返券、送积分、给链接、门店地址等方式吸引他、勾引他，全方位地缠绕他。这种全方位的营销到底能不能产生消费不敢肯定，但是这样的促销行为对一部分人一定会产生影响。</p>
-
-<p> 基于论坛数据的用户洞察在对论坛的研究方面，提取了某消费者论坛的监测数据，样本量是24万的用
-户，其中签到的人达到了80万，购买信息数达到200万。对论坛用户年龄的分析，可以发现绝大部分都是85后和90后，这两部分用户占到70%以上，因此可以认定这是一个新型的消费领域。从学历方面来分析这些用户，80%以上的用户为专科以上学历，这些人渴望成功，渴望归属和友情，他们勇敢、时尚，但是消费能力不够。</p>
-
-<p>   在这个论坛用户结构中，普通人占到50%多，而骨灰级的粉丝占到40.3%，粉丝如何运营就是目前面临的最大问题。现在很多企业在做社会化的营销，在做粉丝运营，但是坦率来讲，做的都不是特别理想。目前家电行业都在向互联网思维转变，在产品和技术方面，企业并没有多大的问题，如果说企业还有哪些欠缺的话，应该就是思维上的转变、专业人才的培育与经验的积累。</p>
-
-<p>   在粉丝运营中，找准时间可以让营销事半功倍。之前所有电商网站购销行为，基本上都是在晚上11点到12点。但是论坛则不一样，如果企业有官网或者是官微，那么可以发现粉丝活跃时间是在午休时间，如果要做活动宣传、广告或者品牌推广，午休时间是个好选择。如果是做抢购、秒杀、团购、促销的活动，最好放在晚上。</p>
-
-<p><strong>基于社会化用户的深度挖掘成为企业关注重点</strong></p>
-
-<p>   如果只是基于在现有数据的条件下，进行深入挖掘以及用户分析，可能还远远不够，这时需要建立一个目标交互引流的分析模型，这个模型通过对线上用户精确的界定抓取，用于企业的用户运营、品牌分析。随着互联网和社会化的发展，企业需要对线上用户进行精确的分析和洞察。</p>
-
-<p>   具体如何操作？首先要分析在互联网的行为下，用户对产品和品牌究竟有什么样的看法和观点，即满意度如何；还有产品是否迭代，原因是什么，企业的痛点又在哪里，有没有可能推送新的迭代创意或者是颠覆性的想法。通过这些方面，进行社会化的数据抓取，得到标准化的期望值，进行简单的画像，然后再进行分析，抽取相关的报表报告，提供给企业进行产品的设计和创意的输出。</p>
-
-<p><strong>构建基于社会化大数据的用户洞察和交互体系</strong></p>
-
-<p>   总结前面的分析，可以看出基于大数据的用户洞察和交互体系可以归纳为：基于营销为目的：分析用户的历史销售记录，基于用户群体，获取SNS的数据，处理清洗SNS数据，挖掘用户潜在需求，针对潜在客户进行精准的个性化、差异化营销和推荐，形成销售业绩。
-   基于洞察为目的：通过社会化媒体和电商平台找到关键的用户意见领袖和SNS用户，对他们细分得到相关的群体，通过社会化运营，可以对他进行调研，广告推送，或者搭建新一代用户调研系统，未来这将是能够解决产品跟进、快速升级的好平台。</p>
-
-      <div class="readall"><a href="/blog/2014/10/09/Holographic-user-portrait.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

@@ -5,9 +5,645 @@
     <description>willgo - 最好的从未错过</description>
     <link>index.html</link>
     <atom:link href="index.html/page/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sat, 28 Nov 2015 22:19:27 +0800</pubDate>
-    <lastBuildDate>Sat, 28 Nov 2015 22:19:27 +0800</lastBuildDate>
+    <pubDate>Sat, 26 Dec 2015 17:10:44 +0800</pubDate>
+    <lastBuildDate>Sat, 26 Dec 2015 17:10:44 +0800</lastBuildDate>
     <generator>Will.Quan</generator>
+    
+      <item>
+        <title>牛逼之路</title>
+        <description>&lt;转自&gt; [http://www.hollischuang.com/archives/489](http://www.hollischuang.com/archives/489)
+
+#  一、基础篇   
+##  1.1 JVM  
+ 
+1.1.1. Java内存模型，Java内存管理，Java堆和栈，垃圾回收    
+
+	http://www.jcp.org/en/jsr/detail?id=133
+	http://ifeve.com/jmm-faq/
+1.1.2. 了解JVM各种参数及调优  
+
+1.1.3. 学习使用Java工具  
+jps, jstack, jmap, jconsole, jinfo, jhat, javap, …
+
+	http://kenai.com/projects/btrace
+	http://www.crashub.org/
+	https://github.com/taobao/TProfiler
+	https://github.com/CSUG/HouseMD
+	http://wiki.cyclopsgroup.org/jmxterm
+	https://github.com/jlusdy/TBJMap
+1.1.4. 学习Java诊断工具  
+
+	http://www.eclipse.org/mat/
+	http://visualvm.java.net/oqlhelp.html
+1.1.5. 自己编写各种outofmemory，stackoverflow程序  
+
+	HeapOutOfMemory
+	Young OutOfMemory
+	MethodArea OutOfMemory
+	ConstantPool OutOfMemory
+	DirectMemory OutOfMemory
+	Stack OutOfMemory
+	Stack OverFlow
+1.1.6. 使用工具尝试解决以下问题，并写下总结  
+当一个Java程序响应很慢时如何查找问题  
+当一个Java程序频繁FullGC时如何解决问题，如何查看垃圾回收日志  
+当一个Java应用发生OutOfMemory时该如何解决，年轻代、年老代、永久代解决办法不同，导致原因也不同    
+1.1.7. 参考资料  
+
+	http://docs.oracle.com/javase/specs/jvms/se7/html/
+	http://www.cs.umd.edu/~pugh/java/memoryModel/
+	http://gee.cs.oswego.edu/dl/jmm/cookbook.html
+1.2. Java基础知识
+
+1.2.1. 阅读源代码
+
+	java.lang.String
+	java.lang.Integer
+	java.lang.Long
+	java.lang.Enum
+	java.math.BigDecimal
+	java.lang.ThreadLocal
+	java.lang.ClassLoader &amp;amp; java.net.URLClassLoader
+	java.util.ArrayList &amp;amp; java.util.LinkedList
+	java.util.HashMap &amp;amp; java.util.LinkedHashMap &amp;amp; java.util.TreeMap
+	java.util.HashSet &amp;amp; java.util.LinkedHashSet &amp;amp; java.util.TreeSet
+1.2.2. 熟悉Java中各种变量类型  
+1.2.3. 熟悉Java String的使用，熟悉String的各种函数  
+1.2.4. 熟悉Java中各种关键字  
+1.2.5. 学会使用List，Map，Stack，Queue，Set   
+
+	上述数据结构的遍历  
+	上述数据结构的使用场景   
+	Java实现对Array/List排序   
+	java.uti.Arrays.sort()  
+	java.util.Collections.sort()     
+	Java实现对List去重   
+	Java实现对List去重，并且需要保留数据原始的出现顺序  
+	Java实现最近最少使用cache，用LinkedHashMap  
+1.2.6. Java IO&amp;amp;Java NIO，并学会使用 
+  
+	java.io.*  
+	java.nio.*  
+	nio和reactor设计模式   
+	文件编码，字符集   
+1.2.7. Java反射与javassist  
+反射与工厂模式  
+java.lang.reflect.*  
+1.2.8. Java序列化  
+java.io. Serializable   
+什么是序列化，为什么序列化  
+序列化与单例模式   
+google序列化protobuf   
+1.2.9. 虚引用，弱引用，软引用   
+java.lang.ref.*   
+实验这些引用的回收   
+1.2.10. 熟悉Java系统属性   
+java.util.Properties   
+1.2.11. 熟悉Annotation用法   
+java.lang.annotation.*   
+1.2.12. JMS   
+javax.jms.*  
+1.2.13. JMX   
+java.lang.management.*   
+javax.management.*   
+1.2.14. 泛型和继承，泛型和擦除   
+1.2.15. 自动拆箱装箱与字节码   
+1.2.16. 实现Callback   
+1.2.17. java.lang.Void类使用   
+1.2.18. Java Agent，premain函数   
+java.lang.instrument   
+1.2.19. 单元测试    
+Junit，http://junit.org/   
+Jmockit，https://code.google.com/p/jmockit/   
+djUnit，http://works.dgic.co.jp/djunit/   
+1.2.20. Java实现通过正则表达式提取一段文本中的电子邮件，并将@替换为#输出   
+java.lang.util.regex.*   
+1.2.21. 学习使用常用的Java工具库   
+commons.lang, commons.*…   
+guava-libraries   
+1.2.22. 什么是API&amp;amp;SPI  
+	
+	http://en.wikipedia.org/wiki/Application_programming_interface
+	http://en.wikipedia.org/wiki/Service_provider_interface
+1.2.23. 参考资料
+
+	JDK src.zip 源代码
+	http://openjdk.java.net/
+	http://commons.apache.org/
+	https://code.google.com/p/guava-libraries/
+	http://netty.io/
+	http://stackoverflow.com/questions/2954372/difference-between-spi-and-api
+	http://stackoverflow.com/questions/11404230/how-to-implement-the-api-spi-pattern-in-java
+1.3. Java并发编程
+ 
+
+1.3.1. 阅读源代码，并学会使用  
+
+	java.lang.Thread  
+	java.lang.Runnable  
+	java.util.concurrent.Callable  
+	java.util.concurrent.locks.ReentrantLock  
+	java.util.concurrent.locks.ReentrantReadWriteLock  
+	java.util.concurrent.atomic.Atomic*  
+	java.util.concurrent.Semaphore  
+	java.util.concurrent.CountDownLatch
+	java.util.concurrent.CyclicBarrier
+	java.util.concurrent.ConcurrentHashMap
+	java.util.concurrent.Executors
+1.3.2. 学习使用线程池，自己设计线程池需要注意什么  
+1.3.3. 锁  
+什么是锁，锁的种类有哪些，每种锁有什么特点，适用场景是什么  
+在并发编程中锁的意义是什么  
+1.3.4. synchronized的作用是什么，synchronized和lock  
+1.3.5. sleep和wait  
+1.3.6. wait和notify  
+1.3.7. 写一个死锁的程序  
+1.3.8. 什么是守护线程，守护线程和非守护线程的区别以及用法  
+1.3.9. volatile关键字的理解  
+C++ volatile关键字和Java volatile关键字  
+happens-before语义  
+编译器指令重排和CPU指令重排  
+http://en.wikipedia.org/wiki/Memory_ordering  
+http://en.wikipedia.org/wiki/Volatile_variable  
+http://preshing.com/20130702/the-happens-before-relation/  
+1.3.10. 以下代码是不是线程安全？为什么？如果为count加上volatile修饰是否能够做到线程安全？你觉得该怎么做是线程安全的？  
+	
+	public class Sample {
+	private static int count = 0;
+	public static void increment() {
+	count++;
+	}
+	}
+1.3.11. 解释一下下面两段代码的差别  
+	
+	// 代码1
+	public class Sample {
+	private static int count = 0;
+	synchronized public static void increment() {
+	count++;
+	}
+	}
+	
+	// 代码2
+	public class Sample {
+	private static AtomicInteger count = new AtomicInteger(0);
+	public static void increment() {
+	count.getAndIncrement();
+	}
+	}
+1.3.12. 参考资料
+
+	
+	http://book.douban.com/subject/10484692/
+	http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
+#二、 进阶篇
+
+2.1. Java底层知识
+
+	2.1.1. 学习了解字节码、class文件格式
+	
+	http://en.wikipedia.org/wiki/Java_class_file
+	http://en.wikipedia.org/wiki/Java_bytecode
+	http://en.wikipedia.org/wiki/Java_bytecode_instruction_listings
+	http://www.csg.ci.i.u-tokyo.ac.jp/~chiba/javassist/
+	http://asm.ow2.org/
+2.1.2. 写一个程序要求实现javap的功能（手工完成，不借助ASM等工具）  
+如Java源代码：
+
+	public static void main(String[] args) {
+	int i = 0;
+	i += 1;
+	i *= 1;
+	System.out.println(i);
+	}
+	编译后读取class文件输出以下代码：
+	public static void main(java.lang.String[]);
+	Code:
+	Stack=2, Locals=2, Args_size=1
+	0:   iconst_0
+	1:   istore_1
+	2:   iinc    1, 1
+	5:   iload_1
+	6:   iconst_1
+	7:   imul
+	8:   istore_1
+	9:   getstatic       #2; //Field java/lang/System.out:Ljava/io/PrintStream;
+	12:  iload_1
+	13:  invokevirtual   #3; //Method java/io/PrintStream.println:(I)V
+	16:  return
+	LineNumberTable:
+	line 4: 0
+	line 5: 2
+	line 6: 5
+	line 7: 9
+	line 8: 16
+2.1.3. CPU缓存，L1，L2，L3和伪共享  
+http://duartes.org/gustavo/blog/post/intel-cpu-caches/  
+http://mechanical-sympathy.blogspot.com/2011/07/false-sharing.html  
+2.1.4. 什么是尾递归  
+2.1.5. 熟悉位运算   
+用位运算实现加、减、乘、除、取余   
+2.1.6. 参考资料   
+	
+	http://book.douban.com/subject/1138768/
+	http://book.douban.com/subject/6522893/
+	http://en.wikipedia.org/wiki/Java_class_file
+	http://en.wikipedia.org/wiki/Java_bytecode
+	http://en.wikipedia.org/wiki/Java_bytecode_instruction_listings
+2.2. 设计模式  
+
+2.2.1. 实现AOP   
+CGLIB和InvocationHandler的区别  
+http://cglib.sourceforge.net/  
+动态代理模式  
+Javassist实现AOP  
+http://www.csg.ci.i.u-tokyo.ac.jp/~chiba/javassist/  
+ASM实现AOP  
+http://asm.ow2.org/   
+2.2.2. 使用模板方法设计模式和策略设计模式实现IOC   
+2.2.3. 不用synchronized和lock，实现线程安全的单例模式  
+2.2.4. nio和reactor设计模式  
+2.2.5. 参考资料  
+http://asm.ow2.org/  
+http://cglib.sourceforge.net/  
+http://www.javassist.org/  
+2.3. 网络编程知识  
+2.3.1. Java RMI，Socket，HttpClient  
+2.3.2. 用Java写一个简单的静态文件的HTTP服务器  
+实现客户端缓存功能，支持返回304  
+实现可并发下载一个文件  
+使用线程池处理客户端请求  
+使用nio处理客户端请求  
+支持简单的rewrite规则   
+上述功能在实现的时候需要满足“开闭原则”   
+2.3.3. 了解nginx和apache服务器的特性并搭建一个对应的服务器   
+http://nginx.org/  
+http://httpd.apache.org/   
+2.3.4. 用Java实现FTP、SMTP协议  
+2.3.5. 什么是CDN？如果实现？DNS起到什么作用？  
+搭建一个DNS服务器  
+搭建一个 Squid 或 Apache Traffic Server 服务器  
+http://www.squid-cache.org/  
+http://trafficserver.apache.org/  
+http://en.wikipedia.org/wiki/Domain_Name_System  
+2.3.6. 参考资料  
+	
+	http://www.ietf.org/rfc/rfc2616.txt
+	http://tools.ietf.org/rfc/rfc5321.txt
+	http://en.wikipedia.org/wiki/Open/closed_principle
+2.4. 框架知识  
+spring，spring mvc，阅读主要源码  
+ibatis，阅读主要源码  
+用spring和ibatis搭建java server  
+2.5. 应用服务器知识  
+熟悉使用jboss，https://www.jboss.org/overview/  
+熟悉使用tomcat，http://tomcat.apache.org/  
+熟悉使用jetty，http://www.eclipse.org/jetty/  
+
+# 三、 高级篇
+
+3.1. 编译原理知识
+
+3.1.1. 用Java实现以下表达式解析并返回结果（语法和Oracle中的select sysdate-1 from dual类似）  
+sysdate  
+sysdate - 1  
+sysdate - 1/24  
+sysdate - 1/(12*2)   
+3.1.2. 实现对一个List通过DSL筛选  
+
+	QList&amp;lt;Map&amp;lt;String, Object&amp;gt;&amp;gt; mapList = new QList&amp;lt;Map&amp;lt;String, Object&amp;gt;&amp;gt;;
+	mapList.add({&quot;name&quot;: &quot;hatter test&quot;});
+	mapList.add({&quot;id&quot;: -1,&quot;name&quot;: &quot;hatter test&quot;});
+	mapList.add({&quot;id&quot;: 0, &quot;name&quot;: &quot;hatter test&quot;});
+	mapList.add({&quot;id&quot;: 1, &quot;name&quot;: &quot;test test&quot;});
+	mapList.add({&quot;id&quot;: 2, &quot;name&quot;: &quot;hatter test&quot;});
+	mapList.add({&quot;id&quot;: 3, &quot;name&quot;: &quot;test hatter&quot;});
+	mapList.query(&quot;id is not null and id &amp;gt; 0 and name like &#39;%hatter%&#39;&quot;);
+	要求返回列表中匹配的对象，即最后两个对象；
+
+3.1.3. 用Java实现以下程序（语法和变量作用域处理都和JavaScript类似）：
+代码：
+	
+	var a = 1;
+	var b = 2;
+	var c = function() {
+	var a = 3;
+	println(a);
+	println(b);
+	};
+	c();
+	println(a);
+	println(b);
+	输出：
+	3
+	2
+	1
+	2
+3.1.4. 参考资料  
+http://en.wikipedia.org/wiki/Abstract_syntax_tree  
+https://javacc.java.net/  
+http://www.antlr.org/  
+3.2. 操作系统知识  
+Ubuntu  
+Centos  
+使用linux，熟悉shell脚本  
+3.3. 数据存储知识  
+  
+3.3.1. 关系型数据库  
+MySQL  
+如何看执行计划  
+如何搭建MySQL主备  
+binlog是什么  
+Derby，H2，PostgreSQL  
+SQLite  
+3.3.2. NoSQL  
+Cache  
+Redis  
+Memcached  
+Leveldb  
+Bigtable  
+HBase  
+Cassandra  
+Mongodb  
+图数据库  
+neo4j  
+3.3.3. 参考资料  
+	
+	http://db-engines.com/en/ranking
+	http://redis.io/
+	https://code.google.com/p/leveldb/
+	http://hbase.apache.org/
+	http://cassandra.apache.org/
+	http://www.mongodb.org/
+	http://www.neo4j.org/
+3.4. 大数据知识  
+
+3.4.1. Zookeeper，在linux上部署zk  
+3.4.2. Solr，Lucene，ElasticSearch  
+在linux上部署solr，solrcloud，，新增、删除、查询索引  
+3.4.3. Storm，流式计算，了解Spark，S4  
+在linux上部署storm，用zookeeper做协调，运行storm hello world，local和remote模式运行调试storm topology。  
+3.4.4. Hadoop，离线计算   
+Hdfs：部署NameNode，SecondaryNameNode，DataNode，上传文件、打开文件、更改文件、删除文件
+MapReduce：部署JobTracker，TaskTracker，编写mr job  
+Hive：部署hive，书写hive sql，得到结果  
+Presto：类hive，不过比hive快，非常值得学习  
+3.4.5. 分布式日志收集flume，kafka，logstash  
+3.4.6. 数据挖掘，mahout  
+3.4.7. 参考资料  
+
+	http://zookeeper.apache.org/
+	https://lucene.apache.org/solr/
+	https://github.com/nathanmarz/storm/wiki
+	http://hadoop.apache.org/
+	http://prestodb.io/
+	http://flume.apache.org/，http://logstash.net/，http://kafka.apache.org/
+	http://mahout.apache.org/
+3.5. 网络安全知识  
+
+3.5.1. 什么是DES、AES  
+3.5.2. 什么是RSA、DSA  
+3.5.3. 什么是MD5，SHA1  
+3.5.4. 什么是SSL、TLS，为什么HTTPS相对比较安全  
+3.5.5. 什么是中间人攻击、如果避免中间人攻击  
+3.5.6. 什么是DOS、DDOS、CC攻击  
+3.5.7. 什么是CSRF攻击  
+3.5.8. 什么是CSS攻击  
+3.5.9. 什么是SQL注入攻击  
+3.5.10. 什么是Hash碰撞拒绝服务攻击  
+3.5.11. 了解并学习下面几种增强安全的技术  
+
+http://www.openauthentication.org/  
+HOTP http://www.ietf.org/rfc/rfc4226.txt  
+TOTP http://tools.ietf.org/rfc/rfc6238.txt  
+OCRA http://tools.ietf.org/rfc/rfc6287.txt  
+http://en.wikipedia.org/wiki/Salt_(cryptography)  
+3.5.12. 用openssl签一个证书部署到apache或nginx  
+3.5.13. 参考资料
+	
+	http://en.wikipedia.org/wiki/Cryptographic_hash_function  
+	http://en.wikipedia.org/wiki/Public-key_cryptography
+	http://en.wikipedia.org/wiki/Transport_Layer_Security
+	http://www.openssl.org/
+	https://code.google.com/p/google-authenticator/
+
+#四、 扩展篇
+
+4.1. 相关知识
+
+4.1.1. 云计算，分布式，高可用，可扩展  
+4.1.2. 虚拟化   
+https://linuxcontainers.org/   
+http://www.linux-kvm.org/page/Main_Page  
+http://www.xenproject.org/  
+https://www.docker.io/  
+4.1.3. 监控   
+http://www.nagios.org/  
+http://ganglia.info/  
+4.1.4. 负载均衡  
+http://www.linuxvirtualserver.org/  
+4.1.5. 学习使用git  
+https://github.com/  
+https://git.oschina.net/  
+4.1.6. 学习使用maven  
+http://maven.apache.org/   
+4.1.7. 学习使用gradle   
+http://www.gradle.org/   
+4.1.8. 学习一个小语种语言  
+Groovy  
+Scala  
+LISP, Common LISP, Schema, Clojure   
+R  
+Julia  
+Lua  
+Ruby  
+4.1.9. 尝试了解编码的本质  
+  
+
+五、 推荐书籍  
+	
+	《深入Java虚拟机》
+	《深入理解Java虚拟机》
+	《Effective Java》
+	《七周七语言》
+	《七周七数据》
+	《Hadoop技术内幕》
+	《Hbase In Action》
+	《Mahout In Action》
+	《这就是搜索引擎》
+	《Solr In Action》
+	《深入分析Java Web技术内幕》
+	《大型网站技术架构》
+	《高性能MySQL》
+	《算法导论》
+	《计算机程序设计艺术》
+	《代码大全》
+	《JavaScript权威指南》
+	
+&lt;/转自&gt;
+</description>
+        <pubDate>Sun, 20 Dec 2015 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2015/12/20/javaniubizhilu.html</link>
+        <guid isPermaLink="true">index.html/blog/2015/12/20/javaniubizhilu.html</guid>
+        
+        <category>不懂</category>
+        
+      </item>
+    
+      <item>
+        <title>flume与hive/impala配合使用时问题记录</title>
+        <description>&lt;h3 id=&quot;flumehiveimpala---&quot;&gt;工作中日志收集以及分析  通过Flume+hive/impala实现 期间遇到一些问题  记录：&lt;/h3&gt;
+
+&lt;h3 id=&quot;section&quot;&gt;问题一：&lt;/h3&gt;
+&lt;p&gt;使用过程中时常会遇到.tmp文件无法找到的问题。  &lt;br /&gt;
+impala 查询时这个问题尤为严重。 hive查询时也会时常出现这个问题。&lt;br /&gt;
+明白Flume写文件处理方式，以及hive/impala 数据查询时的实际处理方式，就能明白为什么会出现这些问题   &lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Flume日志写入操作时 会将正在写入的文件加上.tmp后缀。 当文件写入完成（一定时间没有写入/达到设置的阀值）时，会将./tmp文件重命名，去掉.tmp后缀  &lt;/li&gt;
+  &lt;li&gt;Hive查询时是根据hive元数据库中的信息进行文件扫描，即对应map/reduce的输入。  &lt;/li&gt;
+  &lt;li&gt;Impala共享hive的元数据  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;所以这时就会出现上面遇到的问题&lt;br /&gt;
+1. 如果Hive在执行过程中，恰好Flume对写入文件进行了重命名操作，即将xxx.tmp重命名为xxx，这时Hive会报错  .tmp找不到。。。&lt;br /&gt;
+2. impala这个错  更加平凡是因为impala同步hive元数据并不是实时操作，所以xxx.tmp被重命名掉的概率更大  &lt;/p&gt;
+
+&lt;h6 id=&quot;section-1&quot;&gt;处理办法：&lt;/h6&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;impala的简单解决办法 即手动同步元数据。 执行refresh 文件对应的表， 或者直接执行 invalidate metadata 刷新元数据  &lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;hive的处理办法 &lt;br /&gt;
+因为hdfs java api 读取HDFS文件时，会忽略以”.”和”_”开头的文件&lt;br /&gt;
+类似于Linux中.xx是隐藏的一样，所以应用程序读取HDFS文件时默认也不读取.xxx和_xxx这样名称的文件&lt;br /&gt;
+所以可以利用这一点 将Flume正在写入的.tmp文件设置为以‘.’开头，这样可以避免.tmp文件被读取到
+Flume配置项：hdfs.inUsePrefix&lt;br /&gt;
+另一种解决办法 重写hive的PathFilter  &lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt; package com.willgo.util;
+	
+ import java.io.IOException;
+ import java.util.ArrayList;
+ import java.util.List;
+ import org.apache.hadoop.fs.Path;
+ import org.apache.hadoop.fs.PathFilter;
+	
+ public class FileFilterExcludeTmpFiles implements PathFilter {
+     public boolean accept(Path p) {
+         String name = p.getName();
+         return !name.startsWith(“_”) &amp;amp;&amp;amp; !name.startsWith(“.”) &amp;amp;&amp;amp; !name.endsWith(“.tmp”);
+     }
+ }
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;hive-site.xml：  &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;	&amp;lt;property&amp;gt;
+	    &amp;lt;name&amp;gt;mapred.input.pathFilter.class&amp;lt;/name&amp;gt;
+	    &amp;lt;value&amp;gt;com.willgo.util.FileFilterExcludeTmpFiles&amp;lt;/value&amp;gt;
+	&amp;lt;/property&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;section-2&quot;&gt;问题二：&lt;/h3&gt;
+
+&lt;p&gt;数据写入延时&lt;br /&gt;
+日志上报端 反映日志上报到集群后 查询时有不同情况的延时问题。 但自己测试时有几乎没有延时的问题。。。  &lt;br /&gt;
+考虑如下：&lt;br /&gt;
+1. Flume channel选择 （but 已是内存）&lt;br /&gt;
+2. hdfs写入机制，hdfs文件按block存储，正在写入的block 对文件系统是隐藏的。&lt;br /&gt;
+hdfs文件原则：  &lt;br /&gt;
+创建文件，这个文件可以立即可见&lt;br /&gt;
+写入文件的数据则不被保证可见了，哪怕是执行了刷新操作(flush/sync)。只有数据量大于1个BLOCK时，第一个BLOCK的数据才会被看到，后续的BLOCK也同样的特性。正在写入的BLOCK始终不会被其他用户看到！ &lt;br /&gt;
+基于以上两点  遇到的延时问题 基本上判断是第二点引起的。&lt;br /&gt;
+###### 处理办法：&lt;br /&gt;
+调小Flume写入文件分割的阀值：hdfs.rollInterval。&lt;br /&gt;
+现在是按小时分割，是否可以考虑按分钟分割……&lt;br /&gt;
+这样又将产生大量小文件的问题以及namenode压力问题，小文件可以采用线下合并以及使用归档的方式处理。&lt;/p&gt;
+
+</description>
+        <pubDate>Sat, 28 Nov 2015 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2015/11/28/flume-hvie-question.html</link>
+        <guid isPermaLink="true">index.html/blog/2015/11/28/flume-hvie-question.html</guid>
+        
+        <category>hadoop</category>
+        
+      </item>
+    
+      <item>
+        <title>博客操作记录</title>
+        <description>&lt;p&gt;在_config.yml配置站点信息，详细配置如下：&lt;/p&gt;
+
+&lt;p&gt;blog:
+	name:                  # 博客名称
+	description:           # 博客描述
+	title:                 # 网页标题
+	url:                   # 博客地址
+	duoshuo:               # 多说ID
+	tongji:                # 百度统计ID
+	qiniu:                 # 七牛云地址
+author:
+	name:                  # 作者名称
+	email:                 # 邮箱地址
+	weibo:                 # 微博地址
+	github:                # GitHub地址
+	douban:
+		name:              # 豆瓣地址名称
+		key:               # 豆瓣API Key&lt;/p&gt;
+
+&lt;p&gt;多说评论框
+_posts文章默认开启评论框，而简版页面默认关闭。
+_posts文章可以在开头设置duoshuo: false来关闭。
+简版页面可以在开头设置duoshuo: true来开启。&lt;/p&gt;
+
+&lt;p&gt;MathJax数学公式
+需要在页面开头添加math: true来开启&lt;/p&gt;
+
+&lt;p&gt;在需要用到公式的地方用[ ]或&lt;script type=&quot;math/tex&quot;&gt; &lt;/script&gt;括起来&lt;/p&gt;
+
+&lt;p&gt;例如：&lt;/p&gt;
+
+&lt;p&gt;行内公式：
+\E=mc^2\&lt;/p&gt;
+
+&lt;p&gt;行间公式：
+&lt;script type=&quot;math/tex&quot;&gt;E=mc^2&lt;/script&gt;
+效果：&lt;/p&gt;
+
+&lt;p&gt;\E=mc^2\&lt;/p&gt;
+
+&lt;p&gt;E=mc2
+创建文章/页面&lt;br /&gt;
+定位到博客目录，可以运行以下命令  &lt;/p&gt;
+
+&lt;p&gt;创建文章：rake post title=”Post Name”&lt;br /&gt;
+创建简版页面：rake life title=”Page Name”&lt;br /&gt;
+创建页面： rake page title=”Page name”&lt;br /&gt;
+页面的使用 &lt;br /&gt;
+修改的都是markdown文件   &lt;/p&gt;
+
+&lt;p&gt;普通页面 &lt;br /&gt;
+layout项改为blog &lt;br /&gt;
+简版页面 &lt;br /&gt;
+layout项改为life &lt;br /&gt;
+文章 &lt;br /&gt;
+_posts文件夹下的markdown文件的layout项改为post，使用简版页面就改成life&lt;br /&gt;
+生成静态博客&lt;br /&gt;
+把你的博客推送到GitHub或者其它支持Jekyll的代码托管网站就可以了。&lt;br /&gt;
+具体可以到Jekyll官网或GitHub Pages查看详细教程。  &lt;/p&gt;
+
+</description>
+        <pubDate>Wed, 28 Oct 2015 00:00:00 +0800</pubDate>
+        <link>index.html/blog/2015/10/28/bokecaozuo.html</link>
+        <guid isPermaLink="true">index.html/blog/2015/10/28/bokecaozuo.html</guid>
+        
+        <category>f2e</category>
+        
+      </item>
     
       <item>
         <title>Sqoop密码和SA用户问题记录</title>
@@ -805,371 +1441,6 @@ Hadoop 2.6中有许多的改进使其能够进一步支持分层存储。你可�
         <pubDate>Sun, 20 Sep 2015 00:00:00 +0800</pubDate>
         <link>index.html/blog/2015/09/20/duoyuan-ETL.html</link>
         <guid isPermaLink="true">index.html/blog/2015/09/20/duoyuan-ETL.html</guid>
-        
-        <category>hadoop</category>
-        
-      </item>
-    
-      <item>
-        <title>数据平台拓展</title>
-        <description>&lt;h3 id=&quot;section&quot;&gt;一、数据的位置&lt;/h3&gt;
-&lt;p&gt;数据存储数据存储，管理的就是数据的位置，在CPU的位置，数据相对其他数据的位置，CPU善于处理顺序性操作数据指令，即：数据预取。&lt;br /&gt;
-随机读取操作即成为瓶颈，预取到缓存、前端总线的数据都是无效的。传统意义上说，磁盘的存取性能要弱于内存，但是要分随机存取及顺序存取不同的场景下讨论。&lt;br /&gt;
-#####1、数据存储和更新&lt;br /&gt;
-追加写可以让我们尽量保持顺序存储文件。但是当数据要进行更新的时候，有两种选择，一种是在数据原地进行更新操作，这样我们就有了随机IO操作。另一种是把更新都放到文件末尾，然后需要读取更新数据的时候进行替换。&lt;br /&gt;
-#####2、读取数据&lt;br /&gt;
-一下子读取整个文件，也是很耗费时间的事情，例如数据库中的全表扫描。当我们读取文件中某一个字段时候，我们需要索引。索引的方式有多种，我们可以用一种简单的固定数值大小的有序数组来做索引，数组里存的是当前数据在文件中的存储偏移量。其他索引技术，如hash索引，位图索引等。&lt;br /&gt;
-索引相当于在数据之上又加了一层树状结构，可以迅速的读取数据。但是打破了我们前面讲的数据的追加写，这些数据都是根据索引随机写入的。在数据库上建立索引的时候都会遇到这个问题，在传统的机械式磁盘上，这个问题会造成千倍的性能差异。  &lt;br /&gt;
-有三种方法可以解决上述问题：&lt;br /&gt;
-1）把索引放到内存中，可以随机存储和读取，把数据顺序存储到硬盘上。MongoDB，Cassandra都是采取这种方式。这种方式有一个弊端是存储的数据量受限于内存的大小，数据量一大，索引也增大，数据就饱和了。   &lt;/p&gt;
-
-&lt;p&gt;2）第二种方式是把大的索引结构，拆成很多小的索引来存储。在内存中批量进来的数据，当积累到一个预定的量，就排序然后顺序写到磁盘上，本身就是一个小的索引，数据存储完，最后加一块小的全局索引数据即可。这样读取数据的时候，要遍历一些小的索引，会有随机读取。本质是用部分小的随机读换取了整体的数据顺序存储。我们通过在内存中保存一个元索引或者Bloom filter来实现处理那些小索引的低延迟。&lt;br /&gt;
-日志结构的归并树（log structed merge tree）是一种典型的实现，
-	有三个特征：&lt;br /&gt;
-	a)一组小的、不变的索引集。 &lt;br /&gt;
-	b)只能追加写 ，合并重复的文件。 &lt;br /&gt;
-	c)少量的内存索引消耗换来读取的性能提升。这是一种写优化索引结构。HBase、Cassandra、Bigtable都是通过这种比较小的内存开销来实现读取和存储的平衡。  &lt;/p&gt;
-
-&lt;p&gt;3）列式存储或者面向列的存储。纯列式存储和谷歌bigtable那种列式存储还是有所不同的，，虽然占用了同一个名字。列式存储很好理解，就是把数据按照列顺序存储到文件中，读取的时候只读需要的列。列式存储需要保持每一列数据都有相同的顺序，即行N在每一列都有相同的偏移。这很重要，因为同一查询中可能要返回多个列的数据，同时可能我们要对多列直接进行连接。每一列保持同样的顺序我们可以用非常简单的循环实现上述操作，且都是高效的CPU和缓存操作。&lt;br /&gt;
-列式存储的缺点是更新数据的时候需要更新每一个列文件中的相应数据，一个常用的方法就是类似LSM那种批量内存写的方式。当查询只是返回某几列数据，列式存储可以大规模减少磁盘IO。除此之外，列式存储的数据往往属于同一类型，可以进行高效的压缩，一些低延迟，高压缩率的扫描宽度、位填充算法都试用。即使对于未压缩的数据流，同时可以进行针对其编码格式的预取。 &lt;br /&gt;
-列式存储尤其适用于大表扫描，求均值、最大最小值、分组等聚合查询场景。列式存储天然的保持了一列中数据的顺序性，方便两列数据进行关联，而heap-file index结构关联时候，一份数据可以按顺序读取，则另一份数据就会有随机读取了。&lt;br /&gt;
-典型优势总结：&lt;br /&gt;
-1）列式压缩，低IO &lt;br /&gt;
-2）列中每行数据保持顺序，可以按照行id进行关联合并&lt;br /&gt;
-3）压缩后的数据依然可以进行预取&lt;br /&gt;
-4）数据延迟序列化&lt;br /&gt;
-通过heap-file结构把索引存储在内存，是很多NoSQL数据库及一些关系型数据库的首选，例如Riak，CouchBase和MongoDB，模型简单并且运行良好。 &lt;br /&gt;
-要处理更大量的数据，LSM技术应用更为广泛，提供了同时满足高效存储和读取效率的基于磁盘的存取结构。HBase、Cassandra、RocksDB, LevelDB，甚至MongoDB最新版也支持这种技术。   &lt;/p&gt;
-
-&lt;p&gt;列式存储在MPP数据库里面应用广泛，例如RedShift、Vertica及hadoop上的Parquet等。这种结构适合需要大表扫描的数据处理问题，数据聚合类操作（最大最小值）更是他的主战场。  &lt;/p&gt;
-
-&lt;h3 id=&quot;section-1&quot;&gt;二、并行化&lt;/h3&gt;
-&lt;p&gt;把数据放到分布式集群中运算，有两点最为重要：分区（partition）和副本（replication）。
-分区又被称为sharding，在随机访问和暴力扫描任务下都表现不错。通过hash函数把数据分布到多个机器上，很像单机上使用的hashtable，只不过这儿每一个桶都被放到了不同的机器上。这样可以通过hash函数直接去存储数据的机器上把数据取出来，这种模式有很强的扩展性，也是唯一可以根据客户端请求数线性扩展的模式。请求会被独立分发到某一机器上单独处理。  &lt;br /&gt;
-我们通过分区可以实现批量任务的并行化，例如聚合函数或者更复杂的聚类或者其他机器学习算法，我们通过广播的方式在所有机器上使任务同时执行。我们还可以运行分治策略来使得高计算的任务在一个更短的时间内解决。批处理系统处理大型的计算问题有不错的效果，但是它的并发性不好，因为执行任务的时候会非常消耗集群的资源。所以分区方式在两个极端情况非常简单：1）直接hash访问 2）广播，然后分而治之，在这两种情况之间还有中间地带，那就是在NoSQL数据库中常用的二级索引技术。&lt;/p&gt;
-
-&lt;p&gt;二级索引是指不是构建在主键上的索引，意味着数据不会因为索引的值而进行分区。不能直接通过hash函数去路由到数据本身。我们必须把请求广播到所有节点上，这样会限制了并发性，每一个请求都会卷入所有的节点。因此好多基于key-value的数据库拒绝引入二级索引，虽然它很有价值，例如Hbase和Voldemort。也有些数据库系统包含它了，因为它有用，例如Cassandra、MongoDB、Riak等。重要的是我们要理解好他的效益及他对并发性所造成的影响。        &lt;br /&gt;
-解决上述并发性瓶颈的一个途径是数据副本，例如异步从数据库和Cassandra、MongoDB中的数据副本。实际上副本数据可以是透明的（只是数据恢复时候使用）、只读的（增加读的并发性），可读写的（增加分区容错性）。这些选择都会对系统的一致性造成影响。 &lt;/p&gt;
-
-&lt;p&gt;这些对一致性的折中，给我们带来一个值得思考的问题？一致性到底有什么用？实现一致性的代价非常昂贵。在数据库中是用串行化来保证ACID的。他的基本保证是所有操作都是顺序排列的。这样实现起来的代价非常昂贵，所以好多关系型数据库也不把他当成默认选项。所以说要想在包含分布式写操作的系统上实现强一致性，如同坠入深渊。
-解决一致性问题的方案也很简单，避免他。假如不能避免它把他隔离到尽可能少的写入和尽可能少的机器上。&lt;br /&gt;
-当然有些业务场景是必须要保证数据一致性的，例如银行转账时候。有些业务场景感觉上是必须保持一致性的，但实际上不是，例如标记一个交易是否有潜在的欺诈，我们可以先把它更新到一个新的字段里面，另外再用一条单独的记录数据去关联最开始的那个交易。所以对一个数据平台来说有效的方式是去避免或者孤立需要一致性的请求，一种孤立的方法是采取单一写入者的策略，Datamic就是典型的例子。另一种物理隔离的方法就是去区分请求中可变和不可变的字段，分别查询。Bloom/CALM把这种理念走的更远，默认的配置选项就是无序执行的策略，只有在必要的时候才启用顺序执行读写语句。&lt;/p&gt;
-</description>
-        <pubDate>Sun, 20 Sep 2015 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2015/09/20/data-store-platform.html</link>
-        <guid isPermaLink="true">index.html/blog/2015/09/20/data-store-platform.html</guid>
-        
-        <category>nosql</category>
-        
-      </item>
-    
-      <item>
-        <title>基于Hadoop生态的企业数据中心考虑</title>
-        <description>&lt;p&gt;一．面临的问题&lt;br /&gt;
-如今的大数据已经炒得妇孺皆知但实际上真正在企业实践中能够发挥其优点并从中获益的很少。大数据的挑战与机遇并存，大数据的发展将从预期膨胀、炒作阶段转入将逐渐理性发展、落地应用阶段，不可否认大数据是必然趋势，未来的大数据发展依然存在诸多挑战。 &lt;br /&gt;
-目前大数据的发展依然存在诸多挑战，如：&lt;br /&gt;
-1.各业务部门没有清晰的大数据需求导致数据资产流失；&lt;br /&gt;
-2.内部数据孤岛严重，数据价值不能充分挖掘；&lt;br /&gt;
-3.数据可用性低，质量差，利用效率低；&lt;br /&gt;
-4.数据管理技术和架构无法满足大数据要求；&lt;br /&gt;
-5.没有明确的大数据构想；&lt;br /&gt;
-大数据现阶段仍在起步阶段，存在诸多挑战，但未来的发展依然非常乐观。大数据的发展呈现的趋势也逐渐清晰：&lt;br /&gt;
-1.数据资源化，将成为企业主要资产；&lt;br /&gt;
-2.将全面落地于企业业务各个方面；&lt;br /&gt;
-3.与传统数据分析融合，定制分析方案；&lt;br /&gt;
-4.数据安全的重要性更加明显；&lt;br /&gt;
-二. 为何选择Hadoop生态&lt;br /&gt;
-1.成本低;&lt;br /&gt;
-2.生态圈成熟,社区活跃;&lt;br /&gt;
-3.能解决大多数大数据需求。  &lt;/p&gt;
-
-&lt;p&gt;三.实施步骤&lt;br /&gt;
-1.讨论确定数据分析的应用方向&lt;br /&gt;
-A.数据支持的业务优化(如：根据用户行为热点调整用户界面)&lt;br /&gt;
-B.独立数据分析应用(如：投资组合推荐TOP100)&lt;br /&gt;
-C.大数据精准运营(如：用户流失预警模型)&lt;br /&gt;
-D.决策支持(如：用户来源细分)&lt;br /&gt;
-E.。。。&lt;br /&gt;
-2.统计各产品现有统计需求&lt;br /&gt;
-明确当前公司的数据分析环境。。。&lt;br /&gt;
-3.召集各部门产品负责人讨论，协助明确大数据需求&lt;br /&gt;
-明确大数据能做什么不能做什么&lt;br /&gt;
-4.确定分析数据源&lt;br /&gt;
-A.业务数据&lt;br /&gt;
-B.SDK收集数据&lt;br /&gt;
-C.日志文件&lt;br /&gt;
-D.网络爬虫&lt;br /&gt;
-5.选择确定技术方案&lt;br /&gt;
-以Hadoop为基础，利用Hive/HBase/Sqoop/Flume/MR/Mahout/Spark/Storm/MQ/Mysql/
-技术整体实现&lt;br /&gt;
-6.设计实施技术架构&lt;br /&gt;
-A.数据收集（ETL）&lt;br /&gt;
-以Sqoop/MR 从业务数据库拉取数据到数据中心(定期)&lt;br /&gt;
-SDK收集数据直接推送至数据消息队列随后持久化到数据中心(统一开发各平台数据收集SDK，保证收集数据一致性)&lt;br /&gt;
-爬虫数据保存至数据中心()&lt;br /&gt;
-各种数据融合消除数据孤岛()&lt;br /&gt;
-B.数据中心设计&lt;br /&gt;
-数据中心以HDFS为基础&lt;br /&gt;
-Hive构建历史数据仓库&lt;br /&gt;
-	Hive数据存储设计：&lt;br /&gt;
-	数据只添加不更新/删除，数据以大表的形式存储？ Hive数据仓库设计？&lt;br /&gt;
-HBase存储近期数据满足准实时分析需求&lt;br /&gt;
-分析数据以MySQL形式形成满足不同业务部需求的数据集市&lt;br /&gt;
-C.数据分析处理&lt;br /&gt;
-	以自定义Map/Reduce作为主要数据处理工具，对数据仓库数据进行分析处理，结果推送至MySQL，形成数据集市。&lt;br /&gt;
-	以Spark/Storm 流式计算处理近实时分析需求&lt;br /&gt;
-	以Mahout作为主要数据挖掘分析工具，对数据进行进一步的分析利用&lt;br /&gt;
-D.结果数据存储(数据集市)&lt;br /&gt;
-	    以MySQL为数据库构建数据集市，面向不同业务方向提供不同主题的数据。各集市数据规模控制在千万级以内&lt;br /&gt;
-E.数据深度处理 &lt;br /&gt;
-		基于Mahout/?实现数据的深度挖掘。&lt;br /&gt;
-F.。。。&lt;br /&gt;
-7.开发具体分析 &lt;br /&gt;
-整体架构：&lt;br /&gt;
-&lt;img src=&quot;/image/shujupingtaisheji.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;大数据的能力可以分为四层： &lt;br /&gt;
-第一层是骨骼，硬件和存储的计算能力.&lt;br /&gt;
-第二层是血液，数据建模和管理能力，包括数据如何进行采集、如何进行建模，以及如何最快的计算和最高效的存储等等; &lt;br /&gt;
-第三层是思想，业务理解和算法能力，很多算法工程师、科学家用大数据的时候可以作出很多关于用户的标签画像，其实这一部分正是他们对于业务的理解和算法能力的体现，但是仅仅这样还不够，大数据应用过 程中需要一个系统、体系完整的解决方案。 &lt;br /&gt;
-第四层是大脑，告诉你今天的数据表现是什么样，问题是什么，未来你可以做一些什么，做完之后的效果会是怎么样，因为这个效果可以 做什么样的改善，这本身就是一个非常复杂完整的体系，产品设计和服务能力，大脑进行产品的设计以及很好的服务能力。　&lt;br /&gt;
-这四者结合起来，分别表示着大数据的基础建设能力和数据产品能力。　　&lt;br /&gt;
-大数据能力背后意味着非常巨大的挑战，大数据挑战本身也是一个非常完整的闭环。　　   &lt;/p&gt;
-
-&lt;p&gt;基础建设方面，包括如何进行很好的数据采 集，如果你的数据只有几百个T或1PB左右，采集起来不那么难，如果面临几百个PB的数据如何采集，在无线时代已经到来的时候，无线的采集应该如何做?采 集之后非常重要的是计算，如果把数据采集、计算都做得很好，可是上面的应用根本没有很好的方法，快速和有效拿到这些数据来使用，其实前面所有的工作都是白费的。　　   &lt;/p&gt;
-
-&lt;p&gt;关于采集、计算、服务是大数据基础建设方面的挑战，所有这些工作最终都要在上面浮现出来，就是我们所理解的数据产品，我们希望数据产品给到大家真的不只是一个报表，而是希望我们真的用数据产品去理解 商业，理解它的目标，并且把数据不是枯燥的以一个表格的方式呈现给用户，而是告诉你这个数据的含义是什么，如何解读它，在这个过程中去追求数据价值的最大化。关于基础建设和数据产品价值两大块挑战的关键词就是质量、效率和价值。　　   &lt;/p&gt;
-
-&lt;p&gt;关于大数据的能力看起来非常具有想象空间，挑战也是巨大的，这是非常复杂的事情，复杂的事情一定要用复杂的方法去解决，所以我们需要有简单、清晰、明确的顶层设计。过去两年，阿里巴巴大数据实战过程 中的一个顶层设计，下面我们做好数据的基础建设，包括数据采集计算以及服务，上面我们面临的客户数据方面首先是阿里自己的小二，要有能力用好数据做数据化营运，第二块是我们非常紧密的伙伴，即商家。我们在做这件事情顶层设计时，同步考虑阿里的小二和商家如何同时用好数据。数据基础建设方面做好one data和one service，数据上面一块做好对内和对外能够共享的one Platform。解决的是关于大数据本身背后的挑战，基础建设和价值两块的挑战。    &lt;/p&gt;
-
-</description>
-        <pubDate>Sun, 20 Sep 2015 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2015/09/20/dashujupingtaisheji.html</link>
-        <guid isPermaLink="true">index.html/blog/2015/09/20/dashujupingtaisheji.html</guid>
-        
-        <category>hadoop</category>
-        
-      </item>
-    
-      <item>
-        <title>C4.5+聚类+SVM+关联+EM+PageRank+迭代+kNN+NB+分类笔记</title>
-        <description>&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;C4.5算法&lt;br /&gt;
-C4.5是做什么  &lt;br /&gt;
-C4.5 以决策树的形式构建了一个分类器。&lt;br /&gt;
-什么是分类器  &lt;br /&gt;
-分类器是进行数据挖掘的一个工具，它处理大量需要进行分类的数据，并尝试预测新数据所属的类别。
-ru:假定一个包含很多病人信息的数据集。我们知道每个病人的各种信息，比如年龄、脉搏、血压、最大摄氧量、家族病史等。这些叫做数据属性。&lt;br /&gt;
-现在：  &lt;br /&gt;
-给定这些属性，我们想预测下病人是否会患癌症。病人可能会进入下面两个分类：会患癌症或者不会患癌症。算法负责告诉我们每个病人的分类。&lt;br /&gt;
-做法：&lt;br /&gt;
-用一个病人的数据属性集和对应病人的反馈类型，C4.5构建了一个基于新病人属性预测他们类型的决策树。&lt;br /&gt;
-什么是决策树呢？  &lt;br /&gt;
-决策树学习是创建一种类似与流程图的东西对新数据进行分类。  &lt;br /&gt;
-基本原则：&lt;br /&gt;
-流程图的每个环节都是一个关于属性值的问题，并根据这些数值，病人就被分类了。你可以找到很多决策树的例子。&lt;br /&gt;
-这属于监督学习算法，因为训练数据是已经分好类的。使用分好类的病人数据，C4.5算法不需要自己学习病人是否会患癌症。  &lt;br /&gt;
-C4.5算法和决策树系统区别  &lt;br /&gt;
-首先，C4.5算法在生成信息树的时候使用了信息增益。  &lt;br /&gt;
-其次，尽管其他系统也包含剪枝，C4.5使用了一个单向的剪枝过程来缓解过渡拟合。剪枝给结果带来了很多改进。 再次，C4.5算法既可以处理连续数据也可以处理离散数据。最后，不完全的数据用算法自有的方式进行了处理。  &lt;br /&gt;
-决策树最好的卖点是他们方便于翻译和解释。他们速度也很快，是种比较流行的算法。输出的结果简单易懂。  &lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;k 均值聚类算法&lt;br /&gt;
-K-聚类算法从一个目标集中创建多个组，每个组的成员都是比较相似的。这是个想要探索一个数据集时比较流行的聚类分析技术。&lt;br /&gt;
-什么是聚类分析&lt;br /&gt;
-聚类分析属于设计构建组群的算法，这里的组成员相对于非组成员有更多的相似性。在聚类分析的世界里，类和组是相同的意思。&lt;br /&gt;
-如：假设我们定义一个病人的数据集。在聚类分析里，这些病人可以叫做观察对象。我们知道每个病人的各类信息，比如年龄、血压、血型、最大含氧量和胆固醇含量等。这是一个表达病人特性的向量。&lt;br /&gt;
-基本认为一个向量代表了我们所知道的病人情况的一列数据。这列数据也可以理解为多维空间的坐标。脉搏是一维坐标，血型是其他维度的坐标等等。  &lt;br /&gt;
-Kmeans算法更深层次的这样处理问题： &lt;br /&gt;
-1.k-means 算法在多维空间中挑选一些点代表每一个 k 类。他们叫做中心点。&lt;br /&gt;
-2.每个病人会在这 k 个中心点中找到离自己最近的一个。我们希望病人最靠近的点不要是同一个中心点，所以他们在靠近他们最近的中心点周围形成一个类。&lt;br /&gt;
-3.我们现在有 k 个类，并且现在每个病人都是一个类中的一员。 &lt;br /&gt;
-4.之后k-means 算法根据它的类成员找到每个 k 聚类的中心&lt;br /&gt;
-5.这个中心成为类新的中心点。&lt;br /&gt;
-6.因为现在中心点在不同的位置上了，病人可能现在靠近了其他的中心点。换句话说，他们可能会修改自己的类成员身份。  &lt;br /&gt;
-7.重复2-6步直到中心点不再改变，这样类成员也就稳定了。这也叫做收敛性。  &lt;br /&gt;
-k-means 可以认为是非监督学习的类型。并不是指定分类的个数，也没有观察对象该属于那个类的任何信息   &lt;br /&gt;
-k-means 关键卖点是它的简单。它的简易型意味着它通常要比其他的算法更快更有效，尤其是要大量数据集的情况下更是如此。 &lt;br /&gt;
-改进：&lt;br /&gt;
-k-means 可以对已经大量数据集进行预先聚类处理，然后在针对每个子类做成本更高点的聚类分析。k-means 也能用来快速的处理“K”和探索数据集中是否有被忽视的模式或关系。  &lt;br /&gt;
-k means算法的两个关键弱点分别是它对异常值的敏感性和它对初始中心点选择的敏感性。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;支持向量机&lt;br /&gt;
-支持向量机（SVM）获取一个超平面将数据分成两类。除了不会使用决策树以外，SVM与 C4.5算法是执行相似的任务的。  &lt;br /&gt;
-超平面（hyperplane）是个函数，类似于解析一条线的方程。实际上，对于只有两个属性的简单分类任务来说，超平面可以是一条线的。 &lt;br /&gt;
-其实事实证明：
-SVM 可以使用一个小技巧，把你的数据提升到更高的维度去处理。一旦提升到更高的维度中，SVM算法会计算出把你的数据分离成两类的最好的超平面。  &lt;br /&gt;
-简单的例子。我发现桌子上开始就有一堆红球和蓝球，如果这这些球没有过分的混合在一起，不用移动这些球，你可以拿一根棍子把它们分离开。
-当在桌上加一个新球时，通过已经知道的棍字的哪一边是哪个颜色的球，你就可以预测这个新球的颜色了。 &lt;br /&gt;
-SVM 算法可以算出这个超平面的方程。
-如果事情变得更复杂该怎么办？当然了，事情通常都很复杂。如果球是混合在一起的，一根直棍就不能解决问题了。 &lt;br /&gt;
-通过使用核函数（kernel），我们在高维空间也有很棒的操作方法。这张大纸依然叫做超平面，但是现在它对应的方程是描述一个平面而不是一条线了。&lt;br /&gt;
-那么在桌上或者空中的球怎么用现实的数据解释呢？桌上的每个球都有自己的位置，我们可以用坐标来表示。打个比方，一个球可能是距离桌子左边缘20cm 距离底部边缘 50 cm，另一种描述这个球的方式是使用坐标(x,y)或者(20,50)表达。x和 y 是代表球的两个维度。&lt;br /&gt;
-可以这样理解：如果我们有个病人的数据集，每个病人可以用很多指标来描述，比如脉搏，胆固醇水平，血压等。每个指标都代表一个维度。&lt;br /&gt;
-基本上，SVM 把数据映射到一个更高维的空间然后找到一个能分类的超平面。 &lt;br /&gt;
-类间间隔(margin)经常会和 SVM 联系起来，类间间隔是什么呢？它是超平面和各自类中离超平面最近的数据点间的距离。在球和桌面的例子中，棍子和最近的红球和蓝球间的距离就是类间间隔(margin)。 &lt;br /&gt;
-SVM 的关键在于，它试图最大化这个类间间隔，使分类的超平面远离红球和蓝球。这样就能降低误分类的可能性。 &lt;br /&gt;
-SVM 属于监督学习。因为开始需要使用一个数据集让 SVM学习这些数据中的类型。只有这样之后 SVM 才有能力对新数据进行分类。  &lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Apriori 关联算法&lt;br /&gt;
-Apriori算法学习数据的关联规则(association rules)，适用于包含大量事务（transcation）的数据库。&lt;br /&gt;
-什么是关联规则&lt;br /&gt;
-关联规则学习是学习数据库中不同变量中的相互关系的一种数据挖掘技术。
-举个 Apriori 算法的例子：我们假设有一个充满超市交易数据的数据库，你可以把数据库想象成一个巨大的电子数据表，表里每一行是一个顾客的交易情况，每一列代表不用的货物项。&lt;br /&gt;
-通过使用 Apriori 算法，我们就知道了同时被购买的货物项，这也叫做关联规则。它的强大之处在于，你能发现相比较其他货物来说，有一些货物更频繁的被同时购买—终极目的是让购物者买更多的东西。这些常被一起购买的货物项被称为项集（itemset）。 &lt;br /&gt;
-如：“薯条+蘸酱”和“薯条+苏打水”的组合频繁的一起出现。这些组合被称为2-itemsets。在一个足够大的数据集中，就会很难“看到”这些关系了，尤其当还要处理3-itemset 或者更多项集的时候。这正是 Apriori 可以帮忙的地方！&lt;br /&gt;
-基本的 Apriori 算法有三步：
-1.参与，扫描一遍整个数据库，计算1-itemsets 出现的频率。&lt;br /&gt;
-2.剪枝，满足支持度和可信度的这些1-itemsets移动到下一轮流程，再寻找出现的2-itemsets。&lt;br /&gt;
-3.重复，对于每种水平的项集 一直重复计算，知道我们之前定义的项集大小为止。 &lt;br /&gt;
-Apriori 一般被认为是一种非监督的学习方法，因为它经常用来挖掘和发现有趣的模式和关系。  &lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;EM 最大期望算法 Expectation Maximization&lt;br /&gt;
-在数据挖掘领域，最大期望算法（Expectation-Maximization,EM） 一般作为聚类算法（类似 kmeans 算法）用来知识挖掘。&lt;br /&gt;
-在统计学上，当估运算带有无法观测隐藏变量的统计模型参数时,EM 算法不断迭代和优化可以观测数据的似然估计值。 &lt;br /&gt;
-统计模型？我把模型看做是描述观测数据是如何生成的。例如，一场考试的分数可能符合一种钟形曲线，因此这种分数分布符合钟形曲线（也称正态分布）的假设就是模型。&lt;br /&gt;
-什么是分布？分布代表了对所有可测量结果的可能性。例如，一场考试的分数可能符合一个正态分布。这个正态分布代表了分数的所有可能性。换句话说，给定一个分数，你可以用这个分布来预计多少考试参与者可能会得到这个分数。&lt;br /&gt;
-那么，你描述正态分布需要的所有东西就是这两个参数：&lt;br /&gt;
-1.平均值&lt;br /&gt;
-2.方差 &lt;br /&gt;
-什么是似然性：&lt;br /&gt;
-回到我们之前的钟形曲线例子，假设我们已经拿到很多的分数数据，并被告知分数符合一个钟形曲线。然而，我们并没有给到所有的分数，只是拿到了一个样本。
-可以这样做：&lt;br /&gt;
-我们不知道所有分数的平均值或者方差，但是我们可以使用样本计算它们。似然性就是用估计的方差和平均值得到的钟形曲线在算出很多分数的概率。&lt;br /&gt;
-换句话说，给定一系列可测定的结果，让我们来估算参数。再使用这些估算出的参数，得到结果的这个假设概率就被称为似然性。&lt;br /&gt;
-算法的优势是：对于数据挖掘和聚类，观察到遗失的数据的这类数据点对我们来说很重要。我们不知道具体的类，因此这样处理丢失数据对使用 EM 算法做聚类的任务来说是很关键的。
-算法的精髓在于：&lt;br /&gt;
-通过优化似然性，EM 生成了一个很棒的模型，这个模型可以对数据点指定类型标签—听起来像是聚类算法！ &lt;br /&gt;
-EM 算法是怎么帮助实现聚类的呢？EM 算法以对模型参数的猜测开始。然后接下来它会进行一个循环的3步：   &lt;br /&gt;
-1.E 过程：基于模型参数，它会针对每个数据点计算对聚类的分配概率。&lt;br /&gt;
-2.M 过程：基于 E 过程的聚类分配，更新模型参数。&lt;br /&gt;
-3.重复知道模型参数和聚类分配工作稳定（也可以称为收敛）。 &lt;br /&gt;
-EM 是非监督学习算法。
-EM 算法的一个关键卖点就是它的实现直接。它不但可以优化模型参数，还可以反复的对丢失数据进行猜测。  &lt;br /&gt;
-这使算法在聚类和产生带参数的模型上都表现出色。在得知聚类情况和模型参数的情况下，我们有可能解释清楚有相同属性的分类情况和新数据属于哪个类之中。 &lt;br /&gt;
-EM算法弱点… &lt;br /&gt;
-第一，EM 算法在早期迭代中都运行速度很快，但是越后面的迭代速度越慢。&lt;br /&gt;
-第二，EM 算法并不能总是寻到最优参数，很容易陷入局部最优而不是找到全局最优解。   &lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;PageRank算法
-PageRank是为了决定一些对象和同网络中的其他对象之间的相对重要程度而设计的连接分析算法(link analysis algorithm)。   &lt;br /&gt;
-什么是连接分析算法？&lt;br /&gt;
-它是一类针对网络的分析算法，探寻对象间的关系（也可成为连接）。&lt;br /&gt;
-举个例子：最流行的 PageRank 算法是 Google 的搜索引擎。尽管他们的搜索引擎不止是依靠它，但  PageRank依然是 Google 用来测算网页重要度的手段之一。 &lt;br /&gt;
-万维网上的网页都是互相链接的。如果 Rayli.net 链接到了 CNN 上的一个网页，CNN 网页就增加一个投票，表示 rayli.net 和 CNN 网页是关联的。 &lt;br /&gt;
-反过来，来自rayli.net 网页的投票重要性也要根据 rayli.net 网的重要性和关联性来权衡。换句话说，任何给 rayli.net 投票的网页也能提升 rayli.net 网页的关联性。 &lt;br /&gt;
-概括一下： &lt;br /&gt;
-投票和关联性就是 PageRank 的概念。rayli.net 给CNN 投票增加了 CNN 的 Pagerank，rayli.net 的 PageRank级别同时也影响着它为 CNN 投票多大程度影响了CNN 的 PageRank。&lt;br /&gt;
-这排名有点像一个网页流行度的竞争。我们的头脑中都有了一些这些网站的流行度和关联度的信息。
-PageRank只是一个特别讲究的方式来定义了这些而已。 &lt;br /&gt;
-PageRank还有什么其他应用呢？ PageRank是专门为了万维网设计的。 &lt;br /&gt;
-可以考虑一下，以核心功能的角度看，PageRank算法真的只是一个处理链接分析极度有效率的方法。处理的被链接的对象不止只是针对网页。  &lt;br /&gt;
-给出PageRank 的三个实现：&lt;br /&gt;
-1 C++ OpenSource PageRank Implementation&lt;br /&gt;
-2 Python PageRank Implementation&lt;br /&gt;
-3 igraph – The network analysis package (R)  &lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;AdaBoost 迭代算法
-AdaBoost 是个构建分类器的提升算法。 &lt;br /&gt;
-分类器拿走大量数据，并试图预测或者分类新数据元素的属于的类别。
-提升(boost) 指的什么？提升是个处理多个学习算法（比如决策树）并将他们合并联合起来的综合的学习算法。目的是将弱学习算法综合或形成一个组，把他们联合起来创造一个新的强学习器。 &lt;br /&gt;
-强弱学习器之间有什么区别呢？弱学习分类器的准确性仅仅比猜测高一点。一个比较流行的弱分类器的例子就是只有一层的决策树。 &lt;br /&gt;
-另一个，强学习分类器有更高的准确率，一个通用的强学习器的例子就是 SVM。 &lt;br /&gt;
-举个 AdaBoost 算法的例子：我们开始有3个弱学习器，我们将在一个包含病人数据的数据训练集上对他们做10轮训练。数据集里包含了病人的医疗记录各个细节。 &lt;br /&gt;
-问题来了，那我们怎么预测某个病人是否会得癌症呢？AdaBoost 是这样给出答案的： &lt;br /&gt;
-第一轮，AdaBoost 拿走一些训练数据，然后测试每个学习器的准确率。最后的结果就是我们找到最好的那个学习器。另外，误分类的样本学习器给予一个比较高的权重，这样他们在下轮就有很高的概率被选中了。  &lt;br /&gt;
-再补充一下，最好的那个学习器也要给根据它的准确率赋予一个权重，并将它加入到联合学习器中（这样现在就只有一个分类器了） &lt;br /&gt;
-第二轮， AdaBoost 再次试图寻找最好的学习器。 &lt;br /&gt;
-关键部分来了，病人数据样本的训练数据现在被有很高误分配率的权重影响着。换句话说，之前误分类的病人在这个样本里有很高的出现概率。 &lt;br /&gt;
-为什么？
-这就像是在电子游戏中已经打到了第二级，但当你的角色死亡后却不必从头开始。而是你从第二级开始然后集中注意，尽力升到第三级。 &lt;br /&gt;
-同样地，第一个学习者有可能对一些病人的分类是正确的，与其再度试图对他们分类，不如集中注意尽力处理被误分类的病人。   &lt;br /&gt;
-最好的学习器也被再次赋予权重并加入到联合分类器中，误分类的病人也被赋予权重，这样他们就有比较大的可能性再次被选中，我们会进行过滤和重复。 &lt;br /&gt;
-在10轮结束的时候，我们剩下了一个带着不同权重的已经训练过的联合学习分类器，之后重复训练之前回合中被误分类的数据。&lt;br /&gt;
-算法灵活通用，AdaBoost 可以加入任何学习算法，并且它能处理多种数据。&lt;br /&gt;
-AdaBoost 有很多程序实现和变体。给出一些： &lt;br /&gt;
-▪ scikit-learn&lt;br /&gt;
-▪ ICSIBoost&lt;br /&gt;
-▪ gbm: Generalized Boosted Regression Models   &lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;kNN：k最近邻算法&lt;br /&gt;
-kNN，或 K 最近邻(k-Nearest Neighbors), 诗歌分类算法。然而，它和我们之前描述的分类器不同，因为它是个懒散学习法。&lt;br /&gt;
-懒散学习法？  和存储训练数据的算法不同，懒散学习法在训练过程中不需要做许多处理。只有当新的未被分类的数据输入时，这类算法才会去做分类。 &lt;br /&gt;
-但在另一方面，积极学习法则会在训练中建立一个分类模型，当新的未分类数据输入时，这类学习器会把新数据也提供给这个分类模型。 &lt;br /&gt;
-那么 C4.5，SVM 和 AdaBoost 属于哪类呢？不像 kNN算法，他们都是积极学习算法。 &lt;br /&gt;
-给出原因：&lt;br /&gt;
-1 C4.5 在训练中建立了一个决策分类树模型。&lt;br /&gt;
-2 SVM在训练中建立了一个超平面的分类模型。&lt;br /&gt;
-3 AdaBoost在训练中建立了一个联合的分类模型。&lt;br /&gt;
-那么 kNN 做了什么？ kNN 没有建立这样的分类模型，相反，它只是储存了一些分类好的训练数据。那么新的训练数据进入时，kNN 执行两个基本步骤：&lt;br /&gt;
-1 首先，它观察最近的已经分类的训练数据点—也就是，k最临近点（k-nearest neighbors）&lt;br /&gt;
-2 第二部，kNN使用新数据最近的邻近点的分类， 就对新数据分类得到了更好的结果了。 &lt;br /&gt;
-你可能会怀疑…kNN 是怎么计算出最近的是什么？ 对于连续数据来说，kNN 使用一个像欧氏距离的距离测度，距离测度的选择大多取决于数据类型。有的甚至会根据训练数据学习出一种距离测度。关于 kNN 距离测度有更多的细节讨论和论文描述。 &lt;br /&gt;
-对于离散数据，解决方法是可以把离散数据转化为连续数据。给出两个例子： &lt;br /&gt;
-1 使用汉明距离（Hamming distance ）作为两个字符串紧密程度的测度。 &lt;br /&gt;
-2 把离散数据转化为二进制表征。 &lt;br /&gt;
-当临近的点是不同的类，kNN 怎么给新数据分类呢？当临近点都是同一类的时候，kNN 也就不费力气了。我们用直觉考虑，如果附近点都一致，那么新数据点就很可能落入这同一个类中了。 &lt;br /&gt;
-当临近点不是同一类时，kNN 怎么决定分类情况的呢？&lt;br /&gt;
-处理这种情况通常有两种办法：&lt;br /&gt;
-1 通过这些临近点做个简单的多数投票法。哪个类有更多的票，新数据就属于那个类。&lt;br /&gt;
-2 还是做个类似的投票，但是不同的是，要给那些离的更近的临近点更多的投票权重。这样做的一个简单方法是使用反距离(reciprocal distance). 比如，如果某个临近点距离5个单位，那么它的投票权重就是1/5.当临近点越来越远是，倒数距离就越来越小…这正是我们想要的。 &lt;br /&gt;
- kNN 算法提供了已经被分类好的数据集，所以它是个监督学习算法。 &lt;br /&gt;
-我们需要注意的5点： &lt;br /&gt;
-1 当试图在一个大数据集上计算最临近点时，kNN 算法可能会耗费高昂的计算成本。&lt;br /&gt;
-2 噪声数据(Noisy data)可能会影响到 kNN 的分类。 &lt;br /&gt;
-3 选择大范围的属性筛选(feature)会比小范围的筛选占有很多优势，所以属性筛选(feature)的规模非常重要。 &lt;br /&gt;
-4 由于数据处理会出现延迟，kNN 相比积极分类器，一般需要更强大的存储需求。 &lt;br /&gt;
-5 选择一个合适的距离测度对 kNN 的准确性来说至关重要。 &lt;br /&gt;
-哪里用过这个方法？有很多现存的 kNN 实现手段：&lt;br /&gt;
-▪ MATLAB k-nearest neighbor classification&lt;br /&gt;
-▪ scikit-learn KNeighborsClassifier&lt;br /&gt;
-▪ k-Nearest Neighbour Classification in R   &lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Naive Bayes 朴素贝叶斯算法 &lt;br /&gt;
-朴素贝叶斯（Naive Bayes）并不只是一个算法，而是一系列分类算法，这些算法以一个共同的假设为前提：  &lt;br /&gt;
-被分类的数据的每个属性与在这个类中它其他的属性是独立的。 &lt;br /&gt;
-独立是什么意思呢？当一个属性值对另一个属性值不产生任何影响时，就称这两个属性是独立的。
-举个例子：
-比如说你有一个病人的数据集，包含了病人的脉搏，胆固醇水平，体重，身高和邮编这样的属性。如果这些属性值互相不产生影响，那么所有属性都是独立的。对于这个数据集来说，假定病人的身高和邮编相互独立，这是合理的。因为病人的身高和他们的邮编没有任何关系。但是我们不能停在这，其他的属性间是独立的么？ &lt;br /&gt;
-很遗憾，答案是否定的。给出三个并不独立的属性关系： &lt;br /&gt;
-▪ 如果身高增加，体重可能会增加。 &lt;br /&gt;
-▪ 如果胆固醇水平增加，体重可能增加。&lt;br /&gt;
-▪ 如果胆固醇水平增加，脉搏也可能会增加。&lt;br /&gt;
-以我的经验来看，数据集的属性一般都不是独立的。&lt;br /&gt;
-这样就和下面的问题联系起来了…&lt;br /&gt;
-为什么要把算法称为朴素的(naive)呢？数据集中所有属性都是独立的这个假设正是我们称为朴素（naive）的原因—— 通常下例子中的所有属性并不是独立的。  &lt;br /&gt;
-我们在深入研究一下..
-这个等式是什么意思？在属性1和属性2的条件下，等式计算出了A 类的概率。换句话说，如果算出属性1 和2，等式算出的数据属于 A 类的概率大小。
-等式这样写解释为：在属性1和属性2条件下，分类 A 的概率是一个分数。
-▪ 分数的分子是在分类 A条件下属性1的概率，乘以在分类 A 条件下属性2的概率，再乘以分类 A 的概率
-▪ 分数的分母是属性1的概率乘以属性2的概率。
-Naive Bayes 的实现可以从Orange, scikit-learn, Weka和 R 里面找到。
-最后，看一下第十种算法吧。  &lt;/li&gt;
-  &lt;li&gt;CART 分类算法&lt;br /&gt;
-CART 代表分类和回归树(classification and regression trees)。它是个决策树学习方法，同时输出分类和回归树。 像 C4.5一样，CART 是个分类器。 &lt;br /&gt;
-分类树像决策树一样么？分类树是决策树的一种。分类树的输出是一个类。 &lt;br /&gt;
-举个例子，根据一个病人的数据集、你可能会试图预测下病人是否会得癌症。这个分类或者是“会的癌症”或者是“不会得癌症”。 &lt;br /&gt;
-那回归树是什么呢？和分类树预测分类不同，回归树预测一个数字或者连续数值，比如一个病人的住院时间或者一部智能手机的价格。&lt;br /&gt;
-这么记比较简单：&lt;br /&gt;
-分类树输出类、回归树输出数字。 &lt;br /&gt;
-为了构造分类和回归树模型，需要给它提供被分类好的训练数据集，因此 CART 是个监督学习算法。
-为什么要使用 CART 呢？使用 C4.5的原因大部分也适用于 CART，因为它们都是决策树学习的方法。便于说明和解释这类的原因也适用于 CART。
-和 C4.5一样，它们的计算速度都很快，算法也都比较通用流行，并且输出结果也具有可读性。
-scikit-learn 在他们的决策树分类器部分实现了 CART 算法；R 语言的 tree package 也有 CART 的实现；Weka 和 MATLAB 也有CART的实现过程。&lt;/li&gt;
-&lt;/ol&gt;
-
-</description>
-        <pubDate>Sun, 20 Sep 2015 00:00:00 +0800</pubDate>
-        <link>index.html/blog/2015/09/20/10-suanfa-biji.html</link>
-        <guid isPermaLink="true">index.html/blog/2015/09/20/10-suanfa-biji.html</guid>
         
         <category>hadoop</category>
         

@@ -64,6 +64,578 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/09/20/hiveconfjilu.html">Hive配置记录</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年09月20日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#nosql">nosql</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>hive.fetch.task.conversion: <br />
+hive 0.10.0为了执行效率考虑，简单的查询，就是只是select，不带count,sum,group by这样的，都不走map/reduce，直接读取hdfs文件进行filter过滤。<br />
+这样做的好处就是不新开mr任务，执行效率要提高不少，但是不好的地方就是用户界面不友好，有时候数据量大还是要等很长时间，但是又没有任何返回。<br />
+在hive-site.xml里面有个配置参数叫 <br />
+hive.fetch.task.conversion<br />
+将这个参数设置为more，简单查询就不走map/reduce了，设置为minimal(默认)，就任何简单select都会走map/reduce。   </p>
+
+<p>付：<br />
+hive的配置：  </p>
+
+<pre><code>hive.ddl.output.format：hive的ddl语句的输出格式，默认是text，纯文本，还有json格式，这个是0.90以后才出的新配置；  
+hive.exec.script.wrapper：hive调用脚本时的包装器，默认是null，如果设置为python的话，那么在做脚本调用操作时语句会变为python &lt;script command&gt;，null的话就是直接执行&lt;script command&gt;；  
+hive.exec.plan：hive执行计划的文件路径，默认是null，会在运行时自动设置，形如hdfs://xxxx/xxx/xx；    
+hive.exec.scratchdir：hive用来存储不同阶段的map/reduce的执行计划的目录，同时也存储中间输出结果，默认是/tmp/&lt;user.name&gt;/hive，我们实际一般会按组区分，然后组内自建一个tmp目录存储；  
+hive.exec.submitviachild：在非local模式下，决定hive是否要在独立的jvm中执行map/reduce；默认是false，也就是说默认map/reduce的作业是在hive的jvm上去提交的；
+hive.exec.script.maxerrsize：当用户调用transform或者map或者reduce执行脚本时，最大的序列化错误数，默认100000，一般也不用修改；
+hive.exec.compress.output：一个查询的最后一个map/reduce任务输出是否被压缩的标志，默认为false，但是一般会开启为true，好处的话，节省空间不说，在不考虑cpu压力的时候会提高io；
+hive.exec.compress.intermediate：类似上个，在一个查询的中间的map/reduce任务输出是否要被压缩，默认false，
+hive.jar.path：当使用独立的jvm提交作业时，hive_cli.jar所在的位置，无默认值；
+hive.aux.jars.path：当用户自定义了UDF或者SerDe，这些插件的jar都要放到这个目录下，无默认值；
+hive.partition.pruning：在编译器发现一个query语句中使用分区表然而未提供任何分区谓词做查询时，抛出一个错误从而保护分区表，默认是nonstrict；（待读源码后细化，网上资料极少）
+hive.map.aggr：map端聚合是否开启，默认开启；
+hive.join.emit.interval：在发出join结果之前对join最右操作缓存多少行的设定，默认1000；hive jira里有个对该值设置太小的bugfix；
+hive.map.aggr.hash.percentmemory：map端聚合时hash表所占用的内存比例，默认0.5，这个在map端聚合开启后使用，
+hive.default.fileformat：CREATE TABLE语句的默认文件格式，默认TextFile，其他可选的有SequenceFile、RCFile还有Orc；
+hive.merge.mapfiles：在只有map的作业结束时合并小文件，默认开启true；
+hive.merge.mapredfiles：在一个map/reduce作业结束后合并小文件，默认不开启false；
+&lt;property&gt;
+  &lt;name&gt;hive.merge.mapredfiles&lt;/name&gt;
+  &lt;value&gt;true&lt;/value&gt;
+  &lt;description&gt;在一个map/reduce作业结束后合并小文件&lt;/description&gt;
+&lt;/property&gt;
+
+hive.merge.size.per.task：作业结束时合并文件的大小，默认256MB；
+hive.merge.smallfiles.avgsize：在作业输出文件小于该值时，起一个额外的map/reduce作业将小文件合并为大文件，小文件的基本阈值，设置大点可以减少小文件个数，需要mapfiles和mapredfiles为true，默认值是16MB；
+mapred.reduce.tasks：每个作业的reduce任务数，默认是hadoop client的配置1个；
+hive.exec.reducers.bytes.per.reducer：每个reducer的大小，默认是1G，输入文件如果是10G，那么就会起10个reducer；
+hive.exec.reducers.max：reducer的最大个数，如果在mapred.reduce.tasks设置为负值，那么hive将取该值作为reducers的最大可能值。当然还要依赖（输入文件大小/hive.exec.reducers.bytes.per.reducer）所得出的大小，取其小值作为reducer的个数，hive默认是999；
+hive.fileformat.check：加载数据文件时是否校验文件格式，默认是true；
+hive.groupby.skewindata：group by操作是否允许数据倾斜，默认是false，当设置为true时，执行计划会生成两个map/reduce作业，第一个MR中会将map的结果随机分布到reduce中，达到负载均衡的目的来解决数据倾斜，
+hive.groupby.mapaggr.checkinterval：map端做聚合时，group by 的key所允许的数据行数，超过该值则进行分拆，默认是100000；
+hive.mapred.local.mem：本地模式时，map/reduce的内存使用量，默认是0，就是无限制；
+hive.mapjoin.followby.map.aggr.hash.percentmemory：map端聚合时hash表的内存占比，该设置约束group by在map join后进行，否则使用hive.map.aggr.hash.percentmemory来确认内存占比，默认值0.3；
+hive.map.aggr.hash.force.flush.memeory.threshold：map端聚合时hash表的最大可用内存，如果超过该值则进行flush数据，默认是0.9；
+hive.map.aggr.hash.min.reduction：如果hash表的容量与输入行数之比超过这个数，那么map端的hash聚合将被关闭，默认是0.5，设置为1可以保证hash聚合永不被关闭；
+hive.optimize.groupby：在做分区和表查询时是否做分桶group by，默认开启true；
+hive.multigroupby.singlemr：将多个group by产出为一个单一map/reduce任务计划，当然约束前提是group by有相同的key，默认是false；
+hive.optimize.cp：列裁剪，默认开启true，在做查询时只读取用到的列，这个是个有用的优化；
+hive.optimize.index.filter：自动使用索引，默认不开启false；
+hive.optimize.index.groupby：是否使用聚集索引优化group-by查询，默认关闭false；
+hive.optimize.ppd：是否支持谓词下推，默认开启；所谓谓词下推，将外层查询块的 WHERE 子句中的谓词移入所包含的较低层查询块（例如视图），从而能够提早进行数据过滤以及有可能更好地利用索引。
+hive.optimize.ppd.storage：谓词下推开启时，谓词是否下推到存储handler，默认开启，在谓词下推关闭时不起作用；
+hive.ppd.recognizetransivity：在等值join条件下是否产地重复的谓词过滤器，默认开启；
+hive.join.cache.size：在做表join时缓存在内存中的行数，默认25000；
+hive.mapjoin.bucket.cache.size：mapjoin时内存cache的每个key要存储多少个value，默认100；
+hive.optimize.skewjoin：是否开启数据倾斜的join优化，默认不开启false；
+hive.skewjoin.key：判断数据倾斜的阈值，如果在join中发现同样的key超过该值则认为是该key是倾斜的join key，默认是100000；
+hive.skewjoin.mapjoin.map.tasks：在数据倾斜join时map join的map数控制，默认是10000；
+hive.skewjoin.mapjoin.min.split：数据倾斜join时map join的map任务的最小split大小，默认是33554432，该参数要结合上面的参数共同使用来进行细粒度的控制；
+hive.mapred.mode：hive操作执行时的模式，默认是nonstrict非严格模式，如果是strict模式，很多有风险的查询会被禁止运行，比如笛卡尔积的join和动态分区；
+hive.exec.script.maxerrsize：一个map/reduce任务允许打印到标准错误里的最大字节数，为了防止脚本把分区日志填满，默认是100000；
+hive.exec.script.allow.partial.consumption：hive是否允许脚本不从标准输入中读取任何内容就成功退出，默认关闭false；
+hive.script.operator.id.env.var：在用户使用transform函数做自定义map/reduce时，存储唯一的脚本标识的环境变量的名字，默认HIVE_SCRIPT_OPERATOR_ID；
+hive.exec.compress.output：控制hive的查询结果输出是否进行压缩，压缩方式在hadoop的mapred.output.compress中配置，默认不压缩false；
+hive.exec.compress.intermediate：控制hive的查询中间结果是否进行压缩，同上条配置，默认不压缩false；
+hive.exec.parallel：hive的执行job是否并行执行，默认不开启false，在很多操作如join时，子查询之间并无关联可独立运行，这种情况下开启并行运算可以大大加速；
+hvie.exec.parallel.thread.number：并行运算开启时，允许多少作业同时计算，默认是8；
+hive.exec.rowoffset：是否提供行偏移量的虚拟列，默认是false不提供，Hive有两个虚拟列:一个是INPUT__FILE__NAME,表示输入文件的路径，另外一个是BLOCK__OFFSET__INSIDE__FILE，表示记录在文件中的块偏移量，这对排查出现不符合预期或者null结果的查询是很有帮助的；
+hive.task.progress：控制hive是否在执行过程中周期性的更新任务进度计数器，开启这个配置可以帮助job tracker更好的监控任务的执行情况，但是会带来一定的性能损耗，当动态分区标志hive.exec.dynamic.partition开启时，本配置自动开启；
+hive.exec.pre.hooks：执行前置条件，一个用逗号分隔开的实现了org.apache.hadoop.hive.ql.hooks.ExecuteWithHookContext接口的java class列表，配置了该配置后，每个hive任务执行前都要执行这个执行前钩子，默认是空；
+hive.exec.post.hooks：同上，执行后钩子，默认是空；
+hive.exec.failure.hooks：同上，异常时钩子，在程序发生异常时执行，默认是空；
+hive.mergejob.maponly：试图生成一个只有map的任务去做merge，前提是支持CombineHiveInputFormat，默认开启true；
+hive.mapjoin.smalltable.filesize：输入表文件的mapjoin阈值，如果输入文件的大小小于该值，则试图将普通join转化为mapjoin，默认25MB；
+hive.mapjoin.localtask.max.memory.usage：mapjoin本地任务执行时hash表容纳key/value的最大量，超过这个值的话本地任务会自动退出，默认是0.9；
+hive.mapjoin.followby.gby.localtask.max.memory.usage：类似上面，只不过是如果mapjoin后有一个group by的话，该配置控制类似这样的query的本地内存容量上限，默认是0.55；
+hive.mapjoin.check.memory.rows：在运算了多少行后执行内存使用量检查，默认100000；
+hive.heartbeat.interval：发送心跳的时间间隔，在mapjoin和filter操作中使用，默认1000；
+hive.auto.convert.join：根据输入文件的大小决定是否将普通join转换为mapjoin的一种优化，默认不开启false；
+hive.script.auto.progress：hive的transform/map/reduce脚本执行时是否自动的将进度信息发送给TaskTracker来避免任务没有响应被误杀，本来是当脚本输出到标准错误时，发送进度信息，但是开启该项后，输出到标准错误也不会导致信息发送，因此有可能会造成脚本有死循环产生，但是TaskTracker却没有检查到从而一直循环下去；
+hive.script.serde：用户脚本转换输入到输出时的SerDe约束，默认是org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe；
+hive.script.recordreader：从脚本读数据的时候的默认reader，默认是org.apache.hadoop.hive.ql.exec.TextRecordReader；
+hive.script.recordwriter：写数据到脚本时的默认writer，默认org.apache.hadoop.hive.ql.exec.TextRecordWriter；
+hive.input.format：输入格式，默认是org.apache.hadoop.hive.ql.io.CombineHiveInputFormat，如果出现问题，可以改用org.apache.hadoop.hive.ql.io.HiveInputFormat；
+hive.udtf.auto.progress：UDTF执行时hive是否发送进度信息到TaskTracker，默认是false；
+hive.mapred.reduce.tasks.speculative.execution：reduce任务推测执行是否开启，默认是true；
+hive.exec.counters.pull.interval：运行中job轮询JobTracker的时间间隔，设置小会影响JobTracker的load，设置大可能看不出运行任务的信息，要去平衡，默认是1000；
+hive.enforce.bucketing：数据分桶是否被强制执行，默认false，如果开启，则写入table数据时会启动分桶，
+hive.enforce.sorting：开启强制排序时，插数据到表中会进行强制排序，默认false；
+hive.optimize.reducededuplication：如果数据已经根据相同的key做好聚合，那么去除掉多余的map/reduce作业，此配置是文档的推荐配置，建议打开，默认是true；
+hive.exec.dynamic.partition：在DML/DDL中是否支持动态分区，默认false；
+
+
+hive.exec.dynamic.partition.mode：默认strict，在strict模式下，动态分区的使用必须在一个静态分区确认的情况下，其他分区可以是动态；
+
+
+hive.exec.max.dynamic.partitions：动态分区的上限，默认1000；
+
+
+hive.exec.max.dynamic.partitions.pernode：每个mapper/reducer节点可以创建的最大动态分区数，默认100；
+
+
+hive.exec.max.created.files：一个mapreduce作业能创建的HDFS文件最大数，默认是100000；
+
+
+hive.exec.default.partition.name：当动态分区启用时，如果数据列里包含null或者空字符串的话，数据会被插入到这个分区，默认名字是__HIVE_DEFAULT_PARTITION__；
+
+
+hive.fetch.output.serde：FetchTask序列化fetch输出时需要的SerDe，默认是org.apache.hadoop.hive.serde2.DelimitedJSONSerDe;
+
+
+hive.exec.mode.local.auto：是否由hive决定自动在local模式下运行，默认是false，
+
+hive.exec.drop.ignorenoneexistent：在drop表或者视图时如果发现表或视图不存在，是否报错，默认是true；
+
+
+hive.exec.show.job.failure.debug.info：在作业失败时是否提供一个任务debug信息，默认true；
+
+
+hive.auto.progress.timeout：运行自动progressor的时间间隔，默认是0等价于forever；
+
+
+hive.table.parameters.default：新建表的属性字段默认值，默认是empty空；
+
+
+hive.variable.substitute：是否支持变量替换，如果开启的话，支持语法如${var} ${system:var}和${env.var}，默认是true；
+
+
+hive.error.on.empty.partition：在遇到结果为空的动态分区时是否报错，默认是false；
+
+
+hive.exim.uri.scheme.whitelist：在导入导出数据时提供的一个白名单列表，列表项之间由逗号分隔，默认hdfs,pfile；
+
+
+hive.limit.row.max.size：字面意思理解就是在使用limit做数据的子集查询时保证的最小行数据量，默认是100000；
+
+
+hive.limit.optimize.limit.file：使用简单limit查询数据子集时，可抽样的最大文件数，默认是10；
+
+
+hive.limit.optimize.enable：使用简单limit抽样数据时是否开启优化选项，默认是false，关于limit的优化问题，在hive programming书中解释的是这个feature有drawback，对于抽样的不确定性给出了风险提示；
+
+
+hive.limit.optimize.fetch.max：使用简单limit抽样数据允许的最大行数，默认50000，查询query受限，insert不受影响；
+
+
+hive.rework.mapredwork：是否重做mapreduce，默认是false；
+
+
+hive.sample.seednumber：用来区分抽样的数字，默认是0；
+
+
+hive.io.exception.handlers：io异常处理handler类列表，默认是空，当record reader发生io异常时，由这些handler来处理异常；
+
+
+hive.autogen.columnalias.prefix.label：当在执行中自动产生列别名的前缀，当类似count这样的聚合函数起作用时，如果不明确指出count(a) as xxx的话，那么默认会从列的位置的数字开始算起添加，比如第一个count的结果会冠以列名_c0，接下来依次类推，默认值是_c，数据开发过程中应该很多人都看到过这个别名；
+
+
+hive.autogen.columnalias.prefix.includefuncname：在自动生成列别名时是否带函数的名字，默认是false；
+
+
+hive.exec.perf.logger：负责记录客户端性能指标的日志类名，必须是org.apache.hadoop.hive.ql.log.PerfLogger的子类，默认是org.apache.hadoop.hive.ql.log.PerfLogger；
+
+
+hive.start.cleanup.scratchdir：当启动hive服务时是否清空hive的scratch目录，默认是false；
+
+
+hive.output.file.extension：输出文件扩展名，默认是空；
+
+
+hive.insert.into.multilevel.dirs：是否插入到多级目录，默认是false；
+
+
+hive.files.umask.value：hive创建文件夹时的dfs.umask值，默认是0002；
+
+hive.metastore.local：控制hive是否连接一个远程metastore服务器还是开启一个本地客户端jvm，默认是true，Hive0.10已经取消了该配置项；
+
+
+javax.jdo.option.ConnectionURL：JDBC连接字符串，默认jdbc:derby:;databaseName=metastore_db;create=true；
+
+
+javax.jdo.option.ConnectionDriverName：JDBC的driver，默认org.apache.derby.jdbc.EmbeddedDriver；
+
+
+javax.jdo.PersisteneManagerFactoryClass：实现JDO PersistenceManagerFactory的类名，默认org.datanucleus.jdo.JDOPersistenceManagerFactory；
+
+
+javax.jdo.option.DetachAllOnCommit：事务提交后detach所有提交的对象，默认是true；
+
+
+javax.jdo.option.NonTransactionalRead：是否允许非事务的读，默认是true；
+
+
+javax.jdo.option.ConnectionUserName：username，默认APP；
+
+
+javax.jdo.option.ConnectionPassword：password，默认mine；
+
+
+javax.jdo.option.Multithreaded：是否支持并发访问metastore，默认是true；
+
+
+datanucleus.connectionPoolingType：使用连接池来访问JDBC metastore，默认是DBCP；
+
+
+datanucleus.validateTables：检查是否存在表的schema，默认是false；
+
+
+datanucleus.validateColumns：检查是否存在列的schema，默认false；
+
+
+datanucleus.validateConstraints：检查是否存在constraint的schema，默认false；
+
+
+datanucleus.stroeManagerType：元数据存储类型，默认rdbms；
+
+
+datanucleus.autoCreateSchema：在不存在时是否自动创建必要的schema，默认是true；
+
+
+datanucleus.aotuStartMechanismMode：如果元数据表不正确，抛出异常，默认是checked；
+
+
+datanucleus.transactionIsolation：默认的事务隔离级别，默认是read-committed；
+
+
+datanucleus.cache.level2：使用二级缓存，默认是false；
+
+
+datanucleus.cache.level2.type：二级缓存的类型，有两种，SOFT:软引用，WEAK:弱引用，默认是SOFT；
+
+
+datanucleus.identifierFactory：id工厂生产表和列名的名字，默认是datanucleus；
+
+
+datanucleus.plugin.pluginRegistryBundleCheck：当plugin被发现并且重复时的行为，默认是LOG；
+
+
+hive.metastroe.warehouse.dir：数据仓库的位置，默认是/user/hive/warehouse；
+
+
+hive.metastore.execute.setugi：非安全模式，设置为true会令metastore以客户端的用户和组权限执行DFS操作，默认是false，这个属性需要服务端和客户端同时设置；
+
+
+hive.metastore.event.listeners：metastore的事件监听器列表，逗号隔开，默认是空；
+
+
+hive.metastore.partition.inherit.table.properties：当新建分区时自动继承的key列表，默认是空；
+
+
+hive.metastore.end.function.listeners：metastore函数执行结束时的监听器列表，默认是空；
+
+
+hive.metastore.event.expiry.duration：事件表中事件的过期时间，默认是0；
+
+
+hive.metastore.event.clean.freq：metastore中清理过期事件的定时器的运行周期，默认是0；
+
+
+hive.metastore.connect.retries：创建metastore连接时的重试次数，默认是5；
+
+
+hive.metastore.client.connect.retry.delay：客户端在连续的重试连接等待的时间，默认1；
+
+
+hive.metastore.client.socket.timeout：客户端socket超时时间，默认20秒；
+
+
+hive.metastore.rawstore.impl：原始metastore的存储实现类，默认是org.apache.hadoop.hive.metastore.ObjectStore；
+
+
+hive.metastore.batch.retrieve.max：在一个batch获取中，能从metastore里取出的最大记录数，默认是300；
+
+
+hive.metastore.ds.connection.url.hook：查找JDO连接url时hook的名字，默认是javax.jdo.option.ConnectionURL；
+
+
+hive.metastore.ds.retry.attempts：当出现连接错误时重试连接的次数，默认是1次；
+
+
+hive.metastore.ds.retry.interval：metastore重试连接的间隔时间，默认1000毫秒；
+
+
+hive.metastore.server.min.threads：在thrift服务池中最小的工作线程数，默认是200；
+
+
+hive.metastore.server.max.threads：最大线程数，默认是100000；
+
+
+hive.metastore.server.tcp.keepalive：metastore的server是否开启长连接，长连可以预防半连接的积累，默认是true；
+
+
+hive.metastore.sasl.enabled：metastore thrift接口的安全策略，开启则用SASL加密接口，客户端必须要用Kerberos机制鉴权，默认是不开启false；
+
+
+hive.metastore.kerberos.keytab.file：在开启sasl后kerberos的keytab文件存放路径，默认是空；
+
+
+hive.metastore.kerberos.principal：kerberos的principal，_HOST部分会动态替换，默认是hive-metastore/_HOST@EXAMPLE.COM；
+
+
+hive.metastore.cache.pinobjtypes：在cache中支持的metastore的对象类型，由逗号分隔，默认是Table,StorageDescriptor,SerDeInfo,Partition,Database,Type,FieldSchema,Order；
+
+
+hive.metastore.authorization.storage.checks：在做类似drop partition操作时，metastore是否要认证权限，默认是false；
+
+
+hive.metastore.schema.verification：强制metastore的schema一致性，开启的话会校验在metastore中存储的信息的版本和hive的jar包中的版本一致性，并且关闭自动schema迁移，用户必须手动的升级hive并且迁移schema，关闭的话只会在版本不一致时给出警告，默认是false不开启；
+
+
+
+hive.index.compact.file.ignore.hdfs：在索引文件中存储的hdfs地址将在运行时被忽略，如果开启的话；如果数据被迁移，那么索引文件依然可用，默认是false；
+
+
+hive.optimize.index.filter.compact.minsize：压缩索引自动应用的最小输入大小，默认是5368709120；
+
+
+hive.optimize.index.filter.compact.maxsize：同上，相反含义，如果是负值代表正无穷，默认是-1；
+
+
+hive.index.compact.query.max.size：一个使用压缩索引做的查询能取到的最大数据量，默认是10737418240 个byte；负值代表无穷大；
+
+
+hive.index.compact.query.max.entries：使用压缩索引查询时能读到的最大索引项数，默认是10000000；负值代表无穷大；
+
+
+hive.index.compact.binary.search：在索引表中是否开启二分搜索进行索引项查询，默认是true；
+
+
+hive.exec.concatenate.check.index：如果设置为true，那么在做ALTER TABLE tbl_name CONCATENATE on a table/partition（有索引） 操作时，抛出错误；可以帮助用户避免index的删除和重建；
+
+
+hive.stats.dbclass：存储hive临时统计信息的数据库，默认是jdbc:derby；
+
+
+hive.stats.autogather：在insert overwrite命令时自动收集统计信息，默认开启true；
+
+
+hive.stats.jdbcdriver：数据库临时存储hive统计信息的jdbc驱动；
+
+
+hive.stats.dbconnectionstring：临时统计信息数据库连接串，默认jdbc:derby:databaseName=TempStatsStore;create=true；
+
+
+hive.stats.defaults.publisher：如果dbclass不是jdbc或者hbase，那么使用这个作为默认发布，必须实现StatsPublisher接口，默认是空；
+
+
+hive.stats.defaults.aggregator：如果dbclass不是jdbc或者hbase，那么使用该类做聚集，要求实现StatsAggregator接口，默认是空；
+
+
+hive.stats.jdbc.timeout：jdbc连接超时配置，默认30秒；
+
+
+hive.stats.retries.max：当统计发布合聚集在更新数据库时出现异常时最大的重试次数，默认是0，不重试；
+
+
+hive.stats.retries.wait：重试次数之间的等待窗口，默认是3000毫秒；
+
+
+hive.client.stats.publishers：做count的job的统计发布类列表，由逗号隔开，默认是空；必须实现org.apache.hadoop.hive.ql.stats.ClientStatsPublisher接口；
+
+
+hive.client.stats.counters：没什么用~~~
+
+
+hive.security.authorization.enabled：hive客户端是否认证，默认是false；
+
+
+hive.security.authorization.manager：hive客户端认证的管理类，默认是org.apache.hadoop.hive.ql.security.authorization.DefaultHiveAuthorizationProvider；用户定义的要实现org.apache.hadoop.hive.ql.security.authorization.HiveAuthorizationProvider；
+
+
+hive.security.authenticator.manager：hive客户端授权的管理类，默认是org.apache.hadoop.hive.ql.security.HadoopDefaultAuthenticator；用户定义的需要实现org.apache.hadoop.hive.ql.security.HiveAuthenticatorProvider；
+
+
+hive.security.authorization.createtable.user.grants：当表创建时自动授权给用户，默认是空；
+
+
+hive.security.authorization.createtable.group.grants：同上，自动授权给组，默认是空；
+
+
+hive.security.authorization.createtable.role.grants：同上，自动授权给角色，默认是空；
+
+
+hive.security.authorization.createtable.owner.grants：同上，自动授权给owner，默认是空；
+
+
+hive.security.metastore.authorization.manager：metastore的认证管理类，默认是org.apache.hadoop.hive.ql.security.authorization.DefaultHiveMetastoreAuthorizationProvider；用户定义的必须实现org.apache.hadoop.hive.ql.security.authorization.HiveMetastoreAuthorizationProvider接口；接口参数要包含org.apache.hadoop.hive.ql.security.authorization.StorageBasedAuthorizationProvider接口；使用HDFS的权限控制认证而不是hive的基于grant的方式；
+
+
+hive.security.metastore.authenticator.manager：metastore端的授权管理类，默认是org.apache.hadoop.hive.ql.security.HadoopDefaultMetastoreAuthenticator，自定义的必须实现org.apache.hadoop.hive.ql.security.HiveAuthenticatorProvider接口；
+
+
+hive.metastore.pre.event.listeners：在metastore做数据库任何操作前执行的事件监听类列表；
+
+
+
+fs.har.impl：访问Hadoop Archives的实现类，低于hadoop 0.20版本的都不兼容，默认是org.apache.hadoop.hive.shims.HiveHarFileSystem；
+
+
+hive.archive.enabled：是否允许归档操作，默认是false；
+
+
+hive.archive.har.parentdir.settable：在创建HAR文件时必须要有父目录，需要手动设置，在新的hadoop版本会支持，默认是false；
+
+
+hive.support.concurrency：hive是否支持并发，默认是false，支持读写锁的话，必须要起zookeeper；
+
+
+hive.lock.mapred.only.operation：控制是否在查询时加锁，默认是false；
+
+
+hive.lock.numretries：获取锁时尝试的重试次数，默认是100；
+
+
+hive.lock.sleep.between.retries：在重试间隔的睡眠时间，默认60秒；
+
+
+hive.zookeeper.quorum：zk地址列表，默认是空；
+
+
+hive.zookeeper.client.port：zk服务器的连接端口，默认是2181；
+
+
+hive.zookeeper.session.timeout：zk客户端的session超时时间，默认是600000；
+
+
+hive.zookeeper.namespace：在所有zk节点创建后的父节点，默认是hive_zookeeper_namespace；
+
+
+hive.zookeeper.clean.extra.nodes：在session结束时清除所有额外node；
+
+
+hive.cluster.delegation.token.store.class：代理token的存储实现类，默认是org.apache.hadoop.hive.thrift.MemoryTokenStore，可以设置为org.apache.hadoop.hive.thrift.ZooKeeperTokenStore来做负载均衡集群；
+
+
+hive.cluster.delegation.token.store.zookeeper.connectString：zk的token存储连接串，默认是localhost:2181；
+
+
+hive.cluster.delegation.token.store.zookeeper.znode：token存储的节点跟路径，默认是/hive/cluster/delegation；
+
+
+hive.cluster.delegation.token.store.zookeeper.acl：token存储的ACL，默认是sasl:hive/host1@example.com:cdrwa,sasl:hive/host2@example.com:cdrwa；
+
+
+hive.use.input.primary.region：从一张input表创建表时，创建这个表到input表的主region，默认是true；
+
+
+hive.default.region.name：默认region的名字，默认是default；
+
+
+hive.region.properties：region的默认的文件系统和jobtracker，默认是空；
+
+
+hive.cli.print.header：查询输出时是否打印名字和列，默认是false；
+
+
+hive.cli.print.current.db：hive的提示里是否包含当前的db，默认是false；
+
+
+hive.hbase.wal.enabled：写入hbase时是否强制写wal日志，默认是true；
+
+
+hive.hwi.war.file：hive在web接口是的war文件的路径，默认是lib/hive-hwi-xxxx(version).war；
+
+
+hive.hwi.listen.host：hwi监听的host地址，默认是0.0.0.0；
+
+
+hive.hwi.listen.port：hwi监听的端口，默认是9999；
+
+
+hive.test.mode：hive是否运行在测试模式，默认是false；
+
+
+hive.test.mode.prefix：在测试模式运行时，表的前缀字符串，默认是test_；
+
+
+hive.test.mode.samplefreq：如果hive在测试模式运行，并且表未分桶，抽样频率是多少，默认是32；
+
+
+hive.test.mode.nosamplelist：在测试模式运行时不进行抽样的表列表，默认是空；
+</code></pre>
+
+      <div class="readall"><a href="/blog/2015/09/20/hiveconfjilu.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/09/20/hdfs-fenceng.html">HDFS 分层存储</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年09月20日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p>Hadoop  <br />
+众所周知，商用硬件可以组装起来创建拥有大数据存储和计算能力的Hadoop集群。将数据拆分成多个部分，分别存储在每个单独的机器上，数据处理逻辑也在同样的机器上执行。   </p>
+
+<p>例如：一个1000个节点组成的Hadoop集群，单节点容量有20TB，最多可以存储20PB的数据。因此，所有的这些机器拥有足够的计算能力来履行Hadoop的口号：“take compute to data”。 <br />
+数据的温度 <br />
+集群中通常存储着各种不同类型的数据集，不同的团队不同的业务通过该集群可以共享地处理他们不同类型的工作任务。通过数据管道，每个数据集每时每刻都会得到增长。 <br />
+数据集有一个共同特点就是初始的使用量会很大。在此期间，数据集被认为是“热(HOT)”的。我们通过分析发现，随着时间的推移，使用率会有一定程度的下降，存储的数据每周仅仅就被访问几次，逐渐就变为“温(WARM)”数据。在此后90天中，当数据使用率跌至一个月几次时，它就被定义为“冷(COLD)”数据。<br />
+因此数据在最初几天被认为是“热”的，此后第一个月仍然保持为“温”的。在这期间，任务或应用会使用几次该数据。随着数据的使用率下降得更多，它就变“冷”了，在此后90天内或许只被使用寥寥几次。最终，当数据一年只有一两次使用频率、极少用到时，它的“温度”就是“冰冻”的了。   </p>
+
+<p>一般来讲，温度与每个数据集都紧密相关。在这个例子中，温度是与数据的年龄成反比的。一个特定数据集的温度也受其他因素影响的。你也可以通过算法决定数据集的温度。<br />
+HDFS的分层存储<br />
+HDFS从Hadoop2.3开始支持分层存储<br />
+它是如何工作的呢？ <br />
+正常情况下，一台机器添加到集群后，将会有指定的本地文件系统目录来存储这块副本。用来指定本地存储目录的参数是dfs.datanode.dir。另一层中，比如归档(ARCHIVE)层，可以使用名为StorageType的枚举来添加。为了表明这个本地目录属于归档层，该本地目录配置中会带有[ARCHIVE]的前缀。理论上，hadoop集群管理员可以定义多个层级。 <br />
+比如说：如果在一个已有1000个节点，其总存储容量为20PB的集群上，增加100个节点，其中每个节点有200TB的存储容量。相比已有的1000个节点，这些新增节点的计算能力就相对较差。接下来，我们在所有本地目录的配置中增加ARCHIVE的前缀。那么现在位于归档层的这100个节点将会有20PB的存储量。最后整个集群被划分为两层——磁盘(DISK)层和归档(ARCHIVE)层，每一层有20PB的容量，总容量为40PB。   </p>
+
+<p>基于温度将数据映射到存储层 <br />
+在这个例子中，我们将在拥有更强计算能力节点的DISK层存储高频率使用的“热(HOT)”数据。 <br />
+至于“温(WARM)”数据，我们将其大部分的副本存储在磁盘层。对于复制因子(replication factor)为3的数据，我们将在磁盘层存储其两个副本，在归档层存储一个副本。 <br />
+如果数据已经变“冷(COLD)”,那么我们至少将在磁盘层存储其每个块的一个副本。余下的副本都放入归档层。   </p>
+
+<p>当一个数据集为认为是“冰冻(FROZEN)”的,这就意味着它几乎已经不被使用，将其存储在具有大量CPU、能执行众多任务节点或容器的节点上是不明智的。我们会把它存储到一个具有最小计算能力的节点上。因此，所有处于“冰冻(FROZEN)”状态块的全部副本都可以被移动到归档层。 <br />
+跨层的数据流 <br />
+当数据第一次添加到集群中，它将被存储到默认的磁盘层。基于数据的温度，它的一个或多个副本将被移动到归档层。移动器就是用来把数据从一个层移动到另一层的。移动器的工作原理类似平衡器，除了它可以跨层地移动块的副本。移动器可接受一条HDFS路径，一个副本数目和目的地层信息。然后它将基于所述层的信息识别将要被移动的副本，并调度数据在源数据节点到目的数据节点的移动。<br />
+Hadoop 2.6中支持分层存储的变化 <br />
+Hadoop 2.6中有许多的改进使其能够进一步支持分层存储。你可以附加一个存储策略到某个目录来指明它是“热(HOT)”的,“温(WARM)”的,“冷(COLD)”的, 还是“冰冻(FROZEN)”的。存储策略定义了每一层可存储的副本数量。我可以改变目录的存储策略并启动该目录的移动器来使得策略生效。 <br />
+使用数据的应用 <br />
+基于数据的温度，数据的部分或者全部副本可能存储在任一层中。但对于通过HDFS来使用数据的应用而言，其位置是透明的。 <br />
+虽然“冰冻”数据的所有副本都在归档层，应用依然可以像访问HDFS的任何数据一样来访问它。由于归档层中的节点并没有计算能力，运行在磁盘层的映射(map)任务将从归档层的节点上读取数据，但这会导致增加应用的网络流量消耗。如果这种情况频繁地发生，你可以指定该数据为“温/冷”,并让移动器移回一个或多个副本到磁盘层。 <br />
+确定数据温度以及完成指定的副本移动至预先定义的分层存储可以全部自动化。 <br />
+总结 <br />
+无计算能力的存储比有计算能力的存储要便宜。我们可以依据数据的温度来确保具计算能力的存储能得到充分地使用。因为每一个分块的数据都会被复制多次（默认是3次），根据数据的温度，许多副本都会被移动到低成本的存储中。HDFS支持分层存储并提供必要的工具来进行跨层的数据移动。   </p>
+
+      <div class="readall"><a href="/blog/2015/09/20/hdfs-fenceng.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/09/20/guanjianjiagouceng.html">大数据处理的关键架构层</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年09月20日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <p><img src="/image/大数据处理的关键架构层.jpg" alt="" /></p>
+
+      <div class="readall"><a href="/blog/2015/09/20/guanjianjiagouceng.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
       <h1 class="post-title"><a href="/blog/2015/09/20/duoyuan-ETL.html">多源ETL考虑</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
@@ -273,400 +845,6 @@ F.。。。<br />
 
 
       <div class="readall"><a href="/blog/2015/09/20/dashujupingtaisheji.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/09/20/10-suanfa-biji.html">C4.5+聚类+SVM+关联+EM+PageRank+迭代+kNN+NB+分类笔记</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年09月20日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <ol>
-  <li>
-    <p>C4.5算法<br />
-C4.5是做什么  <br />
-C4.5 以决策树的形式构建了一个分类器。<br />
-什么是分类器  <br />
-分类器是进行数据挖掘的一个工具，它处理大量需要进行分类的数据，并尝试预测新数据所属的类别。
-ru:假定一个包含很多病人信息的数据集。我们知道每个病人的各种信息，比如年龄、脉搏、血压、最大摄氧量、家族病史等。这些叫做数据属性。<br />
-现在：  <br />
-给定这些属性，我们想预测下病人是否会患癌症。病人可能会进入下面两个分类：会患癌症或者不会患癌症。算法负责告诉我们每个病人的分类。<br />
-做法：<br />
-用一个病人的数据属性集和对应病人的反馈类型，C4.5构建了一个基于新病人属性预测他们类型的决策树。<br />
-什么是决策树呢？  <br />
-决策树学习是创建一种类似与流程图的东西对新数据进行分类。  <br />
-基本原则：<br />
-流程图的每个环节都是一个关于属性值的问题，并根据这些数值，病人就被分类了。你可以找到很多决策树的例子。<br />
-这属于监督学习算法，因为训练数据是已经分好类的。使用分好类的病人数据，C4.5算法不需要自己学习病人是否会患癌症。  <br />
-C4.5算法和决策树系统区别  <br />
-首先，C4.5算法在生成信息树的时候使用了信息增益。  <br />
-其次，尽管其他系统也包含剪枝，C4.5使用了一个单向的剪枝过程来缓解过渡拟合。剪枝给结果带来了很多改进。 再次，C4.5算法既可以处理连续数据也可以处理离散数据。最后，不完全的数据用算法自有的方式进行了处理。  <br />
-决策树最好的卖点是他们方便于翻译和解释。他们速度也很快，是种比较流行的算法。输出的结果简单易懂。  </p>
-  </li>
-  <li>
-    <p>k 均值聚类算法<br />
-K-聚类算法从一个目标集中创建多个组，每个组的成员都是比较相似的。这是个想要探索一个数据集时比较流行的聚类分析技术。<br />
-什么是聚类分析<br />
-聚类分析属于设计构建组群的算法，这里的组成员相对于非组成员有更多的相似性。在聚类分析的世界里，类和组是相同的意思。<br />
-如：假设我们定义一个病人的数据集。在聚类分析里，这些病人可以叫做观察对象。我们知道每个病人的各类信息，比如年龄、血压、血型、最大含氧量和胆固醇含量等。这是一个表达病人特性的向量。<br />
-基本认为一个向量代表了我们所知道的病人情况的一列数据。这列数据也可以理解为多维空间的坐标。脉搏是一维坐标，血型是其他维度的坐标等等。  <br />
-Kmeans算法更深层次的这样处理问题： <br />
-1.k-means 算法在多维空间中挑选一些点代表每一个 k 类。他们叫做中心点。<br />
-2.每个病人会在这 k 个中心点中找到离自己最近的一个。我们希望病人最靠近的点不要是同一个中心点，所以他们在靠近他们最近的中心点周围形成一个类。<br />
-3.我们现在有 k 个类，并且现在每个病人都是一个类中的一员。 <br />
-4.之后k-means 算法根据它的类成员找到每个 k 聚类的中心<br />
-5.这个中心成为类新的中心点。<br />
-6.因为现在中心点在不同的位置上了，病人可能现在靠近了其他的中心点。换句话说，他们可能会修改自己的类成员身份。  <br />
-7.重复2-6步直到中心点不再改变，这样类成员也就稳定了。这也叫做收敛性。  <br />
-k-means 可以认为是非监督学习的类型。并不是指定分类的个数，也没有观察对象该属于那个类的任何信息   <br />
-k-means 关键卖点是它的简单。它的简易型意味着它通常要比其他的算法更快更有效，尤其是要大量数据集的情况下更是如此。 <br />
-改进：<br />
-k-means 可以对已经大量数据集进行预先聚类处理，然后在针对每个子类做成本更高点的聚类分析。k-means 也能用来快速的处理“K”和探索数据集中是否有被忽视的模式或关系。  <br />
-k means算法的两个关键弱点分别是它对异常值的敏感性和它对初始中心点选择的敏感性。</p>
-  </li>
-  <li>
-    <p>支持向量机<br />
-支持向量机（SVM）获取一个超平面将数据分成两类。除了不会使用决策树以外，SVM与 C4.5算法是执行相似的任务的。  <br />
-超平面（hyperplane）是个函数，类似于解析一条线的方程。实际上，对于只有两个属性的简单分类任务来说，超平面可以是一条线的。 <br />
-其实事实证明：
-SVM 可以使用一个小技巧，把你的数据提升到更高的维度去处理。一旦提升到更高的维度中，SVM算法会计算出把你的数据分离成两类的最好的超平面。  <br />
-简单的例子。我发现桌子上开始就有一堆红球和蓝球，如果这这些球没有过分的混合在一起，不用移动这些球，你可以拿一根棍子把它们分离开。
-当在桌上加一个新球时，通过已经知道的棍字的哪一边是哪个颜色的球，你就可以预测这个新球的颜色了。 <br />
-SVM 算法可以算出这个超平面的方程。
-如果事情变得更复杂该怎么办？当然了，事情通常都很复杂。如果球是混合在一起的，一根直棍就不能解决问题了。 <br />
-通过使用核函数（kernel），我们在高维空间也有很棒的操作方法。这张大纸依然叫做超平面，但是现在它对应的方程是描述一个平面而不是一条线了。<br />
-那么在桌上或者空中的球怎么用现实的数据解释呢？桌上的每个球都有自己的位置，我们可以用坐标来表示。打个比方，一个球可能是距离桌子左边缘20cm 距离底部边缘 50 cm，另一种描述这个球的方式是使用坐标(x,y)或者(20,50)表达。x和 y 是代表球的两个维度。<br />
-可以这样理解：如果我们有个病人的数据集，每个病人可以用很多指标来描述，比如脉搏，胆固醇水平，血压等。每个指标都代表一个维度。<br />
-基本上，SVM 把数据映射到一个更高维的空间然后找到一个能分类的超平面。 <br />
-类间间隔(margin)经常会和 SVM 联系起来，类间间隔是什么呢？它是超平面和各自类中离超平面最近的数据点间的距离。在球和桌面的例子中，棍子和最近的红球和蓝球间的距离就是类间间隔(margin)。 <br />
-SVM 的关键在于，它试图最大化这个类间间隔，使分类的超平面远离红球和蓝球。这样就能降低误分类的可能性。 <br />
-SVM 属于监督学习。因为开始需要使用一个数据集让 SVM学习这些数据中的类型。只有这样之后 SVM 才有能力对新数据进行分类。  </p>
-  </li>
-  <li>
-    <p>Apriori 关联算法<br />
-Apriori算法学习数据的关联规则(association rules)，适用于包含大量事务（transcation）的数据库。<br />
-什么是关联规则<br />
-关联规则学习是学习数据库中不同变量中的相互关系的一种数据挖掘技术。
-举个 Apriori 算法的例子：我们假设有一个充满超市交易数据的数据库，你可以把数据库想象成一个巨大的电子数据表，表里每一行是一个顾客的交易情况，每一列代表不用的货物项。<br />
-通过使用 Apriori 算法，我们就知道了同时被购买的货物项，这也叫做关联规则。它的强大之处在于，你能发现相比较其他货物来说，有一些货物更频繁的被同时购买—终极目的是让购物者买更多的东西。这些常被一起购买的货物项被称为项集（itemset）。 <br />
-如：“薯条+蘸酱”和“薯条+苏打水”的组合频繁的一起出现。这些组合被称为2-itemsets。在一个足够大的数据集中，就会很难“看到”这些关系了，尤其当还要处理3-itemset 或者更多项集的时候。这正是 Apriori 可以帮忙的地方！<br />
-基本的 Apriori 算法有三步：
-1.参与，扫描一遍整个数据库，计算1-itemsets 出现的频率。<br />
-2.剪枝，满足支持度和可信度的这些1-itemsets移动到下一轮流程，再寻找出现的2-itemsets。<br />
-3.重复，对于每种水平的项集 一直重复计算，知道我们之前定义的项集大小为止。 <br />
-Apriori 一般被认为是一种非监督的学习方法，因为它经常用来挖掘和发现有趣的模式和关系。  </p>
-  </li>
-  <li>
-    <p>EM 最大期望算法 Expectation Maximization<br />
-在数据挖掘领域，最大期望算法（Expectation-Maximization,EM） 一般作为聚类算法（类似 kmeans 算法）用来知识挖掘。<br />
-在统计学上，当估运算带有无法观测隐藏变量的统计模型参数时,EM 算法不断迭代和优化可以观测数据的似然估计值。 <br />
-统计模型？我把模型看做是描述观测数据是如何生成的。例如，一场考试的分数可能符合一种钟形曲线，因此这种分数分布符合钟形曲线（也称正态分布）的假设就是模型。<br />
-什么是分布？分布代表了对所有可测量结果的可能性。例如，一场考试的分数可能符合一个正态分布。这个正态分布代表了分数的所有可能性。换句话说，给定一个分数，你可以用这个分布来预计多少考试参与者可能会得到这个分数。<br />
-那么，你描述正态分布需要的所有东西就是这两个参数：<br />
-1.平均值<br />
-2.方差 <br />
-什么是似然性：<br />
-回到我们之前的钟形曲线例子，假设我们已经拿到很多的分数数据，并被告知分数符合一个钟形曲线。然而，我们并没有给到所有的分数，只是拿到了一个样本。
-可以这样做：<br />
-我们不知道所有分数的平均值或者方差，但是我们可以使用样本计算它们。似然性就是用估计的方差和平均值得到的钟形曲线在算出很多分数的概率。<br />
-换句话说，给定一系列可测定的结果，让我们来估算参数。再使用这些估算出的参数，得到结果的这个假设概率就被称为似然性。<br />
-算法的优势是：对于数据挖掘和聚类，观察到遗失的数据的这类数据点对我们来说很重要。我们不知道具体的类，因此这样处理丢失数据对使用 EM 算法做聚类的任务来说是很关键的。
-算法的精髓在于：<br />
-通过优化似然性，EM 生成了一个很棒的模型，这个模型可以对数据点指定类型标签—听起来像是聚类算法！ <br />
-EM 算法是怎么帮助实现聚类的呢？EM 算法以对模型参数的猜测开始。然后接下来它会进行一个循环的3步：   <br />
-1.E 过程：基于模型参数，它会针对每个数据点计算对聚类的分配概率。<br />
-2.M 过程：基于 E 过程的聚类分配，更新模型参数。<br />
-3.重复知道模型参数和聚类分配工作稳定（也可以称为收敛）。 <br />
-EM 是非监督学习算法。
-EM 算法的一个关键卖点就是它的实现直接。它不但可以优化模型参数，还可以反复的对丢失数据进行猜测。  <br />
-这使算法在聚类和产生带参数的模型上都表现出色。在得知聚类情况和模型参数的情况下，我们有可能解释清楚有相同属性的分类情况和新数据属于哪个类之中。 <br />
-EM算法弱点… <br />
-第一，EM 算法在早期迭代中都运行速度很快，但是越后面的迭代速度越慢。<br />
-第二，EM 算法并不能总是寻到最优参数，很容易陷入局部最优而不是找到全局最优解。   </p>
-  </li>
-  <li>
-    <p>PageRank算法
-PageRank是为了决定一些对象和同网络中的其他对象之间的相对重要程度而设计的连接分析算法(link analysis algorithm)。   <br />
-什么是连接分析算法？<br />
-它是一类针对网络的分析算法，探寻对象间的关系（也可成为连接）。<br />
-举个例子：最流行的 PageRank 算法是 Google 的搜索引擎。尽管他们的搜索引擎不止是依靠它，但  PageRank依然是 Google 用来测算网页重要度的手段之一。 <br />
-万维网上的网页都是互相链接的。如果 Rayli.net 链接到了 CNN 上的一个网页，CNN 网页就增加一个投票，表示 rayli.net 和 CNN 网页是关联的。 <br />
-反过来，来自rayli.net 网页的投票重要性也要根据 rayli.net 网的重要性和关联性来权衡。换句话说，任何给 rayli.net 投票的网页也能提升 rayli.net 网页的关联性。 <br />
-概括一下： <br />
-投票和关联性就是 PageRank 的概念。rayli.net 给CNN 投票增加了 CNN 的 Pagerank，rayli.net 的 PageRank级别同时也影响着它为 CNN 投票多大程度影响了CNN 的 PageRank。<br />
-这排名有点像一个网页流行度的竞争。我们的头脑中都有了一些这些网站的流行度和关联度的信息。
-PageRank只是一个特别讲究的方式来定义了这些而已。 <br />
-PageRank还有什么其他应用呢？ PageRank是专门为了万维网设计的。 <br />
-可以考虑一下，以核心功能的角度看，PageRank算法真的只是一个处理链接分析极度有效率的方法。处理的被链接的对象不止只是针对网页。  <br />
-给出PageRank 的三个实现：<br />
-1 C++ OpenSource PageRank Implementation<br />
-2 Python PageRank Implementation<br />
-3 igraph – The network analysis package (R)  </p>
-  </li>
-  <li>
-    <p>AdaBoost 迭代算法
-AdaBoost 是个构建分类器的提升算法。 <br />
-分类器拿走大量数据，并试图预测或者分类新数据元素的属于的类别。
-提升(boost) 指的什么？提升是个处理多个学习算法（比如决策树）并将他们合并联合起来的综合的学习算法。目的是将弱学习算法综合或形成一个组，把他们联合起来创造一个新的强学习器。 <br />
-强弱学习器之间有什么区别呢？弱学习分类器的准确性仅仅比猜测高一点。一个比较流行的弱分类器的例子就是只有一层的决策树。 <br />
-另一个，强学习分类器有更高的准确率，一个通用的强学习器的例子就是 SVM。 <br />
-举个 AdaBoost 算法的例子：我们开始有3个弱学习器，我们将在一个包含病人数据的数据训练集上对他们做10轮训练。数据集里包含了病人的医疗记录各个细节。 <br />
-问题来了，那我们怎么预测某个病人是否会得癌症呢？AdaBoost 是这样给出答案的： <br />
-第一轮，AdaBoost 拿走一些训练数据，然后测试每个学习器的准确率。最后的结果就是我们找到最好的那个学习器。另外，误分类的样本学习器给予一个比较高的权重，这样他们在下轮就有很高的概率被选中了。  <br />
-再补充一下，最好的那个学习器也要给根据它的准确率赋予一个权重，并将它加入到联合学习器中（这样现在就只有一个分类器了） <br />
-第二轮， AdaBoost 再次试图寻找最好的学习器。 <br />
-关键部分来了，病人数据样本的训练数据现在被有很高误分配率的权重影响着。换句话说，之前误分类的病人在这个样本里有很高的出现概率。 <br />
-为什么？
-这就像是在电子游戏中已经打到了第二级，但当你的角色死亡后却不必从头开始。而是你从第二级开始然后集中注意，尽力升到第三级。 <br />
-同样地，第一个学习者有可能对一些病人的分类是正确的，与其再度试图对他们分类，不如集中注意尽力处理被误分类的病人。   <br />
-最好的学习器也被再次赋予权重并加入到联合分类器中，误分类的病人也被赋予权重，这样他们就有比较大的可能性再次被选中，我们会进行过滤和重复。 <br />
-在10轮结束的时候，我们剩下了一个带着不同权重的已经训练过的联合学习分类器，之后重复训练之前回合中被误分类的数据。<br />
-算法灵活通用，AdaBoost 可以加入任何学习算法，并且它能处理多种数据。<br />
-AdaBoost 有很多程序实现和变体。给出一些： <br />
-▪ scikit-learn<br />
-▪ ICSIBoost<br />
-▪ gbm: Generalized Boosted Regression Models   </p>
-  </li>
-  <li>
-    <p>kNN：k最近邻算法<br />
-kNN，或 K 最近邻(k-Nearest Neighbors), 诗歌分类算法。然而，它和我们之前描述的分类器不同，因为它是个懒散学习法。<br />
-懒散学习法？  和存储训练数据的算法不同，懒散学习法在训练过程中不需要做许多处理。只有当新的未被分类的数据输入时，这类算法才会去做分类。 <br />
-但在另一方面，积极学习法则会在训练中建立一个分类模型，当新的未分类数据输入时，这类学习器会把新数据也提供给这个分类模型。 <br />
-那么 C4.5，SVM 和 AdaBoost 属于哪类呢？不像 kNN算法，他们都是积极学习算法。 <br />
-给出原因：<br />
-1 C4.5 在训练中建立了一个决策分类树模型。<br />
-2 SVM在训练中建立了一个超平面的分类模型。<br />
-3 AdaBoost在训练中建立了一个联合的分类模型。<br />
-那么 kNN 做了什么？ kNN 没有建立这样的分类模型，相反，它只是储存了一些分类好的训练数据。那么新的训练数据进入时，kNN 执行两个基本步骤：<br />
-1 首先，它观察最近的已经分类的训练数据点—也就是，k最临近点（k-nearest neighbors）<br />
-2 第二部，kNN使用新数据最近的邻近点的分类， 就对新数据分类得到了更好的结果了。 <br />
-你可能会怀疑…kNN 是怎么计算出最近的是什么？ 对于连续数据来说，kNN 使用一个像欧氏距离的距离测度，距离测度的选择大多取决于数据类型。有的甚至会根据训练数据学习出一种距离测度。关于 kNN 距离测度有更多的细节讨论和论文描述。 <br />
-对于离散数据，解决方法是可以把离散数据转化为连续数据。给出两个例子： <br />
-1 使用汉明距离（Hamming distance ）作为两个字符串紧密程度的测度。 <br />
-2 把离散数据转化为二进制表征。 <br />
-当临近的点是不同的类，kNN 怎么给新数据分类呢？当临近点都是同一类的时候，kNN 也就不费力气了。我们用直觉考虑，如果附近点都一致，那么新数据点就很可能落入这同一个类中了。 <br />
-当临近点不是同一类时，kNN 怎么决定分类情况的呢？<br />
-处理这种情况通常有两种办法：<br />
-1 通过这些临近点做个简单的多数投票法。哪个类有更多的票，新数据就属于那个类。<br />
-2 还是做个类似的投票，但是不同的是，要给那些离的更近的临近点更多的投票权重。这样做的一个简单方法是使用反距离(reciprocal distance). 比如，如果某个临近点距离5个单位，那么它的投票权重就是1/5.当临近点越来越远是，倒数距离就越来越小…这正是我们想要的。 <br />
- kNN 算法提供了已经被分类好的数据集，所以它是个监督学习算法。 <br />
-我们需要注意的5点： <br />
-1 当试图在一个大数据集上计算最临近点时，kNN 算法可能会耗费高昂的计算成本。<br />
-2 噪声数据(Noisy data)可能会影响到 kNN 的分类。 <br />
-3 选择大范围的属性筛选(feature)会比小范围的筛选占有很多优势，所以属性筛选(feature)的规模非常重要。 <br />
-4 由于数据处理会出现延迟，kNN 相比积极分类器，一般需要更强大的存储需求。 <br />
-5 选择一个合适的距离测度对 kNN 的准确性来说至关重要。 <br />
-哪里用过这个方法？有很多现存的 kNN 实现手段：<br />
-▪ MATLAB k-nearest neighbor classification<br />
-▪ scikit-learn KNeighborsClassifier<br />
-▪ k-Nearest Neighbour Classification in R   </p>
-  </li>
-  <li>Naive Bayes 朴素贝叶斯算法 <br />
-朴素贝叶斯（Naive Bayes）并不只是一个算法，而是一系列分类算法，这些算法以一个共同的假设为前提：  <br />
-被分类的数据的每个属性与在这个类中它其他的属性是独立的。 <br />
-独立是什么意思呢？当一个属性值对另一个属性值不产生任何影响时，就称这两个属性是独立的。
-举个例子：
-比如说你有一个病人的数据集，包含了病人的脉搏，胆固醇水平，体重，身高和邮编这样的属性。如果这些属性值互相不产生影响，那么所有属性都是独立的。对于这个数据集来说，假定病人的身高和邮编相互独立，这是合理的。因为病人的身高和他们的邮编没有任何关系。但是我们不能停在这，其他的属性间是独立的么？ <br />
-很遗憾，答案是否定的。给出三个并不独立的属性关系： <br />
-▪ 如果身高增加，体重可能会增加。 <br />
-▪ 如果胆固醇水平增加，体重可能增加。<br />
-▪ 如果胆固醇水平增加，脉搏也可能会增加。<br />
-以我的经验来看，数据集的属性一般都不是独立的。<br />
-这样就和下面的问题联系起来了…<br />
-为什么要把算法称为朴素的(naive)呢？数据集中所有属性都是独立的这个假设正是我们称为朴素（naive）的原因—— 通常下例子中的所有属性并不是独立的。  <br />
-我们在深入研究一下..
-这个等式是什么意思？在属性1和属性2的条件下，等式计算出了A 类的概率。换句话说，如果算出属性1 和2，等式算出的数据属于 A 类的概率大小。
-等式这样写解释为：在属性1和属性2条件下，分类 A 的概率是一个分数。
-▪ 分数的分子是在分类 A条件下属性1的概率，乘以在分类 A 条件下属性2的概率，再乘以分类 A 的概率
-▪ 分数的分母是属性1的概率乘以属性2的概率。
-Naive Bayes 的实现可以从Orange, scikit-learn, Weka和 R 里面找到。
-最后，看一下第十种算法吧。  </li>
-  <li>CART 分类算法<br />
-CART 代表分类和回归树(classification and regression trees)。它是个决策树学习方法，同时输出分类和回归树。 像 C4.5一样，CART 是个分类器。 <br />
-分类树像决策树一样么？分类树是决策树的一种。分类树的输出是一个类。 <br />
-举个例子，根据一个病人的数据集、你可能会试图预测下病人是否会得癌症。这个分类或者是“会的癌症”或者是“不会得癌症”。 <br />
-那回归树是什么呢？和分类树预测分类不同，回归树预测一个数字或者连续数值，比如一个病人的住院时间或者一部智能手机的价格。<br />
-这么记比较简单：<br />
-分类树输出类、回归树输出数字。 <br />
-为了构造分类和回归树模型，需要给它提供被分类好的训练数据集，因此 CART 是个监督学习算法。
-为什么要使用 CART 呢？使用 C4.5的原因大部分也适用于 CART，因为它们都是决策树学习的方法。便于说明和解释这类的原因也适用于 CART。
-和 C4.5一样，它们的计算速度都很快，算法也都比较通用流行，并且输出结果也具有可读性。
-scikit-learn 在他们的决策树分类器部分实现了 CART 算法；R 语言的 tree package 也有 CART 的实现；Weka 和 MATLAB 也有CART的实现过程。</li>
-</ol>
-
-
-      <div class="readall"><a href="/blog/2015/09/20/10-suanfa-biji.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/05/16/sqoop-spacil-chart.html">sqoop 特殊字符导入问题</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年05月16日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <p>Sqoop从MySQL导入数据到hive，示例：<br />
-sqoop import –connect  jdbc:mysql://10.255.2.89:3306/test?charset=utf-8 –  username selectuser –password select##select##  –table test_sqoop_import \<br />
-–columns ‘id,content,updateTime’ \<br />
-–split-by id \<br />
-–hive-import –hive-table basic.test2;  </p>
-
-<p>如果不加其他参数，导入的数据默认的列分隔符是’\001’，默认的行分隔符是’\n’。<br />
-这样问题就来了，如果导入的数据中有’\n’，hive会认为一行已经结束，后面的数据被分割成下一行。这种情况下，导入之后hive中数据的行数就比原先数据库中的多，而且会出现数据不一致的情况。<br />
-Sqoop也指定了参数 –fields-terminated-by和 –lines-terminated-by来自定义行分隔符和列分隔符。<br />
-可是当你真的这么做时 坑爹呀<br />
-INFO hive.HiveImport: FAILED: SemanticException 1:381 LINES TERMINATED BY only supports newline ’\n’ right now.    
-也就是说虽然你通过–lines-terminated-by指定了其他的字符作为行分隔符，但是hive只支持’\n’作为行分隔符。<br />
-简单的解决办法就是加上参数–hive-drop-import-delims来把导入数据中包含的hive默认的分隔符去掉。  </p>
-
-<p>附 sqoop 命令参考  </p>
-
-<p>导入数据到 hdfs<br />
-使用 sqoop-import 命令可以从关系数据库导入数据到 hdfs。<br />
-$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –target-dir /user/hive/result
-注意：<br />
-mysql jdbc url 请使用 ip 地址<br />
-如果重复执行，会提示目录已经存在，可以手动删除<br />
-如果不指定 –target-dir，导入到用户家目录下的 TBLS 目录<br />
-你还可以指定其他的参数：  </p>
-
-<pre><code>--append	将数据追加到hdfs中已经存在的dataset中。使用该参数，sqoop将把数据先导入到一个临时目录中，然后重新给文件命名到一个正式的目录中，以避免和该目录中已存在的文件重名。  
---as-avrodatafile	将数据导入到一个Avro数据文件中  
---as-sequencefile	将数据导入到一个sequence文件中  
---as-textfile	将数据导入到一个普通文本文件中，生成该文本文件后，可以在hive中通过sql语句查询出结果。  
---boundary-query &lt;statement&gt;	边界查询，也就是在导入前先通过SQL查询得到一个结果集，然后导入的数据就是该结果集内的数据，格式如：--boundary-query 'select id,no from t where id = 3'，表示导入的数据为id=3的记录，或者 select min(&lt;split-by&gt;), max(&lt;split-by&gt;) from &lt;table name&gt;，注意查询的字段中不能有数据类型为字符串的字段，否则会报错
---columns&lt;col,col&gt;	指定要导入的字段值，格式如：--columns id,username
---direct	直接导入模式，使用的是关系数据库自带的导入导出工具。官网上是说这样导入会更快
---direct-split-size	在使用上面direct直接导入的基础上，对导入的流按字节数分块，特别是使用直连模式从PostgreSQL导入数据的时候，可以将一个到达设定大小的文件分为几个独立的文件。
---inline-lob-limit	设定大对象数据类型的最大值
--m,--num-mappers	启动N个map来并行导入数据，默认是4个，最好不要将数字设置为高于集群的节点数
---query，-e &lt;sql&gt;	从查询结果中导入数据，该参数使用时必须指定–target-dir、–hive-table，在查询语句中一定要有where条件且在where条件中需要包含 \$CONDITIONS，示例：--query 'select * from t where \$CONDITIONS ' --target-dir /tmp/t –hive-table t
---split-by &lt;column&gt;	表的列名，用来切分工作单元，一般后面跟主键ID
---table &lt;table-name&gt;	关系数据库表名，数据从该表中获取
---delete-target-dir	删除目标目录
---target-dir &lt;dir&gt;	指定hdfs路径
---warehouse-dir &lt;dir&gt;	与 --target-dir 不能同时使用，指定数据导入的存放目录，适用于hdfs导入，不适合导入hive目录
---where	从关系数据库导入数据时的查询条件，示例：--where "id = 2"
--z,--compress	压缩参数，默认情况下数据是没被压缩的，通过该参数可以使用gzip压缩算法对数据进行压缩，适用于SequenceFile, text文本文件, 和Avro文件
---compression-codec	Hadoop压缩编码，默认是gzip
---null-string &lt;null-string&gt;	可选参数，如果没有指定，则字符串null将被使用
---null-non-string &lt;null-string&gt;	可选参数，如果没有指定，则字符串null将被使用
-</code></pre>
-
-<p>使用 sql 语句<br />
-参照上表，使用 sql 语句查询时，需要指定 $CONDITIONS  </p>
-
-<p>$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –query ‘SELECT * from TBLS where $CONDITIONS ‘ –split-by tbl_id -m 4 –target-dir /user/hive/result<br />
-	上面命令通过 -m 1 控制并发的 map 数。</p>
-
-<p>使用 direct 模式：<br />
-$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –delete-target-dir –direct –default-character-set UTF-8 –target-dir /user/hive/result</p>
-
-<p>指定文件输出格式：<br />
-$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –fields-terminated-by “\t” –lines-terminated-by “\n” –delete-target-dir  –target-dir /user/hive/result</p>
-
-<p>指定空字符串：<br />
-$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –fields-terminated-by “\t” –lines-terminated-by “\n” –delete-target-dir –null-string ‘\N’ –null-non-string ‘\N’ –target-dir /user/hive/result</p>
-
-<p>如果需要指定压缩：  <br />
-$ sqoop import –connect jdbc:mysql://192.168.56.121:3306/metastore –username hiveuser –password redhat –table TBLS –fields-terminated-by “\t” –lines-terminated-by “\n” –delete-target-dir –null-string ‘\N’ –null-non-string ‘\N’ –compression-codec “com.hadoop.compression.lzo.LzopCodec” –target-dir /user/hive/result  </p>
-
-<p>附：可选的文件参数如下表。   </p>
-
-<pre><code>--enclosed-by &lt;char&gt;	给字段值前后加上指定的字符，比如双引号，示例：--enclosed-by '\"'，显示例子："3","jimsss","dd@dd.com"
---escaped-by &lt;char&gt;	给双引号作转义处理，如字段值为"测试"，经过 --escaped-by "\\" 处理后，在hdfs中的显示值为：\"测试\"，对单引号无效
---fields-terminated-by &lt;char&gt;	设定每个字段是以什么符号作为结束的，默认是逗号，也可以改为其它符号，如句号.，示例如：--fields-terminated-by
---lines-terminated-by &lt;char&gt;	设定每条记录行之间的分隔符，默认是换行串，但也可以设定自己所需要的字符串，示例如：--lines-terminated-by "#" 以#号分隔
---mysql-delimiters	Mysql默认的分隔符设置，字段之间以,隔开，行之间以换行\n隔开，默认转义符号是\，字段值以单引号'包含起来。
---optionally-enclosed-by &lt;char&gt;	enclosed-by是强制给每个字段值前后都加上指定的符号，而--optionally-enclosed-by只是给带有双引号或单引号的字段值加上指定的符号，故叫可选的
-</code></pre>
-
-<p>创建 hive 表<br />
-生成与关系数据库表的表结构对应的HIVE表：  </p>
-
-<pre><code>$ sqoop create-hive-table --connect jdbc:mysql://192.168.56.121:3306/metastore --username hiveuser --password redhat --table TBLS 
---hive-home &lt;dir&gt;	Hive的安装目录，可以通过该参数覆盖掉默认的hive目录
---hive-overwrite	覆盖掉在hive表中已经存在的数据
---create-hive-table	默认是false，如果目标表已经存在了，那么创建任务会失败
---hive-table	后面接要创建的hive表
---table	指定关系数据库表名  导入数据到 hive   执行下面的命令会将 mysql 中的数据导入到 hdfs 中，然后创建一个hive 表，最后再将 hdfs 上的文件移动到 hive 表的目录下面。   $ sqoop import --connect jdbc:mysql://192.168.56.121:3306/metastore --username hiveuser --password redhat --table TBLS --fields-terminated-by "\t" --lines-terminated-by "\n" --hive-import --hive-overwrite --create-hive-table --hive-table dw_srclog.TBLS --delete-target-dir   说明：   可以在 hive 的表名前面指定数据库名称   可以通过 --create-hive-table 创建表，如果表已经存在则会执行失败   从上面可见，数据导入到 hive 中之后分隔符为默认分隔符，参考上文你可以通过设置参数指定其他的分隔符。   另外，Sqoop 默认地导入空值（NULL）为 null 字符串，而 hive 使用 \N 去标识空值（NULL），故你在 import 或者 export 时候，需要做相应的处理。在 import 时，使用如下命令：   $ sqoop import  ... --null-string '\\N' --null-non-string '\\N'   在导出时，使用下面命令：   $ sqoop import  ... --input-null-string '' --input-null-non-string ''
-</code></pre>
-
-<p>增量导入<br />
-–check-column (col)	用来作为判断的列名，如id<br />
-–incremental (mode)	append：追加，比如对大于last-value指定的值之后的记录进行追加导入。lastmodified：最后的修改时间，追加last-value指定的日期之后的记录<br />
-–last-value (value)	指定自从上次导入后列的最大值（大于该指定的值），也可以自己设定某一值</p>
-
-<p>合并 hdfs 文件<br />
-将HDFS中不同目录下面的数据合在一起，并存放在指定的目录中，示例如：<br />
-sqoop merge –new-data /test/p1/person –onto /test/p2/person –target-dir /test/merged –jar-file /opt/data/sqoop/person/Person.jar –class-name Person –merge-key id<br />
-其中，–class-name 所指定的 class 名是对应于 Person.jar 中的 Person 类，而 Person.jar 是通过 Codegen 生成的<br />
-–new-data <path>	Hdfs中存放数据的一个目录，该目录中的数据是希望在合并后能优先保留的，原则上一般是存放越新数据的目录就对应这个参数。  
---onto <path>	Hdfs中存放数据的一个目录，该目录中的数据是希望在合并后能被更新数据替换掉的，原则上一般是存放越旧数据的目录就对应这个参数。  
---merge-key &lt;col&gt;	合并键，一般是主键ID  
---jar-file <file>	合并时引入的jar包，该jar包是通过Codegen工具生成的jar包  
---class-name <class>	对应的表名或对象名，该class类是包含在jar包中的。  
---target-dir <path>	合并后的数据在HDFS里的存放目录  </path></class></file></path></path></p>
-
-      <div class="readall"><a href="/blog/2015/05/16/sqoop-spacil-chart.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/05/16/hive-datahouse.html">hive 数据仓库优劣学习</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年05月16日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h5 id="hive">Hive数据仓库优劣</h5>
-<p>Hive是一个基于Hadoop的数据仓库平台，通过Hive，可以方便地进行数据提取转化加载（ETL）的工作。Hive定义了一个类似于SQL的查询语言HQL，能够将用户编写的SQL转化为相应的MapReduce程序。当然，用户也可以自定义Mapper和Reducer来完成复杂的分析工作。<br />
-基于MapReduce的Hive具有良好的扩展性和容错性。不过由于MapReduce缺乏结构化数据分析中有价值的特性，以及Hive缺乏对执行计划的充分优化，导致Hive在很场景中执行效率不高。  </p>
-
-<p>强大的数据仓库和数据分析平台至少需要具备以下几点特性。<br />
-灵活的存储引擎<br />
-高效的执行引擎<br />
-良好的可扩展性<br />
-强大的容错机制<br />
-多样化的可视化  </p>
-
-<h6 id="section">#存储引擎</h6>
-<p>Hive数据存储没有特有的数据结构，（只是hdfs文件的映射）也没有为数据建立索引，可以自由地组织Hive中的表，只要在创建表时告诉Hive数据中的列分隔符和行分隔符，Hive就可以解析数据。Hive的元数据存储在RDBMS中，所有数据都基于HDFS存储。Hive包含Table、External Table、Partition和Bucket等数据模型。  </p>
-
-<h6 id="section-1">#执行引擎</h6>
-<p>Hive的编译器负责编译源代码并生成最终的执行计划，包括语法分析、语义分析、目标代码生成，所做的优化并不多。Hive基于MapReduce，Hive的Sort和GroupBy都依赖MapReduce。而MapReduce相当于固化了执行算子，Map的MergeSort必须执行，GroupBy算子也只有一种模式，Reduce的Merge-Sort也必须可选。另外Hive对Join算子的支持也较少。内存拷贝和数据预处理也会影响Hive的执行效率。<br />
-#######扩展性
-Hive关注水平扩展性。简单来讲，水平扩展性指系统可以通过简单的增加资源来支持更大的数据量和负载。Hive处理的数据量是PB级的，而且每小时每天都在增长，这就使得水平扩展性成为一个非常重要的指标。Hadoop系统的水平扩展性是非常好的，而Hive基MapReduce框架，因此能够很自然地利用这点。
-#######容错性
-Hive有较好的容错性。Hive的执行计划在MapReduce框架上以作业的方式执行，每个作业的中间结果文件写到本地磁盘，最终输出文件写到HDFS文件系统，利用HDFS的多副本机制来保证数据的可靠性，从而达到作业的容错性。如果在作业执行过程中某节点出现故障，那么Hive执行计划基本不会受到影响。因此，基于Hive实现的数据仓库可以部署在由普通机器构建的分布式集群之上。
-#######可视化
-Hive的可视化界面基本属于字符终端，用户的技术水平一般比较高。面向不同的应用和用户，提供个性化的可视化展现，是Hive改进的一个重要方向。</p>
-
-      <div class="readall"><a href="/blog/2015/05/16/hive-datahouse.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

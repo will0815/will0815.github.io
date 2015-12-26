@@ -1,0 +1,178 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Will go, Just do it.">
+  <meta name="author" content="Will.Quan">
+  <meta name="keywords" content="flume与hive/impala配合使用时问题记录, willgo, Will.Quan">
+  <title>flume与hive/impala配合使用时问题记录 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2015/11/28/flume-hvie-question.html">
+  <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/res/css/public.css">
+  <link rel="stylesheet" href="/res/css/light.css">
+  <script src="/res/js/light.js"></script>
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fda48b6233123178f300913a0e707883e' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+<body>
+  <div id="blog">
+    <div class="sidebar">
+  <div class="profilepic">
+    <a href="/"><img src="/res/img/icon.png" alt="logo"></img></a>
+  </div>
+  <h1 class="title"><a href="/">willgo</a></h1>
+  <h2 class="sub-title">最好的从未错过</h2>
+  <nav id="nav">
+    <ul>
+    
+      <li><a href="/page/timing.html"><i class="fa fa-clock-o"></i>&nbsp;资料时间</a></li>
+    
+      <li><a href="/page/category.html"><i class="fa fa-tags"></i>&nbsp;文章分类</a></li>
+    
+      <li><a href="/page/read.html"><i class="fa fa-book"></i>&nbsp;逗绊读书</a></li>
+    
+      <li><a href="/page/life.html"><i class="fa fa-eyedropper"></i>&nbsp;生活记录</a></li>
+    
+      <li><a href="/page/about.html"><i class="fa fa-paper-plane-o"></i>&nbsp;假装关于</a></li>
+    
+    </ul>
+  </nav>  
+  <nav id="sub-nav">
+    <a class="weibo " href="http://weibo.com/u/2369015654" title="新浪微博" target="_blank"><i class="fa fa-weibo"></i></a>
+    <a class="github" href="https://github.com/will0815/" title="GitHub" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+    <a class="rss" href="/page/feed.xml" title="RSS订阅" target="_blank"><i class="fa fa-rss"></i></a>
+  </nav>
+  <div id="license">
+    <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" target="_blank" title="本站所有作品采用：&#10;知识共享《署名 非商业性使用 相同方式共享 3.0》&#10;进行许可" >
+    <img alt="License" height="31" width="88" src="/res/img/license.png" /></a>
+  </div>
+</div>
+
+    <div class="main">
+        <div style="font-family: segoepr;font-size: 40px;
+              margin-top:-5px; color:#fff;">
+            <script type="text/javascript" 
+            src="http://open.iciba.com/ds_open.php?id=11519&name=willgo&auth=BE45CDE6481CC46336529A1B407855B1" charset="utf-8">
+            </script>
+        </div>
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2015/11/28/flume-hvie-question.html">flume与hive/impala配合使用时问题记录</a></h2>
+  <p class="post-meta">
+    <i class="fa fa-calendar"></i>
+    2015年11月28日
+    <i class="space"></i>
+    <i class="fa fa-tags"></i>
+    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
+  </p>
+</header>
+<div class="post-main">
+<h3 id="flumehiveimpala---">工作中日志收集以及分析  通过Flume+hive/impala实现 期间遇到一些问题  记录：</h3>
+
+<h3 id="section">问题一：</h3>
+<p>使用过程中时常会遇到.tmp文件无法找到的问题。  <br />
+impala 查询时这个问题尤为严重。 hive查询时也会时常出现这个问题。<br />
+明白Flume写文件处理方式，以及hive/impala 数据查询时的实际处理方式，就能明白为什么会出现这些问题   </p>
+
+<ol>
+  <li>Flume日志写入操作时 会将正在写入的文件加上.tmp后缀。 当文件写入完成（一定时间没有写入/达到设置的阀值）时，会将./tmp文件重命名，去掉.tmp后缀  </li>
+  <li>Hive查询时是根据hive元数据库中的信息进行文件扫描，即对应map/reduce的输入。  </li>
+  <li>Impala共享hive的元数据  </li>
+</ol>
+
+<p>所以这时就会出现上面遇到的问题<br />
+1. 如果Hive在执行过程中，恰好Flume对写入文件进行了重命名操作，即将xxx.tmp重命名为xxx，这时Hive会报错  .tmp找不到。。。<br />
+2. impala这个错  更加平凡是因为impala同步hive元数据并不是实时操作，所以xxx.tmp被重命名掉的概率更大  </p>
+
+<h6 id="section-1">处理办法：</h6>
+
+<ol>
+  <li>
+    <p>impala的简单解决办法 即手动同步元数据。 执行refresh 文件对应的表， 或者直接执行 invalidate metadata 刷新元数据  </p>
+  </li>
+  <li>
+    <p>hive的处理办法 <br />
+因为hdfs java api 读取HDFS文件时，会忽略以”.”和”_”开头的文件<br />
+类似于Linux中.xx是隐藏的一样，所以应用程序读取HDFS文件时默认也不读取.xxx和_xxx这样名称的文件<br />
+所以可以利用这一点 将Flume正在写入的.tmp文件设置为以‘.’开头，这样可以避免.tmp文件被读取到
+Flume配置项：hdfs.inUsePrefix<br />
+另一种解决办法 重写hive的PathFilter  </p>
+
+    <pre><code> package com.willgo.util;
+	
+ import java.io.IOException;
+ import java.util.ArrayList;
+ import java.util.List;
+ import org.apache.hadoop.fs.Path;
+ import org.apache.hadoop.fs.PathFilter;
+	
+ public class FileFilterExcludeTmpFiles implements PathFilter {
+     public boolean accept(Path p) {
+         String name = p.getName();
+         return !name.startsWith(“_”) &amp;&amp; !name.startsWith(“.”) &amp;&amp; !name.endsWith(“.tmp”);
+     }
+ }
+</code></pre>
+  </li>
+</ol>
+
+<p>hive-site.xml：  </p>
+
+<pre><code>	&lt;property&gt;
+	    &lt;name&gt;mapred.input.pathFilter.class&lt;/name&gt;
+	    &lt;value&gt;com.willgo.util.FileFilterExcludeTmpFiles&lt;/value&gt;
+	&lt;/property&gt;
+</code></pre>
+
+<h3 id="section-2">问题二：</h3>
+
+<p>数据写入延时<br />
+日志上报端 反映日志上报到集群后 查询时有不同情况的延时问题。 但自己测试时有几乎没有延时的问题。。。  <br />
+考虑如下：<br />
+1. Flume channel选择 （but 已是内存）<br />
+2. hdfs写入机制，hdfs文件按block存储，正在写入的block 对文件系统是隐藏的。<br />
+hdfs文件原则：  <br />
+创建文件，这个文件可以立即可见<br />
+写入文件的数据则不被保证可见了，哪怕是执行了刷新操作(flush/sync)。只有数据量大于1个BLOCK时，第一个BLOCK的数据才会被看到，后续的BLOCK也同样的特性。正在写入的BLOCK始终不会被其他用户看到！ <br />
+基于以上两点  遇到的延时问题 基本上判断是第二点引起的。<br />
+###### 处理办法：<br />
+调小Flume写入文件分割的阀值：hdfs.rollInterval。<br />
+现在是按小时分割，是否可以考虑按分钟分割……<br />
+这样又将产生大量小文件的问题以及namenode压力问题，小文件可以采用线下合并以及使用归档的方式处理。</p>
+
+
+</div>
+<div class="share">
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+  </div>
+  <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":["qzone","tsina","weixin","sqq"],"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/res/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<div class="pagination">
+
+<a class="pagination-item newer" href="/blog/2015/10/28/bokecaozuo.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;博客操作记录</a>
+
+
+<a class="pagination-item older" href="/blog/2015/12/20/javaniubizhilu.html">牛逼之路&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+
+</div>
+<div class="comments">
+  <div class="ds-thread" data-title="flume与hive/impala配合使用时问题记录" data-thread-key="/blog/2015/11/28/flume-hvie-question" data-url="index.html/blog/2015/11/28/flume-hvie-question.html"></div>
+  <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
+</div>
+    <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
+</br> <a href="http://m.kuaidi100.com" target="_blank">快递查询</a> 
+</footer>
+
+    </div>
+  </div>    
+  <div id="top"><a id="rocket" href="javascript:;" title="返回顶部"><i></i></a></div>
+  
+</body>
+</html>

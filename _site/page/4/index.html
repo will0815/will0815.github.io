@@ -64,6 +64,173 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="posts">
   <section class="post">
     <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point9.html">Linux学习笔记9-AWK</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="linux9-awk">Linux学习笔记9-AWK</h2>
+<p>AWK是所有shell过滤工具中最难掌握的，不知道为什么，也许是其复杂的语法或含义不明确的错误提示信息。在学习awk语言过程中，就会慢慢掌握诸如Bailing out 和awk:cmd.Line:等错误信息。可以说awk是一种自解释的编程语言，之所以要在shell中使用awk是因为awk本身是学习的好例子，但结合awk与其他工具诸如grep和sed，将会使shell编程更加
+容易。<br />
+调用：<br />
+有三种方式调用awk，第一种是命令行方式，如：<br />
+awk [-F field-separator] ‘awk命令’ input-file(s)<br />
+[-F域分隔符]是可选的，因为awk使用空格作为缺省的域分隔符，因此如果
+要浏览域间有空格的文本，不必指定这个选项，但如果要浏览诸如passwd文件，此文件各域以冒号作为分隔符，则必须指明- F选项<br />
+awk -F:’awk命令’ input-file<br />
+第二种方法是将所有awk命令插入一个文件，并使awk程序可执行，然后用awk命令解释器作为脚本的首行，以便通过键入脚本名称来调用它<br />
+awk -f awk-script-file input-files<br />
+第三种方式是将所有的awk命令插入一个单独文件. -f选项指明在文件awk_scriptfile中的awk脚本，inputfile(s)是使用awk进行浏览的文件
+名。  </p>
+
+<p>awk脚本<br />
+在命令中调用awk时，awk脚本由各种操作和模式组成。<br />
+如果设置了-F选项，则awk每次读一条记录或一行，并使用指定的分隔符分隔指定域，但如果未设置-F选项，awk假定空格为域分隔符，并保持这个设置直到发现一新行。当新行出现时，awk命令获悉已读完整条记录，然后在下一个记录启动读命令，这个读进程将持续到文件尾或文件不再存在。</p>
+
+
+      <div class="readall"><a href="/blog/2015/02/01/Linux-point9.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point8.html">Linux学习笔记8-grep 家族</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="linux8-grep-">Linux学习笔记8-grep 家族</h2>
+<p>grep（全局正则表达式版本）允许对文本文件进行模式查找。如果找到匹配模式，grep打印包含模式的所有行。grep支持基本正则表达式，也支持其扩展集   <br />
+grep一般格式为：<br />
+grep [选项]基本正则表达式[文件]<br />
+这里基本正则表达式可为字符串。  </p>
+
+<p>在grep命令中输入字符串参数时，最好将其用双引号括起来。例如：“mystring”。这样做有两个原因，
+一是以防被误解为shell命令，<br />
+二是可以用来查找多个单词组成的字符串，例如：  <br />
+“jet plane”，如果不用双引号将其括起来，那么单词plane将被误认为是一个文件，查询结果将返回“文件不存在”的错误信息。<br />
+在调用变量时，也应该使用双引号，诸如： grep “MYVAR”文件名，如果不这样，将没有返回结果。<br />
+在调用模式匹配时，应使用单引号。  </p>
+
+<p>常用的grep选项有：<br />
+-c 只输出匹配行的计数。<br />
+-i 不区分大小写（只适用于单字符）。<br />
+-h 查询多文件时不显示文件名。<br />
+-l 查询多文件时只输出包含匹配字符的文件名。<br />
+-n 显示匹配行及行号。<br />
+-s 不显示不存在或无匹配文本的错误信息。<br />
+-v 显示不包含匹配文本的所有行。  </p>
+
+<p>grep “will”*.doc 在当前目录下所有.doc文件中查找”will”字符串。  </p>
+
+<p>精确匹配：<br />
+grep “will<tab>"*.doc 在当前目录下所有.doc文件精确匹配"will"   还可以写为：grep "will\&gt;"*.doc  
+大小写敏感：  
+缺省情况下， grep是大小写敏感的，如要查询大小写不敏感字符串，必须使用- i开关。  </tab></p>
+
+
+      <div class="readall"><a href="/blog/2015/02/01/Linux-point8.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point7.html">Linux学习笔记7-正则表达式介绍</a></h1>
+      <p class="post-meta">
+        <i class="fa fa-calendar"></i>
+        2015年02月01日
+        <i class="space"></i>
+        <i class="fa fa-tags"></i>
+        <a class="post-category" href="/page/category.html#linux">linux</a>
+      </p>
+    </header>
+    <div class="post-main">
+      <h2 id="linux7-">Linux学习笔记7-正则表达式介绍</h2>
+<p>当从一个文件或命令输出中抽取或过滤文本时，可以使用正则表达式(RE)，正则表达式是一些特殊或不很特殊的字符串模式的集合。<br />
+为了抽取或获得信息，我们给出抽取操作应遵守的一些规则。这些规则由一些特殊字符或进行模式匹配操作时使用的元字符组成。也可以使用规则字符作为模式中的一部分进行搜寻。<br />
+例如，A将查询A，x将查找字母x  <br />
+基本元字符<br />
+^ 只只匹配行首<br />
+$ 只只匹配行尾<br />
+* 只一个单字符后紧跟*，匹配0个或多个此单字符<br />
+[ ] 只匹配[ ]内字符。可以是一个单字符，也可以是字符序列。可以使用-表示[ ]内字符序列范围，如用[1-5]代替[12345]<br />
+\ 只用来屏蔽一个元字符的特殊含义。因为有时在shell中一些元字符有
+特殊含义。\可以使其失去应有意义<br />
+. 只匹配任意单字符<br />
+pattern{n} 只用来匹配前面pattern出现次数。n为次数<br />
+pattern{n,} m 只含义同上，但次数最少为n<br />
+pattern{n,m} 只含义同上，但pattern出现次数在n与m之间  </p>
+
+<p>1.使用句点匹配单字符<br />
+句点”.”可以匹配任意单字符。例如，如果要匹配一个字符串，以beg开头，中间夹一个任意字符，那么可以表示为beg.n，”.”可以匹配字符串头，也可以是中间任意字符。<br />
+在ls -l命令中，可以匹配一定权限：<br />
+…x..x ..x  : 匹配用户本身，用户组及其他组成员的执行权限。<br />
+“.”允许匹配ASCII集中任意字符，或为字母，或为数字。<br />
+2.在行首以^匹配字符串或字符序列<br />
+^只允许在一行的开始匹配字符或单词。例如，使用ls -l命令，并匹配目录。之所以可以这样做是因为ls -l命令结果每行第一个字符是d，即代表一个目录。  <br />
+^…4XC….  <br />
+以上模式表示，在每行开始，匹配任意3个字符，后跟4XC，最后为任意4个字符。^在正则表达式中使用频繁，因为大量的抽取操作通常在行首.<br />
+3.在行尾以$匹配字符串或字符  <br />
+$与^正相反，它在行尾匹配字符串或字符， $符号放在匹配单词后。假定要匹配以单词test结尾的所有行，操作为：<br />
+test$<br />
+^$<br />
+具体分析为匹配行首，又匹配行尾，中间没有任何模式，因此为空行。<br />
+如果只返回包含一个字符的行，操作如下：<br />
+^.$<br />
+4.使用<em>匹配字符串中的单字符或其重复序列  <br />
+使用此特殊字符匹配任意字符或字符串的重复多次表达式。例如：<br />
+compu</em>t<br />
+将匹配字符u一次或多次：<br />
+compuut 
+compuuut<br />
+compuuuuut<br />
+5.使用\屏蔽一个特殊字符的含义  <br />
+有时需要查找一些字符或字符串，而它们包含了系统指定为特殊字符的一个字符。什么是特殊字符？一般意义上讲，下列字符可以认为是特殊字符：<br />
+$ . ‘ “ * || ^ [] 0 \ + ?<br />
+假定要匹配包含字符“ .”的各行而“，”代表匹配任意单字符的特殊字符，因此需要屏蔽其含义。操作如下：<br />
+.
+6.使用[]匹配一个范围或集合  <br />
+使用[ ]匹配特定字符串或字符串集，可以用逗号将括弧内要匹配的不同字符串分开，但并不强制要求这样做（一些系统提倡在复杂的表达式中使用逗号），这样做可以增加模式的可读性。<br />
+使用”-“表示一个字符串范围，表明字符串范围从”-“左边字符开始，到”-“右边字符结束。<br />
+如果熟知一个字符串匹配操作，应经常使用[]模式。<br />
+假定要匹配任意一个数字，可以使用：<br />
+[0123456789]<br />
+然而，通过使用“-”符号可以简化操作：<br />
+[0-9]<br />
+7.使用{}匹配模式结果出现的次数<br />
+使用*可匹配所有匹配结果任意次，但如果只要指定次数，就应使用\ { \ }，此模式有三种形式，即：<br />
+pattern{n} 匹配模式出现n次。<br />
+pattern{n,} 匹配模式出现最少n次。<br />
+pattern{n,m} 匹配模式出现n到m次之间，n , m为0 -255中任意整数。
+请看第一个例子，匹配字母A出现两次，并以B结尾，操作如下：<br />
+A{2}B<br />
+匹配值为AAB<br />
+匹配A至少4次，使用：<br />
+A{4,} B<br />
+可以得结果AAAAB或AAAAAAAB，但不能为AAAB。  </p>
+
+      <div class="readall"><a href="/blog/2015/02/01/Linux-point7.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="posts">
+  <section class="post">
+    <header class="post-header">
       <h1 class="post-title"><a href="/blog/2015/02/01/Linux-point6.html">Linux学习笔记6-命令执行顺序</a></h1>
       <p class="post-meta">
         <i class="fa fa-calendar"></i>
@@ -208,323 +375,6 @@ WEBGUI：hive客户端提供了一种通过网页的方式访问hive所提供的
 <img src="/image/hive2.png" alt="" />  </p>
 
       <div class="readall"><a href="/blog/2015/02/01/Hive-structure.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/02/01/Hive-partition.html">Hive分区分桶</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年02月01日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h2 id="hive">Hive分区分桶</h2>
-<p>Hive 分区表<br />
-在Hive Select查询中一般会扫描整个表内容，会消耗很多时间做没必要的工作。有时候只需要扫描表中关心的一部分数据，因此建表时引入了partition概念。分区表指的是在创建表时指定的partition的分区空间。 <br />
-Hive可以对数据按照某列或者某些列进行分区管理，所谓分区我们可以拿下面的例子进行解释。 存储日志，其中必然有个属性是日志产生的日期。在产生分区时，就可以按照日志产生的日期列进行划分。把每一天的日志当作一个分区。   
-将数据组织成分区，主要可以提高数据的查询速度。至于用户存储的每一条记录到底放到哪个分区，由用户决定。即用户在加载数据的时候必须显示的指定该部分数据放到哪个分区。 
-1、一个表可以拥有一个或者多个分区，每个分区以文件夹的形式单独存在表文件夹的目录下。 <br />
-2、表和列名不区分大小写。 <br />
-3、分区是以字段的形式在表结构中存在，通过describe table命令可以查看到字段存在， 但是该字段不存放实际的数据内容，仅仅是分区的表示（伪列） 。<br />
-语法  </p>
-
-<pre><code>1. 创建一个分区表，以 ds 为分区列： 
-create table invites (id int, name string) partitioned by (ds string) row format delimited fields terminated by 't' stored as textfile; 
-2. 将数据添加到时间为 2013-08-16 这个分区中： 
-load data local inpath '/home/hadoop/Desktop/data.txt' overwrite into table invites partition (ds='2013-08-16'); 
-3. 将数据添加到时间为 2013-08-20 这个分区中： 
-load data local inpath '/home/hadoop/Desktop/data.txt' overwrite into table invites partition (ds='2013-08-20'); 
-4. 从一个分区中查询数据： 
-select * from invites where ds ='2013-08-12'; 
-5.  往一个分区表的某一个分区中添加数据： 
-insert overwrite table invites partition (ds='2013-08-12') select id,max(name) from test group by id; 
-可以查看分区的具体情况，使用命令： 
-hadoop fs -ls /home/hadoop.hive/warehouse/invites 
-或者： 
-show partitions tablename; 静态/动态分区   （1）静态分区   
-
-create table if not exists sopdm.wyp2(id int,name string,tel string)
-partitioned by(age int)
-row format delimited
-fields terminated by ','
-stored as textfile;
---overwrite是覆盖，into是追加
-insert into table sopdm.wyp2
-partition(age='25')
-select id,name,tel from sopdm.wyp; （2）动态分区  
-
---设置为true表示开启动态分区功能（默认为false）
-set hive.exec.dynamic.partition=true;
---设置为nonstrict,表示允许所有分区都是动态的（默认为strict）
-set hive.exec.dynamic.partition.mode=nonstrict;
---insert overwrite是覆盖，insert into是追加
-set hive.exec.dynamic.partition.mode=nonstrict;
-insert overwrite table sopdm.wyp2
-partition(age)
-select id,name,tel,age from sopdm.wyp;
-</code></pre>
-
-<p>hive中创建分区表没有复杂的分区类型(范围分区、列表分区、hash分区、混合分区等)。分区列也不是表中的一个实际的字段，而是一个或者多个伪列。意思是说在表的数据文件中实际上并不保存分区列的信息与数据。<br />
-下面的语句创建了一个简单的分区表：  </p>
-
-<pre><code>create table partition_test
-(member_id string,
-name string
-)
-partitioned by (
-stat_date string,
-province string)
-ROW FORMAT DELIMITED FIELDS TERMINATED BY ','; 这个例子中创建了stat_date和province两个字段作为分区列。通常情况下需要先预先创建好分区，然后才能使用该分区，例如： 
- 
-alter table partition_test add partition (stat_date='20110728',province='zhejiang');  这样就创建好了一个分区。这时我们会看到hive在HDFS存储中创建了一个相应的文件夹 每一个分区都会有一个独立的文件夹，下面是该分区所有的数据文件。在这个例子中stat_date是主层次，province是副层次，所有stat_date='20110728'，而province不同的分区都会在/user/hive/warehouse/partition_test/stat_date=20110728 下面，而stat_date不同的分区都会在/user/hive/warehouse/partition_test/ 下面.    注意，因为分区列的值要转化为文件夹的存储路径，所以如果分区列的值中包含特殊值，如 '%', ':', '/', '#',它将会被使用%加上2字节的ASCII码进行转义，    特别要注意，在其他数据库中，一般向分区表中插入数据时系统会校验数据是否符合该分区，如果不符合会报错。而在hive中，向某个分区中插入什么样的数据完全是由人来控制的，因为分区键是伪列，不实际存储在文件中，   
-</code></pre>
-
-<p>动态分区，  <br />
-因为按照上面的方法向分区表中插入数据，如果源数据量很大，那么针对一个分区就要写一个insert，非常麻烦。况且在之前的版本中，必须先手动创建好所有的分区后才能插入，这就更麻烦了，你必须先要知道源数据中都有什么样的数据才能创建分区。<br />
-使用动态分区可以很好的解决上述问题。动态分区可以根据查询得到的数据自动匹配到相应的分区中去。 <br />
-使用动态分区要先设置hive.exec.dynamic.partition参数值为true，默认值为false，即不允许使用：  </p>
-
-<pre><code>hive&gt; 	
-hive.exec.dynamic.partition=false
-hive&gt; set hive.exec.dynamic.partition=true; 动态分区的使用方法很简单，假设我想向stat_date='20110728'这个分区下面插入数据，至于province插入到哪个子分区下面让数据库自己来判断，那可以这样写：  
-
-hive&gt; insert overwrite table partition_test partition(stat_date='20110728',province)
-&gt; select member_id,name,province from partition_test_input where stat_date='20110728'; stat_date叫做静态分区列，province叫做动态分区列。select子句中需要把动态分区列按照分区的顺序写出来，静态分区列不用写出来。这样stat_date='20110728'的所有数据，会根据province的不同分别插入到/user/hive/warehouse/partition_test/stat_date=20110728/下面的不同的子文件夹下，如果源数据对应的province子分区不存在，则会自动创建，非常方便，而且避免了人工控制插入数据与分区的映射关系存在的潜在风险。   注意，动态分区不允许主分区采用动态列而副分区采用静态列，这样将导致所有的主分区都要创建副分区静态列所定义的分区   动态分区可以允许所有的分区列都是动态分区列，但是要首先设置一个参数  hive.exec.dynamic.partition.mode ：
-
-hive&gt; set hive.exec.dynamic.partition.mode;
-hive.exec.dynamic.partition.mode=strict 它的默认值是strick，即不允许分区列全部是动态的，这是为了防止用户有可能原意是只在子分区内进行动态建分区，但是由于疏忽忘记为主分区列指定值了，这将导致一个dml语句在短时间内创建大量的新的分区（对应大量新的文件夹），对系统性能带来影响。   所以我们要设置：  
-
-hive&gt; set hive.exec.dynamic.partition.mode=nostrick;
-</code></pre>
-
-<p>再介绍3个参数：<br />
-hive.exec.max.dynamic.partitions.pernode （缺省值100）：每一个mapreduce job允许创建的分区的最大数量，如果超过了这个数量就会报错<br />
-hive.exec.max.dynamic.partitions （缺省值1000）：一个dml语句允许创建的所有分区的最大数量<br />
-hive.exec.max.created.files （缺省值100000）：所有的mapreduce job允许创建的文件的最大数量  </p>
-
-<p>Hive 桶<br />
-对于每一个表（table）或者分区， Hive可以进一步组织成桶，也就是说桶是更为细粒度的数据范围划分。Hive也是 针对某一列进行桶的组织。Hive采用对列值哈希，然后除以桶的个数求余的方式决定该条记录存放在哪个桶当中。<br />
-把表（或者分区）组织成桶（Bucket）有两个理由：<br />
-（1）获得更高的查询处理效率。桶为表加上了额外的结构，Hive 在处理有些查询时能利用这个结构。具体而言，连接两个在（包含连接列的）相同列上划分了桶的表，可以使用 Map 端连接 （Map-side join）高效的实现。比如JOIN操作。对于JOIN操作两个表有一个相同的列，如果对这两个表都进行了桶操作。那么将保存相同列值的桶进行JOIN操作就可以，可以大大较少JOIN的数据量。<br />
-（2）使取样（sampling）更高效。在处理大规模数据集时，在开发和修改查询的阶段，如果能在数据集的一小部分数据上试运行查询，会带来很多方便。  </p>
-
-<p>创建带桶的 table:  </p>
-
-<pre><code>create table bucketed_user(id int,name string) clustered by (id) sorted by(name) into 4 buckets row format delimited fields terminated by '\t' stored as textfile; 
-</code></pre>
-
-<p>首先，使用CLUSTERED BY 子句来指定划分桶所用的列和要划分的桶的个数： </p>
-
-<pre><code>CREATE TABLE bucketed_user (id INT) name STRING)  CLUSTERED BY (id) INTO 4 BUCKETS;  在这里，我们使用用户ID来确定如何划分桶(Hive使用对值进行哈希并将结果除 以桶的个数取余数。 对于map端连接的情况，两个表以相同方式划分桶。处理左边表内某个桶的 mapper知道右边表内相匹配的行在对应的桶内。因此，mapper只需要获取那个桶 (这只是右边表内存储数据的一小部分)即可进行连接。这一优化方法并不一定要求 两个表必须桶的个数相同，两个表的桶个数是倍数关系也可以。 桶中的数据可以根据一个或多个列另外进行排序。由于这样对每个桶的连接变成了高效的归并排序(merge-sort), 因此可以进一步提升map端连接的效率。以下语法声明一个表使其使用排序桶：    
-CREATE TABLE bucketed_users (id INT, name STRING)  CLUSTERED BY (id) SORTED BY (id ASC) INTO 4 BUCKETS;  我们如何保证表中的数据都划分成桶了呢？把在Hive外生成的数据加载到划分成桶的表中，当然是可以的。其实让Hive来划分桶更容易。这一操作通常针对已有的表。    Hive并不检查数据文件中的桶是否和表定义中的桶一致(无论是对于桶 的数量或用于划分桶的列）。如果两者不匹配，在査询时可能会碰到错 误或未定义的结果。因此，建议让Hive来进行划分桶的操作。   
-</code></pre>
-
-<p>索引<br />
-索引可以加快含有group by语句的查询的计算速度  </p>
-
-<pre><code>create index employees_index on table employees(country)
-as  'org.apache.hadoop.hive.ql.index.compact.CompactIndexHandler'
-with deferred rebuild
-in table employees_index_table ;
-</code></pre>
-
-      <div class="readall"><a href="/blog/2015/02/01/Hive-partition.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/02/01/HBase-desgin-optimal.html">HBase设计优化</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年02月01日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h2 id="hbase">HBase设计优化</h2>
-<p>一、Table<br />
-1. 创建表时预分区<br />
-Hbase在创建表时默认只有一个region，这样的话在大量数据导入时会频繁发生region的split，从而导致region 暂停对外服务。同时大量client向同一个region server写数据也会导致集群负载不均衡，影响导入数据。 <br />
-一种可以加快批量写入速度的方法是通过预先创建一些空的regions，这样当数据写入HBase时，会按照region分区情况，在集群内做数据的负载均衡。 <br />
-参考：http://hbase.apache.org/book.html#precreate.regions<br />
-简单实现：  </p>
-
-<pre><code>public static byte[][] getHexSplits(String startKey, String endKey, int numRegions) {
-  byte[][] splits = new byte[numRegions-1][];
-  BigInteger lowestKey = new BigInteger(startKey, 16);
-  BigInteger highestKey = new BigInteger(endKey, 16);
-  BigInteger range = highestKey.subtract(lowestKey);
-  BigInteger regionIncrement = range.divide(BigInteger.valueOf(numRegions));
-  lowestKey = lowestKey.add(regionIncrement);
-  for(int i=0; i &lt; numRegions-1;i++) {
-    BigInteger key = lowestKey.add(regionIncrement.multiply(BigInteger.valueOf(i)));
-    byte[] b = String.format("%016x", key).getBytes();
-    splits[i] = b;
-  }
-  return splits;
-}
-</code></pre>
-
-<ol>
-  <li>Row key<br />
-Row key 即为Hbase数据的天然索引，通过Row key可以实现：<br />
-通过单个row key访问：即按照某个row key键值进行get操作；<br />
-通过row key的range进行scan：即通过设置startRowKey和endRowKey，在这个范围内进行扫描；  </li>
-</ol>
-
-<p>row key可以是任意字符串，最大长度64KB，因为row key在数据中是冗余存在的所以设计row key时也要考虑数据的冗余尤其是海量数据时如果row key设计过长可能导致数据成倍增长，实际应用中一般为10~100bytes，存为byte[]字节数组， 一般设计成定长的 。<br />
-row key是按照字典序存储，因此，设计row key时，也需要考虑这个问题。同时需要注意避免数据热点问题等<br />
-3. Column Family<br />
-不要在一张表里定义太多的 column family 。目前Hbase并不能很好的处理超过2~3个column family的表。因为某个column family在flush的时候，它邻近的column family也会因关联效应被触发flush，最终导致系统产生更多的I/O。（未经验证，不是很理解）。.<br />
-4. In Memory<br />
-创建表的时候，可以通过HColumnDescriptor.setInMemory(true)将表放到RegionServer的缓存中，保证在读取的时候被cache命中。<br />
-5. Max Version<br />
-创建表的时候，可以通过HColumnDescriptor.setMaxVersions(int maxVersions)设置表中数据的最大版本，如果只需要保存最新版本的数据，那么可以设置setMaxVersions(1)。<br />
-6. Time To Live<br />
-创建表的时候，可以通过HColumnDescriptor.setTimeToLive(int timeToLive)设置表中数据的存储生命期，过期数据将自动被删除，例如如果只需要存储最近两天的数据，那么可以设置setTimeToLive(2 * 24 * 60 * 60)。<br />
-7. Compact &amp; Split<br />
-在HBase中，数据在更新时首先写入WAL 日志(HLog)（如果数据安全不是很重要可以关闭先写日志的功能：putrow.setWriteToWAL(false);）和内存(MemStore)中，MemStore中的数据是排序的，当MemStore累计到一定阈值时，就会创建一个新的MemStore，并且将老的MemStore添加到flush队列，由单独的线程flush到磁盘上，成为一个StoreFile。于此同时， 系统会在zookeeper中记录一个redo point，表示这个时刻之前的变更已经持久化了 (minor compact) 。 <br />
-StoreFile是只读的，一旦创建后就不可以再修改。因此Hbase的更新其实是不断追加的操作。当一个Store中的StoreFile达到一定的阈值后，就会进行一次合并 (major compact) ，将对同一个key的修改合并到一起，形成一个大的StoreFile，当StoreFile的大小达到一定阈值后，又会对 StoreFile进行分割 (split) ，等分为两个StoreFile。 由于对表的更新是不断追加的，处理读请求时，需要访问Store中全部的StoreFile和MemStore，将它们按照row key进行合并，由于StoreFile和MemStore都是经过排序的，并且StoreFile带有内存中索引，通常合并过程还是比较快的。  </p>
-
-<p>二、Hbase client HTable<br />
-写：<br />
-1. Auto Flush<br />
-通过调用HTable.setAutoFlush(false)方法可以将HTable写客户端的自动flush关闭，这样可以批量写入数据到HBase，而不是有一条put就执行一次更新，只有当put填满客户端写缓存时，才实际向HBase服务端发起写请求。默认情况下auto flush是开启的。<br />
-2. Write Buffer<br />
-通过调用HTable.setWriteBufferSize(writeBufferSize)方法可以设置HTable客户端的写buffer大小，如果新设置的buffer小于当前写buffer中的数据时，buffer将会被flush到服务端。其中，writeBufferSize的单位是byte字节数，可以根据实际写入数据量的多少来设置该值。<br />
-3. WAL Flag<br />
-在HBae中，客户端向集群中的RegionServer提交数据时（Put/Delete操作），首先会先写WAL（Write Ahead Log）日志（即HLog，一个RegionServer上的所有Region共享一个HLog），只有当WAL日志写成功后，再接着写MemStore，然后客户端被通知提交数据成功；如果写WAL日志失败，客户端则被通知提交失败。这样做的好处是可以做到RegionServer宕机后的数据恢复。因此，对于相对不太重要的数据，可以在Put/Delete操作时，通过调用Put.setWriteToWAL(false)或Delete.setWriteToWAL(false)函数，放弃写WAL日志，从而提高数据写入的性能。<br />
-4. 批量写<br />
-通过调用HTable.put(Put)方法可以将一个指定的row key记录写入HBase，同样HBase提供了另一个方法：通过调用HTable.put(List<put>)方法可以将指定的row key列表，批量写入多行记录，这样做的好处是批量执行，只需要一次网络I/O开销，这对于对数据实时性要求高，网络传输RTT高的情景下可能带来明显的性能提升。  
-读：  
-1. Scanner Caching  
-通过调用HTable.setScannerCaching(int scannerCaching)可以设置HBase scanner一次从服务端抓取的数据条数，默认情况下一次一条。通过将此值设置成一个合理的值，可以减少scan过程中next()的时间开销，代价是scanner需要通过客户端的内存来维持这些被cache的行记录。  
-2. Scan Attribute Selection  
-scan时指定需要的Column Family，可以减少网络传输数据量，否则默认scan操作会返回整行所有Column Family的数据  
-3. Close ResultScanner   
-通过scan取完数据后，记得要关闭ResultScanner  
-4. 批量读  
-通过调用HTable.get(Get)方法可以根据一个指定的row key获取一行记录，同样HBase提供了另一个方法：通过调用HTable.get(List)方法可以根据一个指定的row key列表，批量获取多行记录，这样做的好处是批量执行，只需要一次网络I/O开销，这对于对数据实时性要求高而且网络传输RTT高的情景下可能带来明显的性能提升。  
-5. Blockcache  
-HBase上Regionserver的内存分为两个部分，一部分作为Memstore，主要用来写；另外一部分作为BlockCache，主要用于读。  
-写请求会先写入Memstore，Regionserver会给每个region提供一个Memstore，当Memstore满64MB以后，会启动 flush刷新到磁盘。当Memstore的总大小超过限制时（heapsize * hbase.regionserver.global.memstore.upperLimit * 0.9），会强行启动flush进程，从最大的Memstore开始flush直到低于限制。  
-读请求先到Memstore中查数据，查不到就到BlockCache中查，再查不到就会到磁盘上读，并把读的结果放入BlockCache。由于BlockCache采用的是LRU策略，因此BlockCache达到上限(heapsize * hfile.block.cache.size * 0.85)后，会启动淘汰机制，淘汰掉最老的一批数据。  
-一个Regionserver上有一个BlockCache和N个Memstore，它们的大小之和不能大于等于heapsize * 0.8，否则HBase不能启动。默认BlockCache为0.2，而Memstore为0.4。对于注重读响应时间的系统，可以将 BlockCache设大些，比如设置BlockCache=0.4，Memstore=0.39，以加大缓存的命中率。  </put></p>
-
-<p>服务端计算<br />
-Coprocessor运行于HBase RegionServer服务端，各个Regions保持对与其相关的coprocessor实现类的引用，coprocessor类可以通过RegionServer上classpath中的本地jar或HDFS的classloader进行加载。<br />
-目前，已提供有几种coprocessor：<br />
-Coprocessor：提供对于region管理的钩子，例如region的open/close/split/flush/compact等； 
-RegionObserver：提供用于从客户端监控表相关操作的钩子，例如表的get/put/scan/delete等； 
-Endpoint：提供可以在region上执行任意函数的命令触发器。  </p>
-
-<p>写端计算（不了解）<br />
-	计数<br />
-HBase本身可以看作是一个可以水平扩展的Key-Value存储系统，但是其本身的计算能力有限  （Coprocessor可以提供一定的服务端计算），因此，使用HBase时，往往需要从写端或者读端进行计算，然后将最终的计算结果返回给调用者。举两个简单的例子：<br />
-PV计算：通过在HBase写端内存中，累加计数，维护PV值的更新，同时为了做到持久化，定期（如1秒）将PV计算结果同步到HBase中，这样查询端最多会有1秒钟的延迟，能看到秒级延迟的PV结果。 <br />
-分钟PV计算：与上面提到的PV计算方法相结合，每分钟将当前的累计PV值，按照rowkey + minute作为新的rowkey写入HBase中，然后在查询端通过scan得到当天各个分钟以前的累计PV值，然后顺次将前后两分钟的累计PV值相减，就得到了当前一分钟内的PV值，从而最终也就得到当天各个分钟内的PV值。 <br />
-	去重<br />
-对于UV的计算，就是个去重计算的例子。分两种情况：<br />
-如果内存可以容纳，那么可以在Hash表中维护所有已经存在的UV标识，每当新来一个标识时，通过快速查找Hash确定是否是一个新的UV，若是则UV值加1，否则UV值不变。另外，为了做到持久化或提供给查询接口使用，可以定期（如1秒）将UV计算结果同步到HBase中。   <br />
-如果内存不能容纳，可以考虑采用Bloom Filter来实现，从而尽可能的减少内存的占用情况。除了UV的计算外，判断URL是否存在也是个典型的应用场景。 <br />
-	读端计算<br />
-如果对于响应时间要求比较苛刻的情况（如单次http请求要在毫秒级时间内返回），个人觉得读端不宜做过多复杂的计算逻辑，尽量做到读端功能单一化：即从HBase RegionServer读到数据（scan或get方式）后，按照数据格式进行简单的拼接，直接返回给前端使用。当然，如果对于响应时间要求一般，或者业务特点需要，也可以在读端进行一些计算逻辑。  </p>
-
-
-      <div class="readall"><a href="/blog/2015/02/01/HBase-desgin-optimal.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
-    </div>
-  </section>
-</div>
-
-<div class="posts">
-  <section class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a href="/blog/2015/02/01/HBase-config-optimal.html">HBase配置优化</a></h1>
-      <p class="post-meta">
-        <i class="fa fa-calendar"></i>
-        2015年02月01日
-        <i class="space"></i>
-        <i class="fa fa-tags"></i>
-        <a class="post-category" href="/page/category.html#hadoop">hadoop</a>
-      </p>
-    </header>
-    <div class="post-main">
-      <h2 id="hbase">HBase配置优化</h2>
-<p>zookeeper.session.timeout<br />
-默认值：3分钟（180000ms）<br />
-说明：RegionServer与Zookeeper间的连接超时时间。当超时时间到后，ReigonServer会被Zookeeper从集群清单中移除，HMaster收到移除通知后，会对这台server负责的regions重新balance，让其他存活的RegionServer接管.<br />
-调优：<br />
-这个timeout决定了RegionServer是否能够及时的failover。设置成1分钟或更低，可以减少因等待超时而被延长的failover时间。但是，对于一些Online应用，RegionServer从宕机到恢复时间本身就很短的（网络闪断，crash等故障，运维可快速介入），如果调低timeout时间，反而会得不偿失。因为当ReigonServer被正式从RS集群中移除时，HMaster就开始做balance了（让其他RS根据故障机器记录的WAL日志进行恢复）。当故障的RS在人工介入恢复后，这个balance动作是毫无意义的，反而会使负载不均匀，给RS带来更多负担。另外这个值太小也可能因为集群节点间时间误差造成region server 被下线。<br />
-hbase.regionserver.handler.count<br />
-默认值：10<br />
-说明：RegionServer的请求处理IO线程数。<br />
-调优：<br />
-这个参数的调优与内存息息相关。<br />
-较少的IO线程，适用于处理单次请求内存消耗较高的Big PUT场景（大容量单次PUT或设置了较大cache的scan，均属于Big PUT）或ReigonServer的内存比较紧张的场景。<br />
-较多的IO线程，适用于单次请求内存消耗低，TPS要求非常高的场景。设置该值的时候，以监控内存为主要参考。<br />
-另外如果大量的请求都落在一个region上，会导致充满memstore触发flush导致的读写锁会影响全局TPS，不是IO线程数越高越好。<br />
-hbase.hregion.max.filesize<br />
-默认值：256M<br />
-说明：在当前ReigonServer上单个Reigon的最大存储空间，单个Region超过该值时，这个Region会被自动split成更小的region。<br />
-调优：<br />
-小region对split和compaction友好，因为拆分region或compact小region里的storefile速度很快，内存占用低。缺点是split和compaction会很频繁，会导致集群响应时间波动很大。<br />
-一般512以下的都算小region。<br />
-大region，则不太适合经常split和compaction，因为做一次compact和split会产生较长时间的停顿，对应用的读写性能冲击非常大。此外，大region意味着较大的storefile，compaction时对内存也是一个挑战。<br />
-当然，大region也有其用武之地。如果你的应用场景中，某个时间点的访问量较低，那么在此时做compact和split，既能顺利完成split和compaction，又能保证绝大多数时间平稳的读写性能。
-既然split和compaction如此影响性能，有没有办法去掉？<br />
-compaction是无法避免的，split倒是可以从自动调整为手动。 <br />
-只要通过将这个参数值调大到某个很难达到的值，比如100G，就可以间接禁用自动split（RegionServer不会对未到达100G的region做split）。<br />
-再配合RegionSplitter这个工具，在需要split时，手动split。<br />
-手动split在灵活性和稳定性上比起自动split要高很多，相反，管理成本增加不多，比较推荐online实时系统使用。内存方面，小region在设置memstore的大小值上比较灵活，大region则过大过小都不行，过大会导致flush时app的IO wait增高，过小则因store file过多影响读性能。<br />
-hbase.regionserver.global.memstore.upperLimit/lowerLimit<br />
-默认值：0.4/0.35<br />
-upperlimit说明：hbase.hregion.memstore.flush.size 这个参数的作用是当单个Region内所有的memstore大小总和超过指定值时，flush该region的所有memstore。RegionServer的flush是通过将请求添加一个队列，模拟生产消费模式来异步处理的。如果当队列来不及消费，产生大量积压请求时，可能会导致内存陡增，最坏的情况是触发OOM。<br />
-这个参数的作用是防止内存占用过大，当ReigonServer内所有region的memstores所占用内存总和达到heap的40%时，HBase会强制block所有的更新并flush这些region以释放所有memstore占用的内存。<br />
-lowerLimit说明： 同upperLimit，只不过lowerLimit在所有region的memstores所占用内存达到Heap的35%时，不flush所有的memstore。它会找一个memstore内存占用最大的region，做个别flush，此时写更新还是会被block。lowerLimit算是一个在所有region强制flush导致性能降低前的补救措施。在日志中，表现为 “** Flush thread woke up with memory above low water.”
-调优：这是一个Heap内存保护参数，默认值已经能适用大多数场景。<br />
-参数调整会影响读写，如果写的压力大导致经常超过这个阀值，则调小读缓存  hfile.block.cache.size增大该阀值，或者Heap余量较多时，不修改读缓存大小。<br />
-如果在高压情况下，也没超过这个阀值，那么建议你适当调小这个阀值再做压测，确保触发次数不要太多，然后还有较多Heap余量的时候，调大hfile.block.cache.size提高读性能。<br />
-还有一种可能性是 hbase.hregion.memstore.flush.size保持不变，但RS维护了过多的region，要知道 region数量直接影响占用内存的大小。<br />
-hfile.block.cache.size<br />
-默认值：0.2<br />
-说明：storefile的读缓存占用Heap的大小百分比，0.2表示20%。该值直接影响数据读的性能。
-调优：当然是越大越好，如果写比读少很多，开到0.4-0.5也没问题。如果读写较均衡，0.3左右。如果写比读多，果断默认吧。设置这个值的时候，你同时要参考 hbase.regionserver.global.memstore.upperLimit ，该值是memstore占heap的最大百分比，两个参数一个影响读，一个影响写。如果两值加起来超过80-90%，会有OOM的风险，谨慎设置。<br />
-hbase.hstore.blockingStoreFiles<br />
-默认值：7<br />
-说明：在flush时，当一个region中的Store（Coulmn Family）内有超过7个storefile时，则block所有的写请求进行compaction，以减少storefile数量。<br />
-调优：block写请求会严重影响当前regionServer的响应时间，但过多的storefile也会影响读性能。从实际应用来看，为了获取较平滑的响应时间，可将值设为无限大。如果能容忍响应时间出现较大的波峰波谷，那么默认或根据自身场景调整即可。  <br />
-hbase.hregion.memstore.block.multiplier  <br />
-默认值：2  <br />
-说明：当一个region里的memstore占用内存大小超过hbase.hregion.memstore.flush.size两倍的大小时，block该region的所有请求，进行flush，释放内存。<br />
-虽然我们设置了region所占用的memstores总内存大小，比如64M，但想象一下，在最后63.9M的时候，我Put了一个200M的数据，此时memstore的大小会瞬间暴涨到超过预期的  hbase.hregion.memstore.flush.size的几倍。这个参数的作用是当memstore的大小增至超过hbase.hregion.memstore.flush.size 2倍时，block所有请求，遏制风险进一步扩大。<br />
-调优： 这个参数的默认值还是比较靠谱的。如果你预估你的正常应用场景（不包括异常）不会出现突发写或写的量可控，那么保持默认值即可。如果正常情况下，你的写请求量就会经常暴长到正常的几倍，那么你应该调大这个倍数并调整其他参数值，比如hfile.block.cache.size和hbase.regionserver.global.memstore.upperLimit/lowerLimit，以预留更多内存，防止HBase server OOM。<br />
-hbase.hregion.memstore.mslab.enabled<br />
-默认值：true<br />
-说明：减少因内存碎片导致的Full GC，提高整体性能。  </p>
-
-<p>其他<br />
-启用LZO压缩<br />
-LZO对比Hbase默认的GZip，前者性能较高，后者压缩比较高，<br />
-批量导入<br />
-在批量导入数据到Hbase前，你可以通过预先创建regions，来平衡数据的负载。<br />
-HBase使用CMS GC。默认触发GC的时机是当年老代内存达到90%的时候，这个百分比由   -XX:CMSInitiatingOccupancyFraction=N 这个参数来设置。concurrent mode failed发生在这样一个场景：<br />
-当年老代内存达到90%的时候，CMS开始进行并发垃圾收集，于此同时，新生代还在迅速不断地晋升对象到年老代。当年老代CMS还未完成并发标记时，年老代满了，悲剧就发生了。CMS因为没内存可用不得不暂停mark，并触发一次stop the world（挂起所有jvm线程），然后采用单线程拷贝方式清理所有垃圾对象。这个过程会非常漫长。为了避免出现concurrent mode failed，建议让GC在未到90%时，就触发。<br />
-通过设置 -XX:CMSInitiatingOccupancyFraction=N<br />
-这个百分比， 可以简单的这么计算。如果你的 hfile.block.cache.size   和 hbase.regionserver.global.memstore.upperLimit 加起来有60%（默认），那么你可以设置 70-80，一般高10%左右差不多。  </p>
-
-      <div class="readall"><a href="/blog/2015/02/01/HBase-config-optimal.html" id="post-readall">阅读全文&nbsp;<i class="fa fa-chevron-right"></i></a></div>
     </div>
   </section>
 </div>

@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta name="description" content="Will go, Just do it.">
   <meta name="author" content="Will.Quan">
-  <meta name="keywords" content="Sqoop密码和SA用户问题记录, willgo, Will.Quan">
-  <title>Sqoop密码和SA用户问题记录 - willgo</title>
-  <link rel="canonical" href="index.html/blog/2015/09/20/sqoopmimashuruwenti.html">
+  <meta name="keywords" content="博客操作记录, willgo, Will.Quan">
+  <title>博客操作记录 - willgo</title>
+  <link rel="canonical" href="index.html/blog/2015/10/28/bokecaozuo.html">
   <link rel="icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/res/img/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="/res/css/public.css">
@@ -61,56 +61,76 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
             </script>
         </div>
     <header class="post-header">
-  <h1 class="post-title"><a href="/blog/2015/09/20/sqoopmimashuruwenti.html">Sqoop密码和SA用户问题记录</a></h2>
+  <h1 class="post-title"><a href="/blog/2015/10/28/bokecaozuo.html">博客操作记录</a></h2>
   <p class="post-meta">
     <i class="fa fa-calendar"></i>
-    2015年09月20日
+    2015年10月28日
     <i class="space"></i>
     <i class="fa fa-tags"></i>
-    <a class="post-category" href="/page/category.html#hadoop">hadoop</a>	
+    <a class="post-category" href="/page/category.html#f2e">f2e</a>	
   </p>
 </header>
 <div class="post-main">
-<p>sqoop 定时job 运行时需要输入密码问题
-1.可以使用except 脚本，实现交互输入密码<br />
-2. 配置sqoop，将密码保存至sqoop的metadata中 <br />
-sqoop-site.xml：  </p>
+<p>在_config.yml配置站点信息，详细配置如下：</p>
 
-<pre><code>&lt;property&gt;  
-     &lt;name&gt;sqoop.metastore.client.record.password&lt;/name&gt;  
-     &lt;value&gt;true&lt;/value&gt;  
-     &lt;description&gt;If true, allow saved passwords in the metastore. &lt;/description&gt;
-&lt;/property&gt;  
-</code></pre>
+<p>blog:
+	name:                  # 博客名称
+	description:           # 博客描述
+	title:                 # 网页标题
+	url:                   # 博客地址
+	duoshuo:               # 多说ID
+	tongji:                # 百度统计ID
+	qiniu:                 # 七牛云地址
+author:
+	name:                  # 作者名称
+	email:                 # 邮箱地址
+	weibo:                 # 微博地址
+	github:                # GitHub地址
+	douban:
+		name:              # 豆瓣地址名称
+		key:               # 豆瓣API Key</p>
 
-<ol>
-  <li>sqoop 出现Caused by: java.sql.SQLException: User not found: SA  错误  </li>
-</ol>
+<p>多说评论框
+_posts文章默认开启评论框，而简版页面默认关闭。
+_posts文章可以在开头设置duoshuo: false来关闭。
+简版页面可以在开头设置duoshuo: true来开启。</p>
 
-<p>未知问题，看起来像是并发执行sqoop引起的问题  导致无法连接sqoop的metadata库<br />
-不知如何解决， 可以采取的办法<br />
-1.换个用户执行 貌似可以（。。。。。）<br />
-2.更改metadata数据库  如修改成MySQL   如下：  </p>
+<p>MathJax数学公式
+需要在页面开头添加math: true来开启</p>
 
-<pre><code>&lt;property&gt;  
-    &lt;name&gt;sqoop.metastore.client.autoconnect.url&lt;/name&gt;  
-    &lt;value&gt;jdbc:mysql://192.168.117.7:3306/sqoop&lt;/value&gt;  
-&lt;/property&gt;  
-&lt;property&gt;  
-    &lt;name&gt;sqoop.metastore.client.autoconnect.username&lt;/name&gt;
-    &lt;value&gt;scm987&lt;/value&gt;  
-&lt;/property&gt;  
-&lt;property&gt;  
-    &lt;name&gt;sqoop.metastore.client.autoconnect.password&lt;/name&gt;
-    &lt;value&gt;scm258&lt;/value&gt;  
-&lt;/property&gt;  
+<p>在需要用到公式的地方用[ ]或<script type="math/tex"> </script>括起来</p>
 
+<p>例如：</p>
 
-&lt;property&gt;
-     &lt;name&gt;sqoop.metastore.client.enable.autoconnect&lt;/name&gt;
-     &lt;value&gt;true&lt;/value&gt;
-&lt;/property&gt;
-</code></pre>
+<p>行内公式：
+\E=mc^2\</p>
+
+<p>行间公式：
+<script type="math/tex">E=mc^2</script>
+效果：</p>
+
+<p>\E=mc^2\</p>
+
+<p>E=mc2
+创建文章/页面<br />
+定位到博客目录，可以运行以下命令  </p>
+
+<p>创建文章：rake post title=”Post Name”<br />
+创建简版页面：rake life title=”Page Name”<br />
+创建页面： rake page title=”Page name”<br />
+页面的使用 <br />
+修改的都是markdown文件   </p>
+
+<p>普通页面 <br />
+layout项改为blog <br />
+简版页面 <br />
+layout项改为life <br />
+文章 <br />
+_posts文件夹下的markdown文件的layout项改为post，使用简版页面就改成life<br />
+生成静态博客<br />
+把你的博客推送到GitHub或者其它支持Jekyll的代码托管网站就可以了。<br />
+具体可以到Jekyll官网或GitHub Pages查看详细教程。  </p>
+
 
 </div>
 <div class="share">
@@ -123,14 +143,14 @@ sqoop-site.xml：  </p>
 </div>
 <div class="pagination">
 
-<a class="pagination-item newer" href="/blog/2015/09/20/nosql-onhadoop.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Sql on hadoop 选择笔记</a>
+<a class="pagination-item newer" href="/blog/2015/09/20/sqoopmimashuruwenti.html"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Sqoop密码和SA用户问题记录</a>
 
 
-<a class="pagination-item older" href="/blog/2015/10/28/bokecaozuo.html">博客操作记录&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
+<a class="pagination-item older" href="/blog/2015/11/28/flume-hvie-question.html">flume与hive/impala配合使用时问题记录&nbsp;&nbsp;<i class="fa fa-arrow-right"></i></a>
 
 </div>
 <div class="comments">
-  <div class="ds-thread" data-title="Sqoop密码和SA用户问题记录" data-thread-key="/blog/2015/09/20/sqoopmimashuruwenti" data-url="index.html/blog/2015/09/20/sqoopmimashuruwenti.html"></div>
+  <div class="ds-thread" data-title="博客操作记录" data-thread-key="/blog/2015/10/28/bokecaozuo" data-url="index.html/blog/2015/10/28/bokecaozuo.html"></div>
   <script type="text/javascript">var duoshuoQuery = {short_name:"willgo0815"};(function(){var ds = document.createElement('script');ds.type = 'text/javascript';ds.async = true;ds.src = '/res/js/embed.js';ds.charset = 'UTF-8';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);})();</script>
 </div>
     <footer>Copyright&nbsp;&copy;&nbsp;2015 <a href="index.html">willgo</a><br/><i class="fa fa-cogs" style="color:blueviolet;">&nbsp;</i>Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a>
